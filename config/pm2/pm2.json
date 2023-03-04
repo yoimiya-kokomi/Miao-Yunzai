@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "name": "Yunzai-Bot",
+      "script": "./app.js",
+      "max_memory_restart": "512M",
+      "restart_delay": 60000
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# 是否自动同意加好友 1-同意 0-不处理
+autoFriend: 1
+# 是否自动退群人数，当被好友拉进群时，群人数小于配置值自动退出， 默认50，0则不处理
+autoQuit: 50
+# 主人QQ号
+masterQQ:
+
+# 禁用私聊功能 true：私聊只接受ck以及抽卡链接（Bot主人不受限制），false：私聊可以触发全部指令，默认false
+disablePrivate: false
+# 禁用私聊Bot提示内容
+disableMsg: "私聊功能已禁用，仅支持发送cookie，抽卡记录链接，记录日志文件"
+# 私聊通行字符串
+disableAdopt:
+  - stoken
+#白名单群，配置后只在该群生效
+whiteGroup:
+
+#黑名单群
+blackGroup:
+  - 213938015
+#黑名单qq
+blackQQ:
+  - 528952540

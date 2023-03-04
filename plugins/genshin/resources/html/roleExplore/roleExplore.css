@@ -1,0 +1,178 @@
+@font-face {
+  font-family: "tttgbnumber";
+  src: url("../../../../../resources/font/tttgbnumber.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+body {
+  font-size: 18px;
+  color: #1e1f20;
+  transform: scale(1.5);
+  transform-origin: 0 0;
+}
+.container {
+  width: 470px;
+  padding: 10px 15px;
+  background-color: #f5f6fb;
+}
+.base_info {
+  position: relative;
+  padding-left: 10px;
+}
+.head_box {
+  box-shadow: 0 5px 10px 0 rgb(0 0 0 / 15%);
+}
+.head_box .id_text{
+  font-size: 24px;
+}
+.head_box .day_text{
+  font-size: 20px;
+}
+.head_box .genshin_logo {
+  position: absolute;
+  top: 1px;
+  right: 15px;
+  width: 97px;
+}
+.uid{
+  font-family: tttgbnumber;
+}
+.uid:before {
+  content: " ";
+  position: absolute;
+  width: 5px;
+  height: 24px;
+  border-radius: 1px;
+  left: 0;
+  top: 0;
+  background: #d3bc8d;
+}
+.data_box {
+  border-radius: 15px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 10px 15px 0px 15px;
+  background: #fff;
+  box-shadow: 0 5px 10px 0 rgb(0 0 0 / 15%);
+  padding: 20px 15px 5px 15px;
+  position: relative;
+}
+.tab_lable {
+  position: absolute;
+  top: -10px;
+  left: -8px;
+  background: #d4b98c;
+  color:#fff;
+  font-size: 14px;
+  padding: 3px 10px;
+  border-radius: 15px 0px 15px 15px;
+  z-index: 20;
+}
+.data_line {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 14px;
+}
+.data_line_item {
+  width: 100px;
+  text-align: center;
+  /*margin: 0 20px;*/
+}
+.num {
+  font-family: tttgbnumber;
+  font-size: 24px;
+}
+.explor_box .num{
+  font-family: tttgbnumber;
+  font-size: 16px;
+}
+.lable {
+  font-size: 14px;
+  color: #7f858a;
+  line-height: 1;
+  margin-top: 3px;
+}
+.explor_box {
+  position: relative;
+  font-size: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  border-radius: 15px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 5px 10px 0 rgb(0 0 0 / 15%);
+  padding: 15px;
+}
+.explor_box .item {
+  margin-top: 10px;
+  /*margin-right: 10px;*/
+  display: flex;
+  /*justify-content: center;*/
+  align-items: center;
+  width: 200px;
+  height: 85px;
+  padding: 3px 4px;
+  border-radius: 6px;
+  color: #fff;
+  line-height: 1;
+  background: #394467 url(../../img/other/world-exploration-frame.png) center center
+    no-repeat;
+  background-origin: content-box;
+  background-size: 100% 97%;
+}
+.explor_box .icon {
+  width: 62px;
+  margin-left: 3px;
+}
+.explor_box .content {
+  margin-left: 4px;
+  width: 130px;
+}
+.explor_box .content p {
+  margin: 7px 0;
+}
+.explor_box .name {
+  /* color: #fff; */
+  font-weight: 500;
+  white-space: nowrap;
+}
+.progress {
+  position: relative;
+  width: 120px;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.progress .value {
+  position: absolute;
+  right: 0;
+  top: -14px;
+  font-size: 12px;
+}
+.progress .bar {
+  height: 100%;
+  background-color: #d3bc8d;
+}
+.explor_box .prestige {
+  color: #1e1f20;
+  background: #e9e5dc;
+  width: 88px;
+  border-radius: 2px;
+  padding: 3px 7px;
+}
+.homes_hidden {
+  display: none;
+}
+.logo {
+  font-size: 12px;
+  font-family: "tttgbnumber";
+  text-align: center;
+  color: #7994a7;
+}

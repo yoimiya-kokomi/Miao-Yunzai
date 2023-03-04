@@ -1,0 +1,12 @@
+
+# 米游社公共推送定时任务，修改需要重启
+pushTime: 0 0/5 * * * ? 
+
+# 最多同时推送条数
+maxNum: 1
+
+#公共推送群
+announceGroup: []
+
+#资讯推送群
+infoGroup: []

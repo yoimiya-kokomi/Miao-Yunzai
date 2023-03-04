@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link rel="shortcut icon" href="#" />
+    <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/roleExplore/roleExplore.css"/>
+    <link rel="preload" href="{{resPath}}/font/tttgbnumber.ttf" as="font">
+    <link rel="preload" href="{{pluResPath}}img/other/原神.png" as="image">
+    {{@headIndexStyle}}
+  </head>
+  <body>
+    <div class="container" id="container">
+      <div class="head_box">
+        <div class="id_text">ID: {{uid}}</div>
+        <div class="day_text">{{activeDay}}</div>
+        <img class="genshin_logo" src="{{pluResPath}}img/other/原神.png">
+      </div>
+      <div class="data_box">
+        <div class="tab_lable">数据总览</div>
+        {{each line val}}
+        <div class="data_line">
+          {{each val item}}
+          <div class="data_line_item">
+            <div class="num">{{item.num}}</div>
+            <div class="lable">{{item.lable}}</div>
+          </div>
+          {{/each}}
+        </div>
+        {{/each}}
+      </div>
+      <div class="explor_box">
+        <div class="tab_lable">地图探险</div>
+        {{each explor val}}
+        <div class="item">
+          <img class="icon" src="{{pluResPath}}img/other/{{val.name}}.png" />
+          <div class="content">
+            {{each val.line line}}
+            <p class="name">{{line.name}}：<span class="num">{{line.text}}</span></p>
+            {{/each}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+      <div class="logo">Created By Yunzai-Bot</div>
+    </div>
+  </body>
+  <script type="text/javascript"></script>
+</html>

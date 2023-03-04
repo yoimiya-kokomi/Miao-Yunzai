@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <link rel="shortcut icon" href="#" />
+  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/payLog/payLog.css" />
+  <link rel="preload" href="{{resPath}}font/tttgbnumber.ttf" as="font">
+  <link rel="preload" href="{{pluResPath}}img/namecard/{{headImg}}.png" as="image">
+  {{@headStyle}}
+</head>
+
+<body>
+  <div class="container" id="container">
+    <div class="head_box">
+      <div class="id_text">ID: {{uid}}</div>
+      <h2 class="day_text">充值统计</h2>
+      <img class="genshin_logo" src="{{pluResPath}}img/other/原神.png" />
+    </div>
+    <div class="data_box">
+      <div class="tab_lable">数据总览</div>
+      <div class="data_line">
+        {{each topData.slice(0,4) data}}
+        <div class="data_line_item">
+          <div class="num">{{data.value}}</div>
+          <div class="lable">{{data.title}}</div>
+        </div>
+        {{/each}}
+      </div>
+      <div class="data_line">
+        {{each topData.slice(4,8) data}}
+        <div class="data_line_item">
+          <div class="num">{{data.value}}</div>
+          <div class="lable">{{data.title}}</div>
+        </div>
+        {{/each}}
+      </div>
+      <div class="data_line">
+        {{each topData.slice(8,12) data}}
+        <div class="data_line_item">
+          <div class="num">{{data.value}}</div>
+          <div class="lable">{{data.title}}</div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    <div class="data_box">
+      <div class="tab_lable">月份统计</div>
+      <div id="chartContainer"></div>
+    </div>
+    <div class="data_box">
+      <div class="tab_lable">详细统计</div>
+      <div id="chartContainer2"></div>
+    </div>
+    <div class="logo">Created By Yunzai-Bot & seven-plugin</div>
+  </div>
+</body>
+
+<script src="{{pluResPath}}html/payLog/echarts.min.js"></script>
+
+<script>
+  const barData = JSON.parse(`{{@ barData}}`);
+  var myChart1 = echarts.init(document.querySelector('#chartContainer'), null, { renderer: 'svg' });
+  const xData = barData.map(v => v.type)
+  const yData = barData.map(v => v.sales)
+  // 指定图表的配置项和数据
+  const option = {
+    animation: false,
+    xAxis: {
+      type: 'category',
+      data: xData
+    },
+    legend: {
+      x:'left',
+      y:'top',
+      show: true,
+      data: [{ name: '金额' }]
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        name:'金额',
+        data: yData,
+        type: 'bar',
+        itemStyle: {
+          normal: {
+            label: {
+              position: 'top',
+              show: true,
+              textStyle: {
+                color: '#1e1f20',
+                fontSize: 14,
+                fontFamily: "tttgbnumber",
+              }
+            },
+            color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
+              offset: 0,
+              color: "#1268f3"
+            }, {
+              offset: 0.6,
+              color: "#08a4fa"
+            }, {
+              offset: 1,
+              color: "#01ccfe"
+            }], false)
+          },
+
+        },
+      }
+    ]
+  };
+  myChart1.setOption(option);
+
+  const pieData = JSON.parse(`{{@ pieData}}`);
+  const myChart2 = echarts.init(document.querySelector('#chartContainer2'), null, { renderer: 'svg' });
+  const option2 = {
+    animation: false,
+    title: {
+      text: '{{topData[0].value}}',
+      subtext: '总充值',
+      left: 'right'
+    },
+    legend: {
+      orient: 'horizontal',
+      bottom: 'left'
+    },
+    series: [
+      {
+        name: 'Access From',
+        type: 'pie',
+        radius: '50%',
+        itemStyle: {
+          normal: {
+            label: {
+              show: true,
+              fontFamily: "tttgbnumber",
+              formatter: '{b}:￥{c} ({d}%)'
+            },
+            labelLine: { show: true }
+          }
+        },
+        data: pieData,
+      }
+    ]
+  };
+  myChart2.setOption(option2);
+</script>
+
+</html>

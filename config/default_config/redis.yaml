@@ -1,0 +1,9 @@
+# redis地址
+host: 127.0.0.1
+# redis端口
+port: 6379 
+# redis密码，没有密码可以为空    
+password: 
+# redis数据库    
+db: 0
+

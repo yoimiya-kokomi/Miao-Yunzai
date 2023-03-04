@@ -1,0 +1,21 @@
+# 日志等级:trace,debug,info,warn,fatal,mark,error,off
+# mark时只显示执行命令，不显示聊天记录
+log_level: info
+# 群聊和频道中过滤自己的消息
+ignore_self: true
+# 被风控时是否尝试用分片发送
+resend: false
+# ffmpeg
+ffmpeg_path: 
+ffprobe_path: 
+
+# chromium其他路径
+chromium_path: 
+  
+# 米游社接口代理地址，国际服用
+proxyAddress: 
+
+# 上线时给首个主人QQ推送帮助
+online_msg: true
+# 上线推送通知的冷却时间
+online_msg_exp: 86400

@@ -1,0 +1,51 @@
+version: "3"
+services:
+  yunzai-bot:
+    container_name: yunzai-bot
+    # build: ./docker # 使用 Dockerfile 本地构建
+    image: swr.cn-south-1.myhuaweicloud.com/sirly/yunzai-bot:v3         # 使用云端精简镜像
+    # image: swr.cn-south-1.myhuaweicloud.com/sirly/yunzai-bot:v3plus   # 使用扩展镜像，包含ffmpeg和python
+    # image: sirly/yunzai-bot:v3                                        # Docker Hub源
+    # image: sirly/yunzai-bot:v3plus 
+    # user: "1000:1000"                                                 # 指定容器内用户,格式"UID:GID"（请先修改文件夹权限）
+    restart: always
+    # ports:
+    #   - "50831:50831"                                                 # 映射锅巴插件端口，格式"主机端口:容器内部端口"
+    volumes:
+      - ./yunzai/config/:/app/Yunzai-Bot/config/config/                 # Bot基础配置文件
+      - ./yunzai/genshin_config:/app/Yunzai-Bot/plugins/genshin/config  # 公共Cookie，云崽功能配置文件
+      - ./yunzai/logs:/app/Yunzai-Bot/logs                              # 日志文件
+      - ./yunzai/data:/app/Yunzai-Bot/data                              # 数据文件
+      # 以下目录是插件目录，安装完插件后需要手动添加映射（如有其他插件请自行添加）
+      # 映射格式：./yunzai/plugins/<插件目录名>:/app/Yunzai-Bot/plugins/<插件目录名>
+      # - ./yunzai/plugins/example:/app/Yunzai-Bot/plugins/example                          # 单js插件目录
+      # - ./yunzai/plugins/miao-plugin:/app/Yunzai-Bot/plugins/miao-plugin                  # 喵喵插件
+      # - ./yunzai/plugins/py-plugin:/app/Yunzai-Bot/plugins/py-plugin                      # 新py插件
+      # - ./yunzai/plugins/xiaoyao-cvs-plugin:/app/Yunzai-Bot/plugins/xiaoyao-cvs-plugin    # 图鉴插件
+      #### [警告] 受云崽架构和docker特性限制，使用锅巴插件安装的插件无法持久化，销毁容器后新安装的插件会消失，请谨慎使用 ####
+      # - ./yunzai/plugins/Guoba-Plugin:/app/Yunzai-Bot/plugins/Guoba-Plugin                # 锅巴插件
+    environment:
+      - CUID=1000             # 宿主机运行 id -u 获取
+      - CGID=1000             # 宿主机运行 id -g 获取
+    depends_on:
+      redis: { condition: service_healthy }
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  redis:
+    container_name: yunzai-redis
+    image: redis:alpine
+    restart: always
+    volumes:
+      # 前往 https://download.redis.io/redis-stable/redis.conf 下载配置文件，放入 ./redis/config 文件夹中
+      # - ./redis/config:/etc/redis/    # Redis配置文件
+      - ./redis/data:/data
+      - ./redis/logs:/logs
+    # command: /etc/redis/redis.conf    # 取消注释以应用Redis配置文件
+    healthcheck:
+      test: [ "CMD", "redis-cli", "PING" ]
+      start_period: 10s
+      interval: 5s
+      timeout: 1s
