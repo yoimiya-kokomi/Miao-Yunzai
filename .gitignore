@@ -141,3 +141,4 @@ logs/
 redis
 yunzai
 /.idea/
+/data/
