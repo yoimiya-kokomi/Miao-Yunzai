@@ -255,9 +255,6 @@ export class update extends plugin {
     if (log.length <= 0) return ''
 
     let end = ''
-    if (!plugin) {
-      end = '更多详细信息，请前往github查看\nhttps://github.com/Le-niao/Yunzai-Bot/commits/main'
-    }
 
     log = await this.makeForwardMsg(`${plugin || 'Yunzai-Bot'}更新日志，共${line}条`, log, end)
 
