@@ -6,9 +6,11 @@
   "type": "module",
   "scripts": {
     "app": "node app.js",
+    "web-debug": "node app.js --web-debug",
+    "dev": "node app.js dev",
+    "web": "node ./lib/tools/web.js",
     "test": "node ./lib/tools/test.js",
     "login": "node app.js login",
-    "dev": "node app.js dev",
     "start": "pm2 start ./config/pm2/pm2.json",
     "stop": "pm2 stop ./config/pm2/pm2.json",
     "restart": "pm2 restart ./config/pm2/pm2.json",

@@ -41,7 +41,7 @@ export class strategy extends plugin {
 
     this.set = gsCfg.getConfig('mys', 'set')
 
-    this.path = './data/strategy'
+    this.path = './temp/strategy'
 
     this.url = 'https://bbs-api.mihoyo.com/post/wapi/getPostFullInCollection?&gids=2&order_type=2&collection_id='
     this.collection_id = [

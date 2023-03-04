@@ -9,7 +9,7 @@
 * 使用icqq登录，防止oicq可能出现的低版本问题（如只需要此特性，可使用[Yunzai-V3](https://gitee.com/yoimiya-kokomi/Yunzai-Bot) )
 * 基础功能会保持与Yunzai同步迭代更新，如只需原版Yunzai无需切换
 
-## Miao-Yunzai后续计划
+## Miao-Yunzai后续计划no
 
 先刨坑，但也许会咕咕咕
 
