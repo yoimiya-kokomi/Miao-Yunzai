@@ -48,7 +48,7 @@ FROM runtime AS prod
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-RUN git clone --depth=1 --branch main https://github.com/yoimiya-kokomi/Miao-Yunzai.git /app/Yunzai-Bot\
+RUN git clone --depth=1 --branch master https://github.com/yoimiya-kokomi/Miao-Yunzai.git /app/Yunzai-Bot\
     && cd /app/Yunzai-Bot \
     && sed -i 's/127.0.0.1/redis/g' ./config/default_config/redis.yaml \
     && pnpm install -P
