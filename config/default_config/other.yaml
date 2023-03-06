@@ -5,6 +5,8 @@ autoQuit: 50
 # 主人QQ号
 masterQQ:
 
+# 禁用频道功能 true: 不接受频道消息，flase：接受频道消息
+disableGuildMsg: true
 # 禁用私聊功能 true：私聊只接受ck以及抽卡链接（Bot主人不受限制），false：私聊可以触发全部指令，默认false
 disablePrivate: false
 # 禁用私聊Bot提示内容
