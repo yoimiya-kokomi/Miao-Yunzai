@@ -46,6 +46,12 @@ echo -e "\n ================ \n ${Version} ${BlueBG} Yunzai-Bot 版本信息 ${F
 
 git log -1 --pretty=format:"%h - %an, %ar (%cd) : %s"
 
+if [ ! -d $MIAO_PLUGIN_PATH"/.git" ]; then
+    echo -e "\n ${Warn} ${YellowBG} 由于喵版云崽依赖miao-plugin，检测到目前没有安装，开始自动下载 ${Font} \n"
+    git clone --depth=1 https://gitee.com/yoimiya-kokomi/miao-plugin.git ./plugins/miao-plugin/
+fi
+
+
 if [ -d $MIAO_PLUGIN_PATH"/.git" ]; then
 
     echo -e "\n ================ \n ${Info} ${GreenBG} 拉取 喵喵插件 更新 ${Font} \n ================ \n"
