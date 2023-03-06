@@ -11,10 +11,11 @@ services:
       - ./yunzai/genshin_config:/app/Miao-Yunzai/plugins/genshin/config  # 公共Cookie，云崽功能配置文件
       - ./yunzai/logs:/app/Miao-Yunzai/logs                              # 日志文件
       - ./yunzai/data:/app/Miao-Yunzai/data                              # 数据文件
+      - ./yunzai/plugins:/app/Miao-Yunzai/plugins                        # 插件数据目录
       # 以下目录是插件目录，安装完插件后需要手动添加映射（如有其他插件请自行添加）
       # 映射格式：./yunzai/plugins/<插件目录名>:/app/Miao-Yunzai/plugins/<插件目录名>
       # - ./yunzai/plugins/example:/app/Miao-Yunzai/plugins/example                          # 单js插件目录
-      - ./yunzai/plugins/miao-plugin:/app/Miao-Yunzai/plugins/miao-plugin                    # 默认映射喵喵插件
+      # - ./yunzai/plugins/miao-plugin:/app/Miao-Yunzai/plugins/miao-plugin                    # 默认映射喵喵插件
       # - ./yunzai/plugins/py-plugin:/app/Miao-Yunzai/plugins/py-plugin                      # 新py插件
       # - ./yunzai/plugins/xiaoyao-cvs-plugin:/app/Miao-Yunzai/plugins/xiaoyao-cvs-plugin    # 图鉴插件
       #### [警告] 受云崽架构和docker特性限制，使用锅巴插件安装的插件无法持久化，销毁容器后新安装的插件会消失，请谨慎使用 ####
