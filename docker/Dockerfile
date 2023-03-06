@@ -48,13 +48,13 @@ FROM runtime AS prod
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-RUN git clone --depth=1 --branch master https://github.com/yoimiya-kokomi/Miao-Yunzai.git /app/Yunzai-Bot\
-    && cd /app/Yunzai-Bot \
+RUN git clone --depth=1 --branch master https://github.com/yoimiya-kokomi/Miao-Yunzai.git /app/Miao-Yunzai\
+    && cd /app/Miao-Yunzai \
     && sed -i 's/127.0.0.1/redis/g' ./config/default_config/redis.yaml \
     && pnpm install -P
 
-COPY --from=resource /res/entrypoint.sh /app/Yunzai-Bot/entrypoint.sh
+COPY --from=resource /res/entrypoint.sh /app/Miao-Yunzai/entrypoint.sh
 
-WORKDIR /app/Yunzai-Bot
+WORKDIR /app/Miao-Yunzai
 
-ENTRYPOINT ["/app/Yunzai-Bot/entrypoint.sh"]
+ENTRYPOINT ["/app/Miao-Yunzai/entrypoint.sh"]
