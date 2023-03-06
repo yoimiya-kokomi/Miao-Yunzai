@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "app": "node app.js",
-    "web-debug": "node app.js --web-debug",
     "dev": "node app.js dev",
     "web": "node ./lib/tools/web.js",
     "test": "node ./lib/tools/test.js",

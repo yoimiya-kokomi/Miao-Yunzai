@@ -9,7 +9,7 @@
 * 使用icqq登录，防止oicq可能出现的低版本问题（如只需要此特性，可使用[Yunzai-V3](https://gitee.com/yoimiya-kokomi/Yunzai-Bot) )
 * 基础功能会保持与Yunzai同步迭代更新，如只需原版Yunzai无需切换
 
-## Miao-Yunzai后续计划no
+## Miao-Yunzai后续计划
 
 先刨坑，但也许会咕咕咕
 
@@ -18,7 +18,7 @@
     * `miao-plugin`的帮助、设置、版本信息会升至`Miao-Yunzai`，以支持更多场景
 * 一些底层会与`miao-plugin`做更深层的联动，以支持一些高级功能
     * 基于面板信息的uid管理及认证
-    * ck切换感知等 
+    * ck切换感知等
 * 逐步实验一些新的特性
     * 更完备的plugin基础能力支持
     * 第三方 IM / Bot / WebAPI 对接或适配等
@@ -27,19 +27,34 @@
 
 ## 使用方法
 
-> 环境准备： Windows or Linux，Node.js（[版本至少v16以上](http://nodejs.cn/download/)），[Redis](https://redis.io/docs/getting-started/installation/)
+> 环境准备： Windows or Linux，Node.js（ [版本至少v16以上](http://nodejs.cn/download/) ）， [Redis](https://redis.io/docs/getting-started/installation/ )
 
-1.克隆项目
+1.克隆项目并安装miao-plugin
 
-```
-git clone --depth=1 -b main https://github.com/Le-niao/Yunzai-Bot.git
-```
+请根据网络情况选择Github安装或Gitee安装
 
 ```
-cd Yunzai-Bot #进入Yunzai目录
+#使用 Github 
+git clone --depth=1 https://github.com/yoimiya-kokomi/Miao-Yunzai.git
+
+#使用Gitee
+git clone --depth=1 https://gitee.com/yoimiya-kokomi/Miao-Yunzai.git
 ```
 
-2.安装[pnpm](https://pnpm.io/zh/installation)，已安装的可以跳过
+```
+#进入Yunzai目录
+cd Miao-Yunzai 
+```
+
+```
+#使用Github
+git clone --depth=1 https://github.com/yoimiya-kokomi/miao-plugin.git ./plugins/miao-plugin/
+
+#使用Gitee
+git clone --depth=1 https://gitee.com/yoimiya-kokomi/miao-plugin.git ./plugins/miao-plugin/
+```
+
+2.安装[pnpm](https://pnpm.io/zh/installation) ，已安装的可以跳过
 
 ```
 npm install pnpm -g
