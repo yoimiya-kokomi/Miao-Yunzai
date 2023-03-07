@@ -1,12 +1,14 @@
 FROM debian:stable AS resource
 
+COPY sources.list  /etc/apt/sources.list
+
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y wget xz-utils dos2unix \
     && wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-$(dpkg --print-architecture)-static.tar.xz \
     && mkdir -p /res/ffmpeg \
     && tar -xvf ./ffmpeg-git-$(dpkg --print-architecture)-static.tar.xz -C /res/ffmpeg --strip-components 1
-    
+
 COPY docker-entrypoint.sh /res/entrypoint.sh
 
 RUN dos2unix /res/entrypoint.sh \
@@ -18,6 +20,8 @@ FROM node:lts-slim AS runtime
 COPY --from=resource /res/ffmpeg/ffmpeg /usr/bin/ffmpeg
 
 COPY --from=resource /res/ffmpeg/ffprobe /usr/bin/ffprobe
+
+COPY sources.list  /etc/apt/sources.list
 
 RUN apt-get update \
     && apt-get upgrade -y \
