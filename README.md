@@ -67,7 +67,7 @@ npm --registry=https://registry.npmmirror.com install pnpm -g
 pnpm install -P
 
 # 如依赖安装缓慢或失败，可尝试更换国内npm源后再执行install命令
-pnpm --registry https://registry.npmmirror.com install -P
+pnpm config set registry https://registry.npmmirror.com
 pnpm install -P
 ```
 
