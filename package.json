@@ -49,8 +49,5 @@
   "imports": {
     "#miao": "./plugins/miao-plugin/components/index.js",
     "#miao.models": "./plugins/miao-plugin/models/index.js"
-  },
-  "pnpm": {
-    "patchedDependencies": {}
   }
 }
