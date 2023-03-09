@@ -4,7 +4,6 @@ import fs from 'node:fs'
 import GachaLog from '../model/gachaLog.js'
 import ExportLog from '../model/exportLog.js'
 import LogCount from '../model/logCount.js'
-import { segment } from 'icqq'
 
 const _path = process.cwd() + '/plugins/genshin'
 
