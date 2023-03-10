@@ -2,7 +2,6 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import gsCfg from '../model/gsCfg.js'
 import common from '../../../lib/common/common.js'
-import { segment } from 'icqq'
 import lodash from 'lodash'
 import fs from 'node:fs'
 import fetch from 'node-fetch'

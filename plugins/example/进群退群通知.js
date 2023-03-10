@@ -1,5 +1,4 @@
 import plugin from '../../lib/plugins/plugin.js'
-import { segment } from 'icqq'
 export class newcomer extends plugin {
   constructor () {
     super({

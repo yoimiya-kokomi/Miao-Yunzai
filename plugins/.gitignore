@@ -14,6 +14,7 @@ other/**
 !other/sendLog.js
 !other/update.js
 !other/setPubCk.js
+!other/version.js
 
 !example
 example/**
