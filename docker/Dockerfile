@@ -1,8 +1,7 @@
 FROM debian:stable AS resource
 
-COPY sources.list  /etc/apt/sources.list
-
-RUN apt-get update \
+RUN sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list \
+    && apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y wget xz-utils dos2unix \
     && wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-$(dpkg --print-architecture)-static.tar.xz \
@@ -21,9 +20,8 @@ COPY --from=resource /res/ffmpeg/ffmpeg /usr/bin/ffmpeg
 
 COPY --from=resource /res/ffmpeg/ffprobe /usr/bin/ffprobe
 
-COPY sources.list  /etc/apt/sources.list
-
-RUN apt-get update \
+RUN sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list \
+    && apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y curl wget gnupg git python3-pip fonts-wqy-microhei xfonts-utils chromium fontconfig libxss1 libgl1 \
     && apt-get autoremove \
