@@ -28,10 +28,10 @@ if [[ -z $(git status -s) ]]; then
     echo -e " ${Warn} ${YellowBG} 当前工作区有修改，尝试暂存后更新。${Font}"
     git add .
     git stash
-    git pull origin main --allow-unrelated-histories --rebase
+    git pull origin master --allow-unrelated-histories --rebase
     git stash pop
 else
-    git pull origin main --allow-unrelated-histories
+    git pull origin master --allow-unrelated-histories
 fi
 
 if [[ ! -f "$HOME/.ovo/yunzai.ok" ]]; then

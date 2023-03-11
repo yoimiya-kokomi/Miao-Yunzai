@@ -23,7 +23,7 @@ COPY --from=resource /res/ffmpeg/ffprobe /usr/bin/ffprobe
 RUN sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list \
     && apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y curl wget gnupg git python3-pip fonts-wqy-microhei xfonts-utils chromium fontconfig libxss1 libgl1 \
+    && apt-get install -y curl wget gnupg git python3-pip python3-venv fonts-wqy-microhei xfonts-utils chromium fontconfig libxss1 libgl1 \
     && apt-get autoremove \
     && apt-get clean
 
@@ -37,8 +37,11 @@ RUN git config --global --add safe.directory '*' \
 RUN npm install pnpm -g
 
 RUN ln -s /usr/bin/python3 /usr/bin/python \
-    && curl -fsSL https://install.python-poetry.org | python - \
-    && ln -s /$HOME/.local/bin/poetry /usr/bin \
+    && POETRY_HOME=$HOME/venv-poetry \
+    && python -m venv $POETRY_HOME \
+    && $POETRY_HOME/bin/pip install --upgrade pip setuptools -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    && $POETRY_HOME/bin/pip install poetry -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    && ln -s $POETRY_HOME/bin/poetry /usr/bin \
     && poetry config virtualenvs.in-project true
 
 RUN rm -rf /var/cache/* \
