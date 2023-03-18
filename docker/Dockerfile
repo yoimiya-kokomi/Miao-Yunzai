@@ -53,7 +53,7 @@ FROM runtime AS prod
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-RUN git clone --depth=1 --branch master https://github.com/yoimiya-kokomi/Miao-Yunzai.git /app/Miao-Yunzai\
+RUN git clone --depth=1 --branch master https://gitee.com/yoimiya-kokomi/Miao-Yunzai.git /app/Miao-Yunzai\
     && cd /app/Miao-Yunzai \
     && sed -i 's/127.0.0.1/redis/g' ./config/default_config/redis.yaml \
     && pnpm install -P
