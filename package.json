@@ -33,10 +33,10 @@
     "node-xlsx": "^0.21.0",
     "oicq": "^2.3.1",
     "pm2": "^5.2.2",
-    "puppeteer": "^19.7.4",
+    "puppeteer": "^19.7.5",
     "redis": "^4.6.5",
     "sequelize": "^6.29.3",
-    "sqlite3": "^5.1.4",
+    "sqlite3": "^5.1.6",
     "yaml": "^2.2.1"
   },
   "devDependencies": {
