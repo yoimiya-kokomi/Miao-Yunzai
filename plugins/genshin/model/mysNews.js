@@ -389,6 +389,12 @@ export default class MysNews extends base {
   }
 
   async sendNews (groupId, typeName, postId) {
+    // 判断是否存在群关系
+    if (!Bot.gl.get(Number(groupId))) {
+      logger.error(`[米游社${typeName}推送] 群${groupId}未关联`)
+      return
+    }
+
     if (!this.pushGroup[groupId]) this.pushGroup[groupId] = 0
     if (this.pushGroup[groupId] >= this.maxNum) return
 
