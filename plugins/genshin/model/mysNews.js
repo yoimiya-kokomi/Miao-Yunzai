@@ -395,6 +395,12 @@ export default class MysNews extends base {
     let sended = await redis.get(`${this.key}${groupId}:${postId}`)
     if (sended) return
 
+    // 判断是否存在群关系
+    if (!Bot.gl.get(Number(groupId))) {
+      logger.error(`[米游社${typeName}推送] 群${groupId}未关联`)
+      return
+    }
+
     if (!this[postId]) {
       const param = await this.newsDetail(postId)
 
