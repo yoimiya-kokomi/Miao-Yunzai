@@ -80,6 +80,14 @@ export class sendLog extends plugin {
   }
 
   async makeForwardMsg (title, msg) {
+
+    // 是频道就处理一下
+    if (this.e.isGuild || this.e.isGuildPrivate) {
+      return `${title}\n${msg}`
+        .replace(/(\r?\n)+/g, "\n")
+        .replace(/(https?)?:\/\/(.+?\/)+/gi, " [萌新-🍓🍓] ")
+    }
+
     let nickname = Bot.nickname
     if (this.e.isGroup) {
       let info = await Bot.getGroupMemberInfo(this.e.group_id, Bot.uin)

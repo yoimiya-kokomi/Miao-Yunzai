@@ -256,6 +256,13 @@ export class update extends plugin {
 
     let end = ''
 
+    // 是频道就处理一下
+    if (this.e.isGuild || this.e.isGuildPrivate) {
+      return `${plugin || 'Yunzai-Bot'}更新日志，共${line}条\n${log}`
+        .replace(/(\r?\n)+/g, "\n")
+        .replace(/(https?)?:\/\/(.+?\/)+/gi, " [萌新-🍓🍓] ")
+    }
+
     log = await this.makeForwardMsg(`${plugin || 'Yunzai-Bot'}更新日志，共${line}条`, log, end)
 
     return log
