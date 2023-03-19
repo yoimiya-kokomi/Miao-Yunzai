@@ -86,6 +86,7 @@ export class sendLog extends plugin {
       return `${title}\n${msg}`
         .replace(/(\r?\n)+/g, "\n")
         .replace(/(https?)?:\/\/(.+?\/)+/gi, " [萌新-🍓🍓] ")
+        .trim()
     }
 
     let nickname = Bot.nickname

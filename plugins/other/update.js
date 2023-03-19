@@ -261,6 +261,7 @@ export class update extends plugin {
       return `${plugin || 'Yunzai-Bot'}更新日志，共${line}条\n${log}`
         .replace(/(\r?\n)+/g, "\n")
         .replace(/(https?)?:\/\/(.+?\/)+/gi, " [萌新-🍓🍓] ")
+        .trim()
     }
 
     log = await this.makeForwardMsg(`${plugin || 'Yunzai-Bot'}更新日志，共${line}条`, log, end)
