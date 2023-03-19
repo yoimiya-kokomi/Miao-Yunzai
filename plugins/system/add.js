@@ -96,13 +96,13 @@ export class add extends plugin {
 
   /** 获取群号 */
   async getGroupId () {
-    
+
     /** 添加全局表情，存入到机器人qq文件中 */
     if (this.isGlobal) {
       this.group_id = Bot.uin;
       return Bot.uin;
     }
-    
+
     if (this.e.isGroup) {
       this.group_id = this.e.group_id
       redis.setEx(this.grpKey, 3600 * 24 * 30, String(this.group_id))
@@ -324,7 +324,7 @@ export class add extends plugin {
 
     fs.writeFileSync(`${this.path}${this.group_id}.json`, JSON.stringify(obj, '', '\t'))
   }
-  
+
   saveGlobalJson() {
     let obj = {};
     for (let [k, v] of textArr[Bot.uin]) {
@@ -377,7 +377,7 @@ export class add extends plugin {
 
   async getText () {
     if (!this.e.message) return false
-    
+
     this.isGlobal = false
 
     await this.getGroupId()
@@ -385,7 +385,7 @@ export class add extends plugin {
     if (!this.group_id) return false
 
     this.initTextArr()
-    
+
     this.initGlobalTextArr()
 
     let keyWord = this.e.toString()
@@ -410,7 +410,7 @@ export class add extends plugin {
     if (lodash.isEmpty(msg) && lodash.isEmpty(globalMsg)) return false
 
     msg = [...msg, ...globalMsg]
-    
+
     if (num >= 0 && num < msg.length) {
       msg = msg[num]
     } else {
@@ -439,6 +439,10 @@ export class add extends plugin {
 
     logger.mark(`[发送表情]${this.e.logText} ${keyWord}`)
     let ret = await this.e.reply(msg)
+
+    // 是频道直接返回 true
+    if (this.e.isGuild || this.e.isGuildPrivate) return true
+
     if (!ret) {
       this.expiredMsg(keyWord, num)
     }
@@ -510,7 +514,7 @@ export class add extends plugin {
       fs.mkdirSync(facePath)
     }
   }
-  
+
   /** 初始化全局已添加内容 */
   initGlobalTextArr() {
     if (textArr[Bot.uin]) return;
@@ -743,6 +747,17 @@ export class add extends plugin {
   }
 
   async makeForwardMsg (qq, title, msg, end = '') {
+    // 是频道，就处理一下
+    if (this.e.isGuild || this.e.isGuildPrivate) {
+        return msg
+            .reverse()
+            .join("\n")
+            .replace(/\{at:(\d+)}/g, "<@!$1>")
+            .replace(/\{face:(\d+)}/g, "<emoji:$1>")
+            .replace(/\n+/g, "\n")
+            .trim()
+    }
+
     let nickname = Bot.nickname
     if (this.e.isGroup) {
       let info = await Bot.getGroupMemberInfo(this.e.group_id, qq)
