@@ -378,7 +378,7 @@ export default class RoleIndex extends base {
       name: this.e.sender.card.replace(this.e.uid, '').trim(),
       user_id: this.e.user_id,
       // 无关紧要的修改，以支持频道插件
-      avatar: this.e.isGuild ? this.e.sender.avatar : `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.e.user_id}`,
+      avatar: this.e.isGuild || this.e.isGuildPrivate ? this.e.sender.avatar : `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.e.user_id}`,
       line,
       avatars,
       bg: lodash.random(1, 3),
