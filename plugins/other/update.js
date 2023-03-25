@@ -265,7 +265,9 @@ export class update extends plugin {
     let nickname = Bot.nickname
     if (this.e.isGroup) {
       let info = await Bot.getGroupMemberInfo(this.e.group_id, Bot.uin)
-      nickname = info.card ?? info.nickname
+      if (info) {
+        nickname = info.card ?? info.nickname
+      }
     }
     let userInfo = {
       user_id: Bot.uin,
