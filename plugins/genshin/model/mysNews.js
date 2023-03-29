@@ -424,7 +424,9 @@ export default class MysNews extends base {
       tmp = [`原神${typeName}推送\n`, tmp]
     }
 
-    redis.set(`${this.key}${groupId}:${postId}`, '1', { EX: 3600 * 10 })
+    await redis.set(`${this.key}${groupId}:${postId}`, '1', { EX: 3600 * 10 })
+    // 随机延迟1-180秒
+    await common.sleep(lodash.random(1, 180) * 1000)
     await this.e.group.sendMsg(tmp)
   }
 }
