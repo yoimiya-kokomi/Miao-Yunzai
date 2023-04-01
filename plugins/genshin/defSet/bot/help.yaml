@@ -22,8 +22,8 @@
       title: '#原石 #原石统计'
       desc: 查询体力，需要绑定cookie
     - icon: 打卡
-      title: '#签到、删除cookie'
-      desc: 米游社原神自动签到
+      title: '#删除cookie'
+      desc: 删除米游社cookie
     - icon: 统计
       title: '#角色养成'
       desc: 计算角色养成消耗素材

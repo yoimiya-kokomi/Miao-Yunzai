@@ -44,87 +44,14 @@ export default class MysNews extends base {
 
     const param = await this.newsDetail(postId)
 
-    const img = await this.rander(param)
+    const img = await this.render(param)
 
     return await this.replyMsg(img, `原神${typeName}：${param.data.post.subject}`)
   }
 
-  async rander (param) {
-    const pageHeight = 7000
-
-    await puppeteer.browserInit()
-
-    if (!puppeteer.browser) return false
-
-    const savePath = puppeteer.dealTpl('mysNews', param)
-    if (!savePath) return false
-
-    const page = await puppeteer.browser.newPage()
-    try {
-      await page.goto(`file://${_path}${lodash.trim(savePath, '.')}`, { timeout: 120000 })
-      const body = await page.$('#container') || await page.$('body')
-      const boundingBox = await body.boundingBox()
-
-      const num = Math.round(boundingBox.height / pageHeight) || 1
-
-      if (num > 1) {
-        await page.setViewport({
-          width: boundingBox.width,
-          height: pageHeight + 100
-        })
-      }
-
-      const img = []
-      for (let i = 1; i <= num; i++) {
-        const randData = {
-          type: 'jpeg',
-          quality: 90
-        }
-
-        if (i != 1 && i == num) {
-          await page.setViewport({
-            width: boundingBox.width,
-            height: parseInt(boundingBox.height) - pageHeight * (num - 1)
-          })
-        }
-
-        if (i != 1 && i <= num) {
-          await page.evaluate(() => window.scrollBy(0, 7000))
-        }
-
-        let buff
-        if (num == 1) {
-          buff = await body.screenshot(randData)
-        } else {
-          buff = await page.screenshot(randData)
-        }
-
-        if (num > 2) await common.sleep(200)
-
-        puppeteer.renderNum++
-        /** 计算图片大小 */
-        const kb = (buff.length / 1024).toFixed(2) + 'kb'
-
-        logger.mark(`[图片生成][${this.model}][${puppeteer.renderNum}次] ${kb}`)
-
-        img.push(segment.image(buff))
-      }
-
-      await page.close().catch((err) => logger.error(err))
-
-      if (num > 1) {
-        logger.mark(`[图片生成][${this.model}] 处理完成`)
-      }
-      return img
-    } catch (error) {
-      logger.error(`图片生成失败:${this.model}:${error}`)
-      /** 关闭浏览器 */
-      if (puppeteer.browser) {
-        await puppeteer.browser.close().catch((err) => logger.error(err))
-      }
-      puppeteer.browser = false
-    }
-  }
+  async render (param) {
+    return await puppeteer.screenshots(this.model, param);
+  } 
 
   async newsDetail (postId) {
     const res = await this.postData('getPostFull', { gids: 2, read: 1, post_id: postId })
@@ -282,7 +209,7 @@ export default class MysNews extends base {
 
     const param = await this.newsDetail(postId)
 
-    const img = await this.rander(param)
+    const img = await this.render(param)
 
     return await this.replyMsg(img, `${param.data.post.subject}`)
   }
@@ -295,7 +222,7 @@ export default class MysNews extends base {
 
     const param = await this.newsDetail(postId)
 
-    const img = await this.rander(param)
+    const img = await this.render(param)
 
     return await this.replyMsg(img, `${param.data.post.subject}`)
   }
@@ -322,7 +249,7 @@ export default class MysNews extends base {
 
     const param = await this.newsDetail(postId)
 
-    const img = await this.rander(param)
+    const img = await this.render(param)
 
     if (img.length > 1) {
       img.push(segment.image(param.data.post.images[0] + '?x-oss-process=image//resize,s_600/quality,q_80/auto-orient,0/interlace,1/format,jpg'))
@@ -407,7 +334,7 @@ export default class MysNews extends base {
       logger.mark(`[米游社${typeName}推送] ${param.data.post.subject}`)
 
       this[postId] = {
-        img: await this.rander(param),
+        img: await this.render(param),
         title: param.data.post.subject
       }
     }
