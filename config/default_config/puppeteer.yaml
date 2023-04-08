@@ -1,0 +1,7 @@
+# executablePath: "/usr/bin/chromium"
+headless: true
+args:
+   - "--disable-gpu"
+   - "--disable-setuid-sandbox"
+   - "--no-sandbox"
+   - "--no-zygote"
