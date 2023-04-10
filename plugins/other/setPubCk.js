@@ -52,8 +52,11 @@ export class setPubCk extends plugin {
     let ck = msg.replace(/#|'|"/g, '')
     let param = {}
     ck.split(';').forEach((v) => {
-      let tmp = lodash.trim(v).split('=')
-      param[tmp[0]] = tmp[1]
+      // cookie_token_v2,ltoken_v2值也可能有=
+      // let tmp = lodash.trim(v).split('=')
+      let tmp = lodash.trim(v);
+      let index = tmp.indexOf("=");
+      param[tmp.slice(0,index)] = tmp.slice(index+1);
     })
 
     this.ck = ''
