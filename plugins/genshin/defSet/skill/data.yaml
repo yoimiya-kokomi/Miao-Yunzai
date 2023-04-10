@@ -1,4 +1,4 @@
-#数据源自 https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/blob/main/genshin_role_info/res/json_data/role_skill.json
+#数据源自 https://github.com/CRAZYShimakaze/zhenxun_extensive_plugin/blob/main/genshin_role_info/res/json_data/roles_skill.json
 Name:
   '10001': 单手剑重攻击
   '10002': 长枪重攻击
@@ -293,6 +293,7 @@ Name:
   '10721': 普通攻击·流耀枪术·守势
   '10722': 圣仪·苍鹭庇卫
   '10725': 圣仪·灰鸰衒潮
+  '10731': 普通攻击·行相
   '10732': 所闻遍计
   '10735': 心景幻成
   '10741': 普通攻击·熠辉轨度剑
@@ -317,6 +318,14 @@ Name:
   '10781': 普通攻击·溯因反绎法
   '10782': 共相·理式摹写
   '10785': 殊境·显象缚结
+  '10791': 普通攻击·拂金剑斗术
+  '10792': 熔铁流狱
+  '10793': 迪希雅元素战技-二段收刀
+  '10794': 迪希雅元素爆发_QTE
+  '10795': 炎啸狮子咬
+  '10801': 普通攻击·西风枪术·镝传
+  '10802': 星霜的流旋
+  '10805': 苍翎的颂愿
   '20001': 风魔炮
   '20002': 风魔炮
   '20011': 飞行挑战 - 前冲
@@ -501,6 +510,8 @@ Name:
   '5076010': 空中攻击
   '5077010': 瑶瑶空中攻击
   '5078010': 艾尔海森空中攻击
+  '5079010': 迪希雅空中攻击
+  '5080010': 米卡空中攻击
 Icon:
   '10001': ''
   '10002': ''
@@ -820,6 +831,14 @@ Icon:
   '10781': Skill_A_01
   '10782': Skill_S_Alhatham_01
   '10785': Skill_E_Alhatham_01
+  '10791': Skill_A_04
+  '10792': Skill_S_Dehya_01
+  '10793': Skill_S_Dehya_02
+  '10794': Skill_E_Dehya_02
+  '10795': Skill_E_Dehya_01
+  '10801': Skill_A_03
+  '10802': Skill_S_Mika_01
+  '10805': Skill_E_Mika_01
   '20001': Skill_A_Dvalin_AirGun
   '20002': Skill_A_Dvalin_AirGun
   '20011': Btn_FlightSprint
@@ -909,6 +928,7 @@ Icon:
   '20340': Btn_BrickBreaker_Launch
   '20341': Skill_LanV3_Icon05
   '20342': Skill_LanV3_Icon05
+  '20345': Btn_PacMan
   '10384': Btn_Recon_Bait
   '100540': Skill_A_01
   '100541': Skill_A_01
@@ -1004,6 +1024,8 @@ Icon:
   '5076010': Skill_A_02
   '5077010': Skill_A_03
   '5078010': Skill_A_01
+  '5079010': Skill_A_04
+  '5080010': Skill_A_03
 Talent:
   胡桃:
     - 1
@@ -1203,3 +1225,9 @@ Talent:
   瑶瑶:
     - 1
     - 2
+  迪希雅:
+    - 2
+    - 1
+  米卡:
+    - 2
+    - 1
