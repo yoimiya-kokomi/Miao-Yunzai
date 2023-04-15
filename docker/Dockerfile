@@ -23,7 +23,7 @@ RUN export BUNDLE_FFMPEG=${BUNDLE_FFMPEG:-true} \
     && export USE_PYPI_MIRROR=${USE_PYPI_MIRROR:-true} \
     \
     && ((test "$USE_APT_MIRROR"x = "true"x \
-    && sed -i "s/deb.debian.org/mirrors.bit.edu.cn/g" /etc/apt/sources.list) || true) \
+    && sed -i "s/deb.debian.org/mirrors.ustc.edu.cn/g" /etc/apt/sources.list) || true) \
     && apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y wget xz-utils dos2unix \
