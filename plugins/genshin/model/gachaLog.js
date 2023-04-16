@@ -588,21 +588,24 @@ export default class GachaLog extends base {
       return false
     }
 
-    if (this.role.name == '刻晴') {
-      let start = new Date('2021-02-17 18:00:00').getTime()
-      let end = new Date('2021-03-02 15:59:59').getTime()
-      let logTime = new Date(this.role.time).getTime()
-
-      if (logTime < start || logTime > end) {
-        return false
-      } else {
-        return true
+    let role5join = {
+      '刻晴': {
+        start: '2021-02-17 18:00:00',
+        end: '2021-03-02 15:59:59'
+      },
+      '提纳里': {
+        start: '2022-08-24 06:00:00',
+        end: '2022-09-09 17:59:59'
+      },
+      '迪希雅': {
+        start: '2023-03-01 06:00:00',
+        end: '2023-03-21 17:59:59'
       }
     }
 
-    if (this.role.name == '提纳里') {
-      let start = new Date('2022-08-24 06:00:00').getTime()
-      let end = new Date('2022-09-09 17:59:59').getTime()
+    if (lodash.keys(role5join).includes(this.role.name)) {
+      let start = new Date(role5join[this.role.name].start).getTime()
+      let end = new Date(role5join[this.role.name].end).getTime()
       let logTime = new Date(this.role.time).getTime()
 
       if (logTime < start || logTime > end) {
