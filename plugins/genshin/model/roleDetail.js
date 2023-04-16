@@ -128,7 +128,7 @@ export default class RoleDetail extends base {
       if (lodash.random(0, 100) > 50) {
         bg = 3
       }
-    } else if (['芭芭拉', '凝光', '刻晴', '琴'].includes(avatars.name)) {
+    } else if (['芭芭拉', '凝光', '刻晴', '琴', '菲谢尔', '迪卢克', '丽莎', '神里绫华'].includes(avatars.name)) {
       if (avatars.costumes && avatars.costumes.length >= 1) {
         bg = 3
       }
