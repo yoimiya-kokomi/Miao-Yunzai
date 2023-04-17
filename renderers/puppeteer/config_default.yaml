@@ -1,0 +1,15 @@
+# 如需自定义，复制此文件为 config.yaml 进行配置
+# 更新配置后需要重启
+
+# chromium 地址
+chromiumPath:
+
+# headless
+headless: true
+
+# puppeteer启动args
+args:
+  - --disable-gpu
+  - --disable-setuid-sandbox
+  - --no-sandbox
+  - --no-zygote

@@ -1,6 +1,6 @@
 *
 !.gitignore
-!base_renderer.js
 
 !puppeteer
 !puppeteer/**
+puppeteer/config.yaml

@@ -3,9 +3,9 @@ import os from 'node:os'
 import lodash from 'lodash'
 import template from 'art-template'
 import chokidar from 'chokidar'
+// 暂时保留对原config的兼容
 import cfg from '../../lib/config/config.js'
-import common from '../../lib/common/common.js'
-import BaseRenderer from '../base_renderer.js'
+import { Data } from '#miao'
 
 const _path = process.cwd()
 
@@ -14,9 +14,8 @@ let puppeteer = {}
 // mac地址
 let mac = ''
 
-export default class PuppeteerRenderer extends BaseRenderer {
-  constructor() {
-    super()
+export default class PuppeteerRenderer {
+  constructor (config) {
     this.browser = false
     this.lock = false
     this.shoting = []
@@ -25,18 +24,17 @@ export default class PuppeteerRenderer extends BaseRenderer {
     /** 截图次数 */
     this.renderNum = 0
     this.config = {
-      headless: true,
-      args: [
+      headless: Data.def(config.headless, true),
+      args: Data.def(config.args, [
         '--disable-gpu',
         '--disable-setuid-sandbox',
         '--no-sandbox',
         '--no-zygote'
-      ]
+      ])
     }
-
-    if (cfg.bot?.chromium_path) {
+    if (cfg?.bot?.chromium_path || config.chromiumPath) {
       /** chromium其他路径 */
-      this.config.executablePath = cfg.bot.chromium_path
+      this.config.executablePath = cfg.bot?.chromium_path || config.chromiumPath
     }
 
     this.html = {}
@@ -44,15 +42,13 @@ export default class PuppeteerRenderer extends BaseRenderer {
     this.createDir('./temp/html')
   }
 
-  async initPupp() {
+  async initPupp () {
     if (!lodash.isEmpty(puppeteer)) return puppeteer
-
     puppeteer = (await import('puppeteer')).default
-
     return puppeteer
   }
 
-  createDir(dir) {
+  createDir (dir) {
     if (!fs.existsSync(dir)) {
       let dirs = dir.split('/')
       for (let idx = 1; idx <= dirs.length; idx++) {
@@ -67,7 +63,7 @@ export default class PuppeteerRenderer extends BaseRenderer {
   /**
    * 初始化chromium
    */
-  async browserInit() {
+  async browserInit () {
     await this.initPupp()
     if (this.browser) return this.browser
     if (this.lock) return false
@@ -150,7 +146,7 @@ export default class PuppeteerRenderer extends BaseRenderer {
   }
 
   // 获取Mac地址
-  async getMac() {
+  async getMac () {
     // 获取Mac地址
     let mac = '00:00:00:00:00:00'
     try {
@@ -185,12 +181,16 @@ export default class PuppeteerRenderer extends BaseRenderer {
    * @param data.quality  screenshot参数，图片质量 0-100，jpeg是可传，默认90
    * @param data.omitBackground  screenshot参数，隐藏默认的白色背景，背景透明。默认不透明
    * @param data.path   screenshot参数，截图保存路径。截图图片类型将从文件扩展名推断出来。如果是相对路径，则从当前路径解析。如果没有指定路径，图片将不会保存到硬盘。
-   * @return icqq img
+   * @param data.multiPage 是否分页截图，默认false
+   * @param data.multiPageHeight 分页状态下页面高度，默认4000
+   * @param data.pageGotoParams 页面goto时的参数
+   * @return img/[]img 不做segment包裹
    */
-  async screenshot(name, data = {}) {
+  async screenshot (name, data = {}) {
     if (!await this.browserInit()) {
       return false
     }
+    const pageHeight = data.multiPageHeight || 4000
 
     let savePath = this.dealTpl(name, data)
     if (!savePath) return false
@@ -198,26 +198,80 @@ export default class PuppeteerRenderer extends BaseRenderer {
     let buff = ''
     let start = Date.now()
 
+    let ret = []
     this.shoting.push(name)
 
     try {
       const page = await this.browser.newPage()
-      await page.goto(`file://${_path}${lodash.trim(savePath, '.')}`, data.pageGotoParams || {})
+      let pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
+      await page.goto(`file://${_path}${lodash.trim(savePath, '.')}`, pageGotoParams)
       let body = await page.$('#container') || await page.$('body')
 
+      // 计算页面高度
+      const boundingBox = await body.boundingBox()
+      // 分页数
+      let num = 1
+
       let randData = {
-        // encoding: 'base64',
         type: data.imgType || 'jpeg',
         omitBackground: data.omitBackground || false,
         quality: data.quality || 90,
         path: data.path || ''
       }
 
-      if (data.imgType === 'png') delete randData.quality
+      if (data.multiPage) {
+        randData.type = 'jpeg'
+        num = Math.round(boundingBox.height / pageHeight) || 1
+      }
 
-      buff = await body.screenshot(randData)
+      if (data.imgType === 'png') {
+        delete randData.quality
+      }
 
+      if (!data.multiPage) {
+        buff = await body.screenshot(randData)
+        /** 计算图片大小 */
+        const kb = (buff.length / 1024).toFixed(2) + 'kb'
+        logger.mark(`[图片生成][${name}][${this.renderNum}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`)
+        this.renderNum++
+        ret.push(buff)
+      } else {
+        // 分片截图
+        if (num > 1) {
+          await page.setViewport({
+            width: boundingBox.width,
+            height: pageHeight + 100
+          })
+        }
+        for (let i = 1; i <= num; i++) {
+          if (i !== 1 && i === num) {
+            await page.setViewport({
+              width: boundingBox.width,
+              height: parseInt(boundingBox.height) - pageHeight * (num - 1)
+            })
+          }
+          if (i !== 1 && i <= num) {
+            await page.evaluate(() => window.scrollBy(0, 7000))
+          }
+          if (num === 1) {
+            buff = await body.screenshot(randData)
+          } else {
+            buff = await page.screenshot(randData)
+          }
+          if (num > 2) await Data.sleep(200)
+          this.renderNum++
+
+          /** 计算图片大小 */
+          const kb = (buff.length / 1024).toFixed(2) + 'kb'
+          logger.mark(`[图片生成][${name}][${i}/${num}] ${kb}`)
+          ret.push(buff)
+        }
+        if (num > 1) {
+          logger.mark(`[图片生成][${name}] 处理完成`)
+        }
+      }
       page.close().catch((err) => logger.error(err))
+
     } catch (error) {
       logger.error(`图片生成失败:${name}:${error}`)
       /** 关闭浏览器 */
@@ -225,112 +279,24 @@ export default class PuppeteerRenderer extends BaseRenderer {
         await this.browser.close().catch((err) => logger.error(err))
       }
       this.browser = false
-      buff = ''
+      ret = []
       return false
     }
 
     this.shoting.pop()
 
-    if (!buff) {
+    if (ret.length === 0 || !ret[0]) {
       logger.error(`图片生成为空:${name}`)
       return false
     }
 
-    this.renderNum++
-
-    /** 计算图片大小 */
-    let kb = (buff.length / 1024).toFixed(2) + 'kb'
-
-    logger.mark(`[图片生成][${name}][${this.renderNum}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`)
-
     this.restart()
 
-    return segment.image(buff)
-  }
-
-  /**
-   * `chromium` 分片截图
-   */
-  async screenshots(name, data = {}) {
-    // FIXME: pageHeight 作为参数？
-    const pageHeight = 7000
-
-    await this.browserInit()
-
-    if (!this.browser) return false
-
-    const savePath = this.dealTpl(name, data)
-    if (!savePath) return false
-
-    const page = await this.browser.newPage()
-    try {
-      await page.goto(`file://${_path}${lodash.trim(savePath, '.')}`, { timeout: 120000 })
-      const body = await page.$('#container') || await page.$('body')
-      const boundingBox = await body.boundingBox()
-
-      const num = Math.round(boundingBox.height / pageHeight) || 1
-
-      if (num > 1) {
-        await page.setViewport({
-          width: boundingBox.width,
-          height: pageHeight + 100
-        })
-      }
-
-      const img = []
-      for (let i = 1; i <= num; i++) {
-        const randData = {
-          type: 'jpeg',
-          quality: 90
-        }
-
-        if (i !== 1 && i === num) {
-          await page.setViewport({
-            width: boundingBox.width,
-            height: parseInt(boundingBox.height) - pageHeight * (num - 1)
-          })
-        }
-
-        if (i !== 1 && i <= num) {
-          await page.evaluate(() => window.scrollBy(0, 7000))
-        }
-
-        let buff
-        if (num === 1) {
-          buff = await body.screenshot(randData)
-        } else {
-          buff = await page.screenshot(randData)
-        }
-
-        if (num > 2) await common.sleep(200)
-
-        this.renderNum++
-        /** 计算图片大小 */
-        const kb = (buff.length / 1024).toFixed(2) + 'kb'
-
-        logger.mark(`[图片生成][${name}][${this.renderNum}次] ${kb}`)
-
-        img.push(segment.image(buff))
-      }
-
-      await page.close().catch((err) => logger.error(err))
-
-      if (num > 1) {
-        logger.mark(`[图片生成][${name}] 处理完成`)
-      }
-      return img
-    } catch (error) {
-      logger.error(`图片生成失败:${name}:${error}`)
-      /** 关闭浏览器 */
-      if (this.browser) {
-        await this.browser.close().catch((err) => logger.error(err))
-      }
-      this.browser = false
-    }
+    return data.multiPage ? ret : ret[0]
   }
 
   /** 模板 */
-  dealTpl(name, data) {
+  dealTpl (name, data) {
     let { tplFile, saveId = name } = data
     let savePath = `./temp/html/${name}/${saveId}.html`
 
@@ -362,7 +328,7 @@ export default class PuppeteerRenderer extends BaseRenderer {
   }
 
   /** 监听配置文件 */
-  watch(tplFile) {
+  watch (tplFile) {
     if (this.watcher[tplFile]) return
 
     const watcher = chokidar.watch(tplFile)
@@ -375,7 +341,7 @@ export default class PuppeteerRenderer extends BaseRenderer {
   }
 
   /** 重启 */
-  restart() {
+  restart () {
     /** 截图超过重启数时，自动关闭重启浏览器，避免生成速度越来越慢 */
     if (this.renderNum % this.restartNum === 0) {
       if (this.shoting.length <= 0) {
@@ -388,11 +354,6 @@ export default class PuppeteerRenderer extends BaseRenderer {
         }, 100)
       }
     }
-  }
-
-  static isImportable() {
-    // XXX: Puppeteer 为默认的，因此总可以被导入
-    return true;
   }
 }
 
