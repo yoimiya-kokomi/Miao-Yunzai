@@ -3,13 +3,12 @@ import os from 'node:os'
 import lodash from 'lodash'
 import template from 'art-template'
 import chokidar from 'chokidar'
+import puppeteer from 'puppeteer'
 // 暂时保留对原config的兼容
-import cfg from '../../lib/config/config.js'
+import cfg from '../../../lib/config/config.js'
 import { Data } from '#miao'
 
 const _path = process.cwd()
-
-let puppeteer = {}
 
 // mac地址
 let mac = ''
@@ -32,20 +31,14 @@ export default class PuppeteerRenderer {
         '--no-zygote'
       ])
     }
-    if (cfg?.bot?.chromium_path || config.chromiumPath) {
+    if (config.chromiumPath || cfg?.bot?.chromium_path) {
       /** chromium其他路径 */
-      this.config.executablePath = cfg.bot?.chromium_path || config.chromiumPath
+      this.config.executablePath = config.chromiumPath || cfg?.bot?.chromium_path
     }
 
     this.html = {}
     this.watcher = {}
     this.createDir('./temp/html')
-  }
-
-  async initPupp () {
-    if (!lodash.isEmpty(puppeteer)) return puppeteer
-    puppeteer = (await import('puppeteer')).default
-    return puppeteer
   }
 
   createDir (dir) {
@@ -64,7 +57,6 @@ export default class PuppeteerRenderer {
    * 初始化chromium
    */
   async browserInit () {
-    await this.initPupp()
     if (this.browser) return this.browser
     if (this.lock) return false
     this.lock = true
