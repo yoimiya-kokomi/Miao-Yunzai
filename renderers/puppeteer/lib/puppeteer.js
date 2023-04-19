@@ -243,7 +243,7 @@ export default class PuppeteerRenderer {
             })
           }
           if (i !== 1 && i <= num) {
-            await page.evaluate(() => window.scrollBy(0, pageHeight))
+            await page.evaluate(pageHeight => window.scrollBy(0, pageHeight), pageHeight)
           }
           if (num === 1) {
             buff = await body.screenshot(randData)
