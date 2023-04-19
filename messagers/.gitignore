@@ -1,0 +1,6 @@
+*
+!.gitignore
+
+!icqq
+!icqq/**
+icqq/config.yaml
