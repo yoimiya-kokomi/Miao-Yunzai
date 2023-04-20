@@ -17,7 +17,7 @@ export class newcomer extends plugin {
     /** 冷却cd 30s */
     let cd = 30
 
-    if (this.e.user_id == Bot.uin) return
+    if (this.e.user_id == this.e.bot.uin) return
 
     /** cd */
     let key = `Yz:newcomers:${this.e.group_id}`
@@ -46,7 +46,7 @@ export class outNotice extends plugin {
   }
 
   async accept () {
-    if (this.e.user_id == Bot.uin) return
+    if (this.e.user_id == this.e.bot.uin) return
 
     let name, msg
     if (this.e.member) {
