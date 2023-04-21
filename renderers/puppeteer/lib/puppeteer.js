@@ -35,6 +35,10 @@ export default class PuppeteerRenderer {
       /** chromium其他路径 */
       this.config.executablePath = config.chromiumPath || cfg?.bot?.chromium_path
     }
+    if (config.puppeteerWS || cfg?.bot?.puppeteer_ws) {
+      /** chromium其他路径 */
+      this.config.wsEndpoint = config.puppeteerWS || cfg?.bot?.puppeteer_ws
+    }
 
     this.html = {}
     this.watcher = {}
@@ -73,7 +77,7 @@ export default class PuppeteerRenderer {
           this.browserMacKey = `Yz:chromium:browserWSEndpoint:${mac}`
         }
         // 是否有browser实例
-        const browserUrl = await redis.get(this.browserMacKey)
+        const browserUrl = (await redis.get(this.browserMacKey)) || this.config.wsEndpoint
         if (browserUrl) {
           const browserWSEndpoint = await puppeteer.connect({ browserWSEndpoint: browserUrl }).catch((err) => {
             logger.error('puppeteer Chromium 缓存的实例已关闭')
