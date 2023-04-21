@@ -35,6 +35,10 @@ export default class PuppeteerRenderer {
       /** chromium其他路径 */
       this.config.executablePath = config.chromiumPath || cfg?.bot?.chromium_path
     }
+    if (config.puppeteerWS || cfg?.bot?.puppeteer_ws) {
+      /** chromium其他路径 */
+      this.config.wsEndpoint = config.puppeteerWS || cfg?.bot?.puppeteer_ws
+    }
 
     this.html = {}
     this.watcher = {}
@@ -65,31 +69,29 @@ export default class PuppeteerRenderer {
 
     let connectFlag = false
     try {
-      // 如果是pm2启动，尝试连接已有实例
-      if (process.env.pm_id) {
-        // 获取Mac地址
-        if (!mac) {
-          mac = await this.getMac()
-          this.browserMacKey = `Yz:chromium:browserWSEndpoint:${mac}`
-        }
-        // 是否有browser实例
-        const browserUrl = await redis.get(this.browserMacKey)
-        if (browserUrl) {
-          const browserWSEndpoint = await puppeteer.connect({ browserWSEndpoint: browserUrl }).catch((err) => {
-            logger.error('puppeteer Chromium 缓存的实例已关闭')
-            redis.del(this.browserMacKey)
-          })
-          // 如果有实例，直接使用
-          if (browserWSEndpoint) {
-            this.browser = browserWSEndpoint
-            if (this.browser) {
-              connectFlag = true
-            }
+      // 获取Mac地址
+      if (!mac) {
+        mac = await this.getMac()
+        this.browserMacKey = `Yz:chromium:browserWSEndpoint:${mac}`
+      }
+      // 是否有browser实例
+      const browserUrl = (await redis.get(this.browserMacKey)) || this.config.wsEndpoint
+      if (browserUrl) {
+        logger.mark(`puppeteer Chromium from ${browserUrl}`)
+        const browserWSEndpoint = await puppeteer.connect({ browserWSEndpoint: browserUrl }).catch((err) => {
+          logger.error('puppeteer Chromium 缓存的实例已关闭')
+          redis.del(this.browserMacKey)
+        })
+        // 如果有实例，直接使用
+        if (browserWSEndpoint) {
+          this.browser = browserWSEndpoint
+          if (this.browser) {
+            connectFlag = true
           }
         }
       }
     } catch (e) {
-      logger.error('puppeteer Chromium 尝试连接已有实例失败')
+      logger.mark('puppeteer Chromium 不存在已有实例')
     }
 
     if (!this.browser || !connectFlag) {

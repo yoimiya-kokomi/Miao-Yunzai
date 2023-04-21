@@ -5,6 +5,10 @@
 # chromiumPath: C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
 chromiumPath:
 
+# puppeteer websocket 地址。连接单独存在的 chromium。
+# puppeteerWS: 'ws://browserless:3000'
+puppeteerWS:
+
 # headless
 headless: true
 

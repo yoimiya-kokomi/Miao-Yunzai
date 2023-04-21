@@ -11,6 +11,8 @@ ffprobe_path:
 
 # chromium其他路径
 chromium_path: 
+# puppeteer接口地址
+puppeteer_ws: 
   
 # 米游社接口代理地址，国际服用
 proxyAddress: 
