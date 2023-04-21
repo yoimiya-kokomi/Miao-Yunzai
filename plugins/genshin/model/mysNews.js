@@ -323,7 +323,7 @@ export default class MysNews extends base {
     if (sended) return
 
     // 判断是否存在群关系
-    if (!Bot.gl.get(Number(groupId))) {
+    if (!this.e.bot.gl.get(Number(groupId))) {
       logger.error(`[米游社${typeName}推送] 群${groupId}未关联`)
       return
     }
@@ -340,7 +340,7 @@ export default class MysNews extends base {
     }
 
     this.pushGroup[groupId]++
-    this.e.group = Bot.pickGroup(Number(groupId))
+    this.e.group = this.e.bot.pickGroup(Number(groupId))
     this.e.group_id = Number(groupId)
     let tmp = await this.replyMsg(this[postId].img, `原神${typeName}推送：${this[postId].title}`)
 

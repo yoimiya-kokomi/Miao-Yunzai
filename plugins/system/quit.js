@@ -10,7 +10,7 @@ export class quit extends plugin {
   }
 
   async accept () {
-    if (this.e.user_id != Bot.uin) return
+    if (this.e.user_id != this.e.bot.uin) return
 
     let other = cfg.other
     if (other.autoQuit <= 0) return
