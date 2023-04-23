@@ -4,11 +4,6 @@ allowUseCookie: 0
 cookieDoc: docs.qq.com/doc/DUWNVQVFTU3liTVlO
 
 
-# 是否开启米游社原神自动签到 1-开启 0-关闭
-isAutoSign: 0
-# 修改需要重启，米游社原神签到定时任务，Cron表达式，默认00:02开始执行，每6s签到一个
-signTime: 0 2 0 * * ?
-
 # 别名设置权限 0-所有群员都可以添加 1-群管理员才能添加 2-主人才能添加
 abbrSetAuth: 0
 # 米游社攻略图默认来源设置 1-西风驿站 2-原神观测枢 3-派蒙喵喵屋 4-OH是姜姜呀
