@@ -2,5 +2,5 @@
 qq:
 # 密码，为空则用扫码登录,扫码登录现在仅能在同一ip下进行
 pwd:
-# 1:安卓手机、 2:aPad 、 3:安卓手表、 4:MacOS 、 5:iPad
+# 1:安卓手机、 2:aPad 、 3:安卓手表、 4:MacOS 、 5:iPad 、 6:old_Android
 platform: 5
