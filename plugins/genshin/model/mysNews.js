@@ -50,8 +50,8 @@ export default class MysNews extends base {
   }
 
   async render (param) {
-    return await puppeteer.screenshots(this.model, param);
-  } 
+    return await puppeteer.screenshots(this.model, param)
+  }
 
   async newsDetail (postId) {
     const res = await this.postData('getPostFull', { gids: 2, read: 1, post_id: postId })
@@ -322,9 +322,12 @@ export default class MysNews extends base {
     let sended = await redis.get(`${this.key}${groupId}:${postId}`)
     if (sended) return
 
+    // TODO: 暂时处理，后续待更好的解决方案 （定时任务无法获取e.bot）
+    this.e.bot = Bot
+
     // 判断是否存在群关系
     if (!this.e.bot.gl.get(Number(groupId))) {
-      logger.error(`[米游社${typeName}推送] 群${groupId}未关联`)
+      logger.mark(`[米游社${typeName}推送] 群${groupId}未关联`)
       return
     }
 
@@ -352,8 +355,8 @@ export default class MysNews extends base {
     }
 
     await redis.set(`${this.key}${groupId}:${postId}`, '1', { EX: 3600 * 10 })
-    // 随机延迟1-180秒
-    await common.sleep(lodash.random(1, 180) * 1000)
+    // 随机延迟10-90秒
+    await common.sleep(lodash.random(10, 90) * 1000)
     await this.e.group.sendMsg(tmp)
   }
 }
