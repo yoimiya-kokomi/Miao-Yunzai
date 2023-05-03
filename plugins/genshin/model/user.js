@@ -7,7 +7,7 @@ import MysUser from './mys/MysUser.js'
 import MysInfo from './mys/mysInfo.js'
 
 export default class User extends base {
-  constructor (e) {
+  constructor(e) {
     super(e)
     this.model = 'bingCk'
     /** 绑定的uid */
@@ -15,20 +15,24 @@ export default class User extends base {
 
     /** 多角色uid */
     this.allUid = []
+    if (this.e.isSr) {
+      /** 绑定的uid */
+      this.uidKey = `Yz:srJson:mys:qq-uid:${this.userId}`
+    }
   }
 
   // 获取当前user实例
-  async user () {
+  async user() {
     return await MysInfo.getNoteUser(this.e)
   }
 
-  async resetCk () {
+  async resetCk() {
     let user = await this.user()
     await user.initCache()
   }
 
   /** 绑定ck */
-  async bing () {
+  async bing() {
     let user = await this.user()
     let set = gsCfg.getConfig('mys', 'set')
 
@@ -97,24 +101,31 @@ export default class User extends base {
       })
     }
     await this.e.reply(uidMsg.join('\n'))
-
-    let msg = '【#体力】查询当前树脂'
-    msg += '\n【#原石】查看原石札记'
-    msg += '\n【#原石统计】原石统计数据'
-    msg += '\n【#练度统计】技能统计列表'
-    msg += '\n【#uid】当前绑定ck uid列表'
-    msg += '\n【#ck】检查当前用户ck是否有效'
-    msg += '\n【#我的ck】查看当前绑定ck'
-    msg += '\n【#删除ck】删除当前绑定ck'
+    let msg = ''
+    this.region_name += lodash.map(this.allUid, 'region_name').join(',')
+    if (/天空岛|世界树/.test(this.region_name)) {
+      msg += '原神模块支持：\n【#体力】查询当前树脂'
+      msg += '\n【#签到】米游社原神自动签到'
+      msg += '\n【#关闭签到】开启或关闭原神自动签到'
+      msg += '\n【#原石】查看原石札记'
+      msg += '\n【#原石统计】原石统计数据'
+      msg += '\n【#练度统计】技能统计列表'
+      msg += '\n【#uid】当前绑定ck uid列表'
+      msg += '\n【#ck】检查当前用户ck是否有效'
+      msg += '\n【#我的ck】查看当前绑定ck'
+      msg += '\n【#删除ck】删除当前绑定ck'
+    }
+    if (/星穹列车/.test(this.region_name)) {
+      msg += "\n星穹铁道支持：\n功能还在咕咕咕~"
+    }
     msg += '\n 支持绑定多个ck'
-
     msg = await common.makeForwardMsg(this.e, ['使用命令说明', msg], '绑定成功：使用命令说明')
 
     await this.e.reply(msg)
   }
 
   /** 检查ck是否可用 */
-  async checkCk (param) {
+  async checkCk(param) {
     let res
     for (let type of ['mys', 'hoyolab']) {
       let roleRes = await this.getGameRoles(type)
@@ -135,7 +146,7 @@ export default class User extends base {
     if (!res) return false
 
     if (!res.data.list || res.data.list.length <= 0) {
-      this.checkMsg = '该账号尚未绑定原神角色！'
+      this.checkMsg = '该账号尚未绑定原神或星穹角色！'
       return false
     }
 
@@ -161,17 +172,17 @@ export default class User extends base {
     return this.uid
   }
 
-  async getGameRoles (server = 'mys') {
+  async getGameRoles(server = 'mys') {
     return await MysUser.getGameRole(this.ck, server)
   }
 
   // 获取米游社通行证id
-  async getUserInfo (server = 'mys') {
+  async getUserInfo(server = 'mys') {
     return await MysUser.getUserFullInfo(this.ck, server)
   }
 
   /** 保存ck */
-  getCk () {
+  getCk() {
     let ck = gsCfg.getBingCkSingle(this.e.user_id)
 
     lodash.map(ck, o => {
@@ -185,6 +196,7 @@ export default class User extends base {
       ck: this.ck,
       ltuid: this.ltuid,
       login_ticket: this.login_ticket,
+      region_name: this.region_name,
       device_id: this.getGuid(),
       isMain: true
     }
@@ -196,6 +208,7 @@ export default class User extends base {
         qq: this.e.user_id,
         ck: this.ck,
         ltuid: this.ltuid,
+        region_name: v.region_name,
         device_id: this.getGuid(),
         isMain: false
       }
@@ -204,14 +217,14 @@ export default class User extends base {
   }
 
   /** 删除绑定ck */
-  async delCk (uid = '') {
+  async delCk(uid = '') {
     let user = await this.user()
     let uids = await user.delCk()
     return `绑定cookie已删除,uid:${uids.join(',')}`
   }
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
-  async bingUid () {
+  async bingUid() {
     let uid = this.e.msg.match(/[1|2|5-9][0-9]{8}/g)
     if (!uid) return
     uid = uid[0]
@@ -221,28 +234,40 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid () {
+  async showUid() {
     let user = await this.user()
-
     if (!user.hasCk) {
       await this.e.reply(`当前绑定uid：${user.uid || '无'}`, false, { at: true })
       return
     }
     let uids = user.ckUids
+    let ckData = user.ckData
     let uid = user.uid * 1
     let msg = [`当前uid：${uid}`, '当前绑定cookie Uid列表', '通过【#uid+序号】来切换uid']
-    for (let i in uids) {
-      let tmp = `${Number(i) + 1}: ${uids[i]}`
-      if (uids[i] * 1 === uid) {
-        tmp += ' ☑'
+    let region_name = []
+    Object.keys(ckData).forEach((v) => {
+      if (!region_name.includes(ckData[v].region_name)) {
+        region_name.push(ckData[v].region_name)
       }
-      msg.push(tmp)
+    });
+ let count = 0;
+    for (let n of region_name) {
+      msg.push(n)
+      for (let i in uids) {
+        if (ckData[uids[i]].region_name == n) {
+          let tmp = `${++count}: ${uids[i]}`
+          if (uids[i] * 1 === uid) {
+            tmp += ' ☑'
+          }
+          msg.push(tmp)
+        }
+      }
     }
     await this.e.reply(msg.join('\n'))
   }
 
   /** 切换uid */
-  async toggleUid (index) {
+  async toggleUid(index) {
     let user = await this.user()
     let uidList = user.ckUids
     if (index > uidList.length) {
@@ -254,7 +279,7 @@ export default class User extends base {
   }
 
   /** 加载旧ck */
-  async loadOldData () {
+  async loadOldData() {
     let file = [
       './data/MysCookie/NoteCookie.json',
       './data/NoteCookie/NoteCookie.json',
@@ -309,7 +334,7 @@ export default class User extends base {
   }
 
   /** 我的ck */
-  async myCk () {
+  async myCk() {
     let user = await this.user()
     if (!user.hasCk) {
       this.e.reply('当前尚未绑定cookie')
@@ -322,7 +347,7 @@ export default class User extends base {
     }
   }
 
-  async checkCkStatus () {
+  async checkCkStatus() {
     let user = await this.user()
     if (!user.hasCk) {
       await this.e.reply(`\n未绑定CK，当前绑定uid：${user.uid || '无'}`, false, { at: true })
@@ -354,15 +379,15 @@ export default class User extends base {
     await this.e.reply(cks.join('\n----\n'), false, { at: true })
   }
 
-  getGuid () {
-    function S4 () {
+  getGuid() {
+    function S4() {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
     }
 
     return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
   }
 
-  async userAdmin () {
+  async userAdmin() {
     this.model = 'userAdmin'
     await MysInfo.initCache()
     let stat = await MysUser.getStatData()

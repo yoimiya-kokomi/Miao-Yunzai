@@ -32,7 +32,7 @@ export class gcLog extends plugin {
           fnc: 'logJson'
         },
         {
-          reg: '^#*(抽卡|抽奖|角色|武器|常驻|up)池*(记录|祈愿|分析)$',
+          reg: '^#*(原神|星铁|崩坏星穹铁道|铁道)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*(记录|祈愿|分析)$',
           fnc: 'getLog'
         },
         {
@@ -48,7 +48,7 @@ export class gcLog extends plugin {
           fnc: 'helpPort'
         },
         {
-          reg: '^#*(抽卡|抽奖|角色|武器|常驻|up)池*统计$',
+          reg: '^#*(原神|星铁|崩坏星穹铁道|铁道)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*统计$',
           fnc: 'logCount'
         }
       ]
@@ -58,9 +58,11 @@ export class gcLog extends plugin {
   }
 
   async init () {
-    let file = './data/gachaJson'
-    if (!fs.existsSync(file)) {
-      fs.mkdirSync(file)
+    let file = ['./data/gachaJson','./data/srJson','./temp/html/StarRail']
+    for(let i of file){
+      if (!fs.existsSync(i)) {
+        fs.mkdirSync(i)
+      }
     }
   }
 
@@ -95,8 +97,12 @@ export class gcLog extends plugin {
 
     let data = await new GachaLog(this.e).logUrl()
     if (!data) return
-
-    let img = await puppeteer.screenshot('gachaLog', data)
+    let url='gachaLog'
+    if(this.e.isSr){
+      data.tplFile='./plugins/genshin/resources/StarRail/html/gachaLog/gachaLog.html'
+      url='StarRail/gachaLog'
+    }
+    let img = await puppeteer.screenshot(url, data)
     if (img) await this.reply(img)
   }
 
@@ -118,8 +124,12 @@ export class gcLog extends plugin {
     if (!data) return false
 
     if (typeof data != 'object') return
-
-    let img = await puppeteer.screenshot('gachaLog', data)
+    let url='gachaLog'
+    if(this.e.isSr){
+      data.tplFile='./plugins/genshin/resources/StarRail/html/gachaLog/gachaLog.html'
+      url='StarRail/gachaLog'
+    }
+    let img = await puppeteer.screenshot(url, data)
     if (img) await this.reply(img)
   }
 
@@ -127,8 +137,12 @@ export class gcLog extends plugin {
   async getLog () {
     let data = await new GachaLog(this.e).getLogData()
     if (!data) return
-
-    let img = await puppeteer.screenshot('gachaLog', data)
+    let url='gachaLog'
+    if(this.e.isSr){
+      data.tplFile='./plugins/genshin/resources/StarRail/html/gachaLog/gachaLog.html'
+      url='StarRail/gachaLog'
+    }
+    let img = await puppeteer.screenshot(url, data)
     if (img) await this.reply(img)
   }
 
@@ -139,7 +153,7 @@ export class gcLog extends plugin {
       return
     }
 
-    let friend = this.e.bot.fl.get(Number(this.e.user_id))
+    let friend = Bot.fl.get(Number(this.e.user_id))
     if (!friend) {
       await this.reply('无法发送文件，请先添加好友')
       return
@@ -201,8 +215,12 @@ export class gcLog extends plugin {
   async logCount () {
     let data = await new LogCount(this.e).count()
     if (!data) return
-
-    let img = await puppeteer.screenshot('logCount', data)
+    let url='logCount'
+    if(this.e.isSr){
+      data.tplFile='./plugins/genshin/resources/StarRail/html/logCount/logCount.html'
+      url='StarRail/logCount'
+    }
+    let img = await puppeteer.screenshot(url, data)
     if (img) await this.reply(img)
   }
 }
