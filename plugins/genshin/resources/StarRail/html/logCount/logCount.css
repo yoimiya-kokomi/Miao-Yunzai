@@ -1,12 +1,12 @@
 @font-face {
   font-family: "tttgbnumber";
-  src: url("../../../../../resources/font/tttgbnumber.ttf");
+  src: url("../../../../../../resources/font/tttgbnumber.ttf");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: "HYWenHei-55W";
-  src: url("../../../../../resources/font/HYWenHei-55W.ttf");
+  src: url("../../../../../../resources/font/HYWenHei-55W.ttf");
   font-weight: normal;
   font-style: normal;
 }
@@ -38,16 +38,20 @@ body {
 
 }
 .head_box .id_text {
-  font-size: 24px;
+  color: #f5e7f4;
+  padding: 5px 0; 
+  font-size: 26px;
 }
 .head_box .day_text {
-  font-size: 20px;
+  color: #f5e7f4;
+  padding: 5px 0;
+  font-size: 22px;
 }
-.head_box .genshin_logo {
+.head_box .starrail_logo {
   position: absolute;
-  top: 1px;
-  right: 15px;
-  width: 97px;
+  top: 5px;
+  right: 10px;
+  width: 115px;
 }
 .base_info {
   position: relative;
@@ -139,19 +143,16 @@ body {
   vertical-align: 2px;
 }
 .bg5 {
-  background-image: url(../../img/other/bg5.png);
+  background: #885550;
+  background: linear-gradient(180deg,#885550,#c9a36a 53%);
   width: 100%;
   height: 70px;
-  /*filter: brightness(1.1);*/
-  background-size: 100%;
-  background-repeat: no-repeat;
 }
 .bg4 {
+  background: #343659;
+  background: linear-gradient(180deg,#343659,#8a5fcc 53%);
   width: 100%;
   height: 70px;
-  background-image: url(../../img/other/bg4.png);
-  background-size: 100%;
-  background-repeat: no-repeat;
 }
 .list_box .item .life1 {
   background-color: #62a8ea;

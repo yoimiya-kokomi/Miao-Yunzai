@@ -55,7 +55,7 @@ export default class GachaLog extends base {
       if (i <= 1) await common.sleep(500)
     }
 
-    await this.e.reply('抽卡记录更新完成，您还可回复\n【#武器记录】统计武器池数据\n【#角色统计】按卡池统计数据\n【#导出记录】导出记录数据')
+    await this.e.reply(`抽卡记录更新完成，您还可回复\n【#${this?.e?.isSr?'光锥':'武器'}记录】统计武器池数据\n【#角色统计】按卡池统计数据\n【#导出记录】导出记录数据`)
 
     this.isLogUrl = true
 

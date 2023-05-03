@@ -1,6 +1,6 @@
 @font-face {
   font-family: "tttgbnumber";
-  src: url("../../../../../resources/font/tttgbnumber.ttf");
+  src: url("../../../../../../resources/font/tttgbnumber.ttf");
   font-weight: normal;
   font-style: normal;
 }
@@ -36,18 +36,22 @@ body {
 }
 
 .head_box .id_text {
-  font-size: 24px;
+  color: #f5e7f4;
+  padding: 5px 0; 
+  font-size: 26px;
 }
 
 .head_box .day_text {
-  font-size: 20px;
+  color: #f5e7f4;
+  padding: 5px 0;
+  font-size: 22px;
 }
 
-.head_box .genshin_logo {
+.head_box .starrail_logo {
   position: absolute;
-  top: 1px;
-  right: 15px;
-  width: 97px;
+  top: 5px;
+  right: 10px;
+  width: 115px;
 }
 
 .logo {
@@ -156,20 +160,17 @@ body {
 }
 
 .card_list .item.star5 img {
-  background-image: url(../../img/other/bg5.png);
+  background: #885550;
+  background: linear-gradient(180deg,#885550,#c9a36a 53%);
   width: 100%;
   height: 70px;
-  /*filter: brightness(1.1);*/
-  background-size: 100%;
-  background-repeat: no-repeat;
 }
 
 .card_list .item.star4 img {
+  background: #343659;
+  background: linear-gradient(180deg,#343659,#8a5fcc 53%);
   width: 100%;
   height: 70px;
-  background-image: url(../../img/other/bg4.png);
-  background-size: 100%;
-  background-repeat: no-repeat;
 }
 
 .card_list .item .num {
@@ -222,16 +223,19 @@ body {
   background: #d3bc8d;
 }
 
-.label_301 {
+.label_11 {
   background-color: rgb(235 106 75);
 }
 
-.label_302 {
+.label_12{
   background-color: #E69449;
 }
 
-.label_200 {
+.label_1 {
   background-color: #757CC8;
+}
+.label_2 {
+  background-color: #75c895;
 }
 
 .label {
