@@ -374,16 +374,30 @@ export default class MysUser extends BaseModel {
   }
 
   static async getGameRole (ck, serv = 'mys') {
+    let biz=['hk4e_cn','hkrpg_cn'] 
     let url = {
-      mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_cn',
+      mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=',
       hoyolab: 'https://api-os-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_global'
     }
-
-    let res = await fetch(url[serv], { method: 'get', headers: { Cookie: ck } })
-    if (!res.ok) return false
-    res = await res.json()
-
-    return res
+    let list=[];
+    let result;
+    if(serv=='mys'){
+      for(let item of biz){
+        result=await fetch(url[serv]+item, { method: 'get', headers: { Cookie: ck } })
+        if(result.ok){
+          result=await result.json()
+          if(result?.data?.list.length>0){
+             list.push(...result.data.list)
+          }
+        }
+      }
+      result.data.list=list
+    }else{
+      let res = await fetch(url[serv], { method: 'get', headers: { Cookie: ck } })
+      if (!res.ok) return false
+      result = await res.json()
+    }
+    return result
   }
 
   // 获取米游社通行证id
