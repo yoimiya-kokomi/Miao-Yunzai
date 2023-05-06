@@ -42,7 +42,7 @@ export class user extends plugin {
           fnc: 'bingUid'
         },
         {
-          reg: '^#(我的)?(uid|UID)[0-9]{0,2}$',
+          reg: '^#(原神|星铁)?(我的)?(uid|UID)[0-9]{0,2}$',
           fnc: 'showUid'
         },
         {

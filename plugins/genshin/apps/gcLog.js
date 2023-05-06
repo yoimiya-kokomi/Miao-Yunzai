@@ -32,7 +32,7 @@ export class gcLog extends plugin {
           fnc: 'logJson'
         },
         {
-          reg: '^#*(原神|星铁|崩坏星穹铁道|铁道)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*(记录|祈愿|分析)$',
+          reg: '^#*(原神|星铁)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*(记录|祈愿|分析)$',
           fnc: 'getLog'
         },
         {
@@ -48,7 +48,7 @@ export class gcLog extends plugin {
           fnc: 'helpPort'
         },
         {
-          reg: '^#*(原神|星铁|崩坏星穹铁道|铁道)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*统计$',
+          reg: '^#*(原神|星铁)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*统计$',
           fnc: 'logCount'
         }
       ]

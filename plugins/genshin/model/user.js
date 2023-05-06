@@ -7,7 +7,7 @@ import MysUser from './mys/MysUser.js'
 import MysInfo from './mys/mysInfo.js'
 
 export default class User extends base {
-  constructor(e) {
+  constructor (e) {
     super(e)
     this.model = 'bingCk'
     /** 绑定的uid */
@@ -22,17 +22,17 @@ export default class User extends base {
   }
 
   // 获取当前user实例
-  async user() {
+  async user () {
     return await MysInfo.getNoteUser(this.e)
   }
 
-  async resetCk() {
+  async resetCk () {
     let user = await this.user()
     await user.initCache()
   }
 
   /** 绑定ck */
-  async bing() {
+  async bing () {
     let user = await this.user()
     let set = gsCfg.getConfig('mys', 'set')
 
@@ -69,7 +69,7 @@ export default class User extends base {
 
     /** 检查ck是否失效 */
     if (!await this.checkCk(param)) {
-      logger.mark(`绑定cookie错误：${this.checkMsg || 'cookie错误'}`)
+      logger.mark(`绑定cookie错误1：${this.checkMsg || 'cookie错误'}`)
       await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
       return
     }
@@ -82,7 +82,7 @@ export default class User extends base {
         this.ltuid = userInfo.uid
         this.ck = `${this.ck}ltuid=${this.ltuid};`
       } else {
-        logger.mark(`绑定cookie错误：${userFullInfo.message || 'cookie错误'}`)
+        logger.mark(`绑定cookie错误2：${userFullInfo.message || 'cookie错误'}`)
         await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
         return
       }
@@ -116,7 +116,7 @@ export default class User extends base {
       msg += '\n【#删除ck】删除当前绑定ck'
     }
     if (/星穹列车/.test(this.region_name)) {
-      msg += "\n星穹铁道支持：\n功能还在咕咕咕~"
+      msg += '\n星穹铁道支持：\n功能还在咕咕咕~'
     }
     msg += '\n 支持绑定多个ck'
     msg = await common.makeForwardMsg(this.e, ['使用命令说明', msg], '绑定成功：使用命令说明')
@@ -125,22 +125,23 @@ export default class User extends base {
   }
 
   /** 检查ck是否可用 */
-  async checkCk(param) {
+  async checkCk (param) {
     let res
     for (let type of ['mys', 'hoyolab']) {
       let roleRes = await this.getGameRoles(type)
       if (roleRes?.retcode === 0) {
         res = roleRes
         /** 国际服的标记 */
-        if (type == 'hoyolab' && typeof (param.mi18nLang) === 'string') {
+        if (type === 'hoyolab' && typeof (param.mi18nLang) === 'string') {
           this.ck += ` mi18nLang=${param.mi18nLang};`
         }
         break
       }
-      if (roleRes.retcode == -100) {
+      if (roleRes.retcode === -100) {
         this.checkMsg = '该ck已失效，请重新登录获取'
+      } else {
+        this.checkMsg = roleRes.message || 'error'
       }
-      this.checkMsg = roleRes.message || 'error'
     }
 
     if (!res) return false
@@ -153,13 +154,13 @@ export default class User extends base {
     }
 
     //避免同时多个默认展示角色时候只绑定一个
-    let is_chosen =false
+    let is_chosen = false
     /** 米游社默认展示的角色 */
     for (let val of res.data.list) {
-      if (val.is_chosen&&!is_chosen) {
+      if (val.is_chosen && !is_chosen) {
         this.uid = val.game_uid
         this.region_name = val.region_name
-        is_chosen=true
+        is_chosen = true
       } else {
         this.allUid.push({
           uid: val.game_uid,
@@ -178,17 +179,17 @@ export default class User extends base {
     return this.uid
   }
 
-  async getGameRoles(server = 'mys') {
+  async getGameRoles (server = 'mys') {
     return await MysUser.getGameRole(this.ck, server)
   }
 
   // 获取米游社通行证id
-  async getUserInfo(server = 'mys') {
+  async getUserInfo (server = 'mys') {
     return await MysUser.getUserFullInfo(this.ck, server)
   }
 
   /** 保存ck */
-  getCk() {
+  getCk () {
     let ck = gsCfg.getBingCkSingle(this.e.user_id)
 
     lodash.map(ck, o => {
@@ -223,14 +224,14 @@ export default class User extends base {
   }
 
   /** 删除绑定ck */
-  async delCk(uid = '') {
+  async delCk (uid = '') {
     let user = await this.user()
     let uids = await user.delCk()
     return `绑定cookie已删除,uid:${uids.join(',')}`
   }
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
-  async bingUid() {
+  async bingUid () {
     let uid = this.e.msg.match(/[1|2|5-9][0-9]{8}/g)
     if (!uid) return
     uid = uid[0]
@@ -240,7 +241,7 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid() {
+  async showUid () {
     let user = await this.user()
     if (!user.hasCk) {
       await this.e.reply(`当前绑定uid：${user.uid || '无'}`, false, { at: true })
@@ -255,8 +256,8 @@ export default class User extends base {
       if (!region_name.includes(ckData[v].region_name)) {
         region_name.push(ckData[v].region_name)
       }
-    });
-    let count = 0;
+    })
+    let count = 0
     for (let n of region_name) {
       msg.push(n)
       for (let i in uids) {
@@ -273,7 +274,7 @@ export default class User extends base {
   }
 
   /** 切换uid */
-  async toggleUid(index) {
+  async toggleUid (index) {
     let user = await this.user()
     let uidList = user.ckUids
     if (index > uidList.length) {
@@ -285,7 +286,7 @@ export default class User extends base {
   }
 
   /** 加载旧ck */
-  async loadOldData() {
+  async loadOldData () {
     let file = [
       './data/MysCookie/NoteCookie.json',
       './data/NoteCookie/NoteCookie.json',
@@ -340,7 +341,7 @@ export default class User extends base {
   }
 
   /** 我的ck */
-  async myCk() {
+  async myCk () {
     let user = await this.user()
     if (!user.hasCk) {
       this.e.reply('当前尚未绑定cookie')
@@ -353,7 +354,7 @@ export default class User extends base {
     }
   }
 
-  async checkCkStatus() {
+  async checkCkStatus () {
     let user = await this.user()
     if (!user.hasCk) {
       await this.e.reply(`\n未绑定CK，当前绑定uid：${user.uid || '无'}`, false, { at: true })
@@ -385,15 +386,15 @@ export default class User extends base {
     await this.e.reply(cks.join('\n----\n'), false, { at: true })
   }
 
-  getGuid() {
-    function S4() {
+  getGuid () {
+    function S4 () {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
     }
 
     return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
   }
 
-  async userAdmin() {
+  async userAdmin () {
     this.model = 'userAdmin'
     await MysInfo.initCache()
     let stat = await MysUser.getStatData()
