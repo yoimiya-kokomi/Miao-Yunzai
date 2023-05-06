@@ -152,11 +152,14 @@ export default class User extends base {
       res.data.list = res.data.list.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global'].includes(v.game_biz))
     }
 
+    //避免同时多个默认展示角色时候只绑定一个
+    let is_chosen =false
     /** 米游社默认展示的角色 */
     for (let val of res.data.list) {
-      if (val.is_chosen) {
+      if (val.is_chosen&&!is_chosen) {
         this.uid = val.game_uid
         this.region_name = val.region_name
+        is_chosen=true
       } else {
         this.allUid.push({
           uid: val.game_uid,
@@ -164,6 +167,7 @@ export default class User extends base {
         })
       }
     }
+
 
     if (!this.uid && res.data?.list?.length > 0) {
       this.uid = res.data.list[0].game_uid

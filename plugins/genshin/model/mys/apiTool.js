@@ -124,12 +124,6 @@ export default class apiTool {
         }
 
         if (this.server.startsWith('os')) {
-            urlMap.genshin.bbs_sign_info.url = 'https://hk4e-api-os.hoyoverse.com/event/sol/info'
-            urlMap.genshin.bbs_sign_info.query = `act_id=e202102251931481&region=${this.server}&uid=${this.uid}`
-            urlMap.genshin.bbs_sign_home.url = 'https://hk4e-api-os.hoyoverse.com/event/sol/home'
-            urlMap.genshin.bbs_sign_home.query = `act_id=e202102251931481&region=${this.server}&uid=${this.uid}`
-            urlMap.genshin.bbs_sign.url = 'https://hk4e-api-os.hoyoverse.com/event/sol/sign'
-            urlMap.genshin.bbs_sign.body = { act_id: 'e202102251931481', region: this.server, uid: this.uid }
             urlMap.genshin.detail.url = 'https://sg-public-api.hoyolab.com/event/calculateos/sync/avatar/detail'// 角色天赋详情
             urlMap.genshin.detail.query = `lang=zh-cn&uid=${this.uid}&region=${this.server}&avatar_id=${data.avatar_id}`
             urlMap.genshin.avatarSkill.url = 'https://sg-public-api.hoyolab.com/event/calculateos/avatar/skill_list'// 查询未持有的角色天赋
