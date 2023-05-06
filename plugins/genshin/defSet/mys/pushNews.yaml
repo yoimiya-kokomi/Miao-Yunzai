@@ -10,3 +10,9 @@ announceGroup: []
 
 #资讯推送群
 infoGroup: []
+
+#崩坏星穹铁道公告推送群
+srannounceGroup: []
+
+#崩坏星穹铁道资讯推送群
+srinfoGroup: []
