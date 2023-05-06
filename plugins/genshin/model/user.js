@@ -103,7 +103,7 @@ export default class User extends base {
     await this.e.reply(uidMsg.join('\n'))
     let msg = ''
     this.region_name += lodash.map(this.allUid, 'region_name').join(',')
-    if (/天空岛|世界树/.test(this.region_name)) {
+    if (/天空岛|世界树|America Server|Europe Server|Asia Server/.test(this.region_name)) {
       msg += '原神模块支持：\n【#体力】查询当前树脂'
       msg += '\n【#签到】米游社原神自动签到'
       msg += '\n【#关闭签到】开启或关闭原神自动签到'
@@ -148,13 +148,18 @@ export default class User extends base {
     if (!res.data.list || res.data.list.length <= 0) {
       this.checkMsg = '该账号尚未绑定原神或星穹角色！'
       return false
+    } else {
+      res.data.list = res.data.list.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global'].includes(v.game_biz))
     }
 
+    //避免同时多个默认展示角色时候只绑定一个
+    let is_chosen =false
     /** 米游社默认展示的角色 */
     for (let val of res.data.list) {
-      if (val.is_chosen) {
+      if (val.is_chosen&&!is_chosen) {
         this.uid = val.game_uid
         this.region_name = val.region_name
+        is_chosen=true
       } else {
         this.allUid.push({
           uid: val.game_uid,
@@ -162,6 +167,7 @@ export default class User extends base {
         })
       }
     }
+
 
     if (!this.uid && res.data?.list?.length > 0) {
       this.uid = res.data.list[0].game_uid
@@ -250,7 +256,7 @@ export default class User extends base {
         region_name.push(ckData[v].region_name)
       }
     });
- let count = 0;
+    let count = 0;
     for (let n of region_name) {
       msg.push(n)
       for (let i in uids) {

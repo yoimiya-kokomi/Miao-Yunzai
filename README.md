@@ -77,6 +77,32 @@ pnpm install -P
 node app
 ```
 
+
+## 常见问题
+
+### puppeteer 相关问题
+
+linux环境，其他环境请自行探索
+
+```sh
+    puppeteer Chromium 启动中...
+    Error: Failed to launch the browser process!
+```
+1. 先检查node版本是否大于14 (不大于14请去升级版本)
+```sh
+    node -v
+```
+2. 如果大于14 则可能是缺失一些库 请安装这些 (点击代码块右上角直接复制,如果报错可以尝试 sudo)
+
+### 依赖库
+```sh
+    yum install pango.x86_64 libXcomposite.x86_64 libXcursor.x86_64 libXdamage.x86_64 libXext.x86_64 libXi.x86_64 libXtst.x86_64 cups-libs.x86_64 libXScrnSaver.x86_64 libXrandr.x86_64 GConf2.x86_64 alsa-lib.x86_64 atk.x86_64 gtk3.x86_64 -y
+```
+### 字体(实测下来貌似还不够)
+```sh
+    yum install ipa-gothic-fonts xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11-utils xorg-x11-fonts-cyrillic xorg-x11-fonts-Type1 xorg-x11-fonts-misc -y
+```
+
 ## 致谢
 
 |                           Nickname                            | Contribution      |

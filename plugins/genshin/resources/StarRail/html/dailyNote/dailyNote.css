@@ -1,0 +1,270 @@
+@font-face {
+  font-family: "tttgbnumber";
+  src: url("../../../../../../resources/font/tttgbnumber.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+/* 不让上传字体，如需要请修改路径或者自行添加 部分插件有
+@font-face {
+  font-family: "MiSans-Bold";
+  src: url("../../../../../../resources/font/MiSans-Bold.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "MiSans-Demibold";
+  src: url("../../../../../../resources/font/MiSans-Demibold.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "MiSans-Medium";
+  src: url("../../../../../../resources/font/MiSans-Medium.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "MiSans-Semibold";
+  src: url("../../../../../../resources/font/MiSans-Semibold.ttf");
+  font-weight: normal;
+  font-style: normal;
+} */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  /* 如使用字体请把下面代码放出来，并注释或者删除 font-weight: bold; 属性 */
+  /* font-family: MiSans-Demibold; */
+  font-weight: bold;
+}
+
+body {
+  font-size: 18px;
+  color: #1e1f20;
+  font-family: PingFangSC-Medium, PingFang SC, sans-serif;
+  transform: scale(1.5);
+  transform-origin: 0 0;
+  width: 1200px;
+}
+
+.container {
+  width: 1200px;
+  height: 1835px;
+  background-color: #f5f6fb;
+  background-image: url("../../img/note/bg.png");
+}
+
+.uid {
+  border-radius: 0 25px 25px 0px;
+  display: flex;
+  width: 621px;
+  height: 200px;
+  justify-content: center;
+  flex-direction: column;
+  background-color: #b47f4c;
+  margin-top: 195px;
+  margin-left: 50px;
+}
+
+.uid_item {
+  background-color: #302b25;
+  color: #fff;
+  margin-left: 50px;
+  align-items: center;
+  justify-content: left;
+  display: flex;
+  padding: 8px 10px;
+  font-size: 45px;
+  height: 100px;
+  border-radius: 0 12px 0 0px;
+  font-family: MiSans-Demibold;
+}
+
+.uid_span {
+  text-indent: 1em;
+  font-size: 48px;
+}
+
+.uid_item:nth-child(2) {
+  background-color: #595045;
+  border-radius: 0 0 12px 0px;
+  font-size: 40px;
+  font-family: MiSans-Medium;
+}
+
+.uid_text {
+  width: 150px;
+  text-align: right;
+}
+
+.title {
+  display: flex;
+  position: relative;
+}
+
+.title_date {
+  width: 370px;
+  height: 530px;
+  position: absolute;
+  right: 70px;
+  top: 27px;
+  padding: 10px;
+  transform: rotate(4deg);
+  background-color: #fff;
+  border-bottom: 10px solid #b47f4c;
+}
+
+.icon {
+  width: 350px;
+  height: 350px;
+}
+
+.title_date_text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-size: 30px;
+  color: #808080;
+  height: 160px;
+  font-family: MiSans-Semibold !important;
+}
+.title_date_text span{
+    font-family: MiSans-Semibold !important;
+}
+img {
+  width: 100%;
+  height: 100%;
+}
+
+.subject {
+  width: 1000px;
+  margin: 0 auto;
+  margin-top: 60px;
+  height: 320px;
+  background-color: #e5e5e5;
+  padding-left: 60px;
+}
+
+.subject_note {
+  font-size: 48px;
+  margin-top: 49px;
+  color: #000000;
+  font-family: MiSans-Demibold;
+}
+
+.subject_note span:nth-child(1) {
+  font-size: 82px;
+  color: #b47f4c;
+  font-family: MiSans-Bold;
+}
+
+.subject_solid {
+  display: flex;
+  width: 880px;
+  border-radius: 10px;
+  background-color: #a1a1a1;
+  height: 20px;
+  margin-top: 44px;
+}
+
+.subject_solid span {
+  background-color: #b47f4c;
+  width: 50%;
+  border-radius: 10px;
+}
+
+.subject_date {
+  margin-top: 43px;
+  font-size: 48px;
+  color: #000000;
+}
+
+.title_wt {
+  margin: 30px 0;
+  background-color: #b47f4c;
+  display: flex;
+  height: 80px;
+  width: 330px;
+  margin-left: 100px;
+  justify-content: center;
+  align-items: center;
+}
+
+.title_wt div {
+  font-size: 38px;
+  color: #fff;
+  background-color: #302b25;
+  height: 80px;
+  display: flex;
+  margin-left: 30px;
+  padding-left: 30px;
+  justify-content: left;
+  align-items: center;
+  width: calc(100% - 30px);
+}
+
+.bottom {
+  margin-left: 100px;
+  background-color: #e5e5e5;
+  height: 550px;
+  width: 1000px;
+  padding: 30px;
+}
+
+.bottom_item {
+  width: 100%;
+  height: 100px;
+  background-color: #d6d6d6;
+  flex-direction: column;
+  margin-bottom: 30px;
+}
+
+.bottom_list {
+  display: flex;
+  flex: 3;
+  height: 100px;
+  padding: 0 30px;
+  align-items: center;
+}
+
+.bottom_icon {
+  display: flex;
+}
+
+.bottom_icon div {
+  margin-left: 20px;
+  width: 70px;
+  height: 70px;
+}
+
+.bottom_icon img {
+  border-radius: 50%;
+}
+
+.bottom_list div:nth-child(1) {
+  font-size: 39px;
+  color: #000000;
+}
+
+.bottom_list div:nth-child(2) {
+  font-size: 30px;
+  color: #000000;
+}
+
+.bottom_solid {
+  width: 100%;
+  height: 10px;
+  background-color: #b47f4c;
+  position: relative;
+  top: -10px;
+}
+
+.logo {
+  position: absolute;
+  bottom: 90px;
+  left: 130px;
+  color: #fff;
+}

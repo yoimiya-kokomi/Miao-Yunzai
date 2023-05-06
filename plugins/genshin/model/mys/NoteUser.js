@@ -142,8 +142,7 @@ export default class NoteUser extends BaseModel {
    * 主要供内部调用，建议使用 user.uid 获取用户uid
    * @returns {Promise<*>}
    */
-  async getRegUid () {
-    let redisKey = `Yz:genshin:mys:qq-uid:${this.qq}`
+  async getRegUid (redisKey = `Yz:genshin:mys:qq-uid:${this.qq}`) {
     let uid = await redis.get(redisKey)
     if (uid) {
       await redis.setEx(redisKey, 3600 * 24 * 30, uid)

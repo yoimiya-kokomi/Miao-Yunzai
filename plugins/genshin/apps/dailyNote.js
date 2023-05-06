@@ -13,7 +13,7 @@ export class dailyNote extends plugin {
       event: 'message',
       priority: 300,
       rule: [{
-        reg: '^#*(体力|树脂|查询体力)$',
+        reg: '^#*(原神|星铁|崩坏星穹铁道|铁道)?(体力|树脂|查询体力)$',
         fnc: 'note'
       }]
     })

@@ -374,9 +374,8 @@ export default class MysUser extends BaseModel {
   }
 
   static async getGameRole (ck, serv = 'mys') {
-    let biz=['hk4e_cn','hkrpg_cn'] 
     let url = {
-      mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=',
+      mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie',
       hoyolab: 'https://api-os-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_global'
     }
     let list=[];
@@ -473,11 +472,11 @@ export default class MysUser extends BaseModel {
     }
     if (!res) return ret(msg, false)
     if (!res.data.list || res.data.list.length <= 0) {
-      return ret('该账号尚未绑定原神角色', false)
+      return ret('该账号尚未绑定原神或星穹角色', false)
     }
 
     for (let val of res.data.list) {
-      if (/\d{9}/.test(val.game_uid)) {
+      if (/\d{9}/.test(val.game_uid)&&val.game_biz=='hk4e_cn') {
         uids.push(val.game_uid + '')
       }
     }
