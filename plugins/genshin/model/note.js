@@ -47,11 +47,18 @@ export default class Note extends base {
       let minutes =d.minutes()
       let seconds =d.seconds()
       resinMaxTime = hours+'小时'+minutes+'分钟'+seconds+'秒'
+      //精确到秒。。。。
       if(day>0){
         resinMaxTime =day+'天'+hours+'小时'+minutes+'分钟'+seconds+'秒'
+      }else if(hours>0){
+        resinMaxTime = hours+'小时'+minutes+'分钟'+seconds+'秒'
+      }else if(minutes>0){
+        resinMaxTime = minutes+'分钟'+seconds+'秒'
+      }else if(seconds>0){
+        resinMaxTime = seconds+'秒'
       }
     }
-    data.bfStamina = data.current_stamina / data.max_stamina * data.max_stamina +'%';
+    data.bfStamina = data.current_stamina / data.max_stamina * 100 +'%';
     /** 派遣 */
     for(let item of data.expeditions){
       let d = moment.duration(item.remaining_time, 'seconds');
