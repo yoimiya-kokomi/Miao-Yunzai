@@ -150,7 +150,7 @@ export default class User extends base {
       this.checkMsg = '该账号尚未绑定原神或星穹角色！'
       return false
     } else {
-      res.data.list = res.data.list.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global'].includes(v.game_biz))
+      res.data.list = res.data.list.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
     }
 
     //避免同时多个默认展示角色时候只绑定一个
