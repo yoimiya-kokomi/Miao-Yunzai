@@ -291,7 +291,7 @@ export default class MysInfo {
     // 初始化用户缓存
     let userCount = 0
     await NoteUser.forEach(async function (user) {
-      userCount += await user.initCache(true)
+      // userCount += await user.initCache(true)
     })
     logger.mark(`加载用户UID：${userCount}个，加入查询池`)
   }

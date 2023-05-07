@@ -11,6 +11,7 @@ import NoteUser from './NoteUser.js'
 import MysApi from './mysApi.js'
 import lodash from 'lodash'
 import fetch from 'node-fetch'
+import { MysUserDB } from '../db/index.js'
 
 const tables = {
   // ltuid-uid 查询表
@@ -36,9 +37,8 @@ const tables = {
 }
 
 export default class MysUser extends BaseModel {
-  constructor (data) {
+  constructor (ltuid) {
     super()
-    let ltuid = data.ltuid
     if (!ltuid) {
       return false
     }
@@ -47,59 +47,33 @@ export default class MysUser extends BaseModel {
     if (!self) {
       self = this
     }
-    // 单日有效缓存，不区分服务器
-    self.cache = self.cache || DailyCache.create()
-    self.uids = self.uids || []
-    self.ltuid = data.ltuid
-    self.ck = self.ck || data.ck
-    self.qq = self.qq || data.qq || 'pub'
-    if (data.uid || data.uids) {
-      self.addUid(data.uid || data.uids)
-    }
-    if (data.ck && data.ltuid) {
-      self.ckData = data
-    }
-    // 单日有效缓存，使用uid区分不同服务器
-    self.servCache = self.servCache || DailyCache.create(self.uids[0] || 'mys')
+    this.ltuid = ltuid
     return self._cacheThis()
   }
 
   // 可传入ltuid、cookie、ck对象来创建MysUser实例
   // 在仅传入ltuid时，必须是之前传入过的才能被识别
-  static async create (data) {
+  static async create (ltuid) {
+    ltuid = MysUser.getLtuid(ltuid)
+    if (!ltuid) {
+      return false
+    }
+    let mys = new MysUser(ltuid)
+    await mys.initDB()
+    mys.initCacheObj()
+    return mys
+  }
+
+  static getLtuid (data) {
     if (!data) {
       return false
     }
-    if (lodash.isPlainObject(data)) {
-      return new MysUser(data)
-    }
-    // 传入cookie
-    let testRet = /ltuid=(\d{4,9})/g.exec(data)
-    if (testRet && testRet[1]) {
-      let ltuid = testRet[1]
-      // 尝试使用ltuid创建
-      let ckUser = await MysUser.create(ltuid)
-      if (ckUser) {
-        return ckUser
-      }
-      let uids = await MysUser.getCkUid(data)
-      if (uids) {
-        return new MysUser({
-          ltuid,
-          ck: data,
-          type: 'ck',
-          uids
-        })
-      }
-    }
-    // 传入ltuid
     if (/^\d{4,9}$/.test(data)) {
-      // 查找ck记录
-      let cache = DailyCache.create()
-      let ckData = await cache.kGet(tables.ck, data, true)
-      if (ckData && ckData.ltuid) {
-        return new MysUser(ckData)
-      }
+      return data
+    }
+    let testRet = /ltuid=(\d{4,9})/g.exec(data.ck || data)
+    if (testRet && testRet[1]) {
+      return testRet[1]
     }
     return false
   }
@@ -223,42 +197,6 @@ export default class MysUser extends BaseModel {
     return count
   }
 
-  static async getGameRole (ck, serv = 'mys') {
-    let url = {
-      mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie',
-      hoyolab: 'https://api-os-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_global'
-    }
-
-    let res = await fetch(url[serv], { method: 'get', headers: { Cookie: ck } })
-    if (!res.ok) return false
-    res = await res.json()
-
-    return res
-  }
-
-  // 获取米游社通行证id
-  static async getUserFullInfo (ck, serv = 'mys') {
-    let url = {
-      mys: 'https://bbs-api.mihoyo.com/user/wapi/getUserFullInfo?gids=2',
-      hoyolab: ''
-    }
-    let res = await fetch(url[serv], {
-      method: 'get',
-      headers: {
-        Cookie: ck,
-        Accept: 'application/json, text/plain, */*',
-        Connection: 'keep-alive',
-        Host: 'bbs-api.mihoyo.com',
-        Origin: 'https://m.bbs.mihoyo.com',
-        Referer: ' https://m.bbs.mihoyo.com/'
-      }
-    })
-    if (!res.ok) return res
-    res = await res.json()
-
-    return res
-  }
-
   /**
    * 获取ck对应uid列表
    * @param ck 需要获取的ck
@@ -376,21 +314,124 @@ export default class MysUser extends BaseModel {
     }
   }
 
+  static getDeviceGuid () {
+    function S4 () {
+      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+    }
+
+    return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
+  }
+
+  async getGameRole (serv = 'mys') {
+    let ck = this.ck
+    let url = {
+      mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie',
+      hoyolab: 'https://api-os-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie'
+    }
+
+    let res = await fetch(url[serv], { method: 'get', headers: { Cookie: ck } })
+    if (!res.ok) return false
+    res = await res.json()
+
+    return res
+  }
+
+  // 获取米游社通行证id
+  async getUserFullInfo (serv = 'mys') {
+    let ck = this.ck
+    let url = {
+      mys: 'https://bbs-api.mihoyo.com/user/wapi/getUserFullInfo?gids=2',
+      hoyolab: ''
+    }
+    let res = await fetch(url[serv], {
+      method: 'get',
+      headers: {
+        Cookie: ck,
+        Accept: 'application/json, text/plain, */*',
+        Connection: 'keep-alive',
+        Host: 'bbs-api.mihoyo.com',
+        Origin: 'https://m.bbs.mihoyo.com',
+        Referer: ' https://m.bbs.mihoyo.com/'
+      }
+    })
+    if (!res.ok) return res
+    res = await res.json()
+
+    return res
+  }
+
+  initCacheObj () {
+    if (this.cache) {
+      return true
+    }
+    this.cache = {
+      cache: DailyCache.create(),
+      gs: DailyCache.create(this.type, 'gs'),
+      sr: DailyCache.create(this.type, 'sr')
+    }
+  }
+
+  // 初始化数据
+  async initDB () {
+    if (this.db) {
+      return
+    }
+    let db = await MysUserDB.find(this.ltuid, true)
+    this.db = db
+    this.ck = db.ck || ''
+    this.type = db.type || 'mys'
+    this.gsUids = (db.gsUids || '').split(',')
+    this.srUids = (db.srUids || '').split(',')
+    this.setCkData()
+  }
+
+  setCkData (data = {}) {
+    this.ck = data.ck || this.ck || ''
+    this.device = data.device || this.device || MysUser.getDeviceGuid()
+    this.type = data.type || this.type || 'mys'
+    this.gsUids = lodash.isArray(data.gsUids) ? data.gsUids : this.gsUids || []
+    this.srUids = lodash.isArray(data.srUids) ? data.srUids : this.srUids || []
+  }
+
+  async saveDB () {
+    if (!this.ck || !this.device || !this.db) {
+      return false
+    }
+    let db = this.db
+    db.ck = this.ck
+    db.type = this.type
+    db.device = this.device
+    db.gsUids = this.gsUids.join(',')
+    db.srUids = this.srUids.join(',')
+    await db.save()
+  }
+
+
   // 为当前MysUser绑定uid
-  addUid (uid) {
+  addUid (uid, game = 'gs') {
     if (lodash.isArray(uid)) {
       for (let u of uid) {
-        this.addUid(u)
+        this.addUid(u, game)
       }
       return true
     }
     uid = '' + uid
-    if (/\d{9}/.test(uid) || uid === 'pub') {
-      if (!this.uids.includes(uid)) {
-        this.uids.push(uid)
+    if (/\d{9}/.test(uid)) {
+      let gameKey = this.gameKey(game)
+      let uids = this[`${gameKey}Uids`]
+      if (!uids.includes(uid)) {
+        uids.push(uid)
       }
     }
     return true
+  }
+
+  hasUid (uid, game = 'gs') {
+
+  }
+
+  hasGame (game = 'gs') {
+    return (this.isGs(game) ? this.gsUids : this.srUids).length > 0
   }
 
   // 初始化当前MysUser缓存记录
