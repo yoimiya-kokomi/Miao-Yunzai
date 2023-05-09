@@ -1,4 +1,5 @@
 import BaseModel from './BaseModel.js'
+import lodash from 'lodash'
 
 const { Types } = BaseModel
 
@@ -46,6 +47,22 @@ class UserDB extends BaseModel {
       })
     }
     return user
+  }
+
+  async saveDB (user) {
+    let db = this
+    let ltuids = []
+    lodash.forEach(user.mysUsers, (mys) => {
+      if (mys.ck) {
+        ltuids.push(mys.ltuid)
+      }
+    })
+    db.ltuids = ltuids.join(',')
+    lodash.forEach(['gs', 'sr'], (key) => {
+      db[`${key}Uid`] = user[`${key}Uid`] ? user[`${key}Uid`] : user.uids[key]?.[0] || ''
+      db[`${key}RegUids`] = JSON.stringify(user.uidMap[key])
+    })
+    await this.save()
   }
 }
 

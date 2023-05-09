@@ -1,6 +1,8 @@
 /**
  * 基础类，提供实例缓存等一些基础方法
  */
+import MysUtil from './MysUtil.js'
+
 let cacheMap = {}
 let reFn = {}
 
@@ -54,13 +56,14 @@ export default class BaseModel {
   }
 
   gameKey (game = 'gs') {
-    if (game.user_id) {
-      return game.isSr ? 'sr' : 'gs'
-    }
-    return ['sr', 'star'].includes(game) ? 'sr' : 'gs'
+    return MysUtil.getGameKey(game)
   }
 
   isGs (game = 'gs') {
     return this.gameKey(game) === 'gs'
+  }
+
+  isSr (game = 'gs') {
+    return this.gameKey(game) === 'sr'
   }
 }

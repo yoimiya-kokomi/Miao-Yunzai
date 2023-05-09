@@ -37,16 +37,17 @@ class MysUserDB extends BaseModel {
     return mys || false
   }
 
-  static async findByCK (ck = '') {
-    let ltuid = 0
-    let mys = await MysUserDB.find(ltuid)
-    if (!mys) {
-      mys = await MysUserDB.build({
-        ltuid,
-        ck
-      })
+  async saveDB (mys) {
+    if (!mys.ck || !mys.device || !mys.db) {
+      return false
     }
-    return mys._cacheThis()
+    let db = this
+    this.ck = mys.ck
+    this.type = mys.type
+    this.device = mys.device
+    this.gsUids = (mys.gsUids || []).join(',')
+    this.srUids = (mys.srUids || []).join(',')
+    await db.save()
   }
 }
 

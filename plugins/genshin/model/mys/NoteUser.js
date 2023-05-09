@@ -10,9 +10,10 @@ import lodash from 'lodash'
 import MysUser from './MysUser.js'
 import gsCfg from '../gsCfg.js'
 import { UserDB } from '../db/index.js'
+import { Data } from '#miao'
 
 export default class NoteUser extends BaseModel {
-  constructor (qq, data = null) {
+  constructor (qq) {
     super()
     // 检查实例缓存
     let cacheObj = this._getThis('user', qq)
@@ -65,19 +66,20 @@ export default class NoteUser extends BaseModel {
    * @returns { {ltuid:{ckData, ck, uids}} }
    */
   get cks () {
+    console.log('NoteUser.cks 即将废弃')
+    let game = 'gs'
     let cks = {}
     if (!this.hasCk) {
       return cks
     }
-    for (let uid in this.ckData) {
-      let ck = this.ckData[uid]
-      if (ck && ck.ltuid && ck.uid) {
-        cks[ck.ltuid] = cks[ck.ltuid] || {
-          ckData: ck,
-          ck: ck.ck,
-          uids: []
+    for (let ltuid in this.mysUsers) {
+      let mys = this.mysUsers[ltuid]
+      if (mys && mys.ltuid && mys.uid) {
+        cks[ltuid] = cks[ltuid] || {
+          ckData: mys.getCkInfo(game),
+          ck: mys.ck,
+          uids: mys.getUids(game)
         }
-        cks[ck.ltuid].uids.push(ck.uid)
       }
     }
     return cks
@@ -90,7 +92,7 @@ export default class NoteUser extends BaseModel {
    * @param data 用户对应MysCookie数据，为空则自动读取
    * @returns {Promise<NoteUser|*>}
    */
-  static async create (qq, data = null) {
+  static async create (qq, db) {
     // 兼容处理传入e
     if (qq && qq.user_id) {
       let e = qq
@@ -99,8 +101,8 @@ export default class NoteUser extends BaseModel {
       return user
     }
 
-    let user = new NoteUser(qq, data)
-    await user.initDB()
+    let user = new NoteUser(qq)
+    await user.initDB(db)
 
     // 检查绑定uid (regUid)
     await user.getRegUid()
@@ -109,29 +111,21 @@ export default class NoteUser extends BaseModel {
   }
 
   static async forEach (fn) {
-    // 初始化用户缓存
-    let res = await gsCfg.getBingCk()
-    for (let qq in res.noteCk) {
-      let cks = res.noteCk[qq]
-      if (!lodash.isEmpty(cks)) {
-        let user = await NoteUser.create(qq, cks)
-        if (user && fn) {
-          if (await fn(user) === false) {
-            break
-          }
-        }
-      }
-    }
+    let dbs = await UserDB.findAll()
+    await Data.forEach(users, async (db) => {
+      let user = await NoteUser.create(db.id, db)
+      return await fn(user)
+    })
   }
 
   // 初始化数据
-  async initDB (force = false) {
-    if (this.db && !force) {
+  async initDB (db = false) {
+    if (this.db && !db) {
       return
     }
     // 为后续多类型用户兼容
-    this.db = await UserDB.find(this.qq, 'qq')
-    await this.initMysUser(force)
+    this.db = db && db !== true ? db : await UserDB.find(this.qq, 'qq')
+    await this.initMysUser()
     this.initUids()
   }
 
@@ -184,26 +178,23 @@ export default class NoteUser extends BaseModel {
     })
   }
 
-  async saveDB () {
-    let db = this.db
-    let ltuids = []
-    lodash.forEach(this.mysUsers, (mys) => {
-      if (mys.ck) {
-        ltuids.push(mys.ltuid)
-      }
-    })
-    db.ltuids = ltuids.join(',')
-    lodash.forEach(['gs', 'sr'], (key) => {
-      db[`${key}Uid`] = this[`${key}Uid`] ? this[`${key}Uid`] : this.uids[key]?.[0] || ''
-      db[`${key}RegUids`] = JSON.stringify(this.uidMap[key])
-      console.log(this.uidMap[key])
-    })
-    await db.save()
+  async save () {
+    await this.db.saveDB(this)
   }
 
   // 获取当前UID
   getUid (game = 'gs') {
     return this.isGs(game) ? this.gsUid : this.srUid
+  }
+
+  getSelfUid (game = 'gs') {
+    let gameKey = this.gameKey(game)
+    let uids = this[`${gameKey}UidMap`].filter((v) => v.type === 'ck')
+    if (uids.length === 0) {
+      return false
+    }
+    let find = lodash.find(uids, (v) => v.uid + '' === uid + '', 0)
+    return find ? find.uid : uids[0].uid
   }
 
   // 获取UID列表
@@ -262,16 +253,22 @@ export default class NoteUser extends BaseModel {
    * @returns {Promise<*>}
    */
   async getRegUid (game = 'gs') {
-    console.log('getRegUid 废弃')
+    let gameKey = this.gameKey(game)
+    return this[`${gameKey}Uid`] || ''
   }
 
   /**
    * 设置当前用户的绑定uid
    * @param uid 要绑定的uid
+   * @param game
    * @param force 若已存在绑定uid关系是否强制更新
    */
-  async setRegUid (uid = '', force = false) {
-    console.log('setRegUid 废弃')
+  async setRegUid (uid = '', game = 'gs', force = false) {
+    if (this.getRegUid(game) && false) {
+      return uid
+    }
+    await this.addRegUid(uid, game)
+    return uid
   }
 
   // 切换绑定CK生效的UID
@@ -342,16 +339,5 @@ export default class NoteUser extends BaseModel {
       })
     }
     return ret
-  }
-
-  // 内部方法：读取CK数据
-  _getCkData () {
-    this.ckData = gsCfg.getBingCkSingle(this.qq)
-    return this.ckData
-  }
-
-  // 内部方法：写入CK数据
-  _saveCkData () {
-    gsCfg.saveBingCk(this.qq, this.ckData)
   }
 }

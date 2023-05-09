@@ -7,7 +7,7 @@ const EX = 3600 * 24
 const redisKeyRoot = 'Yz:cache:'
 
 export default class DailyCache extends BaseModel {
-  constructor (uid, game = 'cache') {
+  constructor (uid, game = 'config') {
     super()
     const storeKey = DailyCache.getStoreKey(uid, game)
     // 检查实例缓存
@@ -22,30 +22,28 @@ export default class DailyCache extends BaseModel {
   /**
    * 传入UID或server标示，返回当日存储对象
    * @param uid
+   * @param game
    * * 为空则返回与serv无关的dailyCache
    * * 传入UID，会返回UID对应serv的cache对象
    * * 传入servKey (mys/hoyolab)，会返回指定的servCache
    * @returns {DailyCache}
    */
-  static create (uid, game = 'common') {
-    return new DailyCache(uid)
-  }
-
-  // 内部方法：获取server key
-  static getServKey (uid, game = 'common') {
-    // 不传入uid为默认cache
-    if (!uid || game === 'common') {
-      return `common`
-    }
-    // 传入uid或sever key，判断是mys还是hoyolab
-    return `${game}:${/^[6-9]|^hoyo|^os/i.test(uid) ? servs[1] : servs[0]}`
+  static create (uid, game = 'config') {
+    return new DailyCache(uid, game)
   }
 
   // 内部方法：获取redis表前缀
-  static getStoreKey (uid, game = 'cache') {
-    const serv = DailyCache.getServKey(uid, game = 'cache')
+  static getStoreKey (uid, game = 'config') {
+    let key
+    if (!uid || game === 'config') {
+      key = 'sys:config'
+    } else {
+      game = game === 'sr' ? 'sr' : 'gs'
+      let serv = /^[6-9]|^hoyo|^os/i.test(uid) ? servs[1] : servs[0]
+      key = `${game}:${serv}`
+    }
     const date = moment().format('MM-DD')
-    return `${serv}-${date}`
+    return `${key}-${date}`
   }
 
   /**
@@ -68,8 +66,8 @@ export default class DailyCache extends BaseModel {
   static async clearOutdatedData () {
     let keys = await redis.keys(`${redisKeyRoot}*`)
     const date = moment().format('MM-DD')
-    const testReg = new RegExp(`^${redisKeyRoot}(mys|hoyo|hoyolab|cache)-\\d{2}-\\d{2}`)
-    const todayReg = new RegExp(`^${redisKeyRoot}(mys|hoyo|hoyolab|cache)-${date}`)
+    const testReg = new RegExp(`^${redisKeyRoot}(mys|hoyolab|config)-\\d{2}-\\d{2}`)
+    const todayReg = new RegExp(`^${redisKeyRoot}(mys|hoyolab|config)-${date}`)
     for (let key of keys) {
       if (testReg.test(key) && !todayReg.test(key)) {
         await redis.del(key)

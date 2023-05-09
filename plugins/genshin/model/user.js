@@ -68,6 +68,9 @@ export default class User extends base {
       flagV2 = true
       data.ck = `account_mid_v2=${param.account_mid_v2};cookie_token_v2=${param.cookie_token_v2};ltoken_v2=${param.ltoken_v2};ltmid_v2=${param.ltmid_v2};`
     }
+    if (param.mi18nLang) {
+      data.ck += ` mi18nLang=${param.mi18nLang};`
+    }
     /** 拼接ck */
     data.ltuid = param.ltuid || param.ltmid_v2
 
@@ -77,10 +80,11 @@ export default class User extends base {
     mys.setCkData(data)
 
     /** 检查ck是否失效 */
-    if (!await this.checkCk(mys, param)) {
+    let uidRet = await mys.reqMysUid()
+    console.log('uidRet', uidRet)
+    if (uidRet.status !== 0) {
       logger.mark(`绑定cookie错误1：${this.checkMsg || 'cookie错误'}`)
-      await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
-      return
+      return await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
     }
 
     if (flagV2) {
@@ -94,15 +98,14 @@ export default class User extends base {
          */
       } else {
         logger.mark(`绑定cookie错误2：${userFullInfo.message || 'cookie错误'}`)
-        await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
-        return
+        return await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
       }
     }
 
     logger.mark(`${this.e.logFnc} 检查cookie正常 [ltuid:${mys.ltuid}]`)
 
     await user.addMysUser(mys)
-    await user.saveDB()
+    await user.save()
 
     logger.mark(`${this.e.logFnc} 保存cookie成功 [ltuid:${mys.ltuid}]`)
 
@@ -152,9 +155,7 @@ export default class User extends base {
     }
 
     if (!res) return false
-
     let playerList = res?.data?.list || []
-
     if (!playerList || playerList.length <= 0) {
       this.checkMsg = '该账号尚未绑定原神或星穹角色！'
       return false
@@ -162,55 +163,12 @@ export default class User extends base {
       playerList = playerList.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
     }
 
-    //避免同时多个默认展示角色时候只绑定一个
     /** 米游社默认展示的角色 */
     for (let val of playerList) {
       mys.addUid(val.game_uid, ['hk4e_cn', 'hk4e_global'].includes(val.game_biz) ? 'gs' : 'sr')
     }
-
-    console.log('MYS', mys)
-
-    await mys.saveDB()
-
+    await mys.save()
     return mys
-  }
-
-  // 获取米游社通行证id
-  async getUserInfo (server = 'mys') {
-    return await MysUser.getUserFullInfo(this.ck, server)
-  }
-
-  /** 保存ck */
-  getCk () {
-    let ck = gsCfg.getBingCkSingle(this.e.user_id)
-
-    lodash.map(ck, o => {
-      o.isMain = false
-      return o
-    })
-
-    ck[this.uid] = {
-      uid: this.uid,
-      qq: this.e.user_id,
-      ck: this.ck,
-      ltuid: this.ltuid,
-      login_ticket: this.login_ticket,
-      region_name: this.region_name,
-      isMain: true
-    }
-
-    this.allUid.forEach((v) => {
-      if (!v.uid) return
-      ck[v.uid] = {
-        uid: v.uid,
-        qq: this.e.user_id,
-        ck: this.ck,
-        ltuid: this.ltuid,
-        region_name: v.region_name,
-        isMain: false
-      }
-    })
-    return ck
   }
 
   /** 删除绑定ck */
@@ -227,7 +185,7 @@ export default class User extends base {
     uid = uid[0]
     let user = await this.user()
     user.addRegUid(uid, this.e)
-    await user.saveDB()
+    await user.save()
     return await this.showUid()
   }
 
@@ -263,7 +221,7 @@ export default class User extends base {
     }
     index = Number(index) - 1
     await user.setMainUid(index, game)
-    await user.saveDB()
+    await user.save()
     return await this.showUid()
   }
 
@@ -379,11 +337,11 @@ export default class User extends base {
           data.gsUids = lodash.keys(data.genshin)
           data.srUids = lodash.keys(data.star)
           mys.setCkData(data)
-          await mys.saveDB()
+          await mys.save()
           user.addMysUser(mys)
         }
       }
-      await user.saveDB()
+      await user.save()
       if (fs.existsSync(`./data/MysCookie/${qq}.yaml`)) {
         /* fs.rename(`./data/MysCookie/${qq}.yaml`, `./data/MysCookieBak/${qq}.yaml`, (err) => {
           if (err) {
