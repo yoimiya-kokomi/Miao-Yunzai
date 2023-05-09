@@ -264,7 +264,7 @@ export default class MysUser extends BaseModel {
 
   getUids (game = 'gs') {
     let gameKey = this.gameKey(game)
-    return this[`${gameKey}Uids`] || []
+    return this.uids[gameKey] || []
   }
 
   /**
@@ -378,10 +378,10 @@ export default class MysUser extends BaseModel {
     this.ck = data.ck || this.ck || ''
     this.type = data.type || this.type || 'mys'
     this.device = data.device || this.device || MysUtil.getDeviceGuid()
+    this.uids = this.uids || {}
     let self = this
     MysUtil.eachGame((game) => {
-      let key = `${game}Uids`
-      self[key] = lodash.isString(data[key]) ? (data[key] || '').split(',') : (lodash.isArray(data[key]) ? data[key] : (self[key] || []))
+      self.uids[game] = data?.uids?.[game] || self.uids[game] || []
     })
   }
 
@@ -400,7 +400,7 @@ export default class MysUser extends BaseModel {
     uid = '' + uid
     if (/\d{9}/.test(uid)) {
       let gameKey = this.gameKey(game)
-      let uids = this[`${gameKey}Uids`]
+      let uids = this.uids[gameKey]
       if (!uids.includes(uid)) {
         uids.push(uid)
       }
@@ -419,7 +419,7 @@ export default class MysUser extends BaseModel {
     }
     let self = this
     await MysUtil.eachGame(async (game) => {
-      let uids = self[`${game}Uids`]
+      let uids = self.uids[game]
       await this.addQueryUid(uids, game)
       let cache = self.getCache(game)
       let cacheSearchList = await cache.get(tables.del, this.ltuid, true)
@@ -445,28 +445,20 @@ export default class MysUser extends BaseModel {
   //
   /**
    * 删除缓存, 供User解绑CK时调用
-   * @param user
    * @returns {Promise<boolean>}
    */
-  async del (user) {
-    if (user && user.qq) {
-      let qqList = await this.cache.kGet(tables.qq, this.ltuid, true)
-      let newList = lodash.pull(qqList, user.qq * 1)
-      await this.cache.kSet(tables.qq, this.ltuid, newList)
-      if (newList.length > 0) {
-        // 如果数组还有其他元素，说明该ltuid还有其他绑定，不进行缓存删除
-        return false
-      }
-    }
+  async del () {
+    // TODO 检查一ltuid多绑定的情况
     // 将查询过的uid缓存起来，以备后续重新绑定时恢复
-    let uids = await this.getQueryUids()
-    await this.servCache.set(tables.del, uids)
-
-    // 标记ltuid为失效
-    await this.servCache.zDel(tables.detail, this.ltuid)
-    await this.cache.zDel(tables.uid, this.ltuid)
-    await this.cache.kDel(tables.ck, this.ltuid)
-    await this.cache.kDel(tables.qq, this.ltuid)
+    let self = this
+    await MysUtil.eachGame(async (game) => {
+      let uids = await this.getQueryUids(game)
+      let cache = self.getCache(game)
+      await cache.set(tables.del, uids)
+      // 标记ltuid为失效
+      await cache.zDel(tables.detail, this.ltuid)
+    })
+    await self.db.delete()
     logger.mark(`[删除失效ck][ltuid:${this.ltuid}]`)
   }
 
@@ -502,13 +494,13 @@ export default class MysUser extends BaseModel {
 
   // 获取当前用户已查询uid列表
   async getQueryUids (game = 'gs') {
-    let cache = this.getCache('game')
+    let cache = this.getCache(game)
     return await cache.zList(tables.detail, this.ltuid)
   }
 
   // 根据uid获取查询ltuid
   async getQueryLtuid (uid, game = 'gs') {
-    let cache = this.getCache('game')
+    let cache = this.getCache(game)
     return await cache.zKey(tables.detail, uid)
   }
 
@@ -518,7 +510,7 @@ export default class MysUser extends BaseModel {
       return false
     }
     let gameKey = this.gameKey(game)
-    let uids = this[`${gameKey}Uids`]
+    let uids = this.uids[gameKey]
     return uids.includes(uid + '')
   }
 }

@@ -19,10 +19,22 @@ const COLUMNS = {
   // CK
   ck: Types.STRING,
   device: Types.STRING,
-
-  gsUids: Types.STRING,
-
-  srUids: Types.STRING
+  uids: {
+    type: Types.STRING,
+    get () {
+      let data = this.getDataValue('uids')
+      let ret = {}
+      try {
+        ret = JSON.parse(data)
+      } catch (e) {
+        ret = {}
+      }
+      return ret
+    },
+    set (uids) {
+      this.setDataValue('uids', JSON.stringify(uids))
+    }
+  }
 }
 
 class MysUserDB extends BaseModel {
@@ -45,8 +57,7 @@ class MysUserDB extends BaseModel {
     this.ck = mys.ck
     this.type = mys.type
     this.device = mys.device
-    this.gsUids = (mys.gsUids || []).join(',')
-    this.srUids = (mys.srUids || []).join(',')
+    this.uids = mys.uids
     await db.save()
   }
 }

@@ -1,5 +1,7 @@
 import { Data } from '#miao'
 
+const games = ['gs', 'sr']
+
 const MysUtil = {
   // 获取标准ltuid
   getLtuid (data) {
@@ -36,7 +38,7 @@ const MysUtil = {
 
   // 循环game
   async eachGame (fn) {
-    await Data.forEach(['gs', 'sr'], fn)
+    await Data.forEach(games, fn)
   },
 
   // 循环server

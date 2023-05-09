@@ -6,6 +6,7 @@ import common from '../../../lib/common/common.js'
 import MysInfo from './mys/mysInfo.js'
 import NoteUser from './mys/NoteUser.js'
 import MysUser from './mys/MysUser.js'
+import MysUtil from './mys/MysUtil.js'
 import { promisify } from 'node:util'
 import YAML from 'yaml'
 import { Data } from '#miao'
@@ -58,6 +59,7 @@ export default class User extends base {
       return
     }
 
+    // TODO：独立的mys数据，不走缓存ltuid
     let mys = await MysUser.create(param.ltuid)
     let data = {}
     data.ck = `ltoken=${param.ltoken};ltuid=${param.ltuid || param.login_uid};cookie_token=${param.cookie_token || param.cookie_token_v2}; account_id=${param.ltuid || param.login_uid};`
@@ -81,9 +83,10 @@ export default class User extends base {
 
     /** 检查ck是否失效 */
     let uidRet = await mys.reqMysUid()
-    console.log('uidRet', uidRet)
     if (uidRet.status !== 0) {
       logger.mark(`绑定cookie错误1：${this.checkMsg || 'cookie错误'}`)
+      // 清除mys数据
+      mys._delCache()
       return await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
     }
 
@@ -92,10 +95,8 @@ export default class User extends base {
       let userFullInfo = await mys.getUserFullInfo()
       if (userFullInfo?.data?.user_info) {
         let userInfo = userFullInfo?.data?.user_info
-        /*
-        this.ltuid = userInfo.uid
-        this.ck = `${this.ck}ltuid=${this.ltuid};`
-         */
+        // this.ltuid = userInfo.uid
+        // this.ck = `${this.ck}ltuid=${this.ltuid};`
       } else {
         logger.mark(`绑定cookie错误2：${userFullInfo.message || 'cookie错误'}`)
         return await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
@@ -105,6 +106,7 @@ export default class User extends base {
     logger.mark(`${this.e.logFnc} 检查cookie正常 [ltuid:${mys.ltuid}]`)
 
     await user.addMysUser(mys)
+    await mys.initCache()
     await user.save()
 
     logger.mark(`${this.e.logFnc} 保存cookie成功 [ltuid:${mys.ltuid}]`)
@@ -133,49 +135,17 @@ export default class User extends base {
     await this.e.reply(msg)
   }
 
-  /** 检查ck是否可用 */
-  async checkCk (mys, param = {}) {
-    let res
-    for (let type of ['mys', 'hoyolab']) {
-      let roleRes = await mys.getGameRole(type)
-      if (roleRes?.retcode === 0) {
-        res = roleRes
-        /** 国际服的标记 */
-        if (type === 'hoyolab' && typeof (param.mi18nLang) === 'string' && !/mi18nLang/.test(mys.ck)) {
-          mys.ck += ` mi18nLang=${param.mi18nLang};`
-          mys.type = 'hoyolab'
-        }
-        break
-      }
-      if (roleRes.retcode === -100) {
-        this.checkMsg = '该ck已失效，请重新登录获取'
-      } else {
-        this.checkMsg = roleRes.message || 'error'
-      }
-    }
-
-    if (!res) return false
-    let playerList = res?.data?.list || []
-    if (!playerList || playerList.length <= 0) {
-      this.checkMsg = '该账号尚未绑定原神或星穹角色！'
-      return false
-    } else {
-      playerList = playerList.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
-    }
-
-    /** 米游社默认展示的角色 */
-    for (let val of playerList) {
-      mys.addUid(val.game_uid, ['hk4e_cn', 'hk4e_global'].includes(val.game_biz) ? 'gs' : 'sr')
-    }
-    await mys.save()
-    return mys
-  }
-
   /** 删除绑定ck */
-  async delCk (uid = '') {
+  async delCk () {
     let user = await this.user()
-    let uids = await user.delCk()
-    return `绑定cookie已删除,uid:${uids.join(',')}`
+    // 获取当前uid
+    let uidData = user.getUidData(this.e)
+    let uidms = user.getUidList(this.e)
+    if (!uidData || uidData.type !== 'ck' || !uidData.ltuid) {
+      return `删除失败：当前的UID${uidData.uid}无CK信息`
+    }
+    let uids = await user.delCk(uidData.ltuid)
+    return `绑定cookie已删除}`
   }
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
@@ -193,7 +163,7 @@ export default class User extends base {
   async showUid () {
     let user = await this.user()
     let msg = ['通过【#uid+序号】来切换uid']
-    lodash.forEach({ genshin: '原神', star: '星穹铁道' }, (gameName, game) => {
+    lodash.forEach({ gs: '原神', sr: '星穹铁道' }, (gameName, game) => {
       let uidList = user.getUidList(game)
       let currUid = user.getUid(game)
       if (uidList.length === 0) {
@@ -220,7 +190,7 @@ export default class User extends base {
       return await this.e.reply('uid序号输入错误')
     }
     index = Number(index) - 1
-    await user.setMainUid(index, game)
+    user.setMainUid(index, game)
     await user.save()
     return await this.showUid()
   }
@@ -318,13 +288,16 @@ export default class User extends base {
           ck,
           device,
           ltuid,
-          star: {},
-          genshin: {},
+          uids: {},
           type: /America Server|Europe Server|Asia Server/.test(region) ? 'hoyolab' : 'mys'
         }
         let tmp = ltuids[ltuid]
-        let game = region === '星穹列车' ? 'star' : 'genshin'
-        tmp[game][uid] = uid
+        let game = region === '星穹列车' ? 'sr' : 'gs'
+        tmp.uids[game] = tmp.uids[game] || []
+        let gameUids = tmp.uids[game]
+        if (!gameUids.includes(uid + '')) {
+          gameUids.push(uid + '')
+        }
       }
       if (!qq) {
         continue
@@ -334,8 +307,6 @@ export default class User extends base {
         let data = ltuids[ltuid]
         let mys = await MysUser.create(data.ltuid)
         if (mys) {
-          data.gsUids = lodash.keys(data.genshin)
-          data.srUids = lodash.keys(data.star)
           mys.setCkData(data)
           await mys.save()
           user.addMysUser(mys)
