@@ -29,7 +29,7 @@ export class user extends plugin {
           fnc: 'noLogin'
         },
         {
-          reg: '^#?我的(ck|cookie)$',
+          reg: '^#?(原神|星铁)?我的(ck|cookie)$',
           event: 'message',
           fnc: 'myCk'
         },
@@ -38,7 +38,7 @@ export class user extends plugin {
           fnc: 'delCk'
         },
         {
-          reg: '^#绑定(uid|UID)?[1-9][0-9]{8}$',
+          reg: '^#(原神|星铁)?绑定(uid|UID)?[1-9][0-9]{8}$',
           fnc: 'bingUid'
         },
         {
@@ -157,7 +157,8 @@ export class user extends plugin {
 
   /** 加载旧的绑定ck json */
   loadOldData () {
-    this.User.loadOldData()
+    this.User.loadOldDataV2()
+    this.User.loadOldDataV3()
   }
 
   /** 检查用户CK状态 **/

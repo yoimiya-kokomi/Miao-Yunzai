@@ -14,7 +14,7 @@ export default class blueprint extends base {
     let uid = await MysInfo.getUid(this.e, false)
     if (!uid) return false
     /** 判断是否绑定了ck */
-    let ck = await MysInfo.checkUidBing(uid)
+    let ck = await MysInfo.checkUidBing(uid, this.e)
     if (!ck) {
       await this.e.reply(MysInfo.tips)
       return false
