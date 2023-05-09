@@ -302,12 +302,12 @@ export default class User extends base {
   }
 
   async loadOldData (data) {
-    let ltuids = {}
     let count = 0
     if (!lodash.isPlainObject(data)) {
       return
     }
     for (let u in data) {
+      let ltuids = {}
       let v = data[u]
       let qq
       for (let k in v) {
