@@ -283,8 +283,8 @@ export default class NoteUser extends BaseModel {
   setMainUid (uid = '', game = 'gs') {
     let gameKey = this.gameKey(game)
     // 兼容传入index
-    if (uid < 100 && this.uidList[gameKey][uid]) {
-      uid = this.uidList[gameKey][uid]?.uid
+    if (uid < 100 && this.uidMap[gameKey][uid]) {
+      uid = this.uidMap[gameKey][uid]?.uid
     }
     if (this.uidMap[gameKey][uid]) {
       this.mainUid[gameKey] = uid

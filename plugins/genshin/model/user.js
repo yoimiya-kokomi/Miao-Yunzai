@@ -318,11 +318,9 @@ export default class User extends base {
       }
       await user.save()
       if (fs.existsSync(`./data/MysCookie/${qq}.yaml`)) {
-        /* fs.rename(`./data/MysCookie/${qq}.yaml`, `./data/MysCookieBak/${qq}.yaml`, (err) => {
-          if (err) {
-            console.log(err)
-          }
-        }) */
+        fs.rename(`./data/MysCookie/${qq}.yaml`, `./data/MysCookieBak/${qq}.yaml`, (err) => {
+          if (err) console.log(err)
+        })
       }
       count++
     }
