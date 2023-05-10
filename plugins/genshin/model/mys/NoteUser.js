@@ -149,6 +149,7 @@ export default class NoteUser extends BaseModel {
       // 优先设置CK UID
       lodash.forEach(mysUsers, (mys) => {
         lodash.forEach(mys.uids[key] || [], (uid) => {
+          uid = uid + ''
           if (uid && !uidMap[key][uid]) {
             uidMap[key][uid] = { uid, type: 'ck', ltuid: mys.ltuid }
             uidList[key].push(uid)
@@ -156,13 +157,16 @@ export default class NoteUser extends BaseModel {
         })
       })
 
+      let uidReg = /\d{9}/
+
       // 存在数据库记录则进行设置
       if (gameDB) {
         let regUids = gameDB.data
         // 依次设置verify、reg uid数据
         lodash.forEach(['verify', 'reg'], (uidType) => {
           lodash.forEach(regUids, (ds, uid) => {
-            if (uid && ds.type === uidType && !uidMap[key][uid]) {
+            uid = uid + ''
+            if (uid && uidReg.test(uid) && ds.type === uidType && !uidMap[key][uid]) {
               uidMap[key][uid] = { uid, type: ds.type }
               uidList[key].push(uid)
             }
@@ -172,6 +176,7 @@ export default class NoteUser extends BaseModel {
         // 如果当前选中uid未在记录中，则补充为reg数据
         let uid = gameDB.uid
         if (uid && !uidMap[key][uid]) {
+          uid = uid + ''
           uidMap[key][uid] = { uid, type: 'reg' }
           uidList[key].push(uid)
         }
@@ -283,8 +288,8 @@ export default class NoteUser extends BaseModel {
   setMainUid (uid = '', game = 'gs') {
     let gameKey = this.gameKey(game)
     // 兼容传入index
-    if (uid < 100 && this.uidMap[gameKey][uid]) {
-      uid = this.uidMap[gameKey][uid]?.uid
+    if (uid < 100 && this.uidList[gameKey][uid]) {
+      uid = this.uidList[gameKey][uid]
     }
     if (this.uidMap[gameKey][uid]) {
       this.mainUid[gameKey] = uid
