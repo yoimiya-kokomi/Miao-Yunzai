@@ -101,7 +101,7 @@ export default class MysInfo {
     /** at用户 */
     if (at) {
       let atUser = await NoteUser.create(at)
-      uid = atUser.uid
+      uid = atUser.getUid(e)
       if (uid) return String(uid)
       if (e.noTips !== true) e.reply('尚未绑定uid', false, { at })
       return false
@@ -114,8 +114,8 @@ export default class MysInfo {
     }
 
     // 消息携带UID、当前用户UID、群名片携带UID 依次获取
-    uid = matchUid(msg) || user.uid || matchUid(e.sender.card)
-    if (!matchMsgUid) uid = user.uid
+    uid = matchUid(msg) || user.getUid(e) || matchUid(e.sender.card)
+    if (!matchMsgUid) uid = user.getUid(e)
     if (uid) {
       /** 没有绑定的自动绑定 */
       return await user.setRegUid(uid, false)
