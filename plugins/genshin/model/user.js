@@ -162,7 +162,7 @@ export default class User extends base {
   /** #uid */
   async showUid () {
     let user = await this.user()
-    let msg = ['通过【#uid+序号】来切换uid']
+    let msg = []
     lodash.forEach({ gs: '原神', sr: '星穹铁道' }, (gameName, game) => {
       let uidList = user.getUidList(game)
       let currUid = user.getUid(game)
@@ -178,7 +178,12 @@ export default class User extends base {
         msg.push(tmp)
       })
     })
-    await this.e.reply(msg.join('\n'))
+    if (msg.length > 0) {
+      msg.unshift('通过【#uid+序号】来切换uid')
+      await this.e.reply(msg.join('\n'))
+    } else {
+      await this.e.reply('尚未绑定UID，发送CK或通过【#绑定123456789】命令来绑定UID')
+    }
   }
 
   /** 切换uid */

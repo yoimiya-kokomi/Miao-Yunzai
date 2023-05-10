@@ -161,28 +161,28 @@ export default class NoteUser extends BaseModel {
             uids[key].push(uid)
           }
         })
-
-        // 存在数据库记录则进行设置
-        if (gameDB) {
-          let regUids = gameDB.data
-          // 依次设置verify、reg uid数据
-          lodash.forEach(['verify', 'reg'], (uidType) => {
-            lodash.forEach(regUids, (ds, uid) => {
-              if (uid && ds.type === uidType && !uidMap[key][uid]) {
-                uidMap[key][uid] = { uid, type: ds.type }
-                uids[key].push(uid)
-              }
-            })
-          })
-
-          // 如果当前选中uid未在记录中，则补充为reg数据
-          let uid = gameDB.uid
-          if (uid && !uidMap[key][uid]) {
-            uidMap[key][uid] = { uid, type: 'reg' }
-            uids[key].push(uid)
-          }
-        }
       })
+      // 存在数据库记录则进行设置
+      if (gameDB) {
+        let regUids = gameDB.data
+        // 依次设置verify、reg uid数据
+        lodash.forEach(['verify', 'reg'], (uidType) => {
+          lodash.forEach(regUids, (ds, uid) => {
+            if (uid && ds.type === uidType && !uidMap[key][uid]) {
+              uidMap[key][uid] = { uid, type: ds.type }
+              uids[key].push(uid)
+            }
+          })
+        })
+
+        // 如果当前选中uid未在记录中，则补充为reg数据
+        let uid = gameDB.uid
+        if (uid && !uidMap[key][uid]) {
+          uidMap[key][uid] = { uid, type: 'reg' }
+          uids[key].push(uid)
+        }
+      }
+
       // 设置选中uid
       if (mys && mys.uids[key]?.[0]) {
         self.uid[key] = mys.uids[key]?.[0] || self.uid[key] || ''
@@ -297,6 +297,8 @@ export default class NoteUser extends BaseModel {
     if (this.uidMap[gameKey][uid]) {
       this.uid[gameKey] = uid
     }
+
+    this.initUids()
   }
 
   // 添加MysUser
@@ -307,7 +309,6 @@ export default class NoteUser extends BaseModel {
 
   // 删除当前用户绑定CK
   async delCk (ltuid = '', needRefreshCache = true) {
-    console.log('delCk', ltuid, !!this.mysUsers[ltuid])
     if (!ltuid || !this.mysUsers[ltuid]) {
       return
     }
