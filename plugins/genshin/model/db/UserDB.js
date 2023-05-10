@@ -1,5 +1,7 @@
 import BaseModel from './BaseModel.js'
 import lodash from 'lodash'
+import { UserGameDB } from './index.js'
+import MysUtil from '../mys/MysUtil.js'
 
 const { Types } = BaseModel
 
@@ -23,15 +25,7 @@ const COLUMNS = {
   // 头像
   face: Types.STRING,
 
-  ltuids: Types.STRING,
-
-  // 原神UID
-  gsUid: Types.STRING,
-  gsRegUids: Types.STRING,
-
-  // 星铁UID
-  srUid: Types.STRING,
-  srRegUids: Types.STRING
+  ltuids: Types.STRING
 }
 
 class UserDB extends BaseModel {
@@ -39,7 +33,12 @@ class UserDB extends BaseModel {
     // user_id
     id = type === 'qq' ? '' + id : type + id
     // DB查询
-    let user = await UserDB.findByPk(id)
+    let user = await UserDB.findByPk(id, {
+      include: {
+        model: UserGameDB,
+        as: 'games'
+      }
+    })
     if (!user) {
       user = await UserDB.build({
         id,
@@ -53,15 +52,29 @@ class UserDB extends BaseModel {
     let db = this
     let ltuids = []
     lodash.forEach(user.mysUsers, (mys) => {
-      if (mys.ck) {
+      if (mys.ck && mys.ltuid) {
         ltuids.push(mys.ltuid)
       }
     })
     db.ltuids = ltuids.join(',')
-    lodash.forEach(['gs', 'sr'], (key) => {
-      db[`${key}Uid`] = user[`${key}Uid`] ? user[`${key}Uid`] : user.uids[key]?.[0] || ''
-      db[`${key}RegUids`] = JSON.stringify(user.uidMap[key])
+    let games = []
+    await MysUtil.eachGame(async (key) => {
+      let game = user.games[key]
+      if (!game && (user.uid[key] || !lodash.isEmpty(user.uidMap[key]))) {
+        game = await db.createGame({
+          game: key
+        })
+      }
+      if (game) {
+        game.uid = user.uid[key]
+        game.data = user.uidMap[key]
+        games.push(game)
+        await game.save()
+      }
     })
+    if (games.length > 0) {
+      await this.setGames(games)
+    }
     await this.save()
   }
 }

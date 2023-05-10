@@ -1,5 +1,6 @@
 import moment from 'moment'
 import BaseModel from './BaseModel.js'
+import MysUtil from './MysUtil.js'
 
 const servs = ['mys', 'hoyolab']
 // 超时时间不必精确，直接定24小时即可
@@ -38,7 +39,7 @@ export default class DailyCache extends BaseModel {
     if (!uid || game === 'config') {
       key = 'sys:config'
     } else {
-      game = game === 'sr' ? 'sr' : 'gs'
+      game = MysUtil.getGameKey(game)
       let serv = /^[6-9]|^hoyo|^os/i.test(uid) ? servs[1] : servs[0]
       key = `${game}:${serv}`
     }
