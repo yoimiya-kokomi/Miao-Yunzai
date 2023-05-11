@@ -1,0 +1,10 @@
+# 默认测试配置，其他配置自行复制
+post_type: message
+message_type: group
+sub_type: normal
+group_id: 213938015
+group_name: '2333'
+user_id: 805475874
+# 测试命令
+text: 十连
+card: 测试（104070461）

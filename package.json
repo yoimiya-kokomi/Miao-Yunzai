@@ -1,0 +1,52 @@
+{
+  "name": "trss-yunzai",
+  "version": "3.0.2",
+  "author": "TimeRainStarSky, Yoimiya-Kokomi, Le-niao",
+  "description": "Bot",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "app": "node .",
+    "dev": "node . dev",
+    "web": "node ./lib/tools/web.js",
+    "test": "node ./lib/tools/test.js",
+    "start": "pm2 start ./config/pm2/pm2.json",
+    "stop": "pm2 stop ./config/pm2/pm2.json",
+    "restart": "pm2 restart ./config/pm2/pm2.json",
+    "log": "pm2 logs --lines 400 TRSS-Yunzai"
+  },
+  "dependencies": {
+    "art-template": "^4.13.2",
+    "chalk": "^5.2.0",
+    "chokidar": "^3.5.3",
+    "express": "^4.18.2",
+    "https-proxy-agent": "6.1.0",
+    "image-size": "^1.0.2",
+    "inquirer": "^9.2.2",
+    "lodash": "^4.17.21",
+    "log4js": "^6.9.1",
+    "md5": "^2.3.0",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.1",
+    "node-schedule": "^2.1.1",
+    "node-xlsx": "^0.21.2",
+    "pm2": "^5.3.0",
+    "puppeteer": "^20.1.2",
+    "redis": "^4.6.6",
+    "sequelize": "^6.31.1",
+    "sqlite3": "^5.1.6",
+    "ws": "^8.13.0",
+    "yaml": "^2.2.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.40.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-promise": "^6.1.1"
+  },
+  "imports": {
+    "#miao": "./plugins/miao-plugin/components/index.js",
+    "#miao.models": "./plugins/miao-plugin/models/index.js"
+  }
+}
