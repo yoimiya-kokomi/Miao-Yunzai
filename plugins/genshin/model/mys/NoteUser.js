@@ -9,7 +9,6 @@ import BaseModel from './BaseModel.js'
 import lodash from 'lodash'
 import MysUser from './MysUser.js'
 import MysUtil from './MysUtil.js'
-import gsCfg from '../gsCfg.js'
 import { UserDB } from '../db/index.js'
 import { Data } from '#miao'
 
@@ -23,6 +22,11 @@ export default class NoteUser extends BaseModel {
     }
     this.qq = qq
     return this._cacheThis()
+  }
+
+  get uid () {
+    console.log('NoteUser.uid 默认返回原神UID，可更改为 user.getUid(game)')
+    return this.getUid()
   }
 
   /**
@@ -39,19 +43,8 @@ export default class NoteUser extends BaseModel {
     if (!this.hasCk) {
       return []
     }
+    let ret = []
     return lodash.map(this.ckData, 'uid')
-  }
-
-  /**
-   * 获取当前生效CK
-   *
-   * 返回isMain的uid，没有的话返回首位
-   */
-  get mainCk () {
-    if (this.hasCk) {
-      return lodash.filter(this.ckData, (ck) => ck.isMain)[0] || lodash.values(this.ckData)[0]
-    }
-    return false
   }
 
   /**
@@ -119,6 +112,7 @@ export default class NoteUser extends BaseModel {
     this.db = db && db !== true ? db : await UserDB.find(this.qq, 'qq')
     await this.initMysUser()
     this.initUids()
+    await this.save()
   }
 
   // 初始化MysUser对象
@@ -134,13 +128,13 @@ export default class NoteUser extends BaseModel {
   }
 
   // 初始化Uid
-  initUids (mys = false) {
+  initUids (setMainUid = {}) {
     let self = this
-    self.uid = {}
-    self.uids = {}
-    self.uidMap = {}
+    self.mainUid = self.mainUid || {}
+    self.uidList = {}
+    self.uidMap = self.uidMap || {}
     self.games = {}
-    const { db, uids, games, uidMap, mysUsers } = self
+    const { db, mainUid, uidList, games, uidMap, mysUsers } = self
 
     let gameDBs = {}
     lodash.forEach(db?.games, (gameDB) => {
@@ -150,27 +144,31 @@ export default class NoteUser extends BaseModel {
     MysUtil.eachGame((key) => {
       let gameDB = gameDBs[key]
       uidMap[key] = {}
-      uids[key] = []
+      uidList[key] = []
       games[key] = gameDB
-
       // 优先设置CK UID
       lodash.forEach(mysUsers, (mys) => {
         lodash.forEach(mys.uids[key] || [], (uid) => {
+          uid = uid + ''
           if (uid && !uidMap[key][uid]) {
             uidMap[key][uid] = { uid, type: 'ck', ltuid: mys.ltuid }
-            uids[key].push(uid)
+            uidList[key].push(uid)
           }
         })
       })
+
+      let uidReg = /\d{9}/
+
       // 存在数据库记录则进行设置
       if (gameDB) {
         let regUids = gameDB.data
         // 依次设置verify、reg uid数据
         lodash.forEach(['verify', 'reg'], (uidType) => {
           lodash.forEach(regUids, (ds, uid) => {
-            if (uid && ds.type === uidType && !uidMap[key][uid]) {
+            uid = uid + ''
+            if (uid && uidReg.test(uid) && ds.type === uidType && !uidMap[key][uid]) {
               uidMap[key][uid] = { uid, type: ds.type }
-              uids[key].push(uid)
+              uidList[key].push(uid)
             }
           })
         })
@@ -178,16 +176,16 @@ export default class NoteUser extends BaseModel {
         // 如果当前选中uid未在记录中，则补充为reg数据
         let uid = gameDB.uid
         if (uid && !uidMap[key][uid]) {
+          uid = uid + ''
           uidMap[key][uid] = { uid, type: 'reg' }
-          uids[key].push(uid)
+          uidList[key].push(uid)
         }
       }
-
       // 设置选中uid
-      if (mys && mys.uids[key]?.[0]) {
-        self.uid[key] = mys.uids[key]?.[0] || self.uid[key] || ''
+      if (setMainUid === false || setMainUid[key] === false) {
+        mainUid[key] = uidList[key]?.[0] || ''
       } else {
-        self.uid[key] = self.uid[key] || gameDB?.uid || uids[key]?.[0] || ''
+        mainUid[key] = setMainUid[key] || mainUid[key] || gameDB?.uid || uidList[key]?.[0] || ''
       }
     })
   }
@@ -199,24 +197,24 @@ export default class NoteUser extends BaseModel {
   // 获取当前UID
   getUid (game = 'gs') {
     let gameKey = this.gameKey(game)
-    return this.uid[gameKey] || this.uids[gameKey][0] || ''
+    return this.mainUid[gameKey] || this.uidList[gameKey][0] || ''
   }
 
   getSelfUid (game = 'gs') {
     let gameKey = this.gameKey(game)
-    let uids = this.uidMap[gameKey].filter((v) => v.type === 'ck')
-    if (uids.length === 0) {
+    let uidList = this.uidMap[gameKey].filter((v) => v.type === 'ck')
+    if (uidList.length === 0) {
       return false
     }
-    let find = lodash.find(uids, (v) => v.uid + '' === uid + '', 0)
-    return find ? find.uid : uids[0].uid
+    let find = lodash.find(uidList, (v) => v.uid + '' === uid + '', 0)
+    return find ? find.uid : uidList[0].uid
   }
 
   // 获取UID列表
   getUidList (game = 'gs') {
     let ret = []
     let gameKey = this.gameKey(game)
-    lodash.forEach(this.uids[gameKey], (uid) => {
+    lodash.forEach(this.uidList[gameKey], (uid) => {
       ret.push(this.uidMap[gameKey][uid])
     })
     return ret
@@ -246,11 +244,11 @@ export default class NoteUser extends BaseModel {
   // 添加UID
   addRegUid (uid, game = 'gs') {
     let gameKey = this.gameKey(game)
+    uid = uid + ''
     if (!this.uidMap[gameKey][uid]) {
       this.uidMap[gameKey][uid] = { uid, type: 'reg' }
-      this.uids[gameKey].push(uid)
-      this.setMainUid(uid, game)
     }
+    this.setMainUid(uid, game)
   }
 
   // 删除UID
@@ -258,7 +256,7 @@ export default class NoteUser extends BaseModel {
     let gameKey = this.gameKey(game)
     if (this.uidMap[gameKey][uid] && this.uidMap[gameKey][uid].type !== 'ck') {
       delete this.uidMap[gameKey][uid]
-      lodash.remove(this.uids[gameKey], (u) => u === uid)
+      lodash.remove(this.uidList[gameKey], (u) => u === uid)
     }
   }
 
@@ -269,7 +267,7 @@ export default class NoteUser extends BaseModel {
    */
   async getRegUid (game = 'gs') {
     let gameKey = this.gameKey(game)
-    return this.uid[gameKey] || ''
+    return this.mainUid[gameKey] || ''
   }
 
   /**
@@ -290,32 +288,38 @@ export default class NoteUser extends BaseModel {
   setMainUid (uid = '', game = 'gs') {
     let gameKey = this.gameKey(game)
     // 兼容传入index
-    if (uid < 100 && this.uids[gameKey][uid]) {
-      uid = this.uids[gameKey][uid]
+    if (uid < 100 && this.uidList[gameKey][uid]) {
+      uid = this.uidList[gameKey][uid]
     }
-
     if (this.uidMap[gameKey][uid]) {
-      this.uid[gameKey] = uid
+      this.mainUid[gameKey] = uid
     }
-
-    this.initUids()
+    let mainUid = {}
+    mainUid[gameKey] = uid
+    this.initUids(mainUid)
   }
 
   // 添加MysUser
   addMysUser (mysUser) {
     this.mysUsers[mysUser.ltuid] = mysUser
-    this.initUids(mysUser)
+    this.initUids(mysUser.getMainUid())
   }
 
   // 删除当前用户绑定CK
-  async delCk (ltuid = '', needRefreshCache = true) {
-    if (!ltuid || !this.mysUsers[ltuid]) {
-      return
+  async delCk (ltuid = '') {
+    console.log('delCk即将废弃')
+    return await this.delMysUser(ltuid)
+
+  }
+
+  async delMysUser (ltuid = '') {
+    if (ltuid && this.mysUsers[ltuid]) {
+      let mys = this.mysUsers[ltuid]
+      delete this.mysUsers[ltuid]
+      await mys.del()
     }
-    let mys = this.mysUsers[ltuid]
-    delete this.mysUsers[ltuid]
-    mys.del()
-    await this.initUids()
+    this.initUids(false)
+    await this.save()
   }
 
   /**

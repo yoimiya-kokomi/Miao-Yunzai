@@ -60,13 +60,13 @@ class UserDB extends BaseModel {
     let games = []
     await MysUtil.eachGame(async (key) => {
       let game = user.games[key]
-      if (!game && (user.uid[key] || !lodash.isEmpty(user.uidMap[key]))) {
+      if (!game && (user.mainUid[key] || !lodash.isEmpty(user.uidMap[key]))) {
         game = await db.createGame({
           game: key
         })
       }
       if (game) {
-        game.uid = user.uid[key]
+        game.uid = user.mainUid[key]
         game.data = user.uidMap[key]
         games.push(game)
         await game.save()

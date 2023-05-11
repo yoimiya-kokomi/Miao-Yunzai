@@ -267,6 +267,15 @@ export default class MysUser extends BaseModel {
     return this.uids[gameKey] || []
   }
 
+  getMainUid () {
+    let ret = {}
+    let uids = this.uids
+    MysUtil.eachGame((gameKey) => {
+      ret[gameKey] = uids[gameKey]?.[0] || ''
+    })
+    return ret
+  }
+
   /**
    * 刷新mysUser的UID列表
    * @returns {Promise<{msg: string, status: number}>}
@@ -458,7 +467,8 @@ export default class MysUser extends BaseModel {
       // 标记ltuid为失效
       await cache.zDel(tables.detail, this.ltuid)
     })
-    await self.db.delete()
+    await self.db.destroy()
+    self._delCache()
     logger.mark(`[删除失效ck][ltuid:${this.ltuid}]`)
   }
 
