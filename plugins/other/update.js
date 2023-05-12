@@ -262,40 +262,16 @@ export class update extends plugin {
   }
 
   async makeForwardMsg (title, msg, end) {
-    let nickname = this.e.bot.nickname
-    if (this.e.isGroup) {
-      let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, this.e.bot.uin)
-      nickname = info.card ?? info.nickname
-    }
-    let userInfo = {
-      user_id: this.e.bot.uin,
-      nickname
-    }
+    let forwardMsg = [{ message: title }, { message: msg }]
 
-    let forwardMsg = [
-      {
-        ...userInfo,
-        message: title
-      },
-      {
-        ...userInfo,
-        message: msg
-      }
-    ]
-
-    if (end) {
-      forwardMsg.push({
-        ...userInfo,
-        message: end
-      })
-    }
+    if (end)
+      forwardMsg.push({ message: end })
 
     /** 制作转发内容 */
-    if (this.e.isGroup) {
+    if (this.e.group)
       forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    } else {
+    else
       forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-    }
 
     /** 处理描述 */
     forwardMsg.data = forwardMsg.data

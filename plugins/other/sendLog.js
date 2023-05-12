@@ -80,33 +80,13 @@ export class sendLog extends plugin {
   }
 
   async makeForwardMsg (title, msg) {
-    let nickname = this.e.bot.nickname
-    if (this.e.isGroup) {
-      let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, this.e.bot.uin)
-      nickname = info.card ?? info.nickname
-    }
-    let userInfo = {
-      user_id: this.e.bot.uin,
-      nickname
-    }
-
-    let forwardMsg = [
-      {
-        ...userInfo,
-        message: title
-      },
-      {
-        ...userInfo,
-        message: msg
-      }
-    ]
+    let forwardMsg = [{ message: title }, { message: msg }]
 
     /** 制作转发内容 */
-    if (this.e.isGroup) {
+    if (this.e.group)
       forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    } else {
+    else
       forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-    }
 
     /** 处理描述 */
     forwardMsg.data = forwardMsg.data
