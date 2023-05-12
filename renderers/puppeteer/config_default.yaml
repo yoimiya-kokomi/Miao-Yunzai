@@ -10,7 +10,7 @@ chromiumPath:
 puppeteerWS:
 
 # headless
-headless: true
+headless: "new"
 
 # puppeteer启动args，注意args的--前缀
 args:
