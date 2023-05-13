@@ -5,7 +5,7 @@ import lodash from 'lodash'
 import MysInfo from '../model/mys/mysInfo.js'
 
 export class exchange extends plugin {
-  constructor (e) {
+  constructor(e) {
     super({
       name: '兑换码',
       dsc: '前瞻直播兑换码',
@@ -24,7 +24,7 @@ export class exchange extends plugin {
     })
   }
 
-  async getCode () {
+  async getCode() {
     this.now = parseInt(Date.now() / 1000)
     let actid = await this.getActId()
     if (!actid) return
@@ -33,7 +33,7 @@ export class exchange extends plugin {
     /** index info */
     let index = await this.getData('index')
     if (!index || !index.data) return
-    if(index.data === null){
+    if (index.data === null) {
       return await this.reply(`错误：\n${index.message}`)
     }
     let index_data = index.data.live;
@@ -46,8 +46,11 @@ export class exchange extends plugin {
     if (!code || !code.data?.code_list) return
     let codes = [];
 
-    for(let val of code.data.code_list){
-      codes.push(val.title + ':' + val.code);
+    for (let val of code.data.code_list) {
+      if (val.code){
+        let title = (val.title || '').replace(/\<.*?\>/g,'')
+        codes.push(title + '：' + val.code)
+      }
     }
 
     let msg = ''
@@ -64,7 +67,7 @@ export class exchange extends plugin {
     await this.reply(msg)
   }
 
-  async getData (type) {
+  async getData(type) {
     let url = {
       index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
       code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${parseInt(new Date().getTime() / 1000)}`,
@@ -73,11 +76,12 @@ export class exchange extends plugin {
 
     let response
     try {
-      response = await fetch(url[type], { 
-        method: 'get' ,
-        headers:{
+      response = await fetch(url[type], {
+        method: 'get',
+        headers: {
           'x-rpc-act_id': this.actId
-      }})
+        }
+      })
     } catch (error) {
       logger.error(error.toString())
       return false
@@ -90,14 +94,14 @@ export class exchange extends plugin {
     const res = await response.json()
     return res
   }
-  
+
   async getActId() {
     // 获取 "act_id"
     let ret = await this.getData('actId')
     if (ret.error || ret.retcode !== 0) {
       return "";
     }
-  
+
     let actId = "";
     let keywords = ["来看《原神》", "版本前瞻特别节目"];
     for (const p of ret.data.list) {
@@ -117,18 +121,18 @@ export class exchange extends plugin {
           }
         }
       }
-     
+
       if (actId) {
         break;
       }
     }
-  
+
     return actId;
   }
-  async useCode(){
+  async useCode() {
     let cdkCode = this.e.message[0].text.split(/#(兑换码使用|cdk-u) /, 3)[2];
-    let res = await MysInfo.get(this.e, 'useCdk',{cdk:cdkCode})
-    if(res){
+    let res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
+    if (res) {
       this.e.reply(`${res.data.msg}`)
     }
   }
