@@ -36,28 +36,29 @@ export class exchange extends plugin {
     if(index.data === null){
       return await this.reply(`错误：\n${index.message}`)
     }
-    this.mi18n = index.data.mi18n
-    let mi18n = await this.getData('mi18n')
-
-    if (index.data.remain > 0) {
-      let version = mi18n['act-title'].match(/\d.\d/g)
-      return await this.reply(`暂无直播兑换码\n${version}版本前瞻${mi18n['empty-code-text']}`)
+    let index_data = index.data.live;
+    let title = index_data['title'];
+    if (index_data.remain > 0) {
+      return await this.reply(`暂无直播兑换码\n${title}`)
     }
 
     let code = await this.getData('code')
-    if (!code) return
+    if (!code || !code.data?.code_list) return
+    let codes = [];
 
-    code = lodash.map(code, 'code')
+    for(let val of code.data.code_list){
+      codes.push(val.title + ':' + val.code);
+    }
+
     let msg = ''
-    if (code.length >= 3) {
-      msg = [`${mi18n['act-title']}-直播兑换码`, `${mi18n['exchange-tips']}`, ...code]
+    if (codes.length >= 3) {
+      msg = [`${title}-直播兑换码`, `兑换码存在有效期，请及时兑换哦~`, ...codes]
       msg = await common.makeForwardMsg(this.e, msg, msg[0])
     } else if (this.e.msg.includes('#')) {
-      msg += code.join('\n')
+      msg += codes.join('\n')
     } else {
-      msg = `${mi18n['act-title']}-直播兑换码\n`
-      msg += `${mi18n['exchange-tips']}\n\n`
-      msg += code.join('\n')
+      msg = `${title}-直播兑换码\n`
+      msg += codes.join('\n')
     }
 
     await this.reply(msg)
@@ -65,15 +66,18 @@ export class exchange extends plugin {
 
   async getData (type) {
     let url = {
-      index: `https://api-takumi.mihoyo.com/event/bbslive/index?act_id=${this.actId}`,
-      mi18n: `https://webstatic.mihoyo.com/admin/mi18n/bbs_cn/${this.mi18n}/${this.mi18n}-zh-cn.json`,
-      code: `https://webstatic.mihoyo.com/bbslive/code/${this.actId}.json?version=1&time=${this.now}`,
+      index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
+      code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${parseInt(new Date().getTime() / 1000)}`,
       actId: "https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=75276550",
     }
 
     let response
     try {
-      response = await fetch(url[type], { method: 'get' })
+      response = await fetch(url[type], { 
+        method: 'get' ,
+        headers:{
+          'x-rpc-act_id': this.actId
+      }})
     } catch (error) {
       logger.error(error.toString())
       return false
@@ -86,18 +90,6 @@ export class exchange extends plugin {
     const res = await response.json()
     return res
   }
-
-  // async getActId () {
-  //   let ret = await this.getData('actId')
-  //   if (!ret || ret.retcode !== 0) return false
-
-  //   let post = lodash.map(ret.data.posts, 'post')
-  //   post = lodash.maxBy(post, 'created_at')
-  //   let actId = post.content.replace(/\[链接\]|\[图片\]/g, '').trim()
-  //   if (!actId) return false
-
-  //   return actId
-  // }
   
   async getActId() {
     // 获取 "act_id"
@@ -119,7 +111,7 @@ export class exchange extends plugin {
       let shit = JSON.parse(post.structured_content);
       for (let segment of shit) {
         if (segment.insert.toString().includes('观看直播') && segment.attributes.link) {
-          let matched = segment.attributes.link.match(/act_id=(\d{8}ys\d{4})/);
+          let matched = segment.attributes.link.match(/act_id=(.*?)&/);
           if (matched) {
             actId = matched[1];
           }
