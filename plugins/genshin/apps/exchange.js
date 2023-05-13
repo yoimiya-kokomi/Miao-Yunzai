@@ -48,8 +48,8 @@ export class exchange extends plugin {
 
     for (let val of code.data.code_list) {
       if (val.code){
-        let title = (val.title || '').replace(/\<.*?\>/g,'')
-        codes.push(title + '：' + val.code)
+        //let title = (val.title || '').replace(/\<.*?\>/g,'')
+        codes.push(val.code)
       }
     }
 
