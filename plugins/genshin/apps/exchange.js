@@ -25,6 +25,7 @@ export class exchange extends plugin {
   }
 
   async getCode() {
+    this.code_ver = ''
     this.now = parseInt(Date.now() / 1000)
     let actid = await this.getActId()
     if (!actid) return
@@ -36,8 +37,10 @@ export class exchange extends plugin {
     if (index.data === null) {
       return await this.reply(`错误：\n${index.message}`)
     }
+    
     let index_data = index.data.live;
     let title = index_data['title'];
+    this.code_ver = index_data['code_ver'];
     if (index_data.remain > 0) {
       return await this.reply(`暂无直播兑换码\n${title}`)
     }
@@ -70,7 +73,7 @@ export class exchange extends plugin {
   async getData(type) {
     let url = {
       index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
-      code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${parseInt(new Date().getTime() / 1000)}`,
+      code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${this.now}`,
       actId: "https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=75276550",
     }
 
