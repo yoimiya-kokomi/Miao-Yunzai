@@ -191,7 +191,6 @@ export class add extends plugin {
     this.e.isGlobal = this.e.msg.includes("全局");
 
     this.keyWord = this.e.raw_message.trim()
-      /** 过滤#添加 */
       .replace(/^#?(全局)?(添加|删除)(图片|表情)?/, '')
       .trim()
 
@@ -520,9 +519,14 @@ export class add extends plugin {
 
     this.initTextArr()
 
-    let keyWord = this.e.toString().replace(/#|＃|图片|表情|删除|全部|全局/g, '')
+    this.getKeyWord()
 
-    keyWord = this.trimAlias(keyWord)
+    if (!this.keyWord) {
+      this.e.reply('删除错误：没有关键词')
+      return
+    }
+
+    let keyWord = this.trimAlias(this.keyWord)
 
     let num = false
     let index = 0
@@ -577,7 +581,7 @@ export class add extends plugin {
     let retMsg = [{ type: 'text', text: '删除成功：' }]
     for (let msg of this.e.message) {
       if (msg.type == 'text') {
-        msg.text = msg.text.replace(/#|＃|图片|表情|删除|全部|全局/g, '')
+        msg.text = msg.text.replace(/^#?(全局)?(添加|删除)(图片|表情)?/, '')
 
         if (!msg.text) continue
       }
