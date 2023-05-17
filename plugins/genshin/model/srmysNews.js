@@ -251,7 +251,7 @@ export default class MysNews extends base {
       logger.mark(`[崩坏星穹铁道${typeName}推送] ${param.data.post.subject}`)
 
       this[postId] = {
-        img: await this.rander(param),
+        img: await this.render(param),
         title: param.data.post.subject
       }
     }
