@@ -21,7 +21,7 @@
     "chalk": "^5.2.0",
     "chokidar": "^3.5.3",
     "https-proxy-agent": "5.0.1",
-    "icqq": "^0.3.10",
+    "icqq": "^0.3.14",
     "image-size": "^1.0.2",
     "inquirer": "^8.2.5",
     "lodash": "^4.17.21",
@@ -40,7 +40,7 @@
     "yaml": "^2.2.2"
   },
   "devDependencies": {
-    "eslint": "^8.40.0",
+    "eslint": "^8.41.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^15.7.0",
