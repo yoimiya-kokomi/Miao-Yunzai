@@ -118,7 +118,7 @@ export default class MysInfo {
     if (!matchMsgUid) uid = user.getUid(e)
     if (uid) {
       /** 没有绑定的自动绑定 */
-      return await user.setRegUid(uid, false)
+      return await user.setRegUid(uid, e, false)
     }
 
     if (e.noTips !== true) e.reply('请先#绑定uid', false, { at })

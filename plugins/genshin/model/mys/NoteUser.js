@@ -158,6 +158,7 @@ export default class NoteUser extends BaseModel {
       })
 
       let uidReg = /\d{9}/
+      let regUidCount = 0
 
       // 存在数据库记录则进行设置
       if (gameDB) {
@@ -166,9 +167,10 @@ export default class NoteUser extends BaseModel {
         lodash.forEach(['verify', 'reg'], (uidType) => {
           lodash.forEach(regUids, (ds, uid) => {
             uid = uid + ''
-            if (uid && uidReg.test(uid) && ds.type === uidType && !uidMap[key][uid]) {
+            if (regUidCount <= 5 && uid && uidReg.test(uid) && ds.type === uidType && !uidMap[key][uid]) {
               uidMap[key][uid] = { uid, type: ds.type }
               uidList[key].push(uid)
+              regUidCount++
             }
           })
         })
@@ -242,21 +244,29 @@ export default class NoteUser extends BaseModel {
 
 
   // 添加UID
-  addRegUid (uid, game = 'gs') {
+  async addRegUid (uid, game = 'gs') {
     let gameKey = this.gameKey(game)
     uid = uid + ''
     if (!this.uidMap[gameKey][uid]) {
       this.uidMap[gameKey][uid] = { uid, type: 'reg' }
     }
+    await this.save()
     this.setMainUid(uid, game)
+    // todo 优化保存
+    await this.save()
   }
 
   // 删除UID
-  delRegUid (uid, game = 'gs') {
+  async delRegUid (uid, game = 'gs') {
     let gameKey = this.gameKey(game)
     if (this.uidMap[gameKey][uid] && this.uidMap[gameKey][uid].type !== 'ck') {
+      lodash.remove(this.uidList[gameKey], (u) => u + '' === uid + '')
       delete this.uidMap[gameKey][uid]
-      lodash.remove(this.uidList[gameKey], (u) => u === uid)
+    }
+    await this.save()
+    if (this.mainUid[gameKey] === uid) {
+      this.setMainUid(this.uidList[gameKey][0], game)
+      await this.save()
     }
   }
 
@@ -277,7 +287,7 @@ export default class NoteUser extends BaseModel {
    * @param force 若已存在绑定uid关系是否强制更新
    */
   async setRegUid (uid = '', game = 'gs', force = false) {
-    if (this.getRegUid(game) && false) {
+    if (this.getRegUid(game) && !force) {
       return uid
     }
     await this.addRegUid(uid, game)

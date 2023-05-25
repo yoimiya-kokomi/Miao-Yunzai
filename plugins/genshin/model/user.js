@@ -6,7 +6,6 @@ import common from '../../../lib/common/common.js'
 import MysInfo from './mys/mysInfo.js'
 import NoteUser from './mys/NoteUser.js'
 import MysUser from './mys/MysUser.js'
-import MysUtil from './mys/MysUtil.js'
 import { promisify } from 'node:util'
 import YAML from 'yaml'
 import { Data } from '#miao'
@@ -153,8 +152,23 @@ export default class User extends base {
     if (!uid) return
     uid = uid[0]
     let user = await this.user()
-    user.addRegUid(uid, this.e)
-    await user.save()
+    await user.addRegUid(uid, this.e)
+    return await this.showUid()
+  }
+
+  async delUid (index) {
+    let user = await this.user()
+    let game = this.e
+    let uidList = user.getUidList(game)
+    if (index > uidList.length) {
+      return await this.e.reply('uid序号输入错误')
+    }
+    index = Number(index) - 1
+    let uidObj = uidList[index]
+    if (uidObj.type === 'ck') {
+      return await this.e.reply('CK对应UID无法直接删除，请通过【#删除ck】命令来删除')
+    }
+    await user.delRegUid(uidObj.uid, game)
     return await this.showUid()
   }
 
