@@ -82,7 +82,8 @@ export default class GachaLog extends base {
 
   dealUrl(url) {
     // timestamp=1641338980〈=zh-cn 修复链接有奇怪符号
-    url = url.replace(/〈=/g, '&').split('getGachaLog?')[1]
+    url = url.replace(/〈=/g, '&')
+    if (url.includes("getGachaLog?")) url = url.split('getGachaLog?')[1]
 
     // 处理参数
     let arr = new URLSearchParams(url).entries()
