@@ -1,15 +1,16 @@
 import moment from 'moment'
 import BaseModel from './BaseModel.js'
+import MysUtil from './MysUtil.js'
 
 const servs = ['mys', 'hoyolab']
 // 超时时间不必精确，直接定24小时即可
 const EX = 3600 * 24
-const redisKeyRoot = 'Yz:genshin:mys:'
+const redisKeyRoot = 'Yz:cache:'
 
 export default class DailyCache extends BaseModel {
-  constructor (uid) {
+  constructor (uid, game = 'config') {
     super()
-    const storeKey = DailyCache.getStoreKey(uid)
+    const storeKey = DailyCache.getStoreKey(uid, game)
     // 检查实例缓存
     let self = this._getThis('store', storeKey)
     if (self) {
@@ -22,40 +23,28 @@ export default class DailyCache extends BaseModel {
   /**
    * 传入UID或server标示，返回当日存储对象
    * @param uid
+   * @param game
    * * 为空则返回与serv无关的dailyCache
    * * 传入UID，会返回UID对应serv的cache对象
    * * 传入servKey (mys/hoyolab)，会返回指定的servCache
    * @returns {DailyCache}
    */
-  static create (uid) {
-    return new DailyCache(uid)
-  }
-
-  /** ---- 基础方法 ---- **/
-  // 内部方法：获取redis表key键值
-  getTableKey (key, sub = '') {
-    if (sub) {
-      return `${this.keyPre}:${key}-${sub}`
-    } else {
-      return `${this.keyPre}:${key}`
-    }
-  }
-
-  // 内部方法：获取server key
-  static getServKey (uid) {
-    // 不传入uid为默认cache
-    if (!uid || uid === 'cache') {
-      return 'cache'
-    }
-    // 传入uid或sever key，判断是mys还是hoyolab
-    return /^[6-9]|^hoyo|^os/i.test(uid) ? servs[1] : servs[0]
+  static create (uid, game = 'config') {
+    return new DailyCache(uid, game)
   }
 
   // 内部方法：获取redis表前缀
-  static getStoreKey (uid) {
-    const serv = DailyCache.getServKey(uid)
+  static getStoreKey (uid, game = 'config') {
+    let key
+    if (!uid || game === 'config') {
+      key = 'sys:config'
+    } else {
+      game = MysUtil.getGameKey(game)
+      let serv = /^[6-9]|^hoyo|^os/i.test(uid) ? servs[1] : servs[0]
+      key = `${game}:${serv}`
+    }
     const date = moment().format('MM-DD')
-    return `${serv}-${date}`
+    return `${key}-${date}`
   }
 
   /**
@@ -78,14 +67,55 @@ export default class DailyCache extends BaseModel {
   static async clearOutdatedData () {
     let keys = await redis.keys(`${redisKeyRoot}*`)
     const date = moment().format('MM-DD')
-    const testReg = new RegExp(`^${redisKeyRoot}(mys|hoyo|hoyolab|cache)-\\d{2}-\\d{2}`)
-    const todayReg = new RegExp(`^${redisKeyRoot}(mys|hoyo|hoyolab|cache)-${date}`)
+    const testReg = new RegExp(`^${redisKeyRoot}(mys|hoyolab|config)-\\d{2}-\\d{2}`)
+    const todayReg = new RegExp(`^${redisKeyRoot}(mys|hoyolab|config)-${date}`)
     for (let key of keys) {
       if (testReg.test(key) && !todayReg.test(key)) {
         await redis.del(key)
       }
     }
   }
+
+  // 内部方法，用于decode value
+  static decodeValue (value, decode = false) {
+    if (value && decode) {
+      try {
+        return JSON.parse(value)
+      } catch (e) {
+        return false
+      }
+    }
+    return value
+  }
+
+  // 内部方法，用于encode value
+  static encodeValue (value) {
+    if (typeof (value) === 'object') {
+      return JSON.stringify(value) || ''
+    }
+    if (typeof (value) === 'undefined') {
+      return ''
+    }
+    return '' + value
+  }
+
+  /** ---- 基础方法 ---- **/
+  // 内部方法：获取redis表key键值
+  getTableKey (key, sub = '') {
+    if (sub) {
+      return `${this.keyPre}:${key}-${sub}`
+    } else {
+      return `${this.keyPre}:${key}`
+    }
+  }
+
+  /**
+   * 【基础数据结构】：Key-Value
+   *
+   * 每个key对应一个Value
+   * 使用redis kv存储,所有操作需要指定表名
+   *
+   * **/
 
   /**
    * 设置指定表的过期时间
@@ -109,14 +139,6 @@ export default class DailyCache extends BaseModel {
     await redis.del(this.getTableKey(table))
     await redis.del(this.getTableKey(table, 'count'))
   }
-
-  /**
-   * 【基础数据结构】：Key-Value
-   *
-   * 每个key对应一个Value
-   * 使用redis kv存储,所有操作需要指定表名
-   *
-   * **/
 
   /**
    * 获取表指定key内容
@@ -174,29 +196,6 @@ export default class DailyCache extends BaseModel {
   async set (table, value) {
     value = DailyCache.encodeValue(value)
     return await redis.set(this.getTableKey(table), value, { EX })
-  }
-
-  // 内部方法，用于decode value
-  static decodeValue (value, decode = false) {
-    if (value && decode) {
-      try {
-        return JSON.parse(value)
-      } catch (e) {
-        return false
-      }
-    }
-    return value
-  }
-
-  // 内部方法，用于encode value
-  static encodeValue (value) {
-    if (typeof (value) === 'object') {
-      return JSON.stringify(value) || ''
-    }
-    if (typeof (value) === 'undefined') {
-      return ''
-    }
-    return '' + value
   }
 
   /**

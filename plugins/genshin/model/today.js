@@ -145,7 +145,7 @@ export default class Today extends base {
     }
 
     /** 判断是否绑定了ck */
-    this.ck = await MysInfo.checkUidBing(this.e.uid)
+    this.ck = await MysInfo.checkUidBing(this.e.uid, this.e)
 
     let skill = {}
     if (this.ck) {

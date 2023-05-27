@@ -3,8 +3,12 @@ import gsCfg from './gsCfg.js'
 import lodash from 'lodash'
 import fs from 'node:fs'
 import common from '../../../lib/common/common.js'
-import MysUser from './mys/MysUser.js'
 import MysInfo from './mys/mysInfo.js'
+import NoteUser from './mys/NoteUser.js'
+import MysUser from './mys/MysUser.js'
+import { promisify } from 'node:util'
+import YAML from 'yaml'
+import { Data } from '#miao'
 
 export default class User extends base {
   constructor (e) {
@@ -23,7 +27,7 @@ export default class User extends base {
 
   // 获取当前user实例
   async user () {
-    return await MysInfo.getNoteUser(this.e)
+    return await NoteUser.create(this.e)
   }
 
   async resetCk () {
@@ -41,9 +45,9 @@ export default class User extends base {
       return
     }
 
-    let ck = this.e.ck.replace(/#|'|"/g, '')
+    let ckStr = this.e.ck.replace(/#|'|"/g, '')
     let param = {}
-    ck.split(';').forEach((v) => {
+    ckStr.split(';').forEach((v) => {
       // 处理分割特殊cookie_token
       let tmp = lodash.trim(v).replace('=', '~').split('~')
       param[tmp[0]] = tmp[1]
@@ -54,56 +58,62 @@ export default class User extends base {
       return
     }
 
-    this.ck = `ltoken=${param.ltoken};ltuid=${param.ltuid || param.login_uid};cookie_token=${param.cookie_token || param.cookie_token_v2}; account_id=${param.ltuid || param.login_uid};`
+    // TODO：独立的mys数据，不走缓存ltuid
+    let mys = await MysUser.create(param.ltuid)
+    let data = {}
+    data.ck = `ltoken=${param.ltoken};ltuid=${param.ltuid || param.login_uid};cookie_token=${param.cookie_token || param.cookie_token_v2}; account_id=${param.ltuid || param.login_uid};`
     let flagV2 = false
+
     if (param.cookie_token_v2 && (param.account_mid_v2 || param.ltmid_v2)) { //
       // account_mid_v2 为版本必须带的字段，不带的话会一直提示绑定cookie失败 请重新登录
       flagV2 = true
-      this.ck = `account_mid_v2=${param.account_mid_v2};cookie_token_v2=${param.cookie_token_v2};ltoken_v2=${param.ltoken_v2};ltmid_v2=${param.ltmid_v2};`
+      data.ck = `ltuid=${param.ltuid || param.login_uid};account_mid_v2=${param.account_mid_v2};cookie_token_v2=${param.cookie_token_v2};ltoken_v2=${param.ltoken_v2};ltmid_v2=${param.ltmid_v2};`
+    }
+    if (param.mi18nLang) {
+      data.ck += ` mi18nLang=${param.mi18nLang};`
     }
     /** 拼接ck */
-    this.ltuid = param.ltuid || param.ltmid_v2
+    data.ltuid = param.ltuid || param.ltmid_v2
 
     /** 米游币签到字段 */
-    this.login_ticket = param.login_ticket ?? ''
+    data.login_ticket = param.login_ticket ?? ''
+
+    mys.setCkData(data)
 
     /** 检查ck是否失效 */
-    if (!await this.checkCk(param)) {
+    let uidRet = await mys.reqMysUid()
+    if (uidRet.status !== 0) {
       logger.mark(`绑定cookie错误1：${this.checkMsg || 'cookie错误'}`)
-      await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
-      return
+      // 清除mys数据
+      mys._delCache()
+      return await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
     }
 
     if (flagV2) {
       // 获取米游社通行证id
-      let userFullInfo = await this.getUserInfo()
+      let userFullInfo = await mys.getUserFullInfo()
       if (userFullInfo?.data?.user_info) {
         let userInfo = userFullInfo?.data?.user_info
-        this.ltuid = userInfo.uid
-        this.ck = `${this.ck}ltuid=${this.ltuid};`
+        // this.ltuid = userInfo.uid
+        // this.ck = `${this.ck}ltuid=${this.ltuid};`
       } else {
         logger.mark(`绑定cookie错误2：${userFullInfo.message || 'cookie错误'}`)
-        await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
-        return
+        return await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
       }
     }
 
-    logger.mark(`${this.e.logFnc} 检查cookie正常 [uid:${this.uid}]`)
+    logger.mark(`${this.e.logFnc} 检查cookie正常 [ltuid:${mys.ltuid}]`)
 
-    await user.addCk(this.getCk())
+    await user.addMysUser(mys)
+    await mys.initCache()
+    await user.save()
 
-    logger.mark(`${this.e.logFnc} 保存cookie成功 [uid:${this.uid}] [ltuid:${this.ltuid}]`)
+    logger.mark(`${this.e.logFnc} 保存cookie成功 [ltuid:${mys.ltuid}]`)
 
-    let uidMsg = [`绑定cookie成功\n${this.region_name}：${this.uid}`]
-    if (!lodash.isEmpty(this.allUid)) {
-      this.allUid.forEach(v => {
-        uidMsg.push(`${v.region_name}：${v.uid}`)
-      })
-    }
+    let uidMsg = [`绑定cookie成功`]
     await this.e.reply(uidMsg.join('\n'))
     let msg = ''
-    this.region_name += lodash.map(this.allUid, 'region_name').join(',')
-    if (/天空岛|世界树|America Server|Europe Server|Asia Server/.test(this.region_name)) {
+    if (mys.hasGame('gs')) {
       msg += '原神模块支持：\n【#体力】查询当前树脂'
       msg += '\n【#签到】米游社原神自动签到'
       msg += '\n【#关闭签到】开启或关闭原神自动签到'
@@ -115,7 +125,7 @@ export default class User extends base {
       msg += '\n【#我的ck】查看当前绑定ck'
       msg += '\n【#删除ck】删除当前绑定ck'
     }
-    if (/星穹列车/.test(this.region_name)) {
+    if (mys.hasGame('sr')) {
       msg += '\n星穹铁道支持：\n功能还在咕咕咕~'
     }
     msg += '\n 支持绑定多个ck'
@@ -124,110 +134,16 @@ export default class User extends base {
     await this.e.reply(msg)
   }
 
-  /** 检查ck是否可用 */
-  async checkCk (param) {
-    let res
-    for (let type of ['mys', 'hoyolab']) {
-      let roleRes = await this.getGameRoles(type)
-      if (roleRes?.retcode === 0) {
-        res = roleRes
-        /** 国际服的标记 */
-        if (type === 'hoyolab' && typeof (param.mi18nLang) === 'string') {
-          this.ck += ` mi18nLang=${param.mi18nLang};`
-        }
-        break
-      }
-      if (roleRes.retcode === -100) {
-        this.checkMsg = '该ck已失效，请重新登录获取'
-      } else {
-        this.checkMsg = roleRes.message || 'error'
-      }
-    }
-
-    if (!res) return false
-
-    if (!res.data.list || res.data.list.length <= 0) {
-      this.checkMsg = '该账号尚未绑定原神或星穹角色！'
-      return false
-    } else {
-      res.data.list = res.data.list.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
-    }
-
-    //避免同时多个默认展示角色时候只绑定一个
-    let is_chosen = false
-    /** 米游社默认展示的角色 */
-    for (let val of res.data.list) {
-      if (val.is_chosen && !is_chosen) {
-        this.uid = val.game_uid
-        this.region_name = val.region_name
-        is_chosen = true
-      } else {
-        this.allUid.push({
-          uid: val.game_uid,
-          region_name: val.region_name
-        })
-      }
-    }
-
-
-    if (!this.uid && res.data?.list?.length > 0) {
-      this.uid = res.data.list[0].game_uid
-      this.region_name = res.data.list[0].region_name
-      if (this.allUid[0].uid == this.uid) delete this.allUid[0]
-    }
-
-    return this.uid
-  }
-
-  async getGameRoles (server = 'mys') {
-    return await MysUser.getGameRole(this.ck, server)
-  }
-
-  // 获取米游社通行证id
-  async getUserInfo (server = 'mys') {
-    return await MysUser.getUserFullInfo(this.ck, server)
-  }
-
-  /** 保存ck */
-  getCk () {
-    let ck = gsCfg.getBingCkSingle(this.e.user_id)
-
-    lodash.map(ck, o => {
-      o.isMain = false
-      return o
-    })
-
-    ck[this.uid] = {
-      uid: this.uid,
-      qq: this.e.user_id,
-      ck: this.ck,
-      ltuid: this.ltuid,
-      login_ticket: this.login_ticket,
-      region_name: this.region_name,
-      device_id: this.getGuid(),
-      isMain: true
-    }
-
-    this.allUid.forEach((v) => {
-      if (!v.uid) return
-      ck[v.uid] = {
-        uid: v.uid,
-        qq: this.e.user_id,
-        ck: this.ck,
-        ltuid: this.ltuid,
-        region_name: v.region_name,
-        device_id: this.getGuid(),
-        isMain: false
-      }
-    })
-    return ck
-  }
-
   /** 删除绑定ck */
-  async delCk (uid = '') {
+  async delCk () {
     let user = await this.user()
-    let uids = await user.delCk()
-    return `绑定cookie已删除,uid:${uids.join(',')}`
+    // 获取当前uid
+    let uidData = user.getUidData(this.e)
+    if (!uidData || uidData.type !== 'ck' || !uidData.ltuid) {
+      return `删除失败：当前的UID${uidData.uid}无CK信息`
+    }
+    await user.delMysUser(uidData.ltuid)
+    return `绑定cookie已删除`
   }
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
@@ -236,57 +152,69 @@ export default class User extends base {
     if (!uid) return
     uid = uid[0]
     let user = await this.user()
-    await user.setRegUid(uid, true)
-    return await this.e.reply(`绑定成功uid:${uid}`, false, { at: true })
+    await user.addRegUid(uid, this.e)
+    return await this.showUid()
+  }
+
+  async delUid (index) {
+    let user = await this.user()
+    let game = this.e
+    let uidList = user.getUidList(game)
+    if (index > uidList.length) {
+      return await this.e.reply('uid序号输入错误')
+    }
+    index = Number(index) - 1
+    let uidObj = uidList[index]
+    if (uidObj.type === 'ck') {
+      return await this.e.reply('CK对应UID无法直接删除，请通过【#删除ck】命令来删除')
+    }
+    await user.delRegUid(uidObj.uid, game)
+    return await this.showUid()
   }
 
   /** #uid */
   async showUid () {
     let user = await this.user()
-    if (!user.hasCk) {
-      await this.e.reply(`当前绑定uid：${user.uid || '无'}`, false, { at: true })
-      return
-    }
-    let uids = user.ckUids
-    let ckData = user.ckData
-    let uid = user.uid * 1
-    let msg = [`当前uid：${uid}`, '当前绑定cookie Uid列表', '通过【#uid+序号】来切换uid']
-    let region_name = []
-    Object.keys(ckData).forEach((v) => {
-      if (!region_name.includes(ckData[v].region_name)) {
-        region_name.push(ckData[v].region_name)
+    let msg = []
+    lodash.forEach({ gs: '原神', sr: '星穹铁道' }, (gameName, game) => {
+      let uidList = user.getUidList(game)
+      let currUid = user.getUid(game)
+      if (uidList.length === 0) {
+        return true
       }
-    })
-    let count = 0
-    for (let n of region_name) {
-      msg.push(n)
-      for (let i in uids) {
-        if (ckData[uids[i]].region_name == n) {
-          let tmp = `${++count}: ${uids[i]}`
-          if (uids[i] * 1 === uid) {
-            tmp += ' ☑'
-          }
-          msg.push(tmp)
+      msg.push(`【${gameName}】`)
+      lodash.forEach(uidList, (ds, idx) => {
+        let tmp = `${++idx}: ${ds.uid} (${ds.type})`
+        if (currUid * 1 === ds.uid * 1) {
+          tmp += ' ☑'
         }
-      }
+        msg.push(tmp)
+      })
+    })
+    if (msg.length > 0) {
+      msg.unshift('通过【#uid+序号】来切换uid')
+      await this.e.reply(msg.join('\n'))
+    } else {
+      await this.e.reply('尚未绑定UID，发送CK或通过【#绑定123456789】命令来绑定UID')
     }
-    await this.e.reply(msg.join('\n'))
   }
 
   /** 切换uid */
   async toggleUid (index) {
     let user = await this.user()
-    let uidList = user.ckUids
+    let game = this.e
+    let uidList = user.getUidList(game)
     if (index > uidList.length) {
       return await this.e.reply('uid序号输入错误')
     }
     index = Number(index) - 1
-    await user.setMainUid(index)
-    return await this.e.reply(`切换成功，当前uid：${user.uid}`)
+    user.setMainUid(index, game)
+    await user.save()
+    return await this.showUid()
   }
 
-  /** 加载旧ck */
-  async loadOldData () {
+  /** 加载V2ck */
+  async loadOldDataV2 () {
     let file = [
       './data/MysCookie/NoteCookie.json',
       './data/NoteCookie/NoteCookie.json',
@@ -324,20 +252,93 @@ export default class User extends base {
         qq,
         ck: ck.cookie,
         ltuid,
-        isMain,
-        device_id: this.getGuid()
+        isMain
       }
     })
 
-    lodash.forEach(arr, (ck, qq) => {
-      let saveFile = `./data/MysCookie/${qq}.yaml`
-      if (fs.existsSync(saveFile)) return
-      gsCfg.saveBingCk(qq, ck)
-    })
-
-    logger.mark(logger.green(`加载用户ck完成：${lodash.size(arr)}个`))
-
+    let count = await this.loadOldData(arr)
+    if (count > 0) {
+      logger.mark(logger.green(`DB导入V2用户ck${count}个`))
+    }
     fs.unlinkSync(json)
+  }
+
+  /** 加载V3ck */
+  async loadOldDataV3 (data) {
+    let dir = './data/MysCookie/'
+    Data.createDir('./data/MysCookieBak')
+    let files = fs.readdirSync(dir).filter(file => file.endsWith('.yaml'))
+    const readFile = promisify(fs.readFile)
+    let promises = []
+    files.forEach((v) => promises.push(readFile(`${dir}${v}`, 'utf8')))
+    const res = await Promise.all(promises)
+    let ret = {}
+    for (let v of res) {
+      v = YAML.parse(v)
+      let qq
+      for (let k in v) {
+        qq = qq || v[k]?.qq
+      }
+      if (qq) {
+        ret[qq] = v
+      }
+    }
+    let count = await this.loadOldData(ret)
+    if (count > 0) {
+      logger.mark(logger.green(`DB导入V3用户ck${count}个`))
+    }
+  }
+
+  async loadOldData (data) {
+    let count = 0
+    if (!lodash.isPlainObject(data)) {
+      return
+    }
+    for (let u in data) {
+      let ltuids = {}
+      let v = data[u]
+      let qq
+      for (let k in v) {
+        let data = v[k]
+        qq = qq || data?.qq
+        let { uid, ck, ltuid, region_name: region, device_id: device } = data
+        ltuids[ltuid] = ltuids[ltuid] || {
+          ck,
+          device,
+          ltuid,
+          uids: {},
+          type: /America Server|Europe Server|Asia Server/.test(region) ? 'hoyolab' : 'mys'
+        }
+        let tmp = ltuids[ltuid]
+        let game = region === '星穹列车' ? 'sr' : 'gs'
+        tmp.uids[game] = tmp.uids[game] || []
+        let gameUids = tmp.uids[game]
+        if (!gameUids.includes(uid + '')) {
+          gameUids.push(uid + '')
+        }
+      }
+      if (!qq) {
+        continue
+      }
+      let user = await NoteUser.create(qq)
+      for (let ltuid in ltuids) {
+        let data = ltuids[ltuid]
+        let mys = await MysUser.create(data.ltuid)
+        if (mys) {
+          mys.setCkData(data)
+          await mys.save()
+          user.addMysUser(mys)
+        }
+      }
+      await user.save()
+      if (fs.existsSync(`./data/MysCookie/${qq}.yaml`)) {
+        fs.rename(`./data/MysCookie/${qq}.yaml`, `./data/MysCookieBak/${qq}.yaml`, (err) => {
+          if (err) console.log(err)
+        })
+      }
+      count++
+    }
+    return count
   }
 
   /** 我的ck */
@@ -346,11 +347,10 @@ export default class User extends base {
     if (!user.hasCk) {
       this.e.reply('当前尚未绑定cookie')
     }
-    let ck = user.mainCk
-
-    if (!lodash.isEmpty(ck)) {
-      await this.e.reply(`当前绑定cookie\nuid：${ck.uid}`)
-      await this.e.reply(ck.ck)
+    let mys = user.getMysUser(this.e)
+    if (mys) {
+      await this.e.reply(`当前绑定cookie\nuid：${mys.getUid(this.e)}`)
+      await this.e.reply(mys.ck)
     }
   }
 
@@ -384,14 +384,6 @@ export default class User extends base {
     }
 
     await this.e.reply(cks.join('\n----\n'), false, { at: true })
-  }
-
-  getGuid () {
-    function S4 () {
-      return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
-    }
-
-    return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
   }
 
   async userAdmin () {
