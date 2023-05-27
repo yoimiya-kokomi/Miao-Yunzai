@@ -104,7 +104,7 @@ export class update extends plugin {
     let type = '更新'
     if (this.e.msg.includes('强制')) {
       type = '强制更新'
-      cm = `git reset --hard origin/master && ${cm}`
+      cm = `git fetch --all && git reset --hard && ${cm}`
     }
 
     if (plugin) {

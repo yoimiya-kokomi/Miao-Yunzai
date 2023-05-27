@@ -5,7 +5,7 @@ import lodash from 'lodash'
 import MysInfo from '../model/mys/mysInfo.js'
 
 export class exchange extends plugin {
-  constructor (e) {
+  constructor(e) {
     super({
       name: '兑换码',
       dsc: '前瞻直播兑换码',
@@ -24,7 +24,8 @@ export class exchange extends plugin {
     })
   }
 
-  async getCode () {
+  async getCode() {
+    this.code_ver = ''
     this.now = parseInt(Date.now() / 1000)
     let actid = await this.getActId()
     if (!actid) return
@@ -33,47 +34,57 @@ export class exchange extends plugin {
     /** index info */
     let index = await this.getData('index')
     if (!index || !index.data) return
-    if(index.data === null){
+    if (index.data === null) {
       return await this.reply(`错误：\n${index.message}`)
     }
-    this.mi18n = index.data.mi18n
-    let mi18n = await this.getData('mi18n')
-
-    if (index.data.remain > 0) {
-      let version = mi18n['act-title'].match(/\d.\d/g)
-      return await this.reply(`暂无直播兑换码\n${version}版本前瞻${mi18n['empty-code-text']}`)
+    
+    let index_data = index.data.live;
+    let title = index_data['title'];
+    this.code_ver = index_data['code_ver'];
+    if (index_data.remain > 0) {
+      return await this.reply(`暂无直播兑换码\n${title}`)
     }
 
     let code = await this.getData('code')
-    if (!code) return
+    if (!code || !code.data?.code_list) return
+    let codes = [];
 
-    code = lodash.map(code, 'code')
+    for (let val of code.data.code_list) {
+      if (val.code){
+        //let title = (val.title || '').replace(/\<.*?\>/g,'')
+        codes.push(val.code)
+      }
+    }
+
     let msg = ''
-    if (code.length >= 3) {
-      msg = [`${mi18n['act-title']}-直播兑换码`, `${mi18n['exchange-tips']}`, ...code]
+    if (codes.length >= 3) {
+      msg = [`${title}-直播兑换码`, `兑换码存在有效期，请及时兑换哦~`, ...codes]
       msg = await common.makeForwardMsg(this.e, msg, msg[0])
     } else if (this.e.msg.includes('#')) {
-      msg += code.join('\n')
+      msg += codes.join('\n')
     } else {
-      msg = `${mi18n['act-title']}-直播兑换码\n`
-      msg += `${mi18n['exchange-tips']}\n\n`
-      msg += code.join('\n')
+      msg = `${title}-直播兑换码\n`
+      msg += codes.join('\n')
     }
 
     await this.reply(msg)
   }
 
-  async getData (type) {
+  async getData(type) {
     let url = {
-      index: `https://api-takumi.mihoyo.com/event/bbslive/index?act_id=${this.actId}`,
-      mi18n: `https://webstatic.mihoyo.com/admin/mi18n/bbs_cn/${this.mi18n}/${this.mi18n}-zh-cn.json`,
-      code: `https://webstatic.mihoyo.com/bbslive/code/${this.actId}.json?version=1&time=${this.now}`,
+      index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
+      code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${this.now}`,
       actId: "https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=75276550",
     }
 
     let response
     try {
-      response = await fetch(url[type], { method: 'get' })
+      response = await fetch(url[type], {
+        method: 'get',
+        headers: {
+          'x-rpc-act_id': this.actId
+        }
+      })
     } catch (error) {
       logger.error(error.toString())
       return false
@@ -87,25 +98,13 @@ export class exchange extends plugin {
     return res
   }
 
-  // async getActId () {
-  //   let ret = await this.getData('actId')
-  //   if (!ret || ret.retcode !== 0) return false
-
-  //   let post = lodash.map(ret.data.posts, 'post')
-  //   post = lodash.maxBy(post, 'created_at')
-  //   let actId = post.content.replace(/\[链接\]|\[图片\]/g, '').trim()
-  //   if (!actId) return false
-
-  //   return actId
-  // }
-  
   async getActId() {
     // 获取 "act_id"
     let ret = await this.getData('actId')
     if (ret.error || ret.retcode !== 0) {
       return "";
     }
-  
+
     let actId = "";
     let keywords = ["来看《原神》", "版本前瞻特别节目"];
     for (const p of ret.data.list) {
@@ -119,24 +118,24 @@ export class exchange extends plugin {
       let shit = JSON.parse(post.structured_content);
       for (let segment of shit) {
         if (segment.insert.toString().includes('观看直播') && segment.attributes.link) {
-          let matched = segment.attributes.link.match(/act_id=(\d{8}ys\d{4})/);
+          let matched = segment.attributes.link.match(/act_id=(.*?)&/);
           if (matched) {
             actId = matched[1];
           }
         }
       }
-     
+
       if (actId) {
         break;
       }
     }
-  
+
     return actId;
   }
-  async useCode(){
+  async useCode() {
     let cdkCode = this.e.message[0].text.split(/#(兑换码使用|cdk-u) /, 3)[2];
-    let res = await MysInfo.get(this.e, 'useCdk',{cdk:cdkCode})
-    if(res){
+    let res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
+    if (res) {
       this.e.reply(`${res.data.msg}`)
     }
   }
