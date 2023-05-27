@@ -176,7 +176,7 @@ export default class User extends base {
   async showUid () {
     let user = await this.user()
     let msg = []
-    let typeMap = { ck: 'CK Uid', reg: '绑定uid' }
+    let typeMap = { ck: 'CK Uid', reg: '绑定 Uid' }
     lodash.forEach({ gs: '原神 (#uid)', sr: '星穹铁道 (*uid)' }, (gameName, game) => {
       let uidList = user.getUidList(game)
       let currUid = user.getUid(game)
