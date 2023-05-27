@@ -262,9 +262,12 @@ export default class NoteUser extends BaseModel {
     if (this.uidMap[gameKey][uid] && this.uidMap[gameKey][uid].type !== 'ck') {
       lodash.remove(this.uidList[gameKey], (u) => u + '' === uid + '')
       delete this.uidMap[gameKey][uid]
+      if (this.mainUid[gameKey] === uid) {
+        this.mainUid[gameKey] = ''
+      }
     }
     await this.save()
-    if (this.mainUid[gameKey] === uid) {
+    if (this.mainUid[gameKey] === '') {
       this.setMainUid(this.uidList[gameKey][0], game)
       await this.save()
     }
