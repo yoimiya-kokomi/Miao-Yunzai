@@ -1,3 +1,12 @@
+# 3.1.0
+
+* 重构CK与UID管理逻辑
+    * 支持多UID绑定，可绑定多个UID并进行切换
+    * 支持原神与星铁UID共存，可针对查询命令分配对应UID
+    * 新增`#删除uid1`命令，可对`#uid`列表内的绑定UID进行删除
+    * 使用sqlite进行ck与uid存储
+* 底层对星铁查询进行支持 **@cvs**
+
 # 3.0.2
 
 * 支持协议端：ComWeChat、ICQQ、QQ频道、KOOK、Telegram、Discord

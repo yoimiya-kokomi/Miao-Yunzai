@@ -1,6 +1,6 @@
 {
   "name": "trss-yunzai",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "author": "TimeRainStarSky, Yoimiya-Kokomi, Le-niao",
   "description": "Bot",
   "main": "app.js",
@@ -28,13 +28,14 @@
     "moment": "^2.29.4",
     "node-fetch": "^3.3.1",
     "node-schedule": "^2.1.1",
+    "node-xlsx": "^0.23.0",
     "pm2": "^5.3.0",
     "puppeteer": "^20.4.0",
     "redis": "^4.6.6",
     "sequelize": "^6.31.1",
     "sqlite3": "^5.1.6",
     "ws": "^8.13.0",
-    "yaml": "^2.3.0"
+    "yaml": "^2.3.1"
   },
   "devDependencies": {
     "eslint": "^8.41.0",
