@@ -21,8 +21,8 @@ export default class Note extends base {
       seed_id
     })
     let res = await MysInfo.get(this.e, 'dailyNote',{headers:{
-      'x-rpc-device_fp':device_fp?.data?.device_fp
-    }})
+        'x-rpc-device_fp':device_fp?.data?.device_fp
+      }})
     let resUser
     if (!res || res.retcode !== 0) return false
 
@@ -40,7 +40,7 @@ export default class Note extends base {
       name: this.e.sender.card,
       quality: 80,
       ...screenData,
-      ...data, ...resUser?.data?.list[0]  
+      ...data, ...resUser?.data?.list[0]
     }
   }
 
@@ -48,7 +48,6 @@ export default class Note extends base {
     let { data } = res
     let nowDay = moment().date()
     let nowUnix = Number(moment().format('X'))
-    
     /** 树脂 */
     let resinMaxTime
     if (data.stamina_recover_time > 0) {

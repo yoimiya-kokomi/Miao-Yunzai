@@ -18,7 +18,6 @@ export default class BaseModel extends Model {
 
   static initDB (model, columns) {
     let name = model.name
-    console.log('Model Name', name)
     name = name.replace(/DB$/, 's')
     model.init(columns, { sequelize, tableName: name })
     model.COLUMNS = columns

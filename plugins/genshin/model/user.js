@@ -6,7 +6,6 @@ import common from '../../../lib/common/common.js'
 import MysInfo from './mys/mysInfo.js'
 import NoteUser from './mys/NoteUser.js'
 import MysUser from './mys/MysUser.js'
-import MysUtil from './mys/MysUtil.js'
 import { promisify } from 'node:util'
 import YAML from 'yaml'
 import { Data } from '#miao'
@@ -156,8 +155,23 @@ export default class User extends base {
     if (!uid) return
     uid = uid[0]
     let user = await this.user()
-    user.addRegUid(uid, this.e)
-    await user.save()
+    await user.addRegUid(uid, this.e)
+    return await this.showUid()
+  }
+
+  async delUid (index) {
+    let user = await this.user()
+    let game = this.e
+    let uidList = user.getUidList(game)
+    if (index > uidList.length) {
+      return await this.e.reply('uid序号输入错误')
+    }
+    index = Number(index) - 1
+    let uidObj = uidList[index]
+    if (uidObj.type === 'ck') {
+      return await this.e.reply('CK对应UID无法直接删除，请通过【#删除ck】命令来删除')
+    }
+    await user.delRegUid(uidObj.uid, game)
     return await this.showUid()
   }
 
@@ -165,27 +179,25 @@ export default class User extends base {
   async showUid () {
     let user = await this.user()
     let msg = []
-    lodash.forEach({ gs: '原神', sr: '星穹铁道' }, (gameName, game) => {
+    let typeMap = { ck: 'CK Uid', reg: '绑定 Uid' }
+    lodash.forEach({ gs: '原神 (#uid)', sr: '星穹铁道 (*uid)' }, (gameName, game) => {
       let uidList = user.getUidList(game)
       let currUid = user.getUid(game)
+      msg.push(`【${gameName}】`)
       if (uidList.length === 0) {
+        msg.push(`暂无，通过${game === 'gs' ? '#' : '*'}绑定123456789来绑定UID`)
         return true
       }
-      msg.push(`【${gameName}】`)
       lodash.forEach(uidList, (ds, idx) => {
-        let tmp = `${++idx}: ${ds.uid} (${ds.type})`
+        let tmp = `${++idx}: ${ds.uid} (${typeMap[ds.type]})`
         if (currUid * 1 === ds.uid * 1) {
           tmp += ' ☑'
         }
         msg.push(tmp)
       })
     })
-    if (msg.length > 0) {
-      msg.unshift('通过【#uid+序号】来切换uid')
-      await this.e.reply(msg.join('\n'))
-    } else {
-      await this.e.reply('尚未绑定UID，发送CK或通过【#绑定123456789】命令来绑定UID')
-    }
+    msg.unshift('通过【#uid+序号】来切换uid，【#删除uid+序号】删除uid')
+    await this.e.reply(msg.join('\n'))
   }
 
   /** 切换uid */
@@ -255,10 +267,14 @@ export default class User extends base {
   /** 加载V3ck */
   async loadOldDataV3 (data) {
     let dir = './data/MysCookie/'
-    Data.createDir('./data/MysCookieBak')
+    Data.createDir('./temp/MysCookieBak')
     let files = fs.readdirSync(dir).filter(file => file.endsWith('.yaml'))
     const readFile = promisify(fs.readFile)
     let promises = []
+    if (files.length === 0) {
+      fs.rmdirSync('./data/MysCookie/')
+      return
+    }
     files.forEach((v) => promises.push(readFile(`${dir}${v}`, 'utf8')))
     const res = await Promise.all(promises)
     let ret = {}
@@ -321,7 +337,7 @@ export default class User extends base {
       }
       await user.save()
       if (fs.existsSync(`./data/MysCookie/${qq}.yaml`)) {
-        fs.rename(`./data/MysCookie/${qq}.yaml`, `./data/MysCookieBak/${qq}.yaml`, (err) => {
+        fs.rename(`./data/MysCookie/${qq}.yaml`, `./temp/MysCookieBak/${qq}.yaml`, (err) => {
           if (err) console.log(err)
         })
       }

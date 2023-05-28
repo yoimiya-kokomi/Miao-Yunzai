@@ -60,12 +60,20 @@ export class mysNews extends plugin {
     this.file = './plugins/genshin/config/mys.pushNews.yaml'
 
     /** 定时任务 */
-    this.task = {
-      cron: gsCfg.getConfig('mys', 'pushNews').pushTime,
-      name: '米游社公告推送任务',
-      fnc: () => this.mysNewsTask(),
-      log: false
-    }
+    this.task = [
+      {
+        cron: gsCfg.getConfig('mys', 'pushNews').pushTime,
+        name: '米游社公告推送任务',
+        fnc: () => this.mysNewsTask(),
+        log: false
+      },
+      {
+        cron: gsCfg.getConfig('mys', 'pushNews').pushTime,
+        name: '崩坏星穹铁道公告推送任务',
+        fnc: () => this.srmysNewsTask(),
+        log: false
+      }
+    ]
   }
 
   async init () {
@@ -87,7 +95,7 @@ export class mysNews extends plugin {
   }
 
   async mysNewsTask () {
-    let mysNews = new srNews(this.e)
+    let mysNews = new MysNews(this.e)
     await mysNews.mysNewsTask()
   }
 

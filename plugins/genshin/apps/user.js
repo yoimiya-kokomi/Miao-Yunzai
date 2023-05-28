@@ -38,6 +38,10 @@ export class user extends plugin {
           fnc: 'delCk'
         },
         {
+          reg: '^#?(原神|星铁)?(删除|解绑)uid\\s*[0-9]{1,2}$',
+          fnc: 'delUid'
+        },
+        {
           reg: '^#(原神|星铁)?绑定(uid|UID)?[1-9][0-9]{8}$',
           fnc: 'bingUid'
         },
@@ -143,6 +147,15 @@ export class user extends plugin {
       await this.User.toggleUid(index[0])
     } else {
       await this.User.showUid()
+    }
+  }
+
+  async delUid () {
+    let index = this.e.msg.match(/[0-9]{1,2}$/g)
+    let uidIdx = index && index[0]
+    let game = this.e
+    if (uidIdx) {
+      await this.User.delUid(uidIdx, game)
     }
   }
 

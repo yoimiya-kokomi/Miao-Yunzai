@@ -55,7 +55,7 @@ export default class GachaLog extends base {
       if (i <= 1) await common.sleep(500)
     }
 
-    await this.e.reply(`抽卡记录更新完成，您还可回复\n【#${this?.e?.isSr?'光锥':'武器'}记录】统计${this?.e?.isSr?'光锥':'武器'}池数据\n【#角色统计】按卡池统计数据\n【#导出记录】导出记录数据`)
+    await this.e.reply(`抽卡记录更新完成，您还可回复\n【#${this?.e?.isSr?'星铁光锥':'武器'}记录】统计${this?.e?.isSr?'星铁光锥':'武器'}池数据\n【#${this?.e?.isSr?'星铁':''}角色统计】按卡池统计数据\n【#导出记录】导出记录数据`)
 
     this.isLogUrl = true
 
@@ -82,7 +82,8 @@ export default class GachaLog extends base {
 
   dealUrl(url) {
     // timestamp=1641338980〈=zh-cn 修复链接有奇怪符号
-    url = url.replace(/〈=/g, '&').split('getGachaLog?')[1]
+    url = url.replace(/〈=/g, '&')
+    if (url.includes("getGachaLog?")) url = url.split('getGachaLog?')[1]
 
     // 处理参数
     let arr = new URLSearchParams(url).entries()
