@@ -41,6 +41,9 @@ export default class User extends base {
     let user = await this.user()
     let set = gsCfg.getConfig('mys', 'set')
 
+    if (this.ck && !this.e.ck) {
+      this.e.ck = this.ck
+    }
     if (!this.e.ck) {
       await this.e.reply(`请【私聊】发送米游社cookie，获取教程：\n${set.cookieDoc}`)
       return
