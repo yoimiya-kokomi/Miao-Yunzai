@@ -27,7 +27,7 @@ export default class MysApi {
   }
 
   getUrl(type, data = {}) {
-    let urlMap = this.apiTool.getUrlMap(data)
+    let urlMap = this.apiTool.getUrlMap({...data,deviceId:this.device})
     if (!urlMap[type]) return false
 
     let { url, query = '', body = '', sign = '' } = urlMap[type]
