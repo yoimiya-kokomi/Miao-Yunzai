@@ -10,7 +10,7 @@ export default class apiTool {
    * @param {区服} server
    * @param {是否为星穹铁道或其他游戏? type(bool or string)} isSr
    */
-  constructor (uid, server, isSr = false) {
+  constructor(uid, server, isSr = false) {
     this.uid = uid
     this.isSr = isSr
     this.server = server
@@ -91,6 +91,19 @@ export default class apiTool {
         useCdk: {
           url: 'PLACE_HOLDER',
           query: null
+        },
+        /** 体力接口fp参数用于避开验证码 */
+        getFp: {
+          url: `https://public-data-api.mihoyo.com/device-fp/api/getFp`,
+          body: {
+            seed_id: data.seed_id,
+            device_id: data.deviceId,
+            platform: '5',
+            seed_time: new Date().getTime() + '',
+            ext_fields: '{"userAgent":"Mozilla/5.0 (iPhone; CPU iPhone OS 16_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/2.40.1","browserScreenSize":281520,"maxTouchPoints":5,"isTouchSupported":true,"browserLanguage":"zh-CN","browserPlat":"iPhone","browserTimeZone":"Asia/Shanghai","webGlRender":"Apple GPU","webGlVendor":"Apple Inc.","numOfPlugins":0,"listOfPlugins":"unknown","screenRatio":3,"deviceMemory":"unknown","hardwareConcurrency":"4","cpuClass":"unknown","ifNotTrack":"unknown","ifAdBlock":0,"hasLiedResolution":1,"hasLiedOs":0,"hasLiedBrowser":0}',
+            app_name: 'account_cn',
+            device_fp: '38d7ee834d1e9'
+          },
         }
       },
       honkaisr: {
