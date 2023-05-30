@@ -153,9 +153,13 @@ export default class User extends base {
   async bingUid () {
     let uid = this.e.msg.match(/[1|2|5-9][0-9]{8}/g)
     if (!uid) return
+    let game = 'gs'
+    if (this.e.isSr) {
+      game = 'sr'
+    }
     uid = uid[0]
     let user = await this.user()
-    await user.addRegUid(uid, this.e)
+    await user.addRegUid(uid, game)
     return await this.showUid()
   }
 
