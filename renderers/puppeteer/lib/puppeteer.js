@@ -23,7 +23,7 @@ export default class PuppeteerRenderer {
     /** 截图次数 */
     this.renderNum = 0
     this.config = {
-      headless: Data.def(config.headless, true),
+      headless: Data.def(config.headless, "new"),
       args: Data.def(config.args, [
         '--disable-gpu',
         '--disable-setuid-sandbox',
