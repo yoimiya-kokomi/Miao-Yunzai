@@ -16,13 +16,15 @@ export default class Note extends base {
   }
 
   async getData () {
-    let seed_id=lodash.sample('abcdefghijklmnopqrstuvwxyz0123456789',16).replace(/,/g, '')
-    let device_fp=await MysInfo.get(this.e, 'getFp',{
+    let seed_id = lodash.sample('abcdefghijklmnopqrstuvwxyz0123456789', 16).replace(/,/g, '')
+    let device_fp = await MysInfo.get(this.e, 'getFp', {
       seed_id
     })
-    let res = await MysInfo.get(this.e, 'dailyNote',{headers:{
-        'x-rpc-device_fp':device_fp?.data?.device_fp
-      }})
+    let res = await MysInfo.get(this.e, 'dailyNote', {
+      headers: {
+        'x-rpc-device_fp': device_fp?.data?.device_fp
+      }
+    })
     let resUser
     if (!res || res.retcode !== 0) return false
 
@@ -33,7 +35,7 @@ export default class Note extends base {
     if (this.e.isSr) {
       screenData.tplFile = './plugins/genshin/resources/StarRail/html/dailyNote/dailyNote.html'
       resUser = await MysInfo.get(this.e, 'UserGame')
-      resUser.data?.list?.forEach(v=> this.e.uid.includes(v.game_biz) )
+      resUser.data?.list?.forEach(v => this.e.uid.includes(v.game_biz))
       if (!resUser || resUser.retcode !== 0) return false
     }
     return {

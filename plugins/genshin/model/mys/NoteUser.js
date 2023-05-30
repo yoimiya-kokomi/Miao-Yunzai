@@ -97,7 +97,7 @@ export default class NoteUser extends BaseModel {
 
   static async forEach (fn) {
     let dbs = await UserDB.findAll()
-    await Data.forEach(users, async (db) => {
+    await Data.forEach(dbs, async (db) => {
       let user = await NoteUser.create(db.id, db)
       return await fn(user)
     })

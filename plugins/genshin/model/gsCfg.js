@@ -4,6 +4,8 @@ import fs from 'node:fs'
 import { promisify } from 'node:util'
 import lodash from 'lodash'
 import MysInfo from './mys/mysInfo.js'
+import NoteUser from './mys/NoteUser.js'
+import MysUser from './mys/MysUser.js'
 
 /** 配置文件 */
 class GsCfg {
@@ -20,6 +22,10 @@ class GsCfg {
     this.watcher = { config: {}, defSet: {} }
 
     this.ignore = ['mys.pubCk', 'gacha.set', 'bot.help', 'role.name']
+  }
+
+  get element () {
+    return { ...this.getdefSet('element', 'role'), ...this.getdefSet('element', 'weapon') }
   }
 
   /**
@@ -53,7 +59,7 @@ class GsCfg {
 
     try {
       this[type][key] = YAML.parse(
-          fs.readFileSync(file, 'utf8')
+        fs.readFileSync(file, 'utf8')
       )
     } catch (error) {
       logger.error(`[${app}][${name}] 格式错误 ${error}`)
@@ -88,65 +94,40 @@ class GsCfg {
     this.watcher[type][key] = watcher
   }
 
-  get element () {
-    return { ...this.getdefSet('element', 'role'), ...this.getdefSet('element', 'weapon') }
-  }
-
   /** 读取所有用户绑定的ck */
-  async getBingCk () {
+  async getBingCk (game = 'gs') {
     let ck = {}
     let ckQQ = {}
     let noteCk = {}
-    let dir = './data/MysCookie/'
-    let files = fs.readdirSync(dir).filter(file => file.endsWith('.yaml'))
 
-    const readFile = promisify(fs.readFile)
-
-    let promises = []
-
-    files.forEach((v) => promises.push(readFile(`${dir}${v}`, 'utf8')))
-
-    const res = await Promise.all(promises)
-
-    res.forEach((v) => {
-      let tmp = YAML.parse(v)
-      let qq
-      lodash.forEach(tmp, (item, uid) => {
-        qq = item.qq
-        ck[String(uid)] = item
-        if (item.isMain && !ckQQ[String(item.qq)]) {
-          ckQQ[String(item.qq)] = item
-        }
+    await NoteUser.forEach(async function (user) {
+      let qq = user.qq + ''
+      let tmp = {}
+      lodash.forEach(user.mysUsers, (mys) => {
+        let uids = mys.getUids(game)
+        lodash.forEach(uids, (uid) => {
+          let ckData = mys.getCkInfo(game)
+          ckData.qq = qq
+          if (!ck[uid]) {
+            ck[uid] = ckData
+            ckQQ[qq] = ckData
+          }
+          tmp[uid] = ckData
+        })
       })
-      if (qq && !ckQQ[String(qq)]) {
-        ckQQ[String(qq)] = Object.values(tmp)[0]
-      }
-      noteCk[String(qq)] = tmp
+      noteCk[qq] = tmp
     })
-
     return { ck, ckQQ, noteCk }
   }
 
   /** 获取qq号绑定ck */
   getBingCkSingle (userId) {
-    let file = `./data/MysCookie/${userId}.yaml`
-    try {
-      let ck = fs.readFileSync(file, 'utf-8')
-      ck = YAML.parse(ck)
-      return ck
-    } catch (error) {
-      return {}
-    }
+    console.log('gsCfg.getBingCkSingle() 即将废弃')
+    return {}
   }
 
   saveBingCk (userId, data) {
-    let file = `./data/MysCookie/${userId}.yaml`
-    if (lodash.isEmpty(data)) {
-      fs.existsSync(file) && fs.unlinkSync(file)
-    } else {
-      let yaml = YAML.stringify(data)
-      fs.writeFileSync(file, yaml, 'utf8')
-    }
+    console.log('gsCfg.saveBingCk() 即将废弃')
   }
 
   /**

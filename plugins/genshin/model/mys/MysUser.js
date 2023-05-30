@@ -249,7 +249,6 @@ export default class MysUser extends BaseModel {
 
   // 不建议使用，为了兼容老数据格式，后续废弃
   getCkInfo (game = 'gs') {
-    let gameKey = this.gameKey(game)
     return {
       ck: this.ck,
       uid: this.getUid(game),

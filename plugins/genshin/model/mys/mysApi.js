@@ -1,8 +1,8 @@
 import md5 from 'md5'
-import lodash from 'lodash'
 import fetch from 'node-fetch'
 import cfg from '../../../../lib/config/config.js'
 import apiTool from './apiTool.js'
+
 let HttpsProxyAgent = ''
 export default class MysApi {
   /**
@@ -11,7 +11,7 @@ export default class MysApi {
    * @param option 其他参数
    * @param option.log 是否显示日志
    */
-  constructor(uid, cookie, option = {}, isSr = false) {
+  constructor (uid, cookie, option = {}, isSr = false) {
     this.uid = uid
     this.cookie = cookie
     this.isSr = isSr
@@ -26,8 +26,14 @@ export default class MysApi {
     }
   }
 
-  getUrl(type, data = {}) {
-    let urlMap = this.apiTool.getUrlMap({...data,deviceId:this.device})
+  /* eslint-disable quotes */
+  get device () {
+    if (!this._device) this._device = `Yz-${md5(this.uid).substring(0, 5)}`
+    return this._device
+  }
+
+  getUrl (type, data = {}) {
+    let urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
 
     let { url, query = '', body = '', sign = '' } = urlMap[type]
@@ -40,7 +46,7 @@ export default class MysApi {
     return { url, headers, body }
   }
 
-  getServer() {
+  getServer () {
     let uid = this.uid
     switch (String(uid)[0]) {
       case '1':
@@ -60,7 +66,7 @@ export default class MysApi {
     return 'cn_gf01'
   }
 
-  async getData(type, data = {}, cached = false) {
+  async getData (type, data = {}, cached = false) {
     let { url, headers, body } = this.getUrl(type, data)
 
     if (!url) return false
@@ -153,9 +159,9 @@ export default class MysApi {
     }
   }
 
-  getDs(q = '', b = '') {
+  getDs (q = '', b = '') {
     let n = ''
-    if (['cn_gf01', 'cn_qd01','prod_gf_cn','prod_qd_cn'].includes(this.server)) {
+    if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
       n = 'xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs'
     } else if (/os_|official/.test(this.server)) {
       n = 'okr4obncj8bw5a65hbnn5oo6ixjc3l9w'
@@ -174,22 +180,16 @@ export default class MysApi {
     return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
   }
 
-  cacheKey(type, data) {
+  cacheKey (type, data) {
     return 'Yz:genshin:mys:cache:' + md5(this.uid + type + JSON.stringify(data))
   }
 
-  async cache(res, cacheKey) {
+  async cache (res, cacheKey) {
     if (!res || res.retcode !== 0) return
     redis.setEx(cacheKey, this.cacheCd, JSON.stringify(res))
   }
 
-  /* eslint-disable quotes */
-  get device() {
-    if (!this._device) this._device = `Yz-${md5(this.uid).substring(0, 5)}`
-    return this._device
-  }
-
-  async getAgent() {
+  async getAgent () {
     let proxyAddress = cfg.bot.proxyAddress
     if (!proxyAddress) return null
     if (proxyAddress === 'http://0.0.0.0:0') return null

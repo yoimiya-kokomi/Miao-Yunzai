@@ -58,10 +58,6 @@ export class role extends plugin {
 
   /** 初始化配置文件 */
   async init () {
-    let file = './data/MysCookie'
-    if (!fs.existsSync(file)) {
-      fs.mkdirSync(file)
-    }
 
     let pubCk = './plugins/genshin/config/mys.pubCk.yaml'
     if (!fs.existsSync(pubCk)) {
