@@ -286,16 +286,6 @@ export default class NoteUser extends BaseModel {
     this.save()
   }
 
-  /**
-   * 获取当前用户的绑定UID
-   * 主要供内部调用，建议使用 user.uid 获取用户uid
-   * @returns {Promise<*>}
-   */
-  async getRegUid (game = 'gs') {
-    let gameDs = this.getGameDs(game)
-    return gameDs.uid || ''
-  }
-
   getGameDs (game = 'gs') {
     return this.games[this.gameKey(game)]
   }
@@ -357,6 +347,19 @@ export default class NoteUser extends BaseModel {
     }
     this._map = false
     await this.save()
+  }
+
+  async eachMysUser (fn) {
+    await Data.forEach(this.mysUsers, async (mys, ltuid) => {
+      if (!mys) {
+        return true
+      }
+      return fn(mys, ltuid)
+    })
+  }
+
+  async eachAllMysUser (fn) {
+    return MysUser.forEach(fn)
   }
 
   /**

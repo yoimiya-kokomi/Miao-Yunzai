@@ -66,17 +66,7 @@ export default class MysInfo {
 
     /** 判断回复 */
     await mysInfo.checkReply()
-
     return mysInfo
-  }
-
-  static async getNoteUser (e) {
-    await MysInfo.initCache()
-    let user = await NoteUser.create(e)
-    if (user) {
-      return user
-    }
-    return false
   }
 
   /**
