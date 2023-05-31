@@ -9,6 +9,7 @@ import MysUser from './mys/MysUser.js'
 import { promisify } from 'node:util'
 import YAML from 'yaml'
 import { Data } from '#miao'
+import { Player } from '#miao.models'
 
 export default class User extends base {
   constructor (e) {
@@ -62,7 +63,11 @@ export default class User extends base {
     }
 
     // TODO：独立的mys数据，不走缓存ltuid
-    let mys = await MysUser.create(param.ltuid)
+    let mys = await MysUser.create(param.ltuid || param.ltuid_v2 || param.ltmid_v2)
+    if (!mys) {
+      await this.e.reply('发送cookie不完整或数据错误')
+      return
+    }
     let data = {}
     data.ck = `ltoken=${param.ltoken};ltuid=${param.ltuid || param.login_uid};cookie_token=${param.cookie_token || param.cookie_token_v2}; account_id=${param.ltuid || param.login_uid};`
     let flagV2 = false
@@ -97,8 +102,8 @@ export default class User extends base {
       let userFullInfo = await mys.getUserFullInfo()
       if (userFullInfo?.data?.user_info) {
         let userInfo = userFullInfo?.data?.user_info
-        // this.ltuid = userInfo.uid
-        // this.ck = `${this.ck}ltuid=${this.ltuid};`
+        this.ltuid = userInfo.uid || this.ltuid
+        this.ck = `${this.ck}ltuid=${this.ltuid};`
       } else {
         logger.mark(`绑定cookie错误2：${userFullInfo.message || 'cookie错误'}`)
         return await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
@@ -113,27 +118,31 @@ export default class User extends base {
 
     logger.mark(`${this.e.logFnc} 保存cookie成功 [ltuid:${mys.ltuid}]`)
 
-    let uidMsg = [`绑定cookie成功`]
+    let uidMsg = [`绑定cookie成功`, mys.getUidInfo()]
     await this.e.reply(uidMsg.join('\n'))
-    let msg = ''
+    let msg = []
     if (mys.hasGame('gs')) {
-      msg += '原神模块支持：\n【#体力】查询当前树脂'
-      msg += '\n【#签到】米游社原神自动签到'
-      msg += '\n【#关闭签到】开启或关闭原神自动签到'
-      msg += '\n【#原石】查看原石札记'
-      msg += '\n【#原石统计】原石统计数据'
-      msg += '\n【#练度统计】技能统计列表'
-      msg += '\n【#uid】当前绑定ck uid列表'
-      msg += '\n【#ck】检查当前用户ck是否有效'
-      msg += '\n【#我的ck】查看当前绑定ck'
-      msg += '\n【#删除ck】删除当前绑定ck'
+      msg.push(
+        '原神模块支持：',
+        '【#uid】当前绑定ck uid列表',
+        '【#我的ck】查看当前绑定ck',
+        '【#删除ck】删除当前绑定ck',
+        '【#体力】查询当前树脂',
+        '【#原石】查看原石札记',
+        '【#原石统计】原石统计数据',
+        '【#练度统计】技能统计列表',
+        '【#面板】【#更新面板】面板信息'
+      )
     }
     if (mys.hasGame('sr')) {
-      msg += '\n星穹铁道支持：\n功能还在咕咕咕~'
+      msg.push(
+        '星穹铁道支持：',
+        '【*uid】当前绑定ck uid列表',
+        '【*体力】体力信息',
+        '【*面板】【*更新面板】面板信息'
+      )
     }
-    msg += '\n 支持绑定多个ck'
-    msg = await common.makeForwardMsg(this.e, ['使用命令说明', msg], '绑定成功：使用命令说明')
-
+    msg = await common.makeForwardMsg(this.e, ['使用命令说明', msg.join('\n')], '绑定成功：使用命令说明')
     await this.e.reply(msg)
   }
 
@@ -141,12 +150,17 @@ export default class User extends base {
   async delCk () {
     let user = await this.user()
     // 获取当前uid
-    let uidData = user.getUidData(this.e)
+    let uidData = user.getUidData('', this.e)
     if (!uidData || uidData.type !== 'ck' || !uidData.ltuid) {
-      return `删除失败：当前的UID${uidData.uid}无CK信息`
+      return `删除失败：当前的UID${uidData?.uid}无CK信息`
     }
+    let mys = await MysUser.create(uidData.ltuid)
+    if (!mys) {
+      return `删除失败：当前的UID${uidData?.uid}无CK信息`
+    }
+    let msg = [`绑定cookie已删除`, mys.getUidInfo()]
     await user.delMysUser(uidData.ltuid)
-    return `绑定cookie已删除`
+    return msg.join('\n')
   }
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
@@ -198,6 +212,33 @@ export default class User extends base {
     })
     msg.unshift('通过【#uid+序号】来切换uid，【#删除uid+序号】删除uid')
     await this.e.reply(msg.join('\n'))
+  }
+
+  /** #uid */
+  async showUid2 () {
+    let user = await this.user()
+    let uids = [{
+      key: 'gs',
+      name: '原神'
+    }, {
+      key: 'sr',
+      name: '星穹铁道'
+    }]
+    lodash.forEach(uids, (ds) => {
+      ds.uidList = user.getUidList(ds.key)
+      ds.uid = user.getUid(ds.key)
+      lodash.forEach(ds.uidList, (uidDs) => {
+        let player = Player.create(uidDs.uid, ds.key)
+        if (player) {
+          uidDs.name = player.name
+          uidDs.level = player.level
+        }
+      })
+    })
+    let e = this.e
+    return e.runtime.render('genshin', 'html/user/uid-list', {
+      uids
+    })
   }
 
   /** 切换uid */

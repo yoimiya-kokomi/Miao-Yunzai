@@ -1,6 +1,6 @@
 import { Data } from '#miao'
 
-const games = ['gs', 'sr']
+const games = [{ key: 'gs', name: '原神' }, { key: 'sr', name: '星穹铁道' }]
 
 const MysUtil = {
   // 获取标准ltuid
@@ -8,10 +8,10 @@ const MysUtil = {
     if (!data) {
       return false
     }
-    if (/^\d{4,9}$/.test(data)) {
+    if (/^\d{4,10}$/.test(data)) {
       return data
     }
-    let testRet = /ltuid=(\d{4,9})/g.exec(data.ck || data)
+    let testRet = /ltuid=(\d{4,10})/g.exec(data.ck || data)
     if (testRet && testRet[1]) {
       return testRet[1]
     }
@@ -38,7 +38,9 @@ const MysUtil = {
 
   // 循环game
   async eachGame (fn) {
-    await Data.forEach(games, fn)
+    await Data.forEach(games, (ds) => {
+      return fn(ds.key, ds)
+    })
   },
 
   // 循环server

@@ -74,8 +74,6 @@ export default class MysInfo {
     await MysInfo.initCache()
     let user = await NoteUser.create(e)
     if (user) {
-      // 强制读取一次ck，防止一些问题
-      user.initDB(true)
       return user
     }
     return false
@@ -91,7 +89,7 @@ export default class MysInfo {
     let user = await NoteUser.create(e)
     if (e.uid && matchMsgUid) {
       /** 没有绑定的自动绑定 */
-      return await user.setRegUid(e.uid, e, false)
+      return user.autoRegUid(e.uid, e)
     }
 
     let { msg = '', at = '' } = e
@@ -118,7 +116,7 @@ export default class MysInfo {
     if (!matchMsgUid) uid = user.getUid(e)
     if (uid) {
       /** 没有绑定的自动绑定 */
-      return await user.setRegUid(uid, e, false)
+      return user.autoRegUid(uid, e)
     }
 
     if (e.noTips !== true) e.reply('请先#绑定uid', false, { at })

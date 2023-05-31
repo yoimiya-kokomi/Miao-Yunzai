@@ -149,7 +149,7 @@ export class payLog extends plugin {
   /** 判断主uid，若没有则返回false,有则返回主uid */
   async isMain (id, game = 'gs') {
     let user = await NoteUser.create(id)
-    return user.getSelfUid(game)
+    return user.getCkUid(game)
   }
 
   /** 存储数据 */

@@ -257,6 +257,24 @@ export default class MysUser extends BaseModel {
     }
   }
 
+  getUidData (uid, game = 'gs') {
+    game = this.gameKey(game)
+    if (!this.hasUid(uid, game)) {
+      return false
+    }
+    return {
+      uid,
+      type: 'ck',
+      ltuid: this.ltuid,
+      game
+    }
+  }
+
+  hasUid (uid, game = 'gs') {
+    game = this.gameKey(game)
+    return this.uids[game].includes(uid + '')
+  }
+
   getUid (game = 'gs') {
     return this.getUids(game)[0]
   }
@@ -266,13 +284,15 @@ export default class MysUser extends BaseModel {
     return this.uids[gameKey] || []
   }
 
-  getMainUid () {
-    let ret = {}
-    let uids = this.uids
-    MysUtil.eachGame((gameKey) => {
-      ret[gameKey] = uids[gameKey]?.[0] || ''
+  getUidInfo () {
+    let ret = []
+    MysUtil.eachGame((game, gameDs) => {
+      let uids = this.getUids(game)
+      if (uids && uids.length > 0) {
+        ret.push(`【${gameDs.name}】:${uids.join(', ')}`)
+      }
     })
-    return ret
+    return ret.join('\n')
   }
 
   /**
@@ -417,7 +437,8 @@ export default class MysUser extends BaseModel {
   }
 
   hasGame (game = 'gs') {
-    return (this.isGs(game) ? this.gsUids : this.srUids).length > 0
+    game = this.gameKey(game)
+    return this.uids[game]?.length > 0
   }
 
   // 初始化当前MysUser缓存记录

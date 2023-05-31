@@ -1,0 +1,39 @@
+{{extend elemLayout}}
+
+{{block 'css'}}
+<link rel="stylesheet" type="text/css" href="{{_res_path}}/html/user/uid-list.css"/>
+{{/block}}
+
+{{block 'main'}}
+{{ set gameMap = {
+gs:{mark:'#'},
+sr:{mark:'*'}
+}; }}
+<div class="head-box">
+  <div class="label">111</div>
+</div>
+<div class="uid-list">
+  {{each uids game}}
+  {{set mark = game.key==='gs'? '#':'*'}}
+  <div class="cont">
+    <div class="cont-title">{{game.name}}<span><nobr>{{mark}}uid+序号</nobr>切换</span></div>
+    <div class="cont-body">
+
+      {{each game.uidList uid idx}}
+      <div class="{{game.uid === uid.uid ? 'active':''}}">
+        <div class="idx">{{idx+1}}</div>
+        {{if uid.name && uid.level}}
+        <div>{{uid.name}} (Lv.{{uid.level}})</div>
+        {{/if}}
+        <div>
+          <span class="{{uid.type}}">{{uid.type==='ck'?'CK':'绑定'}}</span>
+          <span>{{uid.uid}}</span>
+        </div>
+      </div>
+      {{/each}}
+      </ul>
+    </div>
+  </div>
+  {{/each}}
+</div>
+{{/block}}
