@@ -69,6 +69,20 @@ export default class Note extends base {
       } else if (seconds > 0) {
         resinMaxTime = seconds + '秒'
       }
+      if ((day > 0) || (hours > 0) || (seconds > 0)) {
+      let total_seconds = 3600*hours + 60*minutes + seconds
+      const now = new Date()
+      const dateTimes = now.getTime() + total_seconds * 1000
+      const date = new Date(dateTimes)
+      const dayDiff = date.getDate() - now.getDate()
+      const str = dayDiff === 0 ? '今日' : '明日'
+      const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date
+              .getMinutes()
+              .toString()
+              .padStart(2, '0')}`
+      let recoverTimeStr = ` | [${str}]${timeStr}`
+        resinMaxTime += recoverTimeStr
+      }
     }
     data.bfStamina = data.current_stamina / data.max_stamina * 100 + '%'
     /** 派遣 */
