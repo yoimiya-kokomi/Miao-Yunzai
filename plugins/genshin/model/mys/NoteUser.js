@@ -206,7 +206,7 @@ export default class NoteUser extends BaseModel {
 
   /** 获取当前UID */
   getUid (game = 'gs') {
-    game = this.game(game)
+    game = this.gameKey(game)
     // todo 刷新uid
     let ds = this.getGameDs(game)
     if (!ds.uid) {
