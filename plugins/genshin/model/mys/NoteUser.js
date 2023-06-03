@@ -289,7 +289,10 @@ export default class NoteUser extends BaseModel {
     game = this.gameKey(game)
     if (uid < 100 || !uid) {
       let uids = this.getUidList(game)
-      uid = (uids[uid] || uids[0]).uid || ''
+      uid = (uids?.[uid] || uids?.[0])?.uid || ''
+    }
+    if (!uid) {
+      return false
     }
     if (this.hasUid(uid, game)) {
       let gameDs = this.getGameDs(game)
