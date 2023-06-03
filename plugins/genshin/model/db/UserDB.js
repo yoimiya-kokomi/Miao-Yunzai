@@ -25,7 +25,31 @@ const COLUMNS = {
   // 头像
   face: Types.STRING,
 
-  ltuids: Types.STRING
+  ltuids: Types.STRING,
+  games: {
+    type: Types.STRING,
+    get () {
+      let data = this.getDataValue('games')
+      let ret = {}
+      try {
+        data = JSON.parse(data) || {}
+      } catch (e) {
+        data = {}
+      }
+      MysUtil.eachGame((game) => {
+        let ds = data[game] || {}
+        ret[game] = {
+          uid: ds.uid || '',
+          data: ds.data || {}
+        }
+      })
+      return ret
+    },
+    set (data) {
+      this.setDataValue('games', JSON.stringify(data))
+    }
+  },
+  data: Types.STRING
 }
 
 class UserDB extends BaseModel {
@@ -33,12 +57,7 @@ class UserDB extends BaseModel {
     // user_id
     id = type === 'qq' ? '' + id : type + id
     // DB查询
-    let user = await UserDB.findByPk(id, {
-      include: {
-        model: UserGameDB,
-        as: 'games'
-      }
-    })
+    let user = await UserDB.findByPk(id)
     if (!user) {
       user = await UserDB.build({
         id,
@@ -57,21 +76,12 @@ class UserDB extends BaseModel {
       }
     })
     db.ltuids = ltuids.join(',')
-    let games = []
-    MysUtil.eachGame((key) => {
-      let game = user.games[key]
-      if (game) {
-        games.push(game)
-      }
-    })
-    if (games.length > 0) {
-      await this.setGames(games)
-    }
+    db.games = user._games
     await this.save()
   }
 }
 
 BaseModel.initDB(UserDB, COLUMNS)
-await UserDB.sync()
+await UserDB.sync({ alter: true })
 
 export default UserDB

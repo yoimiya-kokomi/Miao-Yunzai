@@ -59,12 +59,8 @@ export class user extends plugin {
   }
 
   async init () {
-    let file = './data/MysCookie'
-    if (!fs.existsSync(file)) {
-      fs.mkdirSync(file)
-    }
     /** 加载旧的绑定ck json */
-    this.loadOldData()
+    await this.loadOldData()
   }
 
   /** 接受到消息都会执行一次 */
@@ -169,9 +165,10 @@ export class user extends plugin {
   }
 
   /** 加载旧的绑定ck json */
-  loadOldData () {
-    this.User.loadOldDataV2()
-    this.User.loadOldDataV3()
+  async loadOldData () {
+    await this.User.loadOldDataV2()
+    await this.User.loadOldDataV3()
+    await this.User.loadOldUid()
   }
 
   /** 检查用户CK状态 **/

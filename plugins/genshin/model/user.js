@@ -10,6 +10,7 @@ import { promisify } from 'node:util'
 import YAML from 'yaml'
 import { Data } from '#miao'
 import { Player } from '#miao.models'
+import { UserGameDB, sequelize } from './db/index.js'
 
 export default class User extends base {
   constructor (e) {
@@ -306,8 +307,11 @@ export default class User extends base {
   }
 
   /** 加载V3ck */
-  async loadOldDataV3 (data) {
+  async loadOldDataV3 () {
     let dir = './data/MysCookie/'
+    if (!fs.existsSync(dir)) {
+      return false
+    }
     Data.createDir('./temp/MysCookieBak')
     let files = fs.readdirSync(dir).filter(file => file.endsWith('.yaml'))
     const readFile = promisify(fs.readFile)
@@ -333,6 +337,48 @@ export default class User extends base {
     if (count > 0) {
       logger.mark(logger.green(`DB导入V3用户ck${count}个`))
     }
+  }
+
+  async loadOldUid () {
+    // 从DB中导入
+    await sequelize.query(`delete from UserGames where userId is null or data is null`, {})
+    let games = await UserGameDB.findAll()
+    let count = 0
+    await Data.asyncPool(20, games, async (game) => {
+      if (!game.userId) {
+        game.destroy()
+        return true
+      }
+      count++
+      let user = await NoteUser.create(game.userId)
+      if (game.userId && game.data) {
+        lodash.forEach(game.data, (ds) => {
+          let { uid } = ds
+          user.addRegUid(uid, game.game, false)
+        })
+      }
+      if (game.uid) {
+        user.setMainUid(game.uid, game.game, false)
+      }
+      await user.save()
+      await game.destroy()
+    })
+
+    // 从Redis中导入
+    let keys = await redis.keys('Yz:genshin:mys:qq-uid:*')
+    for (let key of keys) {
+      let uid = await redis.get(key)
+      let qqRet = /Yz:genshin:mys:qq-uid:(\d{5,12})/.exec(key)
+      if (qqRet?.[1] && uid) {
+        let user = await NoteUser.create(qqRet[1])
+        if (!user.getUid('gs')) {
+          user.addRegUid(uid, 'gs')
+        }
+      }
+      redis.del(key)
+    }
+    await sequelize.query(`delete from Users where (ltuids is null or ltuids='') and games is null`, {})
+    console.log('load Uid Data Done...')
   }
 
   async loadOldData (data) {
@@ -384,7 +430,6 @@ export default class User extends base {
       }
       count++
     }
-    return count
   }
 
   /** 我的ck */

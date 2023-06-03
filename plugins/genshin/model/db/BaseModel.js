@@ -23,3 +23,4 @@ export default class BaseModel extends Model {
     model.COLUMNS = columns
   }
 }
+export { sequelize }
