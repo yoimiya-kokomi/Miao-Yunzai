@@ -91,10 +91,10 @@ if [ -d $PY_PLUGIN_PATH"/.git" ]; then
         echo -e " ${Warn} ${YellowBG} 当前工作区有修改，尝试暂存后更新。${Font}"
         git add .
         git stash
-        git pull origin main --allow-unrelated-histories --rebase
+        git pull origin v3 --allow-unrelated-histories --rebase
         git stash pop
     else
-        git pull origin main --allow-unrelated-histories
+        git pull origin v3 --allow-unrelated-histories
     fi
 
     if [[ ! -f "$HOME/.ovo/py.ok" ]]; then
