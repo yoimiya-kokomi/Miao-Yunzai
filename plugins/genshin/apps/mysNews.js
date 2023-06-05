@@ -1,6 +1,6 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import MysNews from '../model/mysNews.js'
-import srNews from '../model/srmysNews.js'
+import MysSrNews from '../model/mysSrNews.js'
 import fs from 'node:fs'
 import lodash from 'lodash'
 import gsCfg from '../model/gsCfg.js'
@@ -25,16 +25,16 @@ export class mysNews extends plugin {
         },
         {
           reg: '^(#*铁道(公告|资讯|活动)|#*星铁(公告|资讯|活动)|#星穹公告|#星穹资讯|#星穹活动)[0-9]*$',
-          fnc: 'srnews'
+          fnc: 'srNews'
         },
         {
           reg: '^#*(开启|关闭)(铁道|星铁|星穹)(公告|资讯)推送$',
-          fnc: 'srsetPush'
+          fnc: 'srSetPush'
         },
         {
           reg: '^#推送(铁道|星铁|星穹)(公告|资讯)$',
           permission: 'master',
-          fnc: 'srmysNewsTask'
+          fnc: 'srMysNewsTask'
         },
         {
           reg: '(.*)(bbs.mihoyo.com|miyoushe.com)/ys(.*)/article(.*)',
@@ -70,7 +70,7 @@ export class mysNews extends plugin {
       {
         cron: gsCfg.getConfig('mys', 'pushNews').pushTime,
         name: '崩坏星穹铁道公告推送任务',
-        fnc: () => this.srmysNewsTask(),
+        fnc: () => this.srMysNewsTask(),
         log: false
       }
     ]
@@ -88,8 +88,8 @@ export class mysNews extends plugin {
     await this.reply(data)
   }
 
-  async srnews () {
-    let data = await new srNews(this.e).getNews()
+  async srNews () {
+    let data = await new MysSrNews(this.e).getNews()
     if (!data) return
     await this.reply(data)
   }
@@ -99,8 +99,8 @@ export class mysNews extends plugin {
     await mysNews.mysNewsTask()
   }
 
-  async srmysNewsTask () {
-    let mysNews = new srNews(this.e)
+  async srMysNewsTask () {
+    let mysNews = new MysSrNews(this.e)
     await mysNews.mysNewsTask()
   }
 
@@ -123,7 +123,7 @@ export class mysNews extends plugin {
     await this.reply(data)
   }
 
-  async srsetPush () {
+  async srSetPush () {
     if (!this.e.isGroup) {
       await this.reply('推送请在群聊中设置')
       return
