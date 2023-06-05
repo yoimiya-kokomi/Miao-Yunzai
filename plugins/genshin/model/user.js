@@ -424,9 +424,15 @@ export default class User extends base {
       }
       await user.save()
       if (fs.existsSync(`./data/MysCookie/${qq}.yaml`)) {
-        fs.rename(`./data/MysCookie/${qq}.yaml`, `./temp/MysCookieBak/${qq}.yaml`, (err) => {
-          if (err) console.log(err)
-        })
+        try {
+          let src = `./data/MysCookie/${qq}.yaml`;
+          let dest = `./temp/MysCookieBak/${qq}.yaml`;
+          await fs.promises.unlink(dest).catch((_) => { });
+          await fs.promises.copyFile(src, dest);
+          await fs.promises.unlink(src);
+        } catch (err) {
+          console.log(err);
+        }
       }
       count++
     }

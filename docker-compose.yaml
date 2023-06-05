@@ -18,6 +18,7 @@ services:
       - ./yunzai/genshin_config:/app/Miao-Yunzai/plugins/genshin/config  # 公共Cookie，云崽功能配置文件
       - ./yunzai/logs:/app/Miao-Yunzai/logs                              # 日志文件
       - ./yunzai/data:/app/Miao-Yunzai/data                              # 数据文件
+      - ./yunzai/temp:/app/Miao-Yunzai/temp                              # 临时文件
       # 以下目录是插件目录，安装完插件后需要手动添加映射（如有其他插件请自行添加）
       # 映射格式：./yunzai/plugins/<插件目录名>:/app/Miao-Yunzai/plugins/<插件目录名>
       # - ./yunzai/plugins/example:/app/Miao-Yunzai/plugins/example                          # 单js插件目录

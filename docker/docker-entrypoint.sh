@@ -91,10 +91,10 @@ if [ -d $PY_PLUGIN_PATH"/.git" ]; then
         echo -e " ${Warn} ${YellowBG} 当前工作区有修改，尝试暂存后更新。${Font}"
         git add .
         git stash
-        git pull origin main --allow-unrelated-histories --rebase
+        git pull origin v3 --allow-unrelated-histories --rebase
         git stash pop
     else
-        git pull origin main --allow-unrelated-histories
+        git pull origin v3 --allow-unrelated-histories
     fi
 
     if [[ ! -f "$HOME/.ovo/py.ok" ]]; then
@@ -184,4 +184,11 @@ fi
 
 echo -e "\n ================ \n ${Info} ${GreenBG} 启动 Miao-Yunzai ${Font} \n ================ \n"
 
+set +e
 node app
+EXIT_CODE=$?
+
+if [[ $EXIT_CODE != 0 ]]; then
+	echo -e "\n ================ \n ${Warn} ${YellowBG} 启动 Miao-Yunzai 失败 ${Font} \n ================ \n"
+	tail -f /dev/null
+fi
