@@ -184,4 +184,11 @@ fi
 
 echo -e "\n ================ \n ${Info} ${GreenBG} 启动 Miao-Yunzai ${Font} \n ================ \n"
 
+set +e
 node app
+EXIT_CODE=$?
+
+if [[ $EXIT_CODE != 0 ]]; then
+	echo -e "\n ================ \n ${Warn} ${YellowBG} 启动 Miao-Yunzai 失败 ${Font} \n ================ \n"
+	tail -f /dev/null
+fi
