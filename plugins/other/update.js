@@ -108,7 +108,7 @@ export class update extends plugin {
     }
 
     if (plugin) {
-      cm = `git -C ./plugins/${plugin}/ pull --no-rebase`
+      cm = `git -C ./plugins/${plugin}/ fetch --all && git -C ./plugins/${plugin}/ reset --hard && git -C ./plugins/${plugin}/ pull`
     }
 
     this.oldCommitId = await this.getcommitId(plugin)
