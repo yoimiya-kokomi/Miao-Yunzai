@@ -55,6 +55,11 @@ export default class MysUser extends BaseModel {
   }
 
   // 可传入ltuid、cookie、ck对象来创建MysUser实例
+
+  get uid () {
+    return this.uids?.gs?.[0] || ''
+  }
+
   // 在仅传入ltuid时，必须是之前传入过的才能被识别
   static async create (ltuid, db = false) {
     ltuid = MysUtil.getLtuid(ltuid)
