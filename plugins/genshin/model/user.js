@@ -344,7 +344,7 @@ export default class User extends base {
     await sequelize.query(`delete from UserGames where userId is null or data is null`, {})
     let games = await UserGameDB.findAll()
     let count = 0
-    await Data.asyncPool(20, games, async (game) => {
+    await Data.forEach(games, async (game) => {
       if (!game.userId) {
         game.destroy()
         return true
