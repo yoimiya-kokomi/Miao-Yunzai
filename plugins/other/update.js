@@ -108,7 +108,9 @@ export class update extends plugin {
     }
 
     if (plugin) {
-      cm = `git -C ./plugins/${plugin}/ fetch --all && git -C ./plugins/${plugin}/ reset --hard && git -C ./plugins/${plugin}/ pull`
+      cm = `git -C ./plugins/${plugin}/ pull --no-rebase`
+      // 请带上脑子来水pr
+      // cm = `git -C ./plugins/${plugin}/ fetch --all && git -C ./plugins/${plugin}/ reset --hard && git -C ./plugins/${plugin}/ pull`
     }
 
     this.oldCommitId = await this.getcommitId(plugin)
