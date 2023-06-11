@@ -108,10 +108,13 @@ export class update extends plugin {
     }
 
     if (plugin) {
-      cm = `git -C ./plugins/${plugin}/ pull --no-rebase`
-      // 请带上脑子来水pr
-      // cm = `git -C ./plugins/${plugin}/ fetch --all && git -C ./plugins/${plugin}/ reset --hard && git -C ./plugins/${plugin}/ pull`
-    }
+      if (this.e.msg.includes('强制')) {
+        type = '强制更新'
+        cm = `git -C ./plugins/${plugin}/ fetch --all && git -C ./plugins/${plugin}/ reset --hard && git -C ./plugins/${plugin}/ pull`
+      }else{
+        cm =  `git -C ./plugins/${plugin}/ pull --no-rebase`
+      }
+}
 
     this.oldCommitId = await this.getcommitId(plugin)
 
