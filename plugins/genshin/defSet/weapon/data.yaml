@@ -123,6 +123,7 @@ Name:
   '807607555': 天空之卷
   '1455107995': 四风原典
   '693354267': 尘世之锁
+  '4007372867': 碧落之珑
   '1890163363': 不灭月华
   '310247243': 神乐之真意
   '1201790667': 千夜浮梦
@@ -160,6 +161,7 @@ Name:
   '4230231107': 若水
   '2918525947': 飞雷之弦振
   '1348687251': 猎人之径
+  '316078811': 鹮穿之喙
   '4137694339': (test)竿测试
   '2719832059': (test)穿模测试
   '500987603': (test)穿模测试
@@ -289,6 +291,7 @@ Type:
   天空之卷: 法器
   四风原典: 法器
   尘世之锁: 法器
+  碧落之珑: 法器
   不灭月华: 法器
   神乐之真意: 法器
   千夜浮梦: 法器
@@ -326,6 +329,7 @@ Type:
   若水: 弓
   飞雷之弦振: 弓
   猎人之径: 弓
+  鹮穿之喙: 弓
   (test)竿测试: 单手剑
   (test)穿模测试: 弓
 Icon:
@@ -450,6 +454,7 @@ Icon:
   天空之卷: UI_EquipIcon_Catalyst_Dvalin
   四风原典: UI_EquipIcon_Catalyst_Fourwinds
   尘世之锁: UI_EquipIcon_Catalyst_Kunwu
+  碧落之珑: UI_EquipIcon_Catalyst_Morax
   不灭月华: UI_EquipIcon_Catalyst_Kaleido
   神乐之真意: UI_EquipIcon_Catalyst_Narukami
   千夜浮梦: UI_EquipIcon_Catalyst_Ayus
@@ -487,5 +492,6 @@ Icon:
   若水: UI_EquipIcon_Bow_Kirin
   飞雷之弦振: UI_EquipIcon_Bow_Narukami
   猎人之径: UI_EquipIcon_Bow_Ayus
+  鹮穿之喙: UI_EquipIcon_Bow_Ibis
   (test)竿测试: UI_EquipIcon_FishingRod
   (test)穿模测试: UI_EquipIcon_Bow_Template

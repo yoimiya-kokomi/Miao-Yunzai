@@ -27,7 +27,7 @@ export class update extends plugin {
           fnc: 'update'
         },
         {
-          reg: '^#全部更新$',
+          reg: '^#全部(强制)?更新$',
           fnc: 'updateAll',
           permission: 'master'
         }

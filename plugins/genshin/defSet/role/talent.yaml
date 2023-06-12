@@ -294,6 +294,12 @@ Name:
   '604': 诓惑者，接树移花
   '605': 坐庄者，三仙戏法
   '606': 取胜者，大小通吃
+  '611': 物器流转
+  '612': 八尖裹术
+  '613': 万户门牌通识
+  '614': 韦驮骏足
+  '615': 千里一日
+  '616': 沿途百景会心
   '621': 异界之星
   '622': 异界之星
   '623': 异界之星
@@ -408,6 +414,18 @@ Name:
   '804': 晴霜的祝念
   '805': 引示的铃箭
   '806': 依随的策援
+  '811': 高门的谒礼
+  '812': 御驿的径迹
+  '813': 金塔的香献
+  '814': 百柱的酣宴
+  '815': 圣古的库藏
+  '816': 天园的理想
+  '821': 呿吟至微
+  '822': 动静精明
+  '823': 八正定气
+  '824': 法古观冥
+  '825': 盈虚藏象
+  '826': 真邪合离
 Icon:
   '21': UI_Talent_S_Ayaka_01
   '22': UI_Talent_S_Ayaka_02
@@ -703,6 +721,12 @@ Icon:
   '604': UI_Talent_S_Yelan_03
   '605': UI_Talent_U_Yelan_02
   '606': UI_Talent_S_Yelan_04
+  '611': UI_Talent_S_Momoka_01
+  '612': UI_Talent_S_Momoka_02
+  '613': UI_Talent_U_Momoka_01
+  '614': UI_Talent_S_Momoka_04
+  '615': UI_Talent_U_Momoka_02
+  '616': UI_Talent_S_Momoka_03
   '621': UI_Talent_S_Aloy_Lock
   '622': UI_Talent_S_Aloy_Lock
   '623': UI_Talent_S_Aloy_Lock
@@ -817,3 +841,15 @@ Icon:
   '804': UI_Talent_S_Mika_03
   '805': UI_Talent_U_Mika_02
   '806': UI_Talent_S_Mika_04
+  '811': UI_Talent_S_Kaveh_01
+  '812': UI_Talent_S_Kaveh_02
+  '813': UI_Talent_U_Kaveh_02
+  '814': UI_Talent_S_Kaveh_03
+  '815': UI_Talent_U_Kaveh_01
+  '816': UI_Talent_S_Kaveh_04
+  '821': UI_Talent_S_Baizhuer_01
+  '822': UI_Talent_S_Baizhuer_02
+  '823': UI_Talent_U_Baizhuer_01
+  '824': UI_Talent_S_Baizhuer_03
+  '825': UI_Talent_U_Baizhuer_02
+  '826': UI_Talent_S_Baizhuer_04
