@@ -430,7 +430,7 @@ export default class GachaLog extends base {
     /** 拿修改时间最后的uid */
     let uidArr = []
     for (let uid of logs) {
-      let json = this?.e?.isSr ? `${this.path}${uid}/301.json` : `${this.path}${uid}/11.json`
+      let json = this?.e?.isSr ? `${this.path}${uid}/11.json` : `${this.path}${uid}/301.json`
       if (!fs.existsSync(json)) {
         continue
       }
