@@ -104,11 +104,14 @@ export class update extends plugin {
     let type = '更新'
     if (this.e.msg.includes('强制')) {
       type = '强制更新'
-      cm = `git fetch --all && git reset --hard && ${cm}`
+      cm = `git reset --hard && git pull --rebase --allow-unrelated-histories`
     }
 
     if (plugin) {
-      cm = `git -C ./plugins/${plugin}/ pull --no-rebase`
+      if (type == '强制更新')
+        cm = `git -C 'plugins/${plugin}' reset --hard && git -C 'plugins/${plugin}' pull --rebase --allow-unrelated-histories`
+      else
+        cm = `git -C 'plugins/${plugin}' pull --no-rebase`
     }
 
     this.oldCommitId = await this.getcommitId(plugin)

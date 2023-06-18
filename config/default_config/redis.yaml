@@ -4,7 +4,7 @@ host: 127.0.0.1
 port: 6379
 # redis用户名，可以为空
 username:
-# redis密码，没有密码可以为空    
-password: 
-# redis数据库    
+# redis密码，没有密码可以为空
+password:
+# redis数据库
 db: 0

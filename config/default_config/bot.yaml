@@ -5,12 +5,12 @@ log_level: info
 port: 2536
 
 # chromium其他路径
-chromium_path: 
+chromium_path:
 # puppeteer接口地址
-puppeteer_ws: 
+puppeteer_ws:
 
 # 米游社接口代理地址，国际服用
-proxyAddress: 
+proxyAddress:
 
 # 上线时给主人推送帮助
 online_msg: true
