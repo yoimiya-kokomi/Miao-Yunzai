@@ -6,7 +6,7 @@ RUN dos2unix /res/entrypoint.sh \
     && chmod +x /res/entrypoint.sh
 
 
-FROM node:lts-slim AS runtime
+FROM node:lts-bullseye-slim AS runtime
 
 ARG BUNDLE_FFMPEG true
 ARG BUNDLE_POETRY true
