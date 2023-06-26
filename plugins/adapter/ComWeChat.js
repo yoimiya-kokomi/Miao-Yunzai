@@ -3,7 +3,12 @@ import { randomUUID } from "crypto"
 import path from "node:path"
 import fs from "node:fs"
 
-export default class ComWeChatAdapter {
+Bot.adapter.push(new class ComWeChatAdapter {
+  constructor() {
+    this.id = "WeChat"
+    this.name = "ComWeChat"
+  }
+
   toStr(data) {
     switch (typeof data) {
       case "string":
@@ -198,8 +203,13 @@ export default class ComWeChatAdapter {
   }
 
   pickFriend(data, user_id) {
-    const i = { ...data, user_id }
+    const i = {
+      ...Bot[data.self_id].fl.get(user_id),
+      ...data,
+      user_id,
+    }
     return {
+      ...i,
       sendMsg: msg => this.sendFriendMsg(i, msg),
       recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
@@ -211,17 +221,28 @@ export default class ComWeChatAdapter {
   }
 
   pickMember(data, group_id, user_id) {
-    const i = { ...data, group_id, user_id }
+    const i = {
+      ...Bot[data.self_id].fl.get(user_id),
+      ...data,
+      group_id,
+      user_id,
+    }
     return {
       ...this.pickFriend(i, user_id),
+      ...i,
       getInfo: () => this.getGroupMemberInfo(i),
       getAvatarUrl: async () => (await this.getGroupMemberInfo(i))["wx.avatar"],
     }
   }
 
   pickGroup(data, group_id) {
-    const i = { ...data, group_id }
+    const i = {
+      ...Bot[data.self_id].gl.get(group_id),
+      ...data,
+      group_id,
+    }
     return {
+      ...i,
       sendMsg: msg => this.sendGroupMsg(i, msg),
       recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
@@ -264,19 +285,19 @@ export default class ComWeChatAdapter {
     Bot[data.self_id].nickname = Bot[data.self_id].info.user_name
     Bot[data.self_id].avatar = Bot[data.self_id].info["wx.avatar"]
 
-    Bot[data.self_id].version = (await data.sendApi("get_version")).data
-
-    Bot[data.self_id].fl = await this.getFriendMap(data)
-    Bot[data.self_id].gl = await this.getGroupMap(data)
-
-    if (Array.isArray(Bot.uin)) {
-      if (!Bot.uin.includes(data.self_id))
-        Bot.uin.push(data.self_id)
-    } else {
-      Bot.uin = [data.self_id]
+    Bot[data.self_id].version = {
+      ...(await data.sendApi("get_version")).data,
+      id: this.id,
+      name: this.name,
     }
 
-    logger.mark(`${logger.blue(`[${data.self_id}]`)} ComWeChat 已连接`)
+    Bot[data.self_id].fl = await Bot[data.self_id].getFriendMap()
+    Bot[data.self_id].gl = await Bot[data.self_id].getGroupMap()
+
+    if (!Bot.uin.includes(data.self_id))
+      Bot.uin.push(data.self_id)
+
+    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
     Bot.emit(`connect`, Bot[data.self_id])
   }
@@ -343,15 +364,17 @@ export default class ComWeChatAdapter {
       return logger.error(err)
     }
 
-    data.sendApi = (action, params) => this.sendApi(ws, action, params)
     if (data.self?.user_id) {
       data.self_id = data.self.user_id
-      data.bot = Bot[data.self_id]
     } else {
       data.self_id = data.id
     }
 
     if (data.type) {
+      if (data.detail_type != "status_update" && !Bot.uin.includes(data.self_id))
+        return false
+      data.sendApi = (action, params) => this.sendApi(ws, action, params)
+      data.bot = Bot[data.self_id]
       switch (data.type) {
         case "meta":
           this.makeMeta(data)
@@ -379,11 +402,11 @@ export default class ComWeChatAdapter {
   }
 
   load() {
-    const wss = new WebSocketServer({ noServer: true })
-    wss.on("connection", ws => {
+    Bot.wss[this.name] = new WebSocketServer({ noServer: true })
+    Bot.wss[this.name].on("connection", ws => {
       ws.on("error", logger.error)
       ws.on("message", data => this.message(data, ws))
     })
-    return wss
+    return true
   }
-}
+})
