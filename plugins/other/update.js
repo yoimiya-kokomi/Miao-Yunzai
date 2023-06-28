@@ -80,9 +80,7 @@ export class update extends plugin {
       if (!plugin) return ''
     }
 
-    let path = `./plugins/${plugin}/.git`
-
-    if (!fs.existsSync(path)) return false
+    if (!fs.existsSync(`plugins/${plugin}/.git`)) return false
 
     this.typeName = plugin
     return plugin
@@ -109,9 +107,9 @@ export class update extends plugin {
 
     if (plugin) {
       if (type == '强制更新')
-        cm = `git -C 'plugins/${plugin}' reset --hard && git -C 'plugins/${plugin}' pull --rebase --allow-unrelated-histories`
+        cm = `cd "plugins/${plugin}" && git reset --hard && git pull --rebase --allow-unrelated-histories`
       else
-        cm = `git -C 'plugins/${plugin}' pull --no-rebase`
+        cm = `cd "plugins/${plugin}" && git pull --no-rebase`
     }
 
     this.oldCommitId = await this.getcommitId(plugin)
@@ -148,7 +146,7 @@ export class update extends plugin {
   async getcommitId (plugin = '') {
     let cm = 'git rev-parse --short HEAD'
     if (plugin) {
-      cm = `git -C ./plugins/${plugin}/ rev-parse --short HEAD`
+      cm = `cd "plugins/${plugin}" && git rev-parse --short HEAD`
     }
 
     let commitId = await execSync(cm, { encoding: 'utf-8' })
@@ -158,9 +156,9 @@ export class update extends plugin {
   }
 
   async getTime (plugin = '') {
-    let cm = 'git log  -1 --oneline --pretty=format:"%cd" --date=format:"%m-%d %H:%M"'
+    let cm = 'git log -1 --pretty=format:"%cd" --date=format:"%F %T"'
     if (plugin) {
-      cm = `cd ./plugins/${plugin}/ && git log -1 --oneline --pretty=format:"%cd" --date=format:"%m-%d %H:%M"`
+      cm = `cd "plugins/${plugin}" && git log -1 --pretty=format:"%cd" --date=format:"%F %T"`
     }
 
     let time = ''
@@ -228,9 +226,9 @@ export class update extends plugin {
   }
 
   async getLog (plugin = '') {
-    let cm = 'git log  -20 --oneline --pretty=format:"%h||[%cd]  %s" --date=format:"%m-%d %H:%M"'
+    let cm = 'git log -20 --pretty=format:"%h||[%cd] %s" --date=format:"%F %T"'
     if (plugin) {
-      cm = `cd ./plugins/${plugin}/ && ${cm}`
+      cm = `cd "plugins/${plugin}" && ${cm}`
     }
 
     let logAll
