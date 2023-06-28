@@ -76,7 +76,20 @@ class UserDB extends BaseModel {
       }
     })
     db.ltuids = ltuids.join(',')
-    db.games = user._games
+    let games = {}
+    lodash.forEach(user._games, (gameDs, game) => {
+      games[game] = {
+        uid: gameDs.uid,
+        data: {}
+      }
+      lodash.forEach(gameDs.data, (ds, uid) => {
+        games[game].data[uid] = {
+          uid: ds.uid,
+          type: ds.type
+        }
+      })
+    })
+    db.games = games
     await this.save()
   }
 }

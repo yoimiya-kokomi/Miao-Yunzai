@@ -9,31 +9,51 @@
 gs:{mark:'#'},
 sr:{mark:'*'}
 }; }}
-<div class="head-box">
-  <div class="label">111</div>
+
+<div class="tips">
+  #开头为原神，*开头为星穹铁道。发送CK可绑定CK对应uid<br>
+  <nobr>#删除uid1</nobr>
+  删除指定序号uid
+
+  <nobr>#绑定123456789</nobr>
+  绑定对应uid
 </div>
+
 <div class="uid-list">
   {{each uids game}}
   {{set mark = game.key==='gs'? '#':'*'}}
-  <div class="cont">
-    <div class="cont-title">{{game.name}}<span><nobr>{{mark}}uid+序号</nobr>切换</span></div>
-    <div class="cont-body">
-
+  <div class="game-cont">
+    <div class="game-title"><strong>{{game.name}}</strong><span>使用<nobr>{{mark}}uid1</nobr>切换uid
+    </div>
+    <div class="game-ul">
       {{each game.uidList uid idx}}
-      <div class="{{game.uid === uid.uid ? 'active':''}}">
-        <div class="idx">{{idx+1}}</div>
-        {{if uid.name && uid.level}}
-        <div>{{uid.name}} (Lv.{{uid.level}})</div>
-        {{/if}}
-        <div>
-          <span class="{{uid.type}}">{{uid.type==='ck'?'CK':'绑定'}}</span>
-          <span>{{uid.uid}}</span>
+      <div class="game-li  {{game.uid*1 === uid.uid*1 ? 'active':''}}">
+        <div class="game-idx">
+          <span>{{idx+1}}</span>
+        </div>
+        <div class="game-bar" style="background-image:url({{_miao_path}}{{uid.banner}})">
+          <div class="face" style="background-image:url({{_miao_path}}{{uid.face}})"></div>
+          <div class="info">
+            <div class="uid">
+              <span>{{uid.uid}}</span>
+              <strong class="{{uid.type}}">{{uid.type==='ck'?'CK':'绑定'}}</strong>
+            </div>
+            {{if uid.name && uid.level}}
+            <div class="name">
+              <div>{{uid.name}} Lv.{{uid.level}}</div>
+            </div>
+            {{else}}
+            <div class="no-info">暂无uid信息</div>
+            {{/if}}
+          </div>
         </div>
       </div>
       {{/each}}
-      </ul>
     </div>
+
   </div>
   {{/each}}
 </div>
+
+
 {{/block}}

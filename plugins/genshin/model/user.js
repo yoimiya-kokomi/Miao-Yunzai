@@ -191,7 +191,7 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid () {
+  async showUid_bak () {
     let user = await this.user()
     let msg = []
     let typeMap = { ck: 'CK Uid', reg: '绑定 Uid' }
@@ -216,7 +216,7 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid2 () {
+  async showUid () {
     let user = await this.user()
     let uids = [{
       key: 'gs',
@@ -233,6 +233,9 @@ export default class User extends base {
         if (player) {
           uidDs.name = player.name
           uidDs.level = player.level
+          let imgs = player?.faceImgs || {}
+          uidDs.face = imgs.face
+          uidDs.banner = imgs.banner
         }
       })
     })
@@ -425,13 +428,14 @@ export default class User extends base {
       await user.save()
       if (fs.existsSync(`./data/MysCookie/${qq}.yaml`)) {
         try {
-          let src = `./data/MysCookie/${qq}.yaml`;
-          let dest = `./temp/MysCookieBak/${qq}.yaml`;
-          await fs.promises.unlink(dest).catch((_) => { });
-          await fs.promises.copyFile(src, dest);
-          await fs.promises.unlink(src);
+          let src = `./data/MysCookie/${qq}.yaml`
+          let dest = `./temp/MysCookieBak/${qq}.yaml`
+          await fs.promises.unlink(dest).catch((_) => {
+          })
+          await fs.promises.copyFile(src, dest)
+          await fs.promises.unlink(src)
         } catch (err) {
-          console.log(err);
+          console.log(err)
         }
       }
       count++
