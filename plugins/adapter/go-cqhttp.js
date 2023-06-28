@@ -199,27 +199,27 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  async getGroupMemberArray(data) {
+  async getMemberArray(data) {
     return (await data.sendApi("get_group_member_list", {
       group_id: data.group_id,
     })).data
   }
 
-  async getGroupMemberList(data) {
+  async getMemberList(data) {
     const array = []
-    for (const i of (await this.getGroupMemberArray(data)))
+    for (const i of (await this.getMemberArray(data)))
       array.push(i.user_id)
     return array
   }
 
-  async getGroupMemberMap(data) {
+  async getMemberMap(data) {
     const map = new Map()
-    for (const i of (await this.getGroupMemberArray(data)))
+    for (const i of (await this.getMemberArray(data)))
       map.set(i.user_id, i)
     return map
   }
 
-  getGroupMemberInfo(data) {
+  getMemberInfo(data) {
     return data.sendApi("get_group_member_info", {
       group_id: data.group_id,
       user_id: data.user_id,
@@ -455,7 +455,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     return {
       ...this.pickFriend(i, user_id),
       ...i,
-      getInfo: () => this.getGroupMemberInfo(i),
+      getInfo: () => this.getMemberInfo(i),
       poke: () => this.sendGroupMsg(i, segment.poke(user_id)),
     }
   }
@@ -500,9 +500,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
       sendFile: (file, name) => this.sendGroupFile(i, file, undefined, name),
       getInfo: () => this.getGroupInfo(i),
       getAvatarUrl: () => `https://p.qlogo.cn/gh/${group_id}/${group_id}/0`,
-      getMemberArray: () => this.getGroupMemberArray(i),
-      getMemberList: () => this.getGroupMemberList(i),
-      getMemberMap: () => this.getGroupMemberMap(i),
+      getMemberArray: () => this.getMemberArray(i),
+      getMemberList: () => this.getMemberList(i),
+      getMemberMap: () => this.getMemberMap(i),
       pickMember: user_id => this.pickMember(i, group_id, user_id),
       pokeMember: user_id => this.sendGroupMsg(i, segment.poke(user_id)),
       setName: group_name => this.setGroupName(i, group_name),
