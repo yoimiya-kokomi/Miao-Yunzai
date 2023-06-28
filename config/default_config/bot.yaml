@@ -21,3 +21,6 @@ proxyAddress:
 online_msg: true
 # 上线推送通知的冷却时间
 online_msg_exp: 86400
+
+# 签名API地址
+sign_api_addr: 
