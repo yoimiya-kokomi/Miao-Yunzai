@@ -197,6 +197,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async sendFile(data, send, file, name = path.basename(file)) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送文件：${name}(${file})`)
     return send(segment.custom("file", {
       file_id: (await this.uploadFile(data, file, name)).file_id
     }))

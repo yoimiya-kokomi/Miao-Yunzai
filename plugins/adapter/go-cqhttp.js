@@ -291,6 +291,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   setGroupName(data, group_name) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 设置群名：[${data.group_id}] ${group_name}`)
     return data.sendApi("set_group_name", {
       group_id: data.group_id,
       group_name,
@@ -298,13 +299,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   setGroupAvatar(data, file) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 设置群头像：[${data.group_id}] ${file}`)
     return data.sendApi("set_group_portrait", {
       group_id: data.group_id,
-      file: segment.image(file).data.file,
+      file: segment.image(file).file,
     })
   }
 
   setGroupAdmin(data, user_id, enable) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} ${enable ? "设置" : "取消"}群管理员：[${data.group_id}] ${user_id}`)
     return data.sendApi("set_group_admin", {
       group_id: data.group_id,
       user_id,
@@ -313,6 +316,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   setGroupCard(data, user_id, card) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 设置群名片：[${data.group_id}] ${user_id} ${card}`)
     return data.sendApi("set_group_card", {
       group_id: data.group_id,
       user_id,
@@ -321,6 +325,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   setGroupTitle(data, user_id, special_title, duration) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 设置群头衔：[${data.group_id}] ${user_id} ${special_title} ${duration}`)
     return data.sendApi("set_group_special_title", {
       group_id: data.group_id,
       user_id,
@@ -346,6 +351,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async sendFriendFile(data, file, name) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友文件：[${data.user_id}] ${name}(${file})`)
     return data.sendApi("upload_private_file", {
       user_id: data.user_id,
       ...await this.makeFile(data, file, name),
@@ -353,6 +359,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async sendGroupFile(data, file, folder, name) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群文件：[${data.group_id}] ${folder||""}/${name}(${file})`)
     return data.sendApi("upload_group_file", {
       group_id: data.group_id,
       folder,
@@ -361,6 +368,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   deleteGroupFile(data, file_id, busid) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 删除群文件：[${data.group_id}] ${file_id}(${busid})`)
     return data.sendApi("delete_group_file", {
       group_id: data.group_id,
       file_id,
@@ -369,6 +377,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   createGroupFileFolder(data, name) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 创建群文件夹：[${data.group_id}] ${name}`)
     return data.sendApi("create_group_file_folder", {
       group_id: data.group_id,
       name,
