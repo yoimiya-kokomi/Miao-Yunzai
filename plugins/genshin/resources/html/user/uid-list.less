@@ -1,5 +1,15 @@
 .container {
-  width: 400px;
+  width: 450px;
+}
+
+nobr {
+  font-size: 12px;
+  background: #000;
+  color: #d3bc8e;
+  display: inline-block;
+  padding: 1px 2px;
+  border-radius: 3px;
+  margin: 0 1px;
 }
 
 .uid-list {
@@ -22,13 +32,14 @@
 
       span {
         font-size: 12px;
-        color: #888;
+        color: #666;
+        float: right;
       }
 
       nobr {
+        background: none;
         font-size: 12px;
-        background: #888;
-        color: #fff;
+        color: #3a2702;
         display: inline-block;
         padding: 1px 2px;
         border-radius: 3px;
@@ -39,16 +50,23 @@
     .cont-body {
       background: none;
       padding: 0;
+
+
     }
   }
 
   .game-ul {
     padding: 8px;
+
+    .no-uid {
+      font-size: 12px;
+      text-align: center;
+    }
   }
 
   .game-idx {
     height: 50px;
-    padding: 13px 0;
+    padding: 20px 0 10px;
     margin-right: 5px;
 
     span {
@@ -64,23 +82,23 @@
   }
 
   .game-bar {
-    height: 50px;
+    height: 64px;
     line-height: 30px;
     margin: 0;
-    border-radius: 25px;
+    border-radius: 33px;
     background: right top no-repeat #f0ece4;
     background-size: auto 100%;
-    padding: 3px;
-    width: 325px;
+    padding: 4px;
+    width: 375px;
     display: flex;
     position: relative;
 
     .face {
-      width: 44px;
-      height: 44px;
-      border-radius: 22px;
+      width: 56px;
+      height: 56px;
+      border-radius: 30px;
       box-shadow: 0 0 1px #000, 0 0 5px rgba(0, 0, 0, .5);
-      border: 1px solid #fff;
+      border: 2px solid #fff;
       overflow: hidden;
       background-size: cover;
 
@@ -98,16 +116,36 @@
       line-height: 18px;
       color: #414e64;
 
-      .uid {
-        font-size: 18px;
-        display: flex;
+
+      div.shadow {
+        position: relative;
+        -webkit-text-stroke: 2px #fff;
 
         span {
+          font-weight: normal;
           display: block;
-          padding-right: 5px;
+          position: absolute;
+          -webkit-text-stroke: 0px #fff;
+          left: 0;
+          top: 0;
+        }
+      }
+
+      .uid-info {
+        height: 25px;
+        font-size: 24px;
+        display: flex;
+        margin-top: 5px;
+
+        .uid {
+          font-weight: normal;
+          display: block;
+          padding-right: 8px;
+
+
         }
 
-        strong {
+        .type {
           width: 35px;
           font-size: 12px;
           font-weight: normal;
@@ -133,28 +171,32 @@
         }
       }
 
-      .name {
+      .detail {
         font-size: 14px;
+        text-shadow: 0 0 2px #fff;
+
+        .no-info {
+          color: #555;
+          font-size: 12px;
+          text-shadow: 0 0 1px #fff;
+        }
       }
 
-      .no-info {
-        font-size: 12px;
-        color: #555;
-      }
+
     }
 
     &:after {
       display: block;
       content: "";
-      width: 28px;
-      height: 28px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 2px solid #ece5d8;
       opacity: 0;
       box-shadow: 0 0 1px #000, 0 0 5px rgba(0, 0, 0, .5);
       position: absolute;
-      right: 8px;
-      top: 8px;
+      right: 13px;
+      top: 12px;
     }
   }
 
@@ -167,28 +209,42 @@
     }
 
     &.active {
+      .game-bar {
+        box-shadow: 0 0 1px 1px #fff, 0 0 5px 2px #d3bc8e;
+      }
+
       .game-bar:after {
         opacity: 1;
         background: url('../../img/icon/check.webp') center center no-repeat #4a5366;
         background-size: 70% auto;
+      }
+
+      .game-idx span {
+        background: #d3bc8e;
+        color: #3a2702;
+        box-shadow: 0 0 1px 1px #fff, 0 0 5px 2px #d3bc8e;
       }
     }
   }
 }
 
 .tips {
-  background: rgba(255, 255, 255, .8);
   border-radius: 10px;
   font-size: 12px;
-  padding: 8px 12px;
-  color: #555;
+  padding: 8px 12px 8px 24px;
+  color: #fff;
   margin-bottom: 10px;
+  background: rgba(0, 0, 0, .4);
+
+  li {
+    padding: 2px 0;
+  }
 
 
   nobr {
     font-size: 12px;
-    background: #555;
-    color: #fff;
+    background: #000;
+    color: #d3bc8e;
     display: inline-block;
     padding: 1px 2px;
     border-radius: 3px;

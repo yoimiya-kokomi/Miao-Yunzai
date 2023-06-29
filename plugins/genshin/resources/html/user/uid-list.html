@@ -10,22 +10,17 @@ gs:{mark:'#'},
 sr:{mark:'*'}
 }; }}
 
-<div class="tips">
-  #开头为原神，*开头为星穹铁道。发送CK可绑定CK对应uid<br>
-  <nobr>#删除uid1</nobr>
-  删除指定序号uid
-
-  <nobr>#绑定123456789</nobr>
-  绑定对应uid
-</div>
 
 <div class="uid-list">
   {{each uids game}}
   {{set mark = game.key==='gs'? '#':'*'}}
   <div class="game-cont">
-    <div class="game-title"><strong>{{game.name}}</strong><span>使用<nobr>{{mark}}uid1</nobr>切换uid
+    <div class="game-title">
+      <strong>{{mark}}{{game.name}}</strong>
+      <span>使用<nobr>{{mark}}uid1</nobr>切换uid</span>
     </div>
     <div class="game-ul">
+      {{if game.uidList?.length > 0 }}
       {{each game.uidList uid idx}}
       <div class="game-li  {{game.uid*1 === uid.uid*1 ? 'active':''}}">
         <div class="game-idx">
@@ -34,26 +29,42 @@ sr:{mark:'*'}
         <div class="game-bar" style="background-image:url({{_miao_path}}{{uid.banner}})">
           <div class="face" style="background-image:url({{_miao_path}}{{uid.face}})"></div>
           <div class="info">
-            <div class="uid">
-              <span>{{uid.uid}}</span>
-              <strong class="{{uid.type}}">{{uid.type==='ck'?'CK':'绑定'}}</strong>
+            <div class="uid-info">
+              <div class="uid shadow">{{uid.uid}}<span>{{uid.uid}}</span></div>
+              <div class="type {{uid.type}}">{{uid.type==='ck'?'CK':'绑定'}}</div>
             </div>
-            {{if uid.name && uid.level}}
-            <div class="name">
-              <div>{{uid.name}} Lv.{{uid.level}}</div>
+            <div class="detail">
+              {{if uid.name && uid.level}}
+              <div class="name">{{uid.name}} Lv.{{uid.level}}</div>
+              {{else}}
+              <div class="no-info">暂无uid信息，可通过更新面板获取信息</div>
+              {{/if}}
             </div>
-            {{else}}
-            <div class="no-info">暂无uid信息</div>
-            {{/if}}
           </div>
         </div>
       </div>
       {{/each}}
+      {{else}}
+      <div class="no-uid">暂无uid，请发送CK或通过
+        <nobr>{{mark}}绑定123456789</nobr>
+        来绑定UID
+      </div>
+      {{/if}}
     </div>
 
   </div>
   {{/each}}
 </div>
 
+<ul class="tips">
+  <li>原神及通用命令以#开头，星铁命令以*开头。发送CK可绑定CK对应uid</li>
+  <li>游戏信息来自面板数据，如无信息或不准确请更新面板</li>
+  <li>
+    <nobr>#删除uid1</nobr>
+    删除指定序号uid
 
+    <nobr>#绑定123456789</nobr>
+    绑定对应uid
+  </li>
+</ul>
 {{/block}}
