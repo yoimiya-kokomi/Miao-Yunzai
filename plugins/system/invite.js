@@ -10,7 +10,7 @@ export class invite extends plugin {
   }
 
   async accept () {
-    if (!cfg.masterQQ || !cfg.masterQQ.includes(Number(this.e.user_id))) {
+    if (!this.e.isMaster) {
       logger.mark(`[邀请加群]：${this.e.group_name}：${this.e.group_id}`)
       return
     }

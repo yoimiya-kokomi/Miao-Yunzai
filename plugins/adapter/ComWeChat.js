@@ -342,7 +342,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         data.member = data.group.pickMember(data.user_id)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.red(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
     }
 
     Bot.emit(`${data.post_type}.${data.message_type}`, data)
@@ -359,7 +359,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         this.connect(data)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.red(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
     }
   }
 
@@ -367,7 +367,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     try {
       data = JSON.parse(data)
     } catch (err) {
-      return logger.error(err)
+      return logger.error(`解码数据失败：${logger.red(err)}`)
     }
 
     if (data.self?.user_id) {
@@ -377,10 +377,13 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
 
     if (data.type) {
-      if (data.detail_type != "status_update" && !Bot.uin.includes(data.self_id))
+      if (data.type != "meta" && !Bot.uin.includes(data.self_id)) {
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 找不到对应Bot，忽略消息：${logger.magenta(JSON.stringify(data))}`)
         return false
+      }
       data.sendApi = (action, params) => this.sendApi(ws, action, params)
       data.bot = Bot[data.self_id]
+
       switch (data.type) {
         case "meta":
           this.makeMeta(data)
@@ -397,13 +400,13 @@ Bot.adapter.push(new class ComWeChatAdapter {
           break
 */
         default:
-          logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.red(JSON.stringify(data))}`)
+          logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
       }
     } else if (data.echo) {
       logger.debug(`请求 API 返回：${logger.cyan(JSON.stringify(data))}`)
       Bot.emit(data.echo, data)
     } else {
-      logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.red(JSON.stringify(data))}`)
+      logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
     }
   }
 
