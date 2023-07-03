@@ -27,18 +27,20 @@ sr:{mark:'*'}
           <span>{{idx+1}}</span>
         </div>
         <div class="game-bar" style="background-image:url({{_miao_path}}{{uid.banner}})">
-          <div class="face" style="background-image:url({{_miao_path}}{{uid.face}})"></div>
-          <div class="info">
-            <div class="uid-info">
-              <div class="uid shadow">{{uid.uid}}<span>{{uid.uid}}</span></div>
-              <div class="type {{uid.type}}">{{uid.type==='ck'?'CK':'绑定'}}</div>
-            </div>
-            <div class="detail">
-              {{if uid.name && uid.level}}
-              <div class="name">{{uid.name}} Lv.{{uid.level}}</div>
-              {{else}}
-              <div class="no-info">暂无uid信息，可通过更新面板获取信息</div>
-              {{/if}}
+          <div class="game-inner">
+            <div class="face" style="background-image:url({{_miao_path}}{{uid.face}})"></div>
+            <div class="info">
+              <div class="uid-info">
+                <div class="uid shadow">{{uid.uid}}<span>{{uid.uid}}</span></div>
+                <div class="type {{uid.type}}">{{uid.type==='ck'?'CK':'绑定'}}</div>
+              </div>
+              <div class="detail">
+                {{if uid.name && uid.level}}
+                <div class="name">{{uid.name}} Lv.{{uid.level}}</div>
+                {{else}}
+                <div class="no-info">暂无uid信息，可通过更新面板获取信息</div>
+                {{/if}}
+              </div>
             </div>
           </div>
         </div>
@@ -65,6 +67,13 @@ sr:{mark:'*'}
 
     <nobr>#绑定123456789</nobr>
     绑定对应uid
+  </li>
+  <li>
+    <nobr>#我的ck</nobr>
+    查看ck信息
+
+    <nobr>#删除ck</nobr>
+    删除当前ck
   </li>
 </ul>
 {{/block}}

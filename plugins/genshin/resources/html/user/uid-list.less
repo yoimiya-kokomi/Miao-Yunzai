@@ -88,10 +88,15 @@ nobr {
     border-radius: 33px;
     background: right top no-repeat #f0ece4;
     background-size: auto 100%;
-    padding: 4px;
     width: 375px;
-    display: flex;
     position: relative;
+  }
+
+  .game-inner {
+    display: flex;
+    background: linear-gradient(to right, rgba(240, 236, 228, 0.7), rgba(240, 236, 228, 0.5), rgba(240, 236, 228, 0));
+    padding: 4px;
+    border-radius: 33px;
 
     .face {
       width: 56px;
@@ -213,7 +218,7 @@ nobr {
         box-shadow: 0 0 1px 1px #fff, 0 0 5px 2px #d3bc8e;
       }
 
-      .game-bar:after {
+      .game-inner:after {
         opacity: 1;
         background: url('../../img/icon/check.webp') center center no-repeat #4a5366;
         background-size: 70% auto;
