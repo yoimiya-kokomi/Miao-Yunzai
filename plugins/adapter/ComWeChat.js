@@ -7,6 +7,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   constructor() {
     this.id = "WeChat"
     this.name = "ComWeChat"
+    this.path = this.name
   }
 
   toStr(data) {
@@ -21,6 +22,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         else
           return JSON.stringify(data)
     }
+    return data
   }
 
   makeLog(msg) {
@@ -37,8 +39,23 @@ Bot.adapter.push(new class ComWeChatAdapter {
         resolve({ ...data, ...data.data })))
   }
 
-  uploadFile(data, file, name = randomUUID()) {
-    const opts = { name }
+  async fileName(file) {
+    try {
+      if (file.match(/^base64:\/\//)) {
+        const buffer = Buffer.from(file.replace(/^base64:\/\//, ""), "base64")
+        const type = await fileTypeFromBuffer(buffer)
+        return `${Date.now()}.${type.ext}`
+      } else {
+        return path.basename(file)
+      }
+    } catch (err) {
+      logger.error(`文件类型检测错误：${logger.red(err)}`)
+    }
+    return false
+  }
+
+  async uploadFile(data, file, name) {
+    const opts = { name: name || await this.fileName(file) || randomUUID() }
 
     if (file.match(/^https?:\/\//)) {
       opts.type = "url"
@@ -54,6 +71,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       opts.path = file
     }
 
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 上传文件：${this.makeLog(opts)}`)
     return data.sendApi("upload_file", opts)
   }
 
@@ -68,51 +86,59 @@ Bot.adapter.push(new class ComWeChatAdapter {
         i = { type: i.type, data: { ...i, type: undefined }}
       if (i.data.file)
         i.data = { file_id: (await this.uploadFile(data, i.data.file)).file_id }
+
       switch (i.type) {
+        case "text":
+          break
+        case "image":
+          break
+        case "record":
+          i.type = "file"
+          break
+        case "video":
+          i.type = "file"
+          break
         case "at":
           if (i.data.qq == "all")
-            msgs.push({ type: "mention_all", data: {}})
+            i = { type: "mention_all", data: {}}
           else
-            msgs.push({ type: "mention", data: { user_id: i.data.qq }})
+            i = { type: "mention", data: { user_id: i.data.qq }}
           break
         case "reply":
+          i = { type: "text", data: { text: `回复：${i.data.id}\n` }}
           break
         default:
-          msgs.push(i)
+          i = { type: "text", data: { text: JSON.stringify(i) }}
       }
+      msgs.push(i)
     }
     return msgs
   }
 
   async sendFriendMsg(data, msg) {
     if (msg?.type == "node")
-      return this.sendForwardMsg(msg => this.sendFriendMsg(data, msg), msg.data)
+      return Bot.sendForwardMsg(msg => this.sendFriendMsg(data, msg), msg.data)
 
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(msg)}`)
+    const message = await this.makeMsg(data, msg)
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(message)}`)
     return data.sendApi("send_message", {
       detail_type: "private",
       user_id: data.user_id,
-      message: await this.makeMsg(data, msg),
+      message,
     })
   }
 
   async sendGroupMsg(data, msg) {
     if (msg?.type == "node")
-      return this.sendForwardMsg(msg => this.sendGroupMsg(data, msg), msg.data)
+      return Bot.sendForwardMsg(msg => this.sendGroupMsg(data, msg), msg.data)
 
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(msg)}`)
+    const message = await this.makeMsg(data, msg)
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(message)}`)
     return data.sendApi("send_message", {
       detail_type: "group",
       group_id: data.group_id,
-      message: await this.makeMsg(data, msg),
+      message,
     })
-  }
-
-  async sendForwardMsg(send, msg) {
-    const messages = []
-    for (const i of msg)
-      messages.push(await send(i.message))
-    return messages
   }
 
   async getFriendArray(data) {
@@ -196,7 +222,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     })
   }
 
-  async sendFile(data, send, file, name = path.basename(file)) {
+  async sendFile(data, send, file, name) {
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送文件：${name}(${file})`)
     return send(segment.custom("file", {
       file_id: (await this.uploadFile(data, file, name)).file_id
@@ -214,7 +240,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       sendMsg: msg => this.sendFriendMsg(i, msg),
       recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
-      sendForwardMsg: msg => this.sendForwardMsg(msg => this.sendFriendMsg(i, msg), msg),
+      sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendFriendMsg(i, msg), msg),
       sendFile: (file, name) => this.sendFile(i, msg => this.sendFriendMsg(i, msg), file, name),
       getInfo: () => this.getFriendInfo(i),
       getAvatarUrl: async () => (await this.getFriendInfo(i))["wx.avatar"],
@@ -247,7 +273,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       sendMsg: msg => this.sendGroupMsg(i, msg),
       recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
-      sendForwardMsg: msg => this.sendForwardMsg(msg => this.sendGroupMsg(i, msg), msg),
+      sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendGroupMsg(i, msg), msg),
       sendFile: (file, name) => this.sendFile(i, msg => this.sendGroupMsg(i, msg), file, name),
       getInfo: () => this.getGroupInfo(i),
       getAvatarUrl: async () => (await this.getGroupInfo(i))["wx.avatar"],
@@ -263,9 +289,11 @@ Bot.adapter.push(new class ComWeChatAdapter {
       data.self_id = bot.self.user_id
 
     Bot[data.self_id] = {
+      adapter: this,
       sendApi: data.sendApi,
       stat: { ...data.status, start_time: data.time },
 
+      pickUser: user_id => this.pickFriend(data, user_id),
       pickFriend: user_id => this.pickFriend(data, user_id),
 
       getFriendArray: () => this.getFriendArray(data),
@@ -279,7 +307,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
     }
-    Bot[data.self_id].pickUser = Bot[data.self_id].pickFriend
 
     Bot[data.self_id].info = (await data.sendApi("get_self_info")).data
     Bot[data.self_id].uin = Bot[data.self_id].info.user_id
@@ -411,8 +438,8 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   load() {
-    Bot.wss[this.name] = new WebSocketServer({ noServer: true })
-    Bot.wss[this.name].on("connection", ws => {
+    Bot.wss[this.path] = new WebSocketServer({ noServer: true })
+    Bot.wss[this.path].on("connection", ws => {
       ws.on("error", logger.error)
       ws.on("message", data => this.message(data, ws))
     })

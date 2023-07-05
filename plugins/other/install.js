@@ -16,6 +16,7 @@ const list = {
   "Telegram-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-Telegram-Plugin",
   "Discord-Plugin"    :"https://gitee.com/TimeRainStarSky/Yunzai-Discord-Plugin",
   "QQGuild-Plugin"    :"https://gitee.com/TimeRainStarSky/Yunzai-QQGuild-Plugin",
+  "WeChat-Plugin"     :"https://gitee.com/TimeRainStarSky/Yunzai-WeChat-Plugin",
   "ICQQ-Plugin"       :"https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin",
   "KOOK-Plugin"       :"https://gitee.com/TimeRainStarSky/Yunzai-KOOK-Plugin",
 }

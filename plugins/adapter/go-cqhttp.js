@@ -6,6 +6,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   constructor() {
     this.id = "QQ"
     this.name = "go-cqhttp"
+    this.path = this.name
   }
 
   toStr(data) {
@@ -20,6 +21,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         else
           return JSON.stringify(data)
     }
+    return data
   }
 
   makeLog(msg) {
@@ -525,6 +527,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async connect(data) {
     Bot[data.self_id] = {
+      adapter: this,
       sendApi: data.sendApi,
       stat: { start_time: data.time },
 
@@ -532,6 +535,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       recallMsg: message_id => this.recallMsg(data, message_id),
       getForwardMsg: message_id => this.getForwardMsg(data, message_id),
 
+      pickUser: user_id => this.pickFriend(data, user_id),
       pickFriend: user_id => this.pickFriend(data, user_id),
 
       getFriendArray: () => this.getFriendArray(data),
@@ -545,7 +549,6 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
     }
-    Bot[data.self_id].pickUser = Bot[data.self_id].pickFriend
 
     Bot[data.self_id].info = (await data.sendApi("get_login_info")).data
     Bot[data.self_id].uin = Bot[data.self_id].info.user_id
@@ -566,9 +569,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
     Bot[data.self_id].version = (await data.sendApi("get_version_info")).data
     Bot[data.self_id].version = {
       ...Bot[data.self_id].version,
-      impl: Bot[data.self_id].version.app_name,
-      version: Bot[data.self_id].version.app_version,
-      onebot_version: Bot[data.self_id].version.protocol_version,
+      id: this.id,
+      name: this.name,
     }
     Bot[data.self_id].status = Bot[data.self_id].version.protocol_name
 
@@ -829,8 +831,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   load() {
-    Bot.wss[this.name] = new WebSocketServer({ noServer: true })
-    Bot.wss[this.name].on("connection", ws => {
+    Bot.wss[this.path] = new WebSocketServer({ noServer: true })
+    Bot.wss[this.path].on("connection", ws => {
       ws.on("error", logger.error)
       ws.on("message", data => this.message(data, ws))
     })

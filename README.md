@@ -2,7 +2,7 @@
 
 # TRSS-Yunzai
 
-Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、ICQQ、QQ频道、KOOK、Telegram、Discord
+Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、GSUIDCore、ICQQ、QQ频道、微信、KOOK、Telegram、Discord
 
 [![访问量](https://visitor-badge.glitch.me/badge?page_id=TimeRainStarSky.Yunzai&right_color=red&left_text=访%20问%20量)](https://github.com/TimeRainStarSky/Yunzai)
 [![Stars](https://img.shields.io/github/stars/TimeRainStarSky/Yunzai?color=yellow&label=收藏)](../../stargazers)
@@ -110,6 +110,16 @@ websocket_url = ["ws://localhost:2536/ComWeChat"]
 
 </details>
 
+<details><summary>GSUIDCore</summary>
+
+下载运行 [GenshinUID 插件](http://docs.gsuid.gbots.work/#/AdapterList)，GSUIDCore 连接地址 修改为：
+
+```
+ws://localhost:2536/GSUIDCore
+```
+
+</details>
+
 <details><summary>ICQQ</summary>
 
 [TRSS-Yunzai ICQQ Plugin](../../../Yunzai-ICQQ-Plugin)
@@ -119,6 +129,12 @@ websocket_url = ["ws://localhost:2536/ComWeChat"]
 <details><summary>QQ频道</summary>
 
 [TRSS-Yunzai QQGuild Plugin](../../../Yunzai-QQGuild-Plugin)
+
+</details>
+
+<details><summary>微信</summary>
+
+[TRSS-Yunzai WeChat Plugin](../../../Yunzai-WeChat-Plugin)
 
 </details>
 
