@@ -85,14 +85,14 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   }
 
   sendGroupMsg(data, msg) {
-    data.group_id = data.group_id.split("-")
+    const target = data.group_id.split("-")
     const content = this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(content)}`)
     return data.bot.ws.send(JSON.stringify({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
-      target_type: data.group_id[0],
-      target_id: data.group_id[1],
+      target_type: target[0],
+      target_id: target[1],
       content,
     }))
   }
