@@ -29,15 +29,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return this.toStr(msg).replace(/("type":"(image|file)","data":").*?(")/g, "$1...$3")
   }
 
-  async makeBase64(file) {
-    if (file.match(/^base64:\/\//))
-      return file.replace(/^base64:\/\//, "")
-    else if (file.match(/^https?:\/\//))
-      return Buffer.from(await (await fetch(file)).arrayBuffer()).toString("base64")
-    return file
-  }
-
-  async makeMsg(msg) {
+  makeMsg(msg) {
     if (!Array.isArray(msg))
       msg = [msg]
     const msgs = []
@@ -46,16 +38,22 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         i = { type: "text", data: { text: i }}
       else if (!i.data)
         i = { type: i.type, data: { ...i, type: undefined }}
-      if (i.data.file)
-        i.data = await this.makeBase64(i.data.file)
 
       switch (i.type) {
         case "text":
           i.data = i.data.text
           break
         case "image":
+          i.data = i.data.file
+          break
+        case "record":
+          i = { type: "file", data: i.data.file }
+          break
+        case "video":
+          i = { type: "file", data: i.data.file }
           break
         case "file":
+          i.data = i.data.file
           break
         case "at":
           i.data = i.data.qq
@@ -63,15 +61,9 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         case "reply":
           i.data = i.data.id
           break
-        case "record":
-          i.type = "file"
-          break
-        case "video":
-          i.type = "file"
-          break
         case "node":
           for (const n in i.data)
-            i.data[n] = await this.makeMsg(i.data[n])
+            i.data[n] = this.makeMsg(i.data[n])
         default:
           i = { type: "text", data: JSON.stringify(i) }
       }
@@ -80,10 +72,10 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return msgs
   }
 
-  async sendFriendMsg(data, msg) {
-    const content = await this.makeMsg(msg)
+  sendFriendMsg(data, msg) {
+    const content = this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(content)}`)
-    return data.bot.send(JSON.stringify({
+    return data.bot.ws.send(JSON.stringify({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
       target_type: "direct",
@@ -92,11 +84,11 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }))
   }
 
-  async sendGroupMsg(data, msg) {
+  sendGroupMsg(data, msg) {
     data.group_id = data.group_id.split("-")
-    const content = await this.makeMsg(msg)
+    const content = this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(content)}`)
-    return data.bot.send(JSON.stringify({
+    return data.bot.ws.send(JSON.stringify({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
       target_type: data.group_id[0],
@@ -152,10 +144,10 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
   }
 
-  makeBot(data, send) {
+  makeBot(data, ws) {
     Bot[data.self_id] = {
       adapter: this,
-      send,
+      ws,
       uin: data.self_id,
       bot_id: data.bot_id,
       bot_self_id: data.bot_self_id,
@@ -186,9 +178,9 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
     data.self_id = `gc_${data.bot_self_id}`
     if (Bot[data.self_id])
-      Bot[data.self_id].send = ws.send
+      Bot[data.self_id].ws = ws
     else
-      this.makeBot(data, ws.send)
+      this.makeBot(data, ws)
     data.bot = Bot[data.self_id]
 
     data.post_type = "message"
@@ -249,7 +241,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       data.group = data.bot.pickGroup(data.group_id)
       data.member = data.group.pickMember(data.user_id)
     }
-    console.log(data)
+
     Bot.emit(`${data.post_type}.${data.message_type}`, data)
     Bot.emit(`${data.post_type}`, data)
   }
