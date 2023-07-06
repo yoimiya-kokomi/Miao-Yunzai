@@ -168,6 +168,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       gl: new Map(),
     }
     Bot[data.self_id].pickUser = Bot[data.self_id].pickFriend
+    data.bot = Bot[data.self_id]
 
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
@@ -183,11 +184,12 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
     data.self_id = `gc_${data.bot_self_id}`
     data.sendApi = data => this.sendApi(ws, data)
-    if (Bot[data.self_id])
-      Bot[data.self_id].sendApi = data.sendApi
-    else
+    if (Bot[data.self_id]) {
+      data.bot = Bot[data.self_id]
+      data.bot.sendApi = data.sendApi
+    } else {
       this.makeBot(data)
-    data.bot = Bot[data.self_id]
+    }
 
     data.post_type = "message"
     data.message_id = data.msg_id
