@@ -81,7 +81,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   sendFriendMsg(data, msg) {
     const content = this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(content)}`)
-    data.sendApi({
+    data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
       target_type: "direct",
@@ -95,7 +95,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     const target = data.group_id.split("-")
     const content = this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(content)}`)
-    data.sendApi({
+    data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
       target_type: target[0],
@@ -105,10 +105,11 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return { message_id: Date.now() }
   }
 
-  pickFriend(data, user_id) {
+  pickFriend(id, user_id) {
     const i = {
-      ...Bot[data.self_id].fl.get(user_id),
-      ...data,
+      ...Bot[id].fl.get(user_id),
+      self_id: id,
+      bot: Bot[id],
       user_id: user_id.replace(/^gc_/, ""),
     }
     return {
@@ -120,23 +121,25 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
   }
 
-  pickMember(data, group_id, user_id) {
+  pickMember(id, group_id, user_id) {
     const i = {
-      ...Bot[data.self_id].fl.get(user_id),
-      ...data,
+      ...Bot[id].fl.get(user_id),
+      self_id: id,
+      bot: Bot[id],
       group_id: group_id.replace(/^gc_/, ""),
       user_id: user_id.replace(/^gc_/, ""),
     }
     return {
-      ...this.pickFriend(i, user_id),
+      ...this.pickFriend(id, user_id),
       ...i,
     }
   }
 
-  pickGroup(data, group_id) {
+  pickGroup(id, group_id) {
     const i = {
-      ...Bot[data.self_id].gl.get(group_id),
-      ...data,
+      ...Bot[id].gl.get(group_id),
+      self_id: id,
+      bot: Bot[id],
       group_id: group_id.replace(/^gc_/, ""),
     }
     return {
@@ -145,7 +148,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendGroupMsg(i, msg), msg),
-      pickMember: user_id => this.pickMember(i, group_id, user_id),
+      pickMember: user_id => this.pickMember(id, group_id, user_id),
     }
   }
 
@@ -161,14 +164,13 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         id: this.id,
         name: this.name,
       },
-      pickFriend: user_id => this.pickFriend(data, user_id),
-      pickMember: (group_id, user_id) => this.pickMember(data, group_id, user_id),
-      pickGroup: group_id => this.pickGroup(data, group_id),
+      pickFriend: user_id => this.pickFriend(data.self_id, user_id),
+      pickMember: (group_id, user_id) => this.pickMember(data.self_id, group_id, user_id),
+      pickGroup: group_id => this.pickGroup(data.self_id, group_id),
       fl: new Map(),
       gl: new Map(),
     }
     Bot[data.self_id].pickUser = Bot[data.self_id].pickFriend
-    data.bot = Bot[data.self_id]
 
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
@@ -184,12 +186,11 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
     data.self_id = `gc_${data.bot_self_id}`
     data.sendApi = data => this.sendApi(ws, data)
-    if (Bot[data.self_id]) {
-      data.bot = Bot[data.self_id]
-      data.bot.sendApi = data.sendApi
-    } else {
+    if (Bot[data.self_id])
+      Bot[data.self_id].sendApi = data.sendApi
+    else
       this.makeBot(data)
-    }
+    data.bot = Bot[data.self_id]
 
     data.post_type = "message"
     data.message_id = data.msg_id
