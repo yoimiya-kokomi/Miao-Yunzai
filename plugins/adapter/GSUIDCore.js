@@ -142,7 +142,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendGroupMsg(i, msg),
-      recallMsg: message_id => this.recallMsg(i, message_id => i.bot.API.message.delete(message_id), message_id),
+      recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendGroupMsg(i, msg), msg),
       pickMember: user_id => this.pickMember(i, group_id, user_id),
