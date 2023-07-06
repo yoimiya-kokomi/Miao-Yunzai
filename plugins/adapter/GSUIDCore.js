@@ -81,26 +81,28 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   sendFriendMsg(data, msg) {
     const content = this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(content)}`)
-    return data.sendApi({
+    data.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
       target_type: "direct",
       target_id: data.user_id,
       content,
     })
+    return { message_id: Date.now() }
   }
 
   sendGroupMsg(data, msg) {
     const target = data.group_id.split("-")
     const content = this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(content)}`)
-    return data.sendApi({
+    data.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
       target_type: target[0],
       target_id: target[1],
       content,
     })
+    return { message_id: Date.now() }
   }
 
   pickFriend(data, user_id) {
