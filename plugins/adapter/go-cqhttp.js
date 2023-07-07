@@ -1,6 +1,7 @@
 import { WebSocketServer } from "ws"
 import { randomUUID } from "crypto"
 import path from "node:path"
+import fs from "node:fs"
 
 Bot.adapter.push(new class gocqhttpAdapter {
   constructor() {
