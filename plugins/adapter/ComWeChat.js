@@ -2,6 +2,7 @@ import { WebSocketServer } from "ws"
 import { randomUUID } from "crypto"
 import path from "node:path"
 import fs from "node:fs"
+import { fileTypeFromBuffer } from "file-type"
 
 Bot.adapter.push(new class ComWeChatAdapter {
   constructor() {
