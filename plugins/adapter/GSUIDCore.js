@@ -7,7 +7,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   constructor() {
     this.id = "GSUIDCore"
     this.name = "早柚核心"
-    this.path = "GSUIDCore"
+    this.path = this.id
   }
 
   toStr(data) {
@@ -118,6 +118,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendFriendMsg(i, msg), msg),
+      getInfo: () => i,
     }
   }
 
@@ -148,6 +149,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       recallMsg: () => false,
       makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendGroupMsg(i, msg), msg),
+      getInfo: () => i,
       pickMember: user_id => this.pickMember(id, group_id, user_id),
     }
   }

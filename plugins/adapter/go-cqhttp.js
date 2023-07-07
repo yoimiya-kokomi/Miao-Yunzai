@@ -681,7 +681,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         logger.info(`${logger.blue(`[${data.self_id}]`)} 离线文件：[${data.user_id}] ${JSON.stringify(data.file)}`)
         break
       case "client_status":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 客户端：[${data.client}] ${data.online ? "上线" : "下线"}`)
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 客户端${data.online ? "上线" : "下线"}：${JSON.stringify(data.client)}`)
         data.clients = (await data.sendApi("get_online_clients")).clients
         Bot[data.self_id].clients = data.clients
         break

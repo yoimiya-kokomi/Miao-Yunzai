@@ -106,7 +106,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
             i = { type: "mention", data: { user_id: i.data.qq }}
           break
         case "reply":
-          i = { type: "text", data: { text: `回复：${i.data.id}\n` }}
+          continue
           break
         default:
           i = { type: "text", data: { text: JSON.stringify(i) }}
