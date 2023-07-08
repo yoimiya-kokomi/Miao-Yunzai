@@ -67,10 +67,13 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         case "reply":
           i.data = i.data.id
           break
-        case "node":
-          for (const n in i.data)
-            i.data[n] = this.makeMsg(i.data[n])
-        default:
+        case "node": {
+          const array = []
+          for (const { message } of i.data)
+            array.push(...this.makeMsg(message))
+          i.data = array
+          break
+        } default:
           i = { type: "text", data: JSON.stringify(i) }
       }
       msgs.push(i)

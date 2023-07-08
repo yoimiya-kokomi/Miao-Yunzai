@@ -148,8 +148,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getFriendList(data) {
     const array = []
-    for (const i of (await this.getFriendArray(data)))
-      array.push(i.user_id)
+    for (const { user_id } of (await this.getFriendArray(data)))
+      array.push(user_id)
     return array
   }
 
@@ -184,8 +184,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGroupList(data) {
     const array = []
-    for (const i of (await this.getGroupArray(data)))
-      array.push(i.group_id)
+    for (const { group_id } of (await this.getGroupArray(data)))
+      array.push(group_id)
     return array
   }
 
@@ -210,8 +210,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getMemberList(data) {
     const array = []
-    for (const i of (await this.getMemberArray(data)))
-      array.push(i.user_id)
+    for (const { user_id } of (await this.getMemberArray(data)))
+      array.push(user_id)
     return array
   }
 
@@ -274,8 +274,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGuildMemberList(data) {
     const array = []
-    for (const i of (await this.getGuildMemberArray(data)))
-      array.push(i.user_id)
+    for (const { user_id } of (await this.getGuildMemberArray(data)))
+      array.push(user_id)
     return array.push
   }
 
