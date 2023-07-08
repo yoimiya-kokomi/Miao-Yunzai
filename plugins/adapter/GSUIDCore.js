@@ -110,7 +110,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       ...Bot[id].fl.get(user_id),
       self_id: id,
       bot: Bot[id],
-      user_id: user_id.replace(/^gc_/, ""),
+      user_id: user_id,
     }
     return {
       ...i,
@@ -127,8 +127,8 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       ...Bot[id].fl.get(user_id),
       self_id: id,
       bot: Bot[id],
-      group_id: group_id.replace(/^gc_/, ""),
-      user_id: user_id.replace(/^gc_/, ""),
+      group_id: group_id,
+      user_id: user_id,
     }
     return {
       ...this.pickFriend(id, user_id),
@@ -141,7 +141,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       ...Bot[id].gl.get(group_id),
       self_id: id,
       bot: Bot[id],
-      group_id: group_id.replace(/^gc_/, ""),
+      group_id: group_id,
     }
     return {
       ...i,
@@ -186,7 +186,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       return logger.error(`解码数据失败：${logger.red(err)}`)
     }
 
-    data.self_id = `gc_${data.bot_self_id}`
+    data.self_id = data.bot_self_id
     data.sendApi = data => this.sendApi(ws, data)
     if (Bot[data.self_id])
       Bot[data.self_id].sendApi = data.sendApi
@@ -196,7 +196,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
     data.post_type = "message"
     data.message_id = data.msg_id
-    data.user_id = `gc_${data.user_id}`
+    data.user_id = data.user_id
     data.sender = {
       user_id: data.user_id,
       user_pm: data.user_pm,
@@ -244,7 +244,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       data.friend = data.bot.pickFriend(data.user_id)
     } else {
       data.message_type = "group"
-      data.group_id = `gc_${data.user_type}-${data.group_id}`
+      data.group_id = `${data.user_type}-${data.group_id}`
       if (!data.bot.gl.has(data.group_id))
         data.bot.gl.set(data.group_id, { group_id: data.group_id })
       logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.user_id}] ${data.raw_message}`)
