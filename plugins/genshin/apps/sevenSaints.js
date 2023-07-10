@@ -8,14 +8,14 @@ export class sevenSaints extends plugin {
       name: '七圣召唤卡组查询',
       dsc: '原神角色信息查询',
       event: 'message',
-      priority: 5000,
+      priority: 0,
       rule: [
         {
-          reg: '^#*七圣(召唤)?(牌|卡)组(列表)?[0-9]{0,2}$',
+          reg: '^#*七圣(召唤)?查询(牌|卡)组(列表)?[0-9]{0,2}$',
           fnc: 'deckIndex'
         },
         {
-          reg: '^#*七圣(召唤)?(角色|行动)?(卡)?牌(列表)?$',
+          reg: '^#*七圣(召唤)?查询(角色|行动)?(卡)?牌(列表)?$',
           fnc: 'deck_cards'
         }
       ]
