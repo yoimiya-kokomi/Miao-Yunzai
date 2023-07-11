@@ -22,11 +22,13 @@ export class PayData {
   async getOringinalData (id = '') {
     let res = await fetch(this.getUrl() + id, this.headers)
     let ret = await res.json()
-    // 加一个authkey不同情况
-    if (ret?.retcode === -101 || ret?.retcode === -100) {
-      return ret.retcode === -101 ? { errorMsg: '您的链接过期，请重新获取' } : { errorMsg: '链接不正确，请重新获取' }
+    let check = this.checkResult(ret)
+    if (check?.errorMsg) return check
+    let list = ret?.data?.list
+    if (!Array.isArray(list)) {
+      console.error(ret)
+      return { errorMsg: '获取失败，错误码：' + ret?.retcode }
     }
-    let list = ret.data.list
     if (list.length === 20) {
       this.#oringinData.push(...list)
       await this.getOringinalData(list[19].id)
@@ -41,7 +43,13 @@ export class PayData {
   async getPrimogemLog (id = '') {
     let res = await fetch(this.getUrl('getPrimogemLog') + id, this.headers)
     let ret = await res.json()
-    let list = ret.data.list
+    let check = this.checkResult(ret)
+    if (check?.errorMsg) return check
+    let list = ret?.data?.list
+    if (!Array.isArray(list)) {
+      console.error(ret)
+      return { errorMsg: '获取失败，错误码：' + ret?.retcode }
+    }
     if (list.length === 20) {
       list.forEach(v => {
         if (v.add_num === '680') this.#oringinData.push(v)
@@ -56,18 +64,42 @@ export class PayData {
     }
   }
 
+  async getUserInfo() {
+    let res = await fetch(this.getUrl('getUserInfo'), this.headers)
+    let ret = await res.json()
+    let check = this.checkResult(ret)
+    if (check?.errorMsg) return check
+    let data = ret?.data
+    if (data?.uid) {
+      return data
+    }
+    return {errorMsg: '获取失败，可能是链接已过期或不正确'}
+  }
+
+  checkResult(ret) {
+    if (ret?.retcode === -101 || ret?.retcode === -100) {
+      return ret.retcode === -101 ? {errorMsg: '您的链接过期，请重新获取'} : {errorMsg: '链接不正确，请重新获取'}
+    }
+    if (/unknown auth appid/.test(ret?.message)) {
+      return {errorMsg: '抽卡或其他链接现已无法获取充值记录，请发送客服页面的链接！'}
+    }
+    return {errorMsg: ''}
+  }
+
   /** 对原始数据进行筛选，组合 */
   async filtrateData () {
+    // 由于新接口不返回uid了，所以先查询出用户信息
+    const userInfo = await this.getUserInfo()
+    if (userInfo?.errorMsg) return userInfo
+    this.#genShinId = userInfo.uid
     // 获取数据
     let isSucceed = await this.getOringinalData()
     // 判断数据是否获取成功
     if (isSucceed?.errorMsg) return isSucceed
     await this.getPrimogemLog()
-    // 获取uid，并判断零氪党的情况
-    if (this.#oringinData[0]?.uid) {
-      this.#genShinId = this.#oringinData[0].uid
-    } else {
-      return { errorMsg: '未获取到您的任何充值数据' }
+    // 判断零氪党的情况
+    if (this.#oringinData.length === 0) {
+      return {errorMsg: '未获取到您的任何充值数据'}
     }
     // 将原始数据按id排序
     this.#oringinData = this.#oringinData.sort((a, b) => {
@@ -92,7 +124,9 @@ export class PayData {
       let num = Number(this.#oringinData[index].add_num)
       if (num < 0) continue
       // 获取月份
-      let thisMonth = ++moment(this.#oringinData[index].time).toArray()[1]
+      // let thisMonth = ++moment(this.#oringinData[index].time).toArray()[1]
+      // 新接口改名为：datetime
+      let thisMonth = ++moment(this.#oringinData[index].datetime).toArray()[1]
       if (thisMonth !== month) {
         i++
         month = thisMonth
@@ -136,10 +170,40 @@ export class PayData {
     credentials: 'include'
   }
 
-  // 两个api //原石 getPrimogemLog //结晶 getCrystalLog
-  getUrl (api = 'getCrystalLog') {
-    let type = api === 'getCrystalLog' ? 3 : 1
-    return `https://hk4e-api.mihoyo.com/ysulog/api/${api}?selfquery_type=${type}&lang=zh-cn&sign_type=2&auth_appid=csc&authkey_ver=1&authkey=${this.#authkey}&game_biz=hk4e_cn&app_client=bbs&type=${type}&size=20&end_id=`
+  /**
+   * 获取url
+   * @param api 原石 getPrimogemLog // 结晶 getCrystalLog // 获取用户信息 getUserInfo
+   * @returns {string}
+   */
+  getUrl(api = 'getCrystalLog') {
+    const baseUrl = 'https://hk4e-api.mihoyo.com/common/hk4e_self_help_query/User'
+    const isUserInfo = api === 'getUserInfo', isCrystalLog = api === 'getCrystalLog'
+    const url = isUserInfo ? '/GetUserInfo' : isCrystalLog ? '/GetCrystalLog' : '/GetPrimogemLog'
+    let params = ''
+    params += '?selfquery_type=1'
+    params += '&sign_type=2'
+    params += '&auth_appid=csc'
+    params += '&authkey_ver=1'
+    params += '&game_biz=hk4e_cn'
+    params += '&win_direction=portrait'
+    params += '&bbs_auth_required=true'
+    params += '&bbs_game_role_required=hk4e_cn'
+    params += '&app_client=bbs'
+    params += '&lang=zh-cn'
+    params += '&csc_authkey_required=true'
+    params += '&authkey=' + this.#authkey
+    params += '&page_id=1'
+    // 此条件限定只查询获取的
+    if (!isUserInfo) {
+      params += '&add_type=produce'
+      params += '&size=20'
+      // endId，外部拼接
+      params += '&end_id='
+    }
+    return baseUrl + url + params
+    // 老API：
+    // let type = api === 'getCrystalLog' ? 3 : 1
+    // return `https://hk4e-api.mihoyo.com/ysulog/api/${api}?selfquery_type=${type}&lang=zh-cn&sign_type=2&auth_appid=csc&authkey_ver=1&authkey=${this.#authkey}&game_biz=hk4e_cn&app_client=bbs&type=${type}&size=20&end_id=`
   }
 }
 
