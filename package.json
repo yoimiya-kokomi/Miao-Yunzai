@@ -21,7 +21,7 @@
     "chokidar": "^3.5.3",
     "express": "^4.18.2",
     "file-type": "^18.5.0",
-    "https-proxy-agent": "7.0.0",
+    "https-proxy-agent": "7.0.1",
     "image-size": "^1.0.2",
     "lodash": "^4.17.21",
     "log4js": "^6.9.1",
@@ -32,7 +32,7 @@
     "node-xlsx": "^0.23.0",
     "oicq": "link:lib/modules/oicq",
     "pm2": "^5.3.0",
-    "puppeteer": "^20.8.0",
+    "puppeteer": "^20.8.2",
     "redis": "^4.6.7",
     "sequelize": "^6.32.1",
     "sqlite3": "^5.1.6",
@@ -40,7 +40,7 @@
     "yaml": "^2.3.1"
   },
   "devDependencies": {
-    "eslint": "^8.44.0",
+    "eslint": "^8.45.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^16.0.1",
