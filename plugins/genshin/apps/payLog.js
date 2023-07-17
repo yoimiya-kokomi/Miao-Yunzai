@@ -27,7 +27,7 @@ export class payLog extends plugin {
         },
         {
           // 优先级高于抽卡记录，但是发送抽卡链接时不会抢指令，对比过米游社链接和抽卡链接，该字段为米游社链接字段
-          reg: '(.*)(bill-record-user|customer-claim|player-log|user.mihoyo.com)(.*)',
+          reg: '(.*)(user-game-search|bill-record-user|customer-claim|player-log|user.mihoyo.com)(.*)',
           fnc: 'getAuthKey'
         },
         {
@@ -89,8 +89,12 @@ export class payLog extends plugin {
     }
 
     // 解析出authKey
-    let userUrl = this.e.msg.replace(/[\u4e00-\u9fa5]/g, '').replace(/\s+/g, '')
-    this.authKey = url.parse(userUrl, true, true).query.authkey
+    let match = this.e.msg.match(/&authkey=([^&\s\u4e00-\u9fa5]+)/)
+    if (!match) {
+      this.reply('链接无效,请重新发送')
+      return false
+    }
+    this.authKey = decodeURIComponent(match[1])
 
     // 获取数据
     this.reply('正在获取消费数据,可能需要30s~~')
@@ -143,7 +147,7 @@ export class payLog extends plugin {
   }
 
   payLogHelp (e) {
-    e.reply('安卓教程： https://b23.tv/K5qfLad\n苹果用户可【先】发送最新获取的抽卡记录链接，【再】发送【#充值记录】或【#更新充值统计】来获取')
+    e.reply('安卓教程： https://b23.tv/K5qfLad\n苹果用户可【先】发送最新获取的抽卡记录链接，【再】发送【#充值记录】或【#更新充值统计】来获取（注：通过抽卡链接获取充值记录大概率已失效）')
   }
 
   /** 判断主uid，若没有则返回false,有则返回主uid */
