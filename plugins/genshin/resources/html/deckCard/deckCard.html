@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <link rel="shortcut icon" href="#" />
+  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/deckCard/deckCard.css" />
+  <link rel="preload" href="{{resPath}}/font/tttgbnumber.ttf" as="font">
+  <link rel="preload" href="{{pluResPath}}img/roleIndex/namecard/{{bg}}.png" as="image">
+  <link rel="preload" href="{{pluResPath}}img/other/bg5.png" as="image">
+  <link rel="preload" href="{{pluResPath}}img/other/bg4.png" as="image">
+  <link rel="preload" href="{{pluResPath}}img/other/bg105.png" as="image">
+  <link rel="preload" href="{{pluResPath}}img/abyss/bg.png" as="image">
+  {{@headIndexStyle}}
+</head>
+
+<body>
+  <div class="container" id="container">
+    <div class="head_box">
+      <div class="id_text">
+        {{basicInfo.nickname}}
+      </div>
+      <div class="id_text">
+        UID: {{uid}}
+      </div>
+      <img class="genshin_logo" src="{{pluResPath}}img/other/原神.png" />
+    </div>
+    <div style="height: 11px;"></div>
+
+    <div class="basicInfo">
+      {{if basicInfo.level>0}}
+      <div class="tab_lable">七圣召唤</div>
+      <div class="basicInfo_header">
+        <div class="basicInfo_icon"><span>{{basicInfo.level}}</span></div>
+        <div class="basicInfo_right">
+          <div class="item">
+            <div>已收集角色牌</div>
+            <div>{{basicInfo.avatar_card_num_gained}}/{{basicInfo.avatar_card_num_total}}</div>
+          </div>
+          <div class="item">
+            <div>已收集行动牌</div>
+            <div>{{basicInfo.action_card_num_gained}}/{{basicInfo.action_card_num_total}}</div>
+          </div>
+        </div>
+      </div>
+      {{if !avatar_cardList && !action_cardList}}
+      <div class="logo">请绑定cookie后查看更多信息</div>
+      {{/if}}
+    </div>
+    {{/if}}
+    <div style="height: 5px;"></div>
+
+    {{if avatar_cardList}}
+    <div class="basicInfo">
+      <div class="tab_lable">角色牌详情</div>
+      <div style="height: 10px;"></div>
+      <div class="avatar_covers">
+        {{each avatar_cardList.card_list val}}
+        {{if val.num>0}}
+        <div class="card-wrapper">
+          <div class="overlay">
+            <img src="{{pluResPath}}img/deck/边框.png" alt="">
+            <span>
+              <div class="win_lable">{{val.proficiency}}/{{val.use_count}}</div>
+            </span>
+          </div>
+          <div class="overlay">
+            <div class="rq-container">
+              <img src="{{pluResPath}}img/deck/容器.png" alt="">
+            </div>
+            <div class="hp-container">
+              <img src="{{pluResPath}}img/deck/{{val.hp}}.png" alt="">
+            </div>
+          </div>
+          <img src="{{val.image}}" alt="">
+        </div>
+        {{/if}}
+        {{/each}}
+      </div>
+      <div class="logo">左下角为胜利场数/使用次数，仅展示已有角色牌</div>
+    </div>
+    {{/if}}
+    {{if action_cardList}}
+    <div class="basicInfo">
+      <div class="tab_lable">行动牌详情</div>
+      <div style="height: 10px;"></div>
+      <div class="action_covers">
+        {{each action_cardList.card_list val}}
+        {{if val.num>0}}
+        <div class="card-wrapper">
+          <div class="overlay">
+            <img src="{{pluResPath}}img/deck/边框.png" alt="">
+            <span>
+              <div class="win_lable">{{val.use_count}}</div>
+            </span>
+            <span>
+              <div class="num_lable">{{val.num}}</div>
+            </span>
+          </div>
+          <div class="cost-wrapper">
+            {{each val.action_cost vals}}
+            <div class="ty-container">
+              <img src="{{pluResPath}}img/deck/{{vals.cost_type}}.png" alt="" style="position: absolute; z-index: 1;">
+            </div>
+            <div class="va-container">
+              <img src="{{pluResPath}}img/deck/{{vals.cost_value}}.png" alt="" style="position: absolute; z-index: 2;">
+            </div>
+            <div style="height: 150px;"></div>
+            {{/each}}
+          </div>
+          <img src="{{val.image}}" alt="">
+        </div>
+        {{/if}}
+        {{/each}}
+      </div>
+      <div class="logo">左下角为使用次数，仅展示已有行动牌</div>
+    </div>
+    {{/if}}
+    <div class="logo">Created By Miao-Yunzai</div>
+  </div>
+</body>
+
+</html>

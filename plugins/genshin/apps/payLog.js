@@ -95,6 +95,7 @@ export class payLog extends plugin {
       return false
     }
     this.authKey = decodeURIComponent(match[1])
+
     // 获取数据
     this.reply('正在获取消费数据,可能需要30s~~')
     let data = new PayData(this.authKey)
