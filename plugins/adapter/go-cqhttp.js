@@ -39,6 +39,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
         resolve({ ...data, ...data.data })))
   }
 
+  setProfile(data, profile) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 设置资料：${JSON.stringify(profile)}`)
+    return data.sendApi("set_qq_profile", profile)
+  }
+
   makeMsg(msg) {
     if (!Array.isArray(msg))
       msg = [msg]
@@ -546,6 +551,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
       adapter: this,
       sendApi: data.sendApi,
       stat: { start_time: data.time },
+
+      setProfile: profile => this.setProfile(data, profile),
+      setNickname: nickname => this.setProfile(data, { nickname }),
 
       pickUser: user_id => this.pickFriend(data, user_id),
       pickFriend: user_id => this.pickFriend(data, user_id),
