@@ -89,8 +89,17 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  getMsg(data, message_id) {
-    return data.sendApi("get_msg", { message_id })
+  async getMsg(data, message_id) {
+    const msg = (await data.sendApi("get_msg", { message_id })).data
+
+    if (msg?.message) {
+      const message = []
+      for (const i of msg.message)
+        message.push({ ...i.data, type: i.type })
+      msg.message = message
+    }
+
+    return msg
   }
 
   recallMsg(data, message_id) {
@@ -432,7 +441,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendFriendMsg(i, msg),
+      getMsg: message_id => this.getMsg(i, message_id),
       recallMsg: message_id => this.recallMsg(i, message_id),
+      getForwardMsg: message_id => this.getForwardMsg(i, message_id),
       makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => this.sendFriendForwardMsg(i, msg),
       sendFile: (file, name) => this.sendFriendFile(i, file, name),
@@ -484,7 +495,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
       return {
         ...i,
         sendMsg: msg => this.sendGuildMsg(i, msg),
+        getMsg: message_id => this.getMsg(i, message_id),
         recallMsg: message_id => this.recallMsg(i, message_id),
+        getForwardMsg: message_id => this.getForwardMsg(i, message_id),
         makeForwardMsg: Bot.makeForwardMsg,
         sendForwardMsg: msg => this.sendGuildForwardMsg(i, msg),
         getInfo: () => this.getGuildInfo(i),
@@ -506,7 +519,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendGroupMsg(i, msg),
+      getMsg: message_id => this.getMsg(i, message_id),
       recallMsg: message_id => this.recallMsg(i, message_id),
+      getForwardMsg: message_id => this.getForwardMsg(i, message_id),
       makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => this.sendGroupForwardMsg(i, msg),
       sendFile: (file, name) => this.sendGroupFile(i, file, undefined, name),
@@ -531,10 +546,6 @@ Bot.adapter.push(new class gocqhttpAdapter {
       adapter: this,
       sendApi: data.sendApi,
       stat: { start_time: data.time },
-
-      getMsg: message_id => this.getMsg(data, message_id),
-      recallMsg: message_id => this.recallMsg(data, message_id),
-      getForwardMsg: message_id => this.getForwardMsg(data, message_id),
 
       pickUser: user_id => this.pickFriend(data, user_id),
       pickFriend: user_id => this.pickFriend(data, user_id),
