@@ -589,7 +589,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   makeMessage(data) {
     const message = []
     for (const i of data.message)
-      message.push({ type: i.type, ...i.data })
+      message.push({ ...i.data, type: i.type })
     data.message = message
 
     switch (data.message_type) {
