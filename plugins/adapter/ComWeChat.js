@@ -328,7 +328,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
-    Bot.emit(`connect`, Bot[data.self_id])
+    Bot.emit("connect", Bot[data.self_id])
   }
 
   makeMessage(data) {
