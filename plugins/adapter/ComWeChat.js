@@ -353,6 +353,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
         case "voice":
           message.push({ type: "record", ...i.data })
           break
+        case "reply":
+          message.push({ type: "reply", id: i.data.message_id, user_id: i.data.user_id })
+          break
         default:
           message.push({ type: i.type, ...i.data })
       }
