@@ -177,6 +177,9 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
     Bot[data.self_id].pickUser = Bot[data.self_id].pickFriend
 
+    if (!Bot.uin.includes(data.self_id))
+      Bot.uin.push(data.self_id)
+
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
     Bot.emit("connect", Bot[data.self_id])
