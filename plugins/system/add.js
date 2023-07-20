@@ -121,7 +121,7 @@ export class add extends plugin {
   checkAuth () {
     if (this.e.isMaster) return true
 
-    let groupCfg = cfg.getGroup(this.group_id)
+    let groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
     if (groupCfg.imgAddLimit == 2) {
       this.e.reply('暂无权限，只有主人才能操作')
       return false
@@ -204,7 +204,7 @@ export class add extends plugin {
 
   /** 过滤别名 */
   trimAlias (msg) {
-    let groupCfg = cfg.getGroup(this.group_id)
+    let groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
     let alias = groupCfg.botAlias
     if (!Array.isArray(alias)) {
       alias = [alias]
@@ -284,7 +284,7 @@ export class add extends plugin {
   }
 
   async saveImg (url, keyWord) {
-    let groupCfg = cfg.getGroup(this.group_id)
+    let groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
     let savePath = `${this.facePath}${this.group_id}/`
 
     if (!fs.existsSync(savePath)) {
