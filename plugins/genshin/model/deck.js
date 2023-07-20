@@ -10,21 +10,8 @@ export default class Deck extends base {
     this.headIndexStyle = `<style> .head_box { background: url(${this.screenData.pluResPath}img/roleIndex/namecard/${lodash.random(1, 8)}.png) #f5f5f5; background-position-x: 30px; background-repeat: no-repeat; border-radius: 15px; font-family: tttgbnumber; padding: 10px 20px; position: relative; background-size: auto 101%; }</style>`
   }
 
-  async getdata(api) {
-    let seed_id = lodash.sample('abcdefghijklmnopqrstuvwxyz0123456789', 16).replace(/,/g, '')
-    let device_fp = await MysInfo.get(this.e, 'getFp', {
-      seed_id
-    })
-    let res = await MysInfo.get(this.e, api, {
-      headers: {
-        'x-rpc-device_fp': device_fp?.data?.device_fp
-      }
-    })
-    return res
-  }
-
   async getIndex(id, list = false) {
-    let res = await this.getdata('deckList')
+    let res = await MysInfo.get(this.e, 'deckList')
     if (res?.retcode !== 0) return false
 
     let Data
@@ -58,7 +45,7 @@ export default class Deck extends base {
     let res = {}
     for (let api of ['basicInfo', 'avatar_cardList', 'action_cardList']) {
       if ((id == 2 && api == 'avatar_cardList') || (id == 1 && api == 'action_cardList')) continue
-      res[api] = (await this.getdata(api)).data
+      res[api] = (await MysInfo.get(this.e, api)).data
     }
     this.model = 'deckCard'
 
