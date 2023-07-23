@@ -13,16 +13,18 @@ const list = {
   "earth-k-plugin"    :"https://gitee.com/SmallK111407/earth-k-plugin",
   "xiaofei-plugin"    :"https://gitee.com/xfdown/xiaofei-plugin",
   "xiaoyao-cvs-plugin":"https://gitee.com/Ctrlcvs/xiaoyao-cvs-plugin",
+  "mysVilla-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-mysVilla-Plugin",
   "Telegram-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-Telegram-Plugin",
   "Discord-Plugin"    :"https://gitee.com/TimeRainStarSky/Yunzai-Discord-Plugin",
   "QQGuild-Plugin"    :"https://gitee.com/TimeRainStarSky/Yunzai-QQGuild-Plugin",
   "WeChat-Plugin"     :"https://gitee.com/TimeRainStarSky/Yunzai-WeChat-Plugin",
+  "Proxy-Plugin"      :"https://gitee.com/TimeRainStarSky/Yunzai-Proxy-Plugin",
   "ICQQ-Plugin"       :"https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin",
   "KOOK-Plugin"       :"https://gitee.com/TimeRainStarSky/Yunzai-KOOK-Plugin",
 }
 
 export class install extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: "安装插件",
       dsc: "#安装插件 #安装TRSS-Plugin",
@@ -37,7 +39,7 @@ export class install extends plugin {
     })
   }
 
-  async install () {
+  async install() {
     if (insing) {
       await this.reply("已有命令安装中..请勿重复操作")
       return false
@@ -68,7 +70,7 @@ export class install extends plugin {
     this.restart()
   }
 
-  async execSync (cmd) {
+  async execSync(cmd) {
     return new Promise(resolve => {
       exec(cmd, (error, stdout, stderr) => {
         resolve({ error, stdout, stderr })
@@ -76,7 +78,7 @@ export class install extends plugin {
     })
   }
 
-  async runInstall (name, url, path) {
+  async runInstall(name, url, path) {
     this.isNowUp = false
 
     let cm = `git clone --depth 1 --single-branch "${url}" "${path}"`
@@ -99,7 +101,7 @@ export class install extends plugin {
     return true
   }
 
-  async gitErr (err, stdout) {
+  async gitErr(err, stdout) {
     let msg = "安装失败！"
     let errMsg = err.toString()
     stdout = stdout.toString()
@@ -119,7 +121,7 @@ export class install extends plugin {
     await this.reply([errMsg, stdout])
   }
 
-  restart () {
+  restart() {
     new Restart(this.e).restart()
   }
 }

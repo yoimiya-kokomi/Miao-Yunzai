@@ -852,10 +852,10 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   load() {
     Bot.wss[this.path] = new WebSocketServer({ noServer: true })
-    Bot.wss[this.path].on("connection", ws => {
-      ws.on("error", logger.error)
-      ws.on("message", data => this.message(data, ws))
-    })
+    Bot.wss[this.path].on("connection", ws => ws
+      .on("error", logger.error)
+      .on("message", data => this.message(data, ws))
+    )
     return true
   }
 })

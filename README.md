@@ -155,6 +155,12 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
+<details><summary>代理</summary>
+
+[TRSS-Yunzai Proxy Plugin](../../../Yunzai-Proxy-Plugin)
+
+</details>
+
 6.设置主人：发送 `#设置主人`，后台日志获取验证码并发送
 
 ## 致谢
