@@ -1,4 +1,5 @@
 import plugin from '../../lib/plugins/plugin.js'
+import common from '../../lib/common/common.js'
 import fs from 'node:fs'
 import lodash from 'lodash'
 import moment from 'moment'
@@ -49,7 +50,7 @@ export class sendLog extends plugin {
       return
     }
 
-    let forwardMsg = await this.makeForwardMsg(`最近${log.length}条${type}日志`, log)
+    let forwardMsg = await common.makeForwardMsg(this.e, log, `最近${log.length}条${type}日志`)
 
     await this.reply(forwardMsg)
   }
@@ -77,50 +78,5 @@ export class sendLog extends plugin {
     })
 
     return tmp
-  }
-
-  async makeForwardMsg(title, msg) {
-    let nickname = this.e.bot.nickname
-    if (this.e.isGroup) {
-      let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, this.e.bot.uin)
-      nickname = info.card ?? info.nickname
-    }
-    let userInfo = {
-      user_id: this.e.bot.uin,
-      nickname
-    }
-
-    let forwardMsg = [
-      {
-        ...userInfo,
-        message: title
-      },
-      {
-        ...userInfo,
-        message: msg
-      }
-    ]
-
-    /** 制作转发内容 */
-    if (this.e.isGroup) {
-      forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    } else {
-      forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-    }
-
-    /** 处理描述 */
-    if (typeof (forwardMsg.data) === 'object') {
-      let detail = forwardMsg.data?.meta?.detail
-      if (detail) {
-        detail.news = [{ text: title }]
-      }
-    } else {
-      forwardMsg.data = forwardMsg.data
-        .replace(/\n/g, '')
-        .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-        .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
-    }
-
-    return forwardMsg
   }
 }

@@ -1,9 +1,8 @@
-
 import cfg from '../../lib/config/config.js'
 import plugin from '../../lib/plugins/plugin.js'
+import common from '../../lib/common/common.js'
 import fs from 'node:fs'
 import lodash from 'lodash'
-import { segment } from 'icqq'
 import { pipeline } from 'stream'
 import { promisify } from 'util'
 import fetch from 'node-fetch'
@@ -96,7 +95,6 @@ export class add extends plugin {
 
   /** 获取群号 */
   async getGroupId() {
-
     /** 添加全局表情，存入到机器人qq文件中 */
     if (this.isGlobal) {
       this.group_id = this.e.bot.uin;
@@ -727,9 +725,8 @@ export class add extends plugin {
       num++
     }
 
-    let end = ''
     if (type == 'list' && count > 100) {
-      end = `更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`
+      msg.push(`更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`)
     }
 
     let title = `表情列表，第${page}页，共${count}条`
@@ -737,59 +734,9 @@ export class add extends plugin {
       title = `表情${search}，${count}条`
     }
 
-    let forwardMsg = await this.makeForwardMsg(this.e.bot.uin, title, msg, end)
+    let forwardMsg = await common.makeForwardMsg(this.e, msg, title)
 
     this.e.reply(forwardMsg)
-  }
-
-  async makeForwardMsg(qq, title, msg, end = '') {
-    let nickname = this.e.bot.nickname
-    if (this.e.isGroup) {
-      let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, qq)
-      nickname = info.card ?? info.nickname
-    }
-    let userInfo = {
-      user_id: this.e.bot.uin,
-      nickname
-    }
-
-    let forwardMsg = [
-      {
-        ...userInfo,
-        message: title
-      }
-    ]
-
-    let msgArr = lodash.chunk(msg, 40)
-    msgArr.forEach(v => {
-      v[v.length - 1] = lodash.trim(v[v.length - 1], '\n')
-      forwardMsg.push({ ...userInfo, message: v })
-    })
-
-    if (end) {
-      forwardMsg.push({ ...userInfo, message: end })
-    }
-
-    /** 制作转发内容 */
-    if (this.e.isGroup) {
-      forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    } else {
-      forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-    }
-
-    /** 处理描述 */
-    if (typeof (forwardMsg.data) === 'object') {
-      let detail = forwardMsg.data?.meta?.detail
-      if (detail) {
-        detail.news = [{ text: title }]
-      }
-    } else {
-      forwardMsg.data = forwardMsg.data
-        .replace(/\n/g, '')
-        .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-        .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
-    }
-    return forwardMsg
   }
 
   /** 分页 */

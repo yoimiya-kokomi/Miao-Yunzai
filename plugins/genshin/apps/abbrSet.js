@@ -1,4 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js'
+import common from '../../../lib/common/common.js'
 import fs from 'node:fs'
 import gsCfg from '../model/gsCfg.js'
 import YAML from 'yaml'
@@ -163,52 +164,8 @@ export class abbrSet extends plugin {
 
     let title = `${role.name}别名，${list.length}个`
 
-    msg = await this.makeForwardMsg(this.e.bot.uin, title, msg)
+    msg = await common.makeForwardMsg(this.e, msg, title)
 
     await this.e.reply(msg)
-  }
-
-  async makeForwardMsg(qq, title, msg) {
-    let nickname = this.e.bot.nickname
-    if (this.e.isGroup) {
-      let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, qq)
-      nickname = info.card ?? info.nickname
-    }
-    let userInfo = {
-      user_id: this.e.bot.uin,
-      nickname
-    }
-
-    let forwardMsg = [
-      {
-        ...userInfo,
-        message: title
-      },
-      {
-        ...userInfo,
-        message: msg
-      }
-    ]
-
-    /** 制作转发内容 */
-    if (this.e.isGroup) {
-      forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    } else {
-      forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-    }
-
-    /** 处理描述 */
-    if (typeof (forwardMsg.data) === 'object') {
-      let detail = forwardMsg.data?.meta?.detail
-      if (detail) {
-        detail.news = [{ text: title }]
-      }
-    } else {
-      forwardMsg.data = forwardMsg.data
-        .replace(/\n/g, '')
-        .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-        .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
-    }
-    return forwardMsg
   }
 }
