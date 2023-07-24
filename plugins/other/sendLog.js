@@ -1,10 +1,11 @@
 import plugin from '../../lib/plugins/plugin.js'
+import common from '../../lib/common/common.js'
 import fs from 'node:fs'
 import lodash from 'lodash'
 import moment from 'moment'
 
 export class sendLog extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '发送日志',
       dsc: '发送最近100条运行日志',
@@ -25,7 +26,7 @@ export class sendLog extends plugin {
     this.errFile = './logs/error.log'
   }
 
-  async sendLog () {
+  async sendLog() {
     let lineNum = this.e.msg.match(/\d+/g)
     if (lineNum) {
       this.lineNum = lineNum[0]
@@ -49,12 +50,12 @@ export class sendLog extends plugin {
       return
     }
 
-    let forwardMsg = await this.makeForwardMsg(`最近${log.length}条${type}日志`, log)
+    let forwardMsg = await common.makeForwardMsg(this.e, log, `最近${log.length}条${type}日志`)
 
     await this.reply(forwardMsg)
   }
 
-  getLog (logFile) {
+  getLog(logFile) {
     let log = fs.readFileSync(logFile, { encoding: 'utf-8' })
     log = log.split('\n')
 
@@ -77,23 +78,5 @@ export class sendLog extends plugin {
     })
 
     return tmp
-  }
-
-  async makeForwardMsg (title, msg) {
-    let forwardMsg = [{ message: title }, { message: msg }]
-
-    /** 制作转发内容 */
-    if (this.e.group)
-      forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    else
-      forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-
-    /** 处理描述 */
-    forwardMsg.data = forwardMsg.data
-      .replace(/\n/g, '')
-      .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-      .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
-
-    return forwardMsg
   }
 }

@@ -41,31 +41,29 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     const msgs = []
     for (let i of msg) {
       if (typeof i != "object")
-        i = { type: "text", data: { text: i }}
-      else if (!i.data)
-        i = { type: i.type, data: { ...i, type: undefined }}
+        i = { type: "text", text: i }
 
       switch (i.type) {
         case "text":
-          i.data = i.data.text
+          i.data = i.text
           break
         case "image":
-          i.data = i.data.file
+          i.data = i.file
           break
         case "record":
-          i = { type: "file", data: i.data.file }
+          i = { type: "file", data: i.file }
           break
         case "video":
-          i = { type: "file", data: i.data.file }
+          i = { type: "file", data: i.file }
           break
         case "file":
-          i.data = i.data.file
+          i.data = i.file
           break
         case "at":
-          i.data = i.data.qq
+          i.data = i.qq
           break
         case "reply":
-          i.data = i.data.id
+          i.data = i.id
           break
         case "node": {
           const array = []
