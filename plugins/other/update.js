@@ -11,7 +11,7 @@ const { exec, execSync } = require('child_process')
 let uping = false
 
 export class update extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '更新',
       dsc: '#更新 #强制更新',
@@ -37,7 +37,7 @@ export class update extends plugin {
     this.typeName = 'Miao-Yunzai'
   }
 
-  async update () {
+  async update() {
     if (!this.e.isMaster) return false
     if (uping) {
       await this.reply('已有命令更新中..请勿重复操作')
@@ -64,7 +64,7 @@ export class update extends plugin {
     }
   }
 
-  async checkGit () {
+  async checkGit() {
     let ret = await execSync('git --version', { encoding: 'utf-8' })
     if (!ret || !ret.includes('git version')) {
       await this.reply('请先安装git')
@@ -74,7 +74,7 @@ export class update extends plugin {
     return true
   }
 
-  getPlugin (plugin = '') {
+  getPlugin(plugin = '') {
     if (!plugin) {
       plugin = this.e.msg.replace(/#|更新|强制/g, '')
       if (!plugin) return ''
@@ -88,7 +88,7 @@ export class update extends plugin {
     return plugin
   }
 
-  async execSync (cmd) {
+  async execSync(cmd) {
     return new Promise((resolve, reject) => {
       exec(cmd, { windowsHide: true }, (error, stdout, stderr) => {
         resolve({ error, stdout, stderr })
@@ -96,7 +96,7 @@ export class update extends plugin {
     })
   }
 
-  async runUpdate (plugin = '') {
+  async runUpdate(plugin = '') {
     this.isNowUp = false
 
     let cm = 'git pull --no-rebase'
@@ -111,10 +111,10 @@ export class update extends plugin {
       if (this.e.msg.includes('强制')) {
         type = '强制更新'
         cm = `git -C ./plugins/${plugin}/ fetch --all && git -C ./plugins/${plugin}/ reset --hard && git -C ./plugins/${plugin}/ pull`
-      }else{
-        cm =  `git -C ./plugins/${plugin}/ pull --no-rebase`
+      } else {
+        cm = `git -C ./plugins/${plugin}/ pull --no-rebase`
       }
-}
+    }
 
     this.oldCommitId = await this.getcommitId(plugin)
 
@@ -147,7 +147,7 @@ export class update extends plugin {
     return true
   }
 
-  async getcommitId (plugin = '') {
+  async getcommitId(plugin = '') {
     let cm = 'git rev-parse --short HEAD'
     if (plugin) {
       cm = `git -C ./plugins/${plugin}/ rev-parse --short HEAD`
@@ -159,7 +159,7 @@ export class update extends plugin {
     return commitId
   }
 
-  async getTime (plugin = '') {
+  async getTime(plugin = '') {
     let cm = 'git log  -1 --oneline --pretty=format:"%cd" --date=format:"%m-%d %H:%M"'
     if (plugin) {
       cm = `cd ./plugins/${plugin}/ && git log -1 --oneline --pretty=format:"%cd" --date=format:"%m-%d %H:%M"`
@@ -177,7 +177,7 @@ export class update extends plugin {
     return time
   }
 
-  async gitErr (err, stdout) {
+  async gitErr(err, stdout) {
     let msg = '更新失败！'
     let errMsg = err.toString()
     stdout = stdout.toString()
@@ -207,7 +207,7 @@ export class update extends plugin {
     await this.reply([errMsg, stdout])
   }
 
-  async updateAll () {
+  async updateAll() {
     let dirs = fs.readdirSync('./plugins/')
 
     await this.runUpdate()
@@ -225,11 +225,11 @@ export class update extends plugin {
     }
   }
 
-  restart () {
+  restart() {
     new Restart(this.e).restart()
   }
 
-  async getLog (plugin = '') {
+  async getLog(plugin = '') {
     let cm = 'git log  -20 --oneline --pretty=format:"%h||[%cd]  %s" --date=format:"%m-%d %H:%M"'
     if (plugin) {
       cm = `cd ./plugins/${plugin}/ && ${cm}`
@@ -266,7 +266,7 @@ export class update extends plugin {
     return log
   }
 
-  async makeForwardMsg (title, msg, end) {
+  async makeForwardMsg(title, msg, end) {
     let nickname = this.e.bot.nickname
     if (this.e.isGroup) {
       let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, this.e.bot.uin)
@@ -303,15 +303,22 @@ export class update extends plugin {
     }
 
     /** 处理描述 */
-    forwardMsg.data = forwardMsg.data
-      .replace(/\n/g, '')
-      .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-      .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
+    if (typeof (forwardMsg.data) === 'object') {
+      let detail = forwardMsg.data?.meta?.detail
+      if (detail) {
+        detail.news = [{ text: title }]
+      }
+    } else {
+      forwardMsg.data = forwardMsg.data
+        .replace(/\n/g, '')
+        .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
+        .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
+    }
 
     return forwardMsg
   }
 
-  async updateLog () {
+  async updateLog() {
     let log = await this.getLog()
     await this.reply(log)
   }

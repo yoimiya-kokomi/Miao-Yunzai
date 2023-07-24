@@ -4,7 +4,7 @@ import lodash from 'lodash'
 import moment from 'moment'
 
 export class sendLog extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '发送日志',
       dsc: '发送最近100条运行日志',
@@ -25,7 +25,7 @@ export class sendLog extends plugin {
     this.errFile = './logs/error.log'
   }
 
-  async sendLog () {
+  async sendLog() {
     let lineNum = this.e.msg.match(/\d+/g)
     if (lineNum) {
       this.lineNum = lineNum[0]
@@ -54,7 +54,7 @@ export class sendLog extends plugin {
     await this.reply(forwardMsg)
   }
 
-  getLog (logFile) {
+  getLog(logFile) {
     let log = fs.readFileSync(logFile, { encoding: 'utf-8' })
     log = log.split('\n')
 
@@ -79,7 +79,7 @@ export class sendLog extends plugin {
     return tmp
   }
 
-  async makeForwardMsg (title, msg) {
+  async makeForwardMsg(title, msg) {
     let nickname = this.e.bot.nickname
     if (this.e.isGroup) {
       let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, this.e.bot.uin)
@@ -109,10 +109,17 @@ export class sendLog extends plugin {
     }
 
     /** 处理描述 */
-    forwardMsg.data = forwardMsg.data
-      .replace(/\n/g, '')
-      .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-      .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
+    if (typeof (forwardMsg.data) === 'object') {
+      let detail = forwardMsg.data?.meta?.detail
+      if (detail) {
+        detail.news = [{ text: title }]
+      }
+    } else {
+      forwardMsg.data = forwardMsg.data
+        .replace(/\n/g, '')
+        .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
+        .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
+    }
 
     return forwardMsg
   }
