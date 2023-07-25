@@ -264,9 +264,7 @@ export default class MysNews extends base {
       return img[0]
     } else {
       let msg = [titile, ...img]
-      return await common.makeForwardMsg(this.e, msg, titile).catch((err) => {
-        logger.error(err)
-      })
+      return await common.makeForwardMsg(this.e, msg, titile)
     }
   }
 

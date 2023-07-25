@@ -177,7 +177,7 @@ export default class MysInfo {
       }
 
       for (let i in res) {
-        res[i] = await mysInfo.checkCode(res[i], res[i].api)
+        res[i] = await mysInfo.checkCode(res[i], res[i].api, mysApi)
 
         if (res[i]?.retcode === 0) continue
 
@@ -185,7 +185,7 @@ export default class MysInfo {
       }
     } else {
       res = await mysApi.getData(api, data)
-      res = await mysInfo.checkCode(res, api)
+      res = await mysInfo.checkCode(res, api, mysApi)
     }
 
     return res
@@ -335,7 +335,7 @@ export default class MysInfo {
     return this.ckUser?.ck
   }
 
-  async checkCode(res, type) {
+  async checkCode(res, type, mysApi = {}) {
     if (!res) {
       this.e.reply('米游社接口请求失败，暂时无法查询')
       return false

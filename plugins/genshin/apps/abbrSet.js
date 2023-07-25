@@ -1,4 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js'
+import common from '../../../lib/common/common.js'
 import fs from 'node:fs'
 import gsCfg from '../model/gsCfg.js'
 import YAML from 'yaml'
@@ -125,8 +126,7 @@ export class abbrSet extends plugin {
   }
 
   async delAbbr() {
-    let role = gsCfg.getRole(this.e.msg, '#|星铁|删除|别名|昵称', this.e.isSr)
-
+    let role = gsCfg.getRole(this.e.msg, '#|删除|别名|昵称')
     if (!role) return false
 
     let nameArr = gsCfg.getConfig('role', 'name')
@@ -164,7 +164,7 @@ export class abbrSet extends plugin {
 
     let title = `${role.name}别名，${list.length}个`
 
-    msg = await this.makeForwardMsg(this.e.bot.uin, title, msg)
+    msg = await common.makeForwardMsg(this.e, msg, title)
 
     await this.e.reply(msg)
   }
