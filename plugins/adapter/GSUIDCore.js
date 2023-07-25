@@ -26,7 +26,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   }
 
   makeLog(msg) {
-    return this.toStr(msg).replace(/("type":"(image|file)","data":").*?(")/g, "$1...$3")
+    return this.toStr(msg).replace(/base64:\/\/.*?"/g, "base64://...\"")
   }
 
   sendApi(ws, data) {
@@ -45,10 +45,10 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
       switch (i.type) {
         case "text":
-          i.data = i.text
+          i = { type: "text", data: i.text }
           break
         case "image":
-          i.data = i.file
+          i = { type: "image", data: i.file }
           break
         case "record":
           i = { type: "file", data: i.file }
@@ -57,13 +57,13 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
           i = { type: "file", data: i.file }
           break
         case "file":
-          i.data = i.file
+          i = { type: "file", data: i.file }
           break
         case "at":
-          i.data = i.qq
+          i = { type: "at", data: i.qq }
           break
         case "reply":
-          i.data = i.id
+          i = { type: "reply", data: i.id }
           break
         case "node": {
           const array = []
