@@ -173,6 +173,17 @@ export default class apiTool {
         dailyNote: {
           url: `${hostRecord}game_record/app/hkrpg/api/note`,
           query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 养成计算器 */
+        compute: {
+          url: `${host}event/rpgcalc/compute?`,
+          query:`game=hkrpg`,
+          body: data
+        },
+        /** 详情 */
+        detail: {
+          url: `${host}event/rpgcalc/avatar/detail`,
+          query: `game=hkrpg&lang=zh-cn&item_id=${data.avatar_id}&tab_from=${data.tab_from}&change_target_level=0&uid=${this.uid}&region=${this.server}`
         }
       }
     }

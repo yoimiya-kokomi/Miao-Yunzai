@@ -22,5 +22,7 @@ online_msg: true
 # 上线推送通知的冷却时间
 online_msg_exp: 86400
 
-# 签名API地址
+# 签名API地址(如:http://127.0.0.1:8080/sign?key=114514)
 sign_api_addr: 
+# 传入的QQ版本(如:8.9.63、8.9.68)
+ver: 
