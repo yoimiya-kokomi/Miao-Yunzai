@@ -49,8 +49,9 @@ export class sendLog extends plugin {
       this.reply(`暂无相关日志：${type}`)
       return
     }
+    let title = `最近${log.length}条${type}日志`
 
-    let forwardMsg = await common.makeForwardMsg(this.e, log, `最近${log.length}条${type}日志`)
+    let forwardMsg = await common.makeForwardMsg(this.e, [title, log.join("")], title)
 
     await this.reply(forwardMsg)
   }
