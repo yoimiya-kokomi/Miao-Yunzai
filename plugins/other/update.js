@@ -105,12 +105,9 @@ export class update extends plugin {
       cm = `git reset --hard && git pull --rebase --allow-unrelated-histories`
     }
 
-    if (plugin) {
-      if (type == '强制更新')
-        cm = `cd "plugins/${plugin}" && git reset --hard && git pull --rebase --allow-unrelated-histories`
-      else
-        cm = `cd "plugins/${plugin}" && git pull --no-rebase`
-    }
+    if (plugin)
+      cm = `cd "plugins/${plugin}" && ${cm}`
+
 
     this.oldCommitId = await this.getcommitId(plugin)
 

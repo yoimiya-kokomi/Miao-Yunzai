@@ -108,6 +108,10 @@ Bot.adapter.push(new class ComWeChatAdapter {
         case "reply":
           continue
           break
+        case "wx.emoji":
+          break
+        case "wx.link":
+          break
         default:
           i = { type: "text", data: { text: JSON.stringify(i) }}
       }

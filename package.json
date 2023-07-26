@@ -27,7 +27,7 @@
     "log4js": "^6.9.1",
     "md5": "^2.3.0",
     "moment": "^2.29.4",
-    "node-fetch": "^3.3.1",
+    "node-fetch": "^3.3.2",
     "node-schedule": "^2.1.1",
     "node-xlsx": "^0.23.0",
     "oicq": "link:lib/modules/oicq",
