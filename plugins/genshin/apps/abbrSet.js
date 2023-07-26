@@ -159,51 +159,13 @@ export class abbrSet extends plugin {
     let msg = []
     for (let i in list) {
       let num = Number(i) + 1
-      msg.push(`${num}.${list[i]}\n`)
+      msg.push(`${num}.${list[i]}`)
     }
 
     let title = `${role.name}别名，${list.length}个`
 
-    msg = await common.makeForwardMsg(this.e, msg, title)
+    msg = await common.makeForwardMsg(this.e, [title, msg.join("\n")], title)
 
     await this.e.reply(msg)
-  }
-
-  async makeForwardMsg(qq, title, msg) {
-    let nickname = this.e.bot.nickname
-    if (this.e.isGroup) {
-      let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, qq)
-      nickname = info.card ?? info.nickname
-    }
-    let userInfo = {
-      user_id: this.e.bot.uin,
-      nickname
-    }
-
-    let forwardMsg = [
-      {
-        ...userInfo,
-        message: title
-      },
-      {
-        ...userInfo,
-        message: msg
-      }
-    ]
-
-    /** 制作转发内容 */
-    if (this.e.isGroup) {
-      forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    } else {
-      forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-    }
-
-    /** 处理描述 */
-    forwardMsg.data = forwardMsg.data
-      .replace(/\n/g, '')
-      .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-      .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
-
-    return forwardMsg
   }
 }
