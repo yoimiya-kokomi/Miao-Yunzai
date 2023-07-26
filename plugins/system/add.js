@@ -734,7 +734,7 @@ export class add extends plugin {
       title = `表情${search}，${count}条`
     }
 
-    let forwardMsg = await common.makeForwardMsg(this.e, msg, title)
+    let forwardMsg = await common.makeForwardMsg(this.e, [title, msg], title)
 
     this.e.reply(forwardMsg)
   }

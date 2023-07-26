@@ -258,13 +258,13 @@ export default class MysNews extends base {
     return await this.replyMsg(img, `${param.data.post.subject}`)
   }
 
-  async replyMsg (img, titile) {
+  async replyMsg (img, title) {
     if (!img || img.length <= 0) return false
     if (img.length == 1) {
       return img[0]
     } else {
-      let msg = [titile, ...img]
-      return await common.makeForwardMsg(this.e, msg, titile)
+      let msg = [title, ...img]
+      return await common.makeForwardMsg(this.e, msg, title)
     }
   }
 

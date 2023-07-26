@@ -255,9 +255,9 @@ export class update extends plugin {
 
     if (log.length <= 0) return ''
 
-    let end = ''
+    let title = `${plugin || 'Miao-Yunzai'}更新日志，共${line}条`
 
-    log = await common.makeForwardMsg(this.e, [log, end], `${plugin || 'Miao-Yunzai'}更新日志，共${line}条`)
+    log = await common.makeForwardMsg(this.e, [title, log], title)
 
     return log
   }
