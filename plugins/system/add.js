@@ -1,63 +1,47 @@
-import cfg from '../../lib/config/config.js'
-import plugin from '../../lib/plugins/plugin.js'
-import common from '../../lib/common/common.js'
-import fs from 'node:fs'
-import lodash from 'lodash'
-import { pipeline } from 'stream'
-import { promisify } from 'util'
-import fetch from 'node-fetch'
-import moment from 'moment'
+import cfg from "../../lib/config/config.js"
+import plugin from "../../lib/plugins/plugin.js"
+import common from "../../lib/common/common.js"
+import fs from "node:fs"
+import path from "node:path"
+import lodash from "lodash"
+import fetch from "node-fetch"
+import { fileTypeFromBuffer } from "file-type"
 
-let textArr = {}
+let messageMap = {}
 
 export class add extends plugin {
   constructor() {
     super({
-      name: '添加表情',
-      dsc: '添加表情，文字等',
-      event: 'message',
+      name: "添加消息",
+      dsc: "添加消息",
+      event: "message",
       priority: 50000,
       rule: [
         {
-          reg: '^#(全局)?添加(.*)',
-          fnc: 'add'
+          reg: "^#(全局)?添加",
+          fnc: "add"
         },
         {
-          reg: '^#(全局)?删除(.*)',
-          fnc: 'del'
+          reg: "^#(全局)?删除",
+          fnc: "del"
         },
         {
-          reg: '(.*)',
-          fnc: 'getText',
+          reg: "",
+          fnc: "getMessage",
           log: false
         },
         {
-          reg: '#(全局)?(表情|词条)(.*)',
-          fnc: 'list'
+          reg: "^#(全局)?(消息|词条)",
+          fnc: "list"
         }
       ]
     })
 
-    this.path = './data/textJson/'
-    this.facePath = './data/face/'
-    /** 全局表情标记 */
-    this.isGlobal = false
+    this.path = "data/messageJson/"
   }
 
   async init() {
-    if (!fs.existsSync(this.path)) {
-      fs.mkdirSync(this.path)
-    }
-    if (!fs.existsSync(this.facePath)) {
-      fs.mkdirSync(this.facePath)
-    }
-  }
-
-  async accept() {
-    /** 处理消息 */
-    if (this.e.atBot && this.e.msg && this.e?.msg.includes('添加') && !this.e?.msg.includes('#')) {
-      this.e.msg = '#' + this.e.msg
-    }
+    common.mkdirs(this.path)
   }
 
   /** 群号key */
@@ -67,38 +51,36 @@ export class add extends plugin {
 
   /** #添加 */
   async add() {
-    this.isGlobal = this.e?.msg.includes("全局");
+    this.isGlobal = Boolean(this.e.msg.match(/^#全局/))
     await this.getGroupId()
 
     if (!this.group_id) {
-      this.e.reply('请先在群内触发表情，确定添加的群')
+      await this.reply("请先在群内触发消息，确定添加的群")
       return
     }
 
-    this.initTextArr()
+    this.initMessageMap()
 
-    if (!this.checkAuth()) return
-    if (!this.checkKeyWord()) return
-    if (await this.singleAdd()) return
+    if (!this.checkAuth()) return false
     /** 获取关键词 */
     this.getKeyWord()
-
-    if (!this.keyWord) {
-      this.e.reply('添加错误：没有关键词')
+    if (!this.e.keyWord) {
+      await this.reply("添加错误：没有关键词")
       return
     }
 
-    this.setContext('addContext')
+    this.e.message = []
+    this.setContext("addContext")
 
-    await this.e.reply('请发送添加内容', false, { at: true })
+    return this.reply("请发送添加内容，完成后发送#结束添加", true, { at: true })
   }
 
   /** 获取群号 */
   async getGroupId() {
-    /** 添加全局表情，存入到机器人qq文件中 */
+    /** 添加全局消息，存入到机器人文件中 */
     if (this.isGlobal) {
-      this.group_id = this.e.bot.uin;
-      return this.e.bot.uin;
+      this.group_id = "global"
+      return this.group_id
     }
 
     if (this.e.isGroup) {
@@ -120,436 +102,248 @@ export class add extends plugin {
   checkAuth() {
     if (this.e.isMaster) return true
 
-    let groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
-    if (groupCfg.imgAddLimit == 2) {
-      this.e.reply('暂无权限，只有主人才能操作')
+    const groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
+    if (groupCfg.addLimit == 2) {
+      this.reply("暂无权限，只有主人才能操作")
       return false
     }
-    if (groupCfg.imgAddLimit == 1) {
+    if (groupCfg.addLimit == 1) {
       if (!this.e.member.is_admin) {
-        this.e.reply('暂无权限，只有管理员才能操作')
+        this.reply("暂无权限，只有管理员才能操作")
         return false
       }
     }
 
-    if (!this.e.isGroup && groupCfg.addPrivate != 1) {
-      this.e.reply('禁止私聊添加')
+    if (groupCfg.addPrivate != 1 && !this.e.isGroup) {
+      this.reply("禁止私聊添加")
       return false
     }
-
-    return true
-  }
-
-  checkKeyWord() {
-    if (this.e.img && this.e.img.length > 1) {
-      this.e.reply('添加错误：只能发送一个表情当关键词')
-      return false
-    }
-
-    if (this.e.at) {
-      let at = lodash.filter(this.e.message, (o) => { return o.type == 'at' && o.qq != this.e.bot.uin })
-      if (at.length > 1) {
-        this.e.reply('添加错误：只能@一个人当关键词')
-        return false
-      }
-    }
-
-    if (this.e.img && this.e.at) {
-      this.e.reply('添加错误：没有关键词')
-      return false
-    }
-
-    return true
-  }
-
-  /** 单独添加 */
-  async singleAdd() {
-    if (this.e.message.length != 2) return false
-    let msg = lodash.keyBy(this.e.message, 'type')
-    if (!this.e.msg || !msg.image) return false
-
-    // #全局添加文字+表情包，无法正确添加到全局路径
-    this.e.isGlobal = this.isGlobal;
-    let keyWord = this.e.msg.replace(/#|＃|图片|表情|添加|全局/g, '').trim()
-    if (!keyWord) return false
-
-    this.keyWord = this.trimAlias(keyWord)
-    this.e.keyWord = this.keyWord
-
-    if (this.e.msg.includes('添加图片')) {
-      this.e.addImg = true
-    }
-    this.e.message = [msg.image]
-    await this.addContext()
 
     return true
   }
 
   /** 获取添加关键词 */
   getKeyWord() {
-    this.e.isGlobal = this.e.msg.includes("全局");
-
-    this.keyWord = this.e.raw_message.trim()
-      .replace(/^#?(全局)?(添加|删除)(图片|表情)?/, '')
-      .trim()
-
-    this.keyWord = this.trimAlias(this.keyWord)
-    this.e.keyWord = this.keyWord
-
-    if (this.e.msg.includes('添加图片')) {
-      this.e.addImg = true
-    }
+    this.e.isGlobal = Boolean(this.e.msg.match(/^#全局/))
+    this.keyWord = this.e.raw_message.replace(/#(全局)?(添加|删除)/, "").trim()
+    this.e.keyWord = this.trimAlias(this.keyWord)
   }
 
   /** 过滤别名 */
   trimAlias(msg) {
-    let groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
+    const groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
     let alias = groupCfg.botAlias
-    if (!Array.isArray(alias)) {
+    if (!Array.isArray(alias))
       alias = [alias]
-    }
-    for (let name of alias) {
-      if (msg.startsWith(name)) {
+
+    for (const name of alias)
+      if (msg.startsWith(name))
         msg = lodash.trimStart(msg, name).trim()
-      }
-    }
 
     return msg
   }
 
   /** 添加内容 */
   async addContext() {
-    this.isGlobal = this.e.isGlobal || this.getContext()?.addContext?.isGlobal;
+    const context = this.getContext()?.addContext
+    this.isGlobal = context.isGlobal
     await this.getGroupId()
     /** 关键词 */
-    let keyWord = this.keyWord || this.getContext()?.addContext?.keyWord
-    let addImg = this.e.addImg || this.getContext()?.addContext?.addImg
+    this.keyWord = context.keyWord
 
-    /** 添加内容 */
-    let message = this.e.message
-
-    let retMsg = [keyWord]
-    this.finish('addContext')
-
-    if (message.length == 1 && message[0].type == 'image') {
-      let local = await this.saveImg(message[0].url, keyWord)
-      if (!local) return
-      message[0].local = local
-      message[0].asface = true
-      if (addImg) message[0].asface = false
+    if (!this.e.msg?.includes("#结束添加")) {
+      /** 添加内容 */
+      for (const i of this.e.message) {
+        if (i.url) i.file = await this.saveFile(i.url)
+        if (i.type == "at" && i.qq == this.e.self_id) continue
+        context.message.push(i)
+      }
+      return
     }
 
-    if (!textArr[this.group_id]) textArr[this.group_id] = new Map()
+    this.finish("addContext")
+    if (!context.message?.length) {
+      this.reply("添加错误：没有添加内容")
+      return
+    }
+
+    if (!messageMap[this.group_id])
+      messageMap[this.group_id] = new Map()
 
     /** 支持单个关键词添加多个 */
-    let text = textArr[this.group_id].get(keyWord)
-    if (text) {
-      text.push(message)
-      textArr[this.group_id].set(keyWord, text)
-    } else {
-      text = [message]
-      textArr[this.group_id].set(keyWord, text)
-    }
+    let message = messageMap[this.group_id].get(this.keyWord)
+    if (Array.isArray(message))
+      message.push(context.message)
+    else
+      message = [context.message]
+    messageMap[this.group_id].set(this.keyWord, message)
 
-    if (text.length > 1 && retMsg[0].type != 'image') {
-      retMsg.push(String(text.length))
-    }
-
-    retMsg.unshift('添加成功：')
+    if (message.length > 1)
+      this.keyWord += String(message.length)
 
     this.saveJson()
-    this.e.reply(retMsg)
+    return this.reply(`添加成功：${this.keyWord}`)
   }
 
   saveJson() {
     let obj = {}
-    for (let [k, v] of textArr[this.group_id]) {
+    for (let [k, v] of messageMap[this.group_id])
       obj[k] = v
-    }
 
-    fs.writeFileSync(`${this.path}${this.group_id}.json`, JSON.stringify(obj, '', '\t'))
-  }
-  
-  saveGlobalJson() {
-    let obj = {};
-    for (let [k, v] of textArr[this.e.bot.uin]) {
-      obj[k] = v;
-    }
-
-    fs.writeFileSync(
-      `${this.path}${this.e.bot.uin}.json`,
-      JSON.stringify(obj, "", "\t")
-    );
+    fs.writeFileSync(`${this.path}${this.group_id}.json`, JSON.stringify(obj, "", "\t"))
   }
 
-  async saveImg(url, keyWord) {
-    let groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
-    let savePath = `${this.facePath}${this.group_id}/`
-
-    if (!fs.existsSync(savePath)) {
-      fs.mkdirSync(savePath)
-    }
-
-    const response = await fetch(url)
-
-    keyWord = keyWord.replace(/\.|\\|\/|:|\*|\?|<|>|\|"/g, '_')
-
-    if (!response.ok) {
-      this.e.reply('添加图片下载失败。。')
-      return false
-    }
-
-    let imgSize = (response.headers.get('size') / 1024 / 1024).toFixed(2)
-    if (imgSize > 1024 * 1024 * groupCfg.imgMaxSize) {
-      this.e.reply(`添加失败：表情太大了，${imgSize}m`)
-      return false
-    }
-
-    let type = response.headers.get('content-type').split('/')[1]
-    if (type == 'jpeg') type = 'jpg'
-
-    if (fs.existsSync(`${savePath}${keyWord}.${type}`)) {
-      keyWord = `${keyWord}_${moment().format('X')}`
-    }
-
-    savePath = `${savePath}${keyWord}.${type}`
-
-    const streamPipeline = promisify(pipeline)
-    await streamPipeline(response.body, fs.createWriteStream(savePath))
-
-    return savePath
+  async makeBuffer(file) {
+    if (file.match(/^base64:\/\//))
+      return Buffer.from(file.replace(/^base64:\/\//, ""), "base64")
+    else if (file.match(/^https?:\/\//))
+      return Buffer.from(await (await fetch(file)).arrayBuffer())
+    else if (fs.existsSync(file))
+      return Buffer.from(fs.readFileSync(file))
+    return file
   }
 
-  async getText() {
+  async fileType(data) {
+    const file = {}
+    try {
+      file.url = data.replace(/^base64:\/\/.*/, "base64://...")
+      file.buffer = await this.makeBuffer(data)
+      file.type = await fileTypeFromBuffer(file.buffer)
+      file.name = `${this.group_id}/${Date.now()}.${file.type.ext}`
+    } catch (err) {
+      logger.error(`文件类型检测错误：${logger.red(err)}`)
+      file.name = `${this.group_id}/${Date.now()}-${path.basename(file.url)}`
+    }
+    return file
+  }
+
+  async saveFile(url) {
+    const file = await this.fileType(url)
+    if (file.name && Buffer.isBuffer(file.buffer) && common.mkdirs(`${this.path}${this.group_id}`)) {
+      fs.writeFileSync(`${this.path}${file.name}`, file.buffer)
+      return file.name
+    }
+    return url
+  }
+
+  async getMessage() {
     if (!this.e.raw_message) return false
-    
     this.isGlobal = false
 
     await this.getGroupId()
-
     if (!this.group_id) return false
 
-    this.initTextArr()
-    
-    this.initGlobalTextArr()
+    this.initMessageMap()
+    this.initGlobalMessageMap()
 
-    let keyWord = this.e.raw_message.trim()
-
-    keyWord = this.trimAlias(keyWord)
+    this.keyWord = this.trimAlias(this.e.raw_message.trim())
+    let keyWord = this.keyWord
 
     let num = 0
     if (isNaN(keyWord)) {
-      num = keyWord.charAt(keyWord.length - 1)
+      num = keyWord.charAt(keyWord.length-1)
 
-      if (!isNaN(num) && !textArr[this.group_id].has(keyWord) && !textArr[this.e.bot.uin].has(keyWord)) {
+      if (!isNaN(num) && !messageMap[this.group_id].has(keyWord) && !messageMap.global.has(keyWord)) {
         keyWord = lodash.trimEnd(keyWord, num).trim()
         num--
       }
     }
 
-    let msg = textArr[this.group_id].get(keyWord) || []
-    let globalMsg = textArr[this.e.bot.uin].get(keyWord) || []
-    if (lodash.isEmpty(msg) && lodash.isEmpty(globalMsg)) return false
+    let msg = [
+      ...messageMap[this.group_id].get(keyWord) || [],
+      ...messageMap.global.get(keyWord) || [],
+    ]
+    if (lodash.isEmpty(msg)) return false
 
-    msg = [...msg, ...globalMsg]
+    if (!msg[num])
+      num = lodash.random(0, msg.length-1)
 
-    if (num >= 0 && num < msg.length) {
-      msg = msg[num]
-    } else {
-      /** 随机获取一个 */
-      num = lodash.random(0, msg.length - 1)
-      msg = msg[num]
-    }
+    msg = [...msg[num]]
+    for (const i in msg)
+      if (msg[i].file && fs.existsSync(`${this.path}${msg[i].file}`))
+        msg[i] = { ...msg[i], file: `base64://${fs.readFileSync(`${this.path}${msg[i].file}`).toString("base64")}` }
 
-    if (msg[0] && msg[0].local) {
-      if (fs.existsSync(msg[0].local)) {
-        let tmp = segment.image(msg[0].local)
-        tmp.asface = msg[0].asface
-        msg = tmp
-      } else {
-        // this.e.reply(`表情已删除：${keyWord}`)
-        return
-      }
-    }
-
-    if (Array.isArray(msg)) {
-      msg.forEach(m => {
-        /** 去除回复@@ */
-        if (m?.type == 'at') { delete m.text }
-      })
-    }
-
-    logger.mark(`[发送表情]${this.e.logText} ${keyWord}`)
-    let ret = await this.e.reply(msg)
-    if (!ret) {
-      this.expiredMsg(keyWord, num)
-    }
-
-    return true
-  }
-
-  expiredMsg(keyWord, num) {
-    logger.mark(`[发送表情]${this.e.logText} ${keyWord} 表情已过期失效`)
-
-    let arr = textArr[this.group_id].get(keyWord)
-    arr.splice(num, 1)
-
-    if (arr.length <= 0) {
-      textArr[this.group_id].delete(keyWord)
-    } else {
-      textArr[this.group_id].set(keyWord, arr)
-    }
-
-    this.saveJson()
+    logger.mark(`[发送消息]${this.e.logText} ${this.keyWord}`)
+    const groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
+    return this.reply(msg, Boolean(groupCfg.addReply), {
+      at: Boolean(groupCfg.addAt),
+      recallMsg: groupCfg.addRecall,
+    })
   }
 
   /** 初始化已添加内容 */
-  initTextArr() {
-    if (textArr[this.group_id]) return
+  initMessageMap() {
+    if (messageMap[this.group_id]) return
+    messageMap[this.group_id] = new Map()
 
-    textArr[this.group_id] = new Map()
-
-    let path = `${this.path}${this.group_id}.json`
-    if (!fs.existsSync(path)) {
-      return
-    }
+    const path = `${this.path}${this.group_id}.json`
+    if (!fs.existsSync(path)) return
 
     try {
-      let text = JSON.parse(fs.readFileSync(path, 'utf8'))
-      for (let i in text) {
-        if (text[i][0] && !Array.isArray(text[i][0])) {
-          text[i] = [text[i]]
-        }
-
-        textArr[this.group_id].set(String(i), text[i])
-      }
-    } catch (error) {
-      logger.error(`json格式错误：${path}`)
-      delete textArr[this.group_id]
-      return false
-    }
-
-    /** 加载表情 */
-    let facePath = `${this.facePath}${this.group_id}`
-
-    if (fs.existsSync(facePath)) {
-      const files = fs.readdirSync(`${this.facePath}${this.group_id}`).filter(file => /\.(jpeg|jpg|png|gif)$/g.test(file))
-      for (let val of files) {
-        let tmp = val.split('.')
-        tmp[0] = tmp[0].replace(/_[0-9]{10}$/, '')
-        if (/at|image/g.test(val)) continue
-
-        if (textArr[this.group_id].has(tmp[0])) continue
-
-        textArr[this.group_id].set(tmp[0], [[{
-          local: `${facePath}/${val}`,
-          asface: true
-        }]])
-      }
-
-      this.saveJson()
-    } else {
-      fs.mkdirSync(facePath)
+      const message = JSON.parse(fs.readFileSync(path, "utf8"))
+      for (const i in message)
+        messageMap[this.group_id].set(i, message[i])
+    } catch (err) {
+      logger.error(`JSON 格式错误：${path} ${err}`)
     }
   }
 
   /** 初始化全局已添加内容 */
-  initGlobalTextArr() {
-    if (textArr[this.e.bot.uin]) return;
+  initGlobalMessageMap() {
+    if (messageMap.global) return
+    messageMap.global = new Map()
 
-    textArr[this.e.bot.uin] = new Map();
-
-    let globalPath = `${this.path}${this.e.bot.uin}.json`;
-    if (!fs.existsSync(globalPath)) {
-      return;
-    }
+    const globalPath = `${this.path}global.json`
+    if (!fs.existsSync(globalPath)) return
 
     try {
-      let text = JSON.parse(fs.readFileSync(globalPath, "utf8"));
-
-      for (let i in text) {
-        if (text[i][0] && !Array.isArray(text[i][0])) {
-          text[i] = [text[i]];
-        }
-        textArr[this.e.bot.uin].set(String(i), text[i]);
-      }
-    } catch (error) {
-      logger.error(`json格式错误：${globalPath}`);
-      delete textArr[this.e.bot.uin];
-      return false;
-    }
-
-    /** 加载表情 */
-    let globalFacePath = `${this.facePath}${this.e.bot.uin}`;
-
-    if (fs.existsSync(globalFacePath)) {
-      const files = fs
-        .readdirSync(`${this.facePath}${this.e.bot.uin}`)
-        .filter((file) => /\.(jpeg|jpg|png|gif)$/g.test(file));
-
-      for (let val of files) {
-        let tmp = val.split(".");
-        tmp[0] = tmp[0].replace(/_[0-9]{10}$/, "");
-        if (/at|image/g.test(val)) continue;
-
-        if (textArr[this.e.bot.uin].has(tmp[0])) continue;
-
-        textArr[this.e.bot.uin].set(tmp[0], [
-          [
-            {
-              local: `${globalFacePath}/${val}`,
-              asface: true,
-            },
-          ],
-        ]);
-      }
-
-      this.saveGlobalJson();
-    } else {
-      fs.mkdirSync(globalFacePath);
+      const message = JSON.parse(fs.readFileSync(globalPath, "utf8"))
+      for (const i in message)
+        messageMap.global.set(i, message[i])
+    } catch (err) {
+      logger.error(`JSON 格式错误：${globalPath} ${err}`)
     }
   }
 
   async del() {
-    this.isGlobal = this.e?.msg.includes("全局");
+    this.isGlobal = this.e.msg.includes("全局")
     await this.getGroupId()
-    if (!this.group_id) return false
-    if (!this.checkAuth()) return
+    if (!(this.group_id && this.checkAuth())) return false
 
-    this.initTextArr()
+    this.initMessageMap()
 
     this.getKeyWord()
-
     if (!this.keyWord) {
-      this.e.reply('删除错误：没有关键词')
-      return
+      await this.reply("删除错误：没有关键词")
+      return false
     }
 
-    let keyWord = this.trimAlias(this.keyWord)
+    this.keyWord = this.trimAlias(this.keyWord)
+    let keyWord = this.keyWord
 
     let num = false
     let index = 0
     if (isNaN(keyWord)) {
-      num = keyWord.charAt(keyWord.length - 1)
+      num = keyWord.charAt(keyWord.length-1)
 
-      if (!isNaN(num) && !textArr[this.group_id].has(keyWord)) {
+      if (!isNaN(num) && !messageMap[this.group_id].has(keyWord)) {
         keyWord = lodash.trimEnd(keyWord, num).trim()
-        index = num - 1
+        index = num-1
       } else {
         num = false
       }
     }
 
-    let arr = textArr[this.group_id].get(keyWord)
+    let arr = messageMap[this.group_id].get(keyWord)
     if (!arr) {
-      // await this.e.reply(`暂无此表情：${keyWord}`)
+      // await this.reply(`暂无此消息：${keyWord}`)
       return false
     }
 
     let tmp = []
     if (num) {
       if (!arr[index]) {
-        // await this.e.reply(`暂无此表情：${keyWord}${num}`)
+        // await this.reply(`暂无此消息：${keyWord}${num}`)
         return false
       }
 
@@ -557,12 +351,12 @@ export class add extends plugin {
       arr.splice(index, 1)
 
       if (arr.length <= 0) {
-        textArr[this.group_id].delete(keyWord)
+        messageMap[this.group_id].delete(keyWord)
       } else {
-        textArr[this.group_id].set(keyWord, arr)
+        messageMap[this.group_id].set(keyWord, arr)
       }
     } else {
-      if (this.e.msg.includes('删除全部')) {
+      if (this.e.msg.includes("删除全部")) {
         tmp = arr
         arr = []
       } else {
@@ -570,127 +364,83 @@ export class add extends plugin {
       }
 
       if (arr.length <= 0) {
-        textArr[this.group_id].delete(keyWord)
+        messageMap[this.group_id].delete(keyWord)
       } else {
-        textArr[this.group_id].set(keyWord, arr)
+        messageMap[this.group_id].set(keyWord, arr)
       }
     }
-    if (!num) num = ''
-
-    let retMsg = [{ type: 'text', text: '删除成功：' }]
-    for (let msg of this.e.message) {
-      if (msg.type == 'text') {
-        msg.text = msg.text.replace(/^#?(全局)?(添加|删除)(图片|表情)?/, '')
-
-        if (!msg.text) continue
-      }
-      retMsg.push(msg)
-    }
-    if (num > 0) {
-      retMsg.push({ type: 'text', text: num })
-    }
-
-    await this.e.reply(retMsg)
-
-    /** 删除图片 */
-    tmp.forEach(item => {
-      let img = item
-      if (Array.isArray(item)) {
-        img = item[0]
-      }
-      if (img.local) {
-        fs.unlink(img.local, () => {})
-      }
-    })
 
     this.saveJson()
+    return this.reply(`删除成功：${this.keyWord}`)
   }
 
   async list() {
-    this.isGlobal = this.e?.msg.includes("全局");
+    this.isGlobal = Boolean(this.e.msg.match(/^#全局/))
 
     let page = 1
     let pageSize = 100
-    let type = 'list'
+    let type = "list"
 
     await this.getGroupId()
     if (!this.group_id) return false
 
-    this.initTextArr()
+    this.initMessageMap()
 
-    let search = this.e.msg.replace(/#|＃|表情|词条|全局/g, '')
+    const search = this.e.msg.replace(/^#(全局)?(消息|词条)/, "").trim()
+    if (search.match(/^列表/))
+      page = search.replace(/^列表/, "") || 1
+    else
+      type = "search"
 
-    if (search.includes('列表')) {
-      page = search.replace(/列表/g, '') || 1
-    } else {
-      type = 'search'
-    }
-
-    let list = textArr[this.group_id]
+    let list = messageMap[this.group_id]
 
     if (lodash.isEmpty(list)) {
-      await this.e.reply('暂无表情')
+      await this.reply("暂无消息")
       return
     }
 
     let arr = []
-    for (let [k, v] of textArr[this.group_id]) {
-      if (type == 'list') {
-        arr.push({ key: k, val: v, num: arr.length + 1 })
-      } else if (k.includes(search)) {
-        /** 搜索表情 */
-        arr.push({ key: k, val: v, num: arr.length + 1 })
-      }
-    }
+    if (type == "list")
+      for (let [k, v] of messageMap[this.group_id])
+        arr.push({ key: k, val: v, num: arr.length+1 })
+    else
+      for (let [k, v] of messageMap[this.group_id])
+        if (k.includes(search))
+          arr.push({ key: k, val: v, num: arr.length+1 })
 
     let count = arr.length
     arr = arr.reverse()
 
-    if (type == 'list') {
+    if (type == "list")
       arr = this.pagination(page, pageSize, arr)
-    }
-
-    if (lodash.isEmpty(arr)) {
-      return
-    }
+    if (lodash.isEmpty(arr)) return false
 
     let msg = []
     let num = 0
-    for (let i in arr) {
+    for (const i of arr) {
       if (num >= page * pageSize) break
 
-      let keyWord = arr[i].key
+      let keyWord = i.key
       if (!keyWord) continue
 
-      if (Array.isArray(keyWord)) {
-        keyWord.unshift(`${arr[i].num}、`)
-        keyWord.push('\n')
-        keyWord.forEach(v => msg.push(v))
-      } else if (keyWord.type) {
-        msg.push(`\n${arr[i].num}、`, keyWord, '\n\n')
-      } else {
-        msg.push(`${arr[i].num}、${keyWord}\n`)
-      }
+      msg.push(`${i.num}. ${keyWord}(${i.val.length})`)
       num++
     }
+    msg = [msg.join("\n")]
 
-    if (type == 'list' && count > 100) {
-      msg.push(`更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`)
-    }
+    if (type == "list" && count > 100)
+      msg.push(`更多内容请翻页查看\n如：#消息列表${Number(page)+1}`)
 
-    let title = `表情列表，第${page}页，共${count}条`
-    if (type == 'search') {
-      title = `表情${search}，${count}条`
-    }
+    let title = `消息列表：第${page}页，共${count}条`
+    if (type == "search")
+      title = `消息${search}：共${count}条`
 
-    let forwardMsg = await common.makeForwardMsg(this.e, msg, title)
-
-    this.e.reply(forwardMsg)
+    return this.reply(await common.makeForwardMsg(this.e, msg, title))
   }
 
   /** 分页 */
   pagination(pageNo, pageSize, array) {
-    let offset = (pageNo - 1) * pageSize
-    return offset + pageSize >= array.length ? array.slice(offset, array.length) : array.slice(offset, offset + pageSize)
+    let offset = (pageNo-1) * pageSize
+    return offset+pageSize >= array.length ? array.slice(offset, array.length) : array.slice(offset, offset+pageSize)
   }
 }
