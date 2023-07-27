@@ -154,7 +154,7 @@ export class add extends plugin {
     if (!this.e.msg?.includes("#结束添加")) {
       /** 添加内容 */
       for (const i of this.e.message) {
-        if (i.url) i.file = await this.saveFile(i.url)
+        if (i.url) i.file = await this.saveFile(i)
         if (i.type == "at" && i.qq == this.e.self_id) continue
         context.message.push(i)
       }
@@ -204,22 +204,22 @@ export class add extends plugin {
   }
 
   async fileType(data) {
-    const file = {}
+    const file = { name: `${this.group_id}/${data.type}/${Date.now()}` }
     try {
-      file.url = data.replace(/^base64:\/\/.*/, "base64://...")
-      file.buffer = await this.makeBuffer(data)
+      file.url = data.url.replace(/^base64:\/\/.*/, "base64://...")
+      file.buffer = await this.makeBuffer(data.url)
       file.type = await fileTypeFromBuffer(file.buffer)
-      file.name = `${this.group_id}/${Date.now()}.${file.type.ext}`
+      file.name = `${file.name}.${file.type.ext}`
     } catch (err) {
       logger.error(`文件类型检测错误：${logger.red(err)}`)
-      file.name = `${this.group_id}/${Date.now()}-${path.basename(file.url)}`
+      file.name = `${file.name}-${path.basename(data.file || data.url)}`
     }
     return file
   }
 
-  async saveFile(url) {
-    const file = await this.fileType(url)
-    if (file.name && Buffer.isBuffer(file.buffer) && common.mkdirs(`${this.path}${this.group_id}`)) {
+  async saveFile(data) {
+    const file = await this.fileType(data)
+    if (file.name && Buffer.isBuffer(file.buffer) && common.mkdirs(path.dirname(`${this.path}${file.name}`))) {
       fs.writeFileSync(`${this.path}${file.name}`, file.buffer)
       return file.name
     }
