@@ -223,7 +223,7 @@ export class add extends plugin {
       fs.writeFileSync(`${this.path}${file.name}`, file.buffer)
       return file.name
     }
-    return url
+    return data.url
   }
 
   async getMessage() {

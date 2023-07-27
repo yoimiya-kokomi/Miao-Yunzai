@@ -437,6 +437,23 @@ Bot.adapter.push(new class gocqhttpAdapter {
     }
   }
 
+  setFriendAddRequest(data, flag, approve, remark) {
+    return data.sendApi("set_friend_add_request", {
+      flag,
+      approve,
+      remark,
+    })
+  }
+
+  setGroupAddRequest(data, flag, sub_type, approve, reason) {
+    return data.sendApi("set_group_add_request", {
+      flag,
+      sub_type,
+      approve,
+      reason,
+    })
+  }
+
   pickFriend(data, user_id) {
     const i = {
       ...Bot[data.self_id].fl.get(user_id),
@@ -568,6 +585,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getGroupArray: () => this.getGroupArray(data),
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
+
+      request_list: [],
+      getSystemMsg: () => Bot[data.self_id].request_list,
+      setFriendAddRequest: (flag, approve, remark) => this.setFriendAddRequest(data, flag, approve, remark),
+      setGroupAddRequest: (flag, sub_type, approve, reason) => this.setGroupAddRequest(data, flag, sub_type, approve, reason),
     }
 
     Bot[data.self_id].info = (await data.sendApi("get_login_info")).data
@@ -761,19 +783,23 @@ Bot.adapter.push(new class gocqhttpAdapter {
   makeRequest(data) {
     switch (data.request_type) {
       case "friend":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 加好友请求：[${data.user_id}] ${data.comment} ${data.flag}`)
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 加好友请求：[${data.user_id}] ${data.comment}(${data.flag})`)
+        data.sub_type = "add"
         data.friend = data.bot.pickFriend(data.user_id)
+        data.approve = approve => data.bot.setFriendAddRequest(data.flag, approve)
         break
       case "group":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 加群请求：[${data.group_id}, ${data.user_id}] ${data.sub_type} ${data.comment} ${data.flag}`)
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 加群请求：[${data.group_id}, ${data.user_id}] ${data.sub_type} ${data.comment}(${data.flag})`)
         data.friend = data.bot.pickFriend(data.user_id)
         data.group = data.bot.pickGroup(data.group_id)
         data.member = data.group.pickMember(data.user_id)
+        data.approve = approve => data.bot.setGroupAddRequest(data.flag, data.sub_type, approve)
         break
       default:
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知请求：${logger.magenta(JSON.stringify(data))}`)
     }
 
+    data.bot.request_list.push(data)
     if (data.sub_type)
       Bot.emit(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
     Bot.emit(`${data.post_type}.${data.request_type}`, data)
