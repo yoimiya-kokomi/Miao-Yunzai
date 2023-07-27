@@ -79,15 +79,12 @@ export class install extends plugin {
   }
 
   async runInstall(name, url, path) {
-    this.isNowUp = false
-
-    let cm = `git clone --depth 1 --single-branch "${url}" "${path}"`
-
     logger.mark(`${this.e.logFnc} 开始安装：${name} 插件`)
+    await this.reply(`开始安装 ${name} 插件`)
 
-    await this.reply(`开始安装：${name} 插件`)
+    const cm = `git clone --depth 1 --single-branch "${url}" "${path}"`
     insing = true
-    let ret = await this.execSync(cm)
+    const ret = await this.execSync(cm)
     if (fs.existsSync(`${path}/package.json`))
       await this.execSync("pnpm install")
     insing = false
@@ -97,8 +94,6 @@ export class install extends plugin {
       this.gitErr(ret.error, ret.stdout)
       return false
     }
-
-    return true
   }
 
   async gitErr(err, stdout) {
@@ -106,16 +101,14 @@ export class install extends plugin {
     let errMsg = err.toString()
     stdout = stdout.toString()
 
-    if (errMsg.includes("Timed out")) {
-      let remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, "")
-      await this.reply(msg + `\n连接超时：${remote}`)
-      return
+    if (errMsg.includes('Timed out')) {
+      const remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, '')
+      return this.reply(`${msg}\n连接超时：${remote}`)
     }
 
     if (/Failed to connect|unable to access/g.test(errMsg)) {
-      let remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, "")
-      await this.reply(msg + `\n连接失败：${remote}`)
-      return
+      const remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, '')
+      return this.reply(`${msg}\n连接失败：${remote}`)
     }
 
     await this.reply([errMsg, stdout])
