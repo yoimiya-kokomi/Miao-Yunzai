@@ -385,6 +385,84 @@ Bot.adapter.push(new class ComWeChatAdapter {
     Bot.emit(`${data.post_type}`, data)
   }
 
+  makeNotice(data) {
+    data.post_type = data.type
+    if (data.group_id)
+      data.notice_type = "group"
+    else
+      data.notice_type = "friend"
+
+    switch (data.detail_type) {
+      case "private_message_delete":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息撤回：[${data.user_id}] ${data.message_id}`)
+        data.sub_type = "recall"
+        break
+      case "group_message_delete":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息撤回：[${data.group_id}, ${data.operator_id}=>${data.user_id}] ${data.message_id}`)
+        data.sub_type = "recall"
+        break
+      case "wx.get_private_file":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 私聊文件：[${data.user_id}] ${data.file_name} ${data.file_length} ${data.md5}`)
+        break
+      case "wx.get_group_file":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 群文件：[${data.group_id}, ${data.user_id}] ${data.file_name} ${data.file_length} ${data.md5}`)
+        break
+      case "wx.get_private_redbag":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友红包：[${data.user_id}]`)
+        break
+      case "wx.get_group_redbag":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 群红包：[${data.group_id}, ${data.user_id}]`)
+        break
+      case "wx.get_private_poke":
+        data.operator_id = data.from_user_id
+        data.target_id = data.user_id
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友拍一拍：[${data.operator_id}=>${data.target_id}]`)
+        break
+      case "wx.get_group_poke":
+        data.operator_id = data.from_user_id
+        data.target_id = data.user_id
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 群拍一拍：[${data.group_id}, ${data.operator_id}=>${data.target_id}]`)
+        break
+      case "wx.get_private_card":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友用户名片：[${data.user_id}] ${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`)
+        break
+      case "wx.get_group_card":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 群用户名片：[${data.group_id}, ${data.user_id}] ${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`)
+        break
+      default:
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(JSON.stringify(data))}`)
+    }
+    if (!data.sub_type)
+      data.sub_type = data.detail_type.split("_").pop()
+
+    Bot.emit(`${data.post_type}.${data.notice_type}.${data.sub_type}`, data)
+    Bot.emit(`${data.post_type}.${data.notice_type}`, data)
+    Bot.emit(`${data.post_type}`, data)
+  }
+
+  makeRequest(data) {
+    data.post_type = data.type
+    if (data.group_id)
+      data.notice_type = "group"
+    else
+      data.notice_type = "friend"
+
+    switch (data.detail_type) {
+      case "wx.friend_request":
+        logger.info(`${logger.blue(`[${data.self_id}]`)} 加好友请求：[${data.user_id}] ${data.v3} ${data.v4} ${data.nickname} ${data.content} ${data.province} ${data.city}`)
+        data.sub_type = "add"
+        break
+      default:
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知请求：${logger.magenta(JSON.stringify(data))}`)
+    }
+    if (!data.sub_type)
+      data.sub_type = data.detail_type.split("_").pop()
+
+    Bot.emit(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
+    Bot.emit(`${data.post_type}.${data.request_type}`, data)
+    Bot.emit(`${data.post_type}`, data)
+  }
+
   makeMeta(data) {
     switch (data.detail_type) {
       case "heartbeat":
@@ -427,14 +505,12 @@ Bot.adapter.push(new class ComWeChatAdapter {
         case "message":
           this.makeMessage(data)
           break
-/*
         case "notice":
           this.makeNotice(data)
           break
         case "request":
           this.makeRequest(data)
           break
-*/
         default:
           logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
       }

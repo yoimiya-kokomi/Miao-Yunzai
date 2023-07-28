@@ -698,11 +698,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
           data.notice_type = "friend"
         switch (data.sub_type) {
           case "poke":
-            if (data.group_id)
-              logger.info(`${logger.blue(`[${data.self_id}]`)} 群戳一戳：[${data.group_id}, ${data.user_id}=>${data.target_id}]`)
-            else
-              logger.info(`${logger.blue(`[${data.self_id}]`)} 好友戳一戳：[${data.user_id}=>${data.target_id}]`)
             data.operator_id = data.user_id
+            if (data.group_id)
+              logger.info(`${logger.blue(`[${data.self_id}]`)} 群戳一戳：[${data.group_id}, ${data.operator_id}=>${data.target_id}]`)
+            else
+              logger.info(`${logger.blue(`[${data.self_id}]`)} 好友戳一戳：[${data.operator_id}=>${data.target_id}]`)
             break
           case "honor":
             logger.info(`${logger.blue(`[${data.self_id}]`)} 群荣誉：[${data.group_id}, ${data.user_id}] ${data.honor_type}`)

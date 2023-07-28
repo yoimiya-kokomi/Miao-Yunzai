@@ -2,7 +2,7 @@ import cfg from '../../lib/config/config.js'
 import moment from 'moment'
 
 export class status extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '其他功能',
       dsc: '#状态',
@@ -16,18 +16,13 @@ export class status extends plugin {
     })
   }
 
-  async status () {
+  async status() {
     if (this.e.isMaster) return this.statusMaster()
-
-    if (!this.e.isGroup) {
-      this.reply('请群聊查看')
-      return
-    }
-
+    if (!this.e.isGroup) return this.reply('请群聊查看')
     return this.statusGroup()
   }
 
-  async statusMaster () {
+  async statusMaster() {
     let runTime = moment().diff(moment.unix(this.e.bot.stat.start_time), 'seconds')
     let Day = Math.floor(runTime / 3600 / 24)
     let Hour = Math.floor((runTime / 3600) % 24)
@@ -52,22 +47,20 @@ export class status extends plugin {
     await this.reply(msg)
   }
 
-  async statusGroup () {
+  async statusGroup() {
     let msg = '-------状态-------'
     msg += await this.getCount(this.e.group_id)
 
     await this.reply(msg)
   }
 
-  async getCount (groupId = '') {
+  async getCount(groupId = '') {
     this.date = moment().format('MMDD')
     this.month = Number(moment().month()) + 1
 
     this.key = 'Yz:count:'
 
-    if (groupId) {
-      this.key += `group:${groupId}:`
-    }
+    if (groupId) this.key += `group:${groupId}:`
 
     this.msgKey = {
       day: `${this.key}sendMsg:day:`,
