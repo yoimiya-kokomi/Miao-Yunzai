@@ -187,8 +187,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
         guild_id: guild.guild_id,
       })))
         array.push({
-          ...guild,
-          ...channel,
+          guild,
+          channel,
           group_id: `${guild.guild_id}-${channel.channel_id}`,
           group_name: `${guild.guild_name}-${channel.channel_name}`,
         })

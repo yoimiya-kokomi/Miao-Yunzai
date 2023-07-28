@@ -9,6 +9,7 @@ const list = {
   "TRSS-Plugin"   :"https://Yunzai.TRSS.me",
   "yenai-plugin"  :"https://gitee.com/yeyang52/yenai-plugin",
   "flower-plugin" :"https://gitee.com/Nwflower/flower-plugin",
+  "xianyu-plugin" :"https://gitee.com/suancaixianyu/xianyu-plugin",
   "earth-k-plugin":"https://gitee.com/SmallK111407/earth-k-plugin",
   "useless-plugin":"https://gitee.com/SmallK111407/useless-plugin",
   "StarRail-plugin"   :"https://gitee.com/hewang1an/StarRail-plugin",
