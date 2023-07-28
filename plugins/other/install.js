@@ -5,22 +5,24 @@ import { Restart } from "./restart.js"
 
 let insing = false
 const list = {
-  "Atlas"             :"https://gitee.com/Nwflower/atlas",
-  "TRSS-Plugin"       :"https://Yunzai.TRSS.me",
-  "yenai-plugin"      :"https://gitee.com/yeyang52/yenai-plugin",
-  "expand-plugin"     :"https://gitee.com/SmallK111407/expand-plugin",
-  "flower-plugin"     :"https://gitee.com/Nwflower/flower-plugin",
-  "earth-k-plugin"    :"https://gitee.com/SmallK111407/earth-k-plugin",
-  "xiaofei-plugin"    :"https://gitee.com/xfdown/xiaofei-plugin",
+  "Atlas":"https://gitee.com/Nwflower/atlas",
+  "TRSS-Plugin"   :"https://Yunzai.TRSS.me",
+  "yenai-plugin"  :"https://gitee.com/yeyang52/yenai-plugin",
+  "flower-plugin" :"https://gitee.com/Nwflower/flower-plugin",
+  "earth-k-plugin":"https://gitee.com/SmallK111407/earth-k-plugin",
+  "useless-plugin":"https://gitee.com/SmallK111407/useless-plugin",
+  "StarRail-plugin"   :"https://gitee.com/hewang1an/StarRail-plugin",
   "xiaoyao-cvs-plugin":"https://gitee.com/Ctrlcvs/xiaoyao-cvs-plugin",
+  "Jinmaocuicuisha-plugin":"https://gitee.com/JMCCS/jinmaocuicuisha",
+  "trss-xianxin-plugin"   :"https://gitee.com/snowtafir/xianxin-plugin",
   "mysVilla-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-mysVilla-Plugin",
   "Telegram-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-Telegram-Plugin",
-  "Discord-Plugin"    :"https://gitee.com/TimeRainStarSky/Yunzai-Discord-Plugin",
-  "QQGuild-Plugin"    :"https://gitee.com/TimeRainStarSky/Yunzai-QQGuild-Plugin",
-  "WeChat-Plugin"     :"https://gitee.com/TimeRainStarSky/Yunzai-WeChat-Plugin",
-  "Proxy-Plugin"      :"https://gitee.com/TimeRainStarSky/Yunzai-Proxy-Plugin",
-  "ICQQ-Plugin"       :"https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin",
-  "KOOK-Plugin"       :"https://gitee.com/TimeRainStarSky/Yunzai-KOOK-Plugin",
+  "Discord-Plugin":"https://gitee.com/TimeRainStarSky/Yunzai-Discord-Plugin",
+  "QQGuild-Plugin":"https://gitee.com/TimeRainStarSky/Yunzai-QQGuild-Plugin",
+  "WeChat-Plugin" :"https://gitee.com/TimeRainStarSky/Yunzai-WeChat-Plugin",
+  "Proxy-Plugin"  :"https://gitee.com/TimeRainStarSky/Yunzai-Proxy-Plugin",
+  "ICQQ-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin",
+  "KOOK-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-KOOK-Plugin",
 }
 
 export class install extends plugin {

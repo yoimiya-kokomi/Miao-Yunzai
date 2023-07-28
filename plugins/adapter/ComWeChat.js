@@ -164,10 +164,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async getFriendMap(data) {
-    const map = new Map()
     for (const i of (await this.getFriendArray(data)))
-      map.set(i.user_id, i)
-    return map
+      Bot[data.self_id].fl.set(i.user_id, i)
+    return Bot[data.self_id].fl
   }
 
   getFriendInfo(data) {
@@ -188,10 +187,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async getGroupMap(data) {
-    const map = new Map()
     for (const i of (await this.getGroupArray(data)))
-      map.set(i.group_id, i)
-    return map
+      Bot[data.self_id].gl.set(i.group_id, i)
+    return Bot[data.self_id].gl
   }
 
   getGroupInfo(data) {
@@ -298,12 +296,18 @@ Bot.adapter.push(new class ComWeChatAdapter {
       sendApi: data.sendApi,
       stat: { ...data.status, start_time: data.time },
 
+      info: {},
+      get uin() { return this.info.user_id },
+      get nickname() { return this.info.user_name },
+      get avatar() { return this.info["wx.avatar"] },
+
       pickUser: user_id => this.pickFriend(data, user_id),
       pickFriend: user_id => this.pickFriend(data, user_id),
 
       getFriendArray: () => this.getFriendArray(data),
       getFriendList: () => this.getFriendList(data),
       getFriendMap: () => this.getFriendMap(data),
+      fl: new Map(),
 
       pickMember: (group_id, user_id) => this.pickMember(data, group_id, user_id),
       pickGroup: group_id => this.pickGroup(data, group_id),
@@ -311,24 +315,21 @@ Bot.adapter.push(new class ComWeChatAdapter {
       getGroupArray: () => this.getGroupArray(data),
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
+      gl: new Map(),
     }
 
-    Bot[data.self_id].info = (await data.sendApi("get_self_info")).data
-    Bot[data.self_id].uin = Bot[data.self_id].info.user_id
-    Bot[data.self_id].nickname = Bot[data.self_id].info.user_name
-    Bot[data.self_id].avatar = Bot[data.self_id].info["wx.avatar"]
+    if (!Bot.uin.includes(data.self_id))
+      Bot.uin.push(data.self_id)
 
+    Bot[data.self_id].info = (await data.sendApi("get_self_info")).data
     Bot[data.self_id].version = {
       ...(await data.sendApi("get_version")).data,
       id: this.id,
       name: this.name,
     }
 
-    Bot[data.self_id].fl = await Bot[data.self_id].getFriendMap()
-    Bot[data.self_id].gl = await Bot[data.self_id].getGroupMap()
-
-    if (!Bot.uin.includes(data.self_id))
-      Bot.uin.push(data.self_id)
+    Bot[data.self_id].getFriendMap()
+    Bot[data.self_id].getGroupMap()
 
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
