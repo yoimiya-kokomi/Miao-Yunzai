@@ -87,9 +87,7 @@ export class update extends plugin {
       type = '强制更新'
       cm = `git reset --hard && git pull --rebase --allow-unrelated-histories`
     }
-
-    if (plugin)
-      cm = `cd "plugins/${plugin}" && ${cm}`
+    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
     this.oldCommitId = await this.getcommitId(plugin)
 
@@ -122,8 +120,7 @@ export class update extends plugin {
 
   async getcommitId(plugin = '') {
     let cm = 'git rev-parse --short HEAD'
-    if (plugin)
-      cm = `cd "plugins/${plugin}" && git rev-parse --short HEAD`
+    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
     const commitId = await execSync(cm, { encoding: 'utf-8' })
     return lodash.trim(commitId)
@@ -131,8 +128,7 @@ export class update extends plugin {
 
   async getTime(plugin = '') {
     let cm = 'git log -1 --pretty=format:"%cd" --date=format:"%F %T"'
-    if (plugin)
-      cm = `cd "plugins/${plugin}" && git log -1 --pretty=format:"%cd" --date=format:"%F %T"`
+    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
     let time = ''
     try {
@@ -196,8 +192,7 @@ export class update extends plugin {
 
   async getLog(plugin = '') {
     let cm = 'git log -100 --pretty=format:"%h||[%cd] %s" --date=format:"%F %T"'
-    if (plugin)
-      cm = `cd "plugins/${plugin}" && ${cm}`
+    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
     let logAll
     try {
@@ -219,14 +214,16 @@ export class update extends plugin {
       log.push(str[1])
     }
     let line = log.length
-    log = log.join('\n')
+    log = log.join('\n\n')
 
     if (log.length <= 0) return ''
 
     let end = ''
     try {
-      end = await execSync('git config -l', { encoding: 'utf-8' })
-      end = end.match(/remote\..*\.url=.+/g).join('\n').replace(/remote\..*\.url=/g, '')
+      cm = 'git config -l'
+      if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
+      end = await execSync(cm, { encoding: 'utf-8' })
+      end = end.match(/remote\..*\.url=.+/g).join('\n\n').replace(/remote\..*\.url=/g, '')
     } catch (error) {
       logger.error(error.toString())
       await this.reply(error.toString())
