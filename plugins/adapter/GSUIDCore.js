@@ -168,12 +168,12 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         name: this.name,
       },
       pickFriend: user_id => this.pickFriend(data.self_id, user_id),
+      get pickUser() { return this.pickFriend },
       pickMember: (group_id, user_id) => this.pickMember(data.self_id, group_id, user_id),
       pickGroup: group_id => this.pickGroup(data.self_id, group_id),
       fl: new Map(),
       gl: new Map(),
     }
-    Bot[data.self_id].pickUser = Bot[data.self_id].pickFriend
 
     if (!Bot.uin.includes(data.self_id))
       Bot.uin.push(data.self_id)

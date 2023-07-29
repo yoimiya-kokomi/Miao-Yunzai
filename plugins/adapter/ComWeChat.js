@@ -301,9 +301,8 @@ Bot.adapter.push(new class ComWeChatAdapter {
       get nickname() { return this.info.user_name },
       get avatar() { return this.info["wx.avatar"] },
 
-      pickUser: user_id => this.pickFriend(data, user_id),
       pickFriend: user_id => this.pickFriend(data, user_id),
-
+      get pickUser() { return this.pickFriend },
       getFriendArray: () => this.getFriendArray(data),
       getFriendList: () => this.getFriendList(data),
       getFriendMap: () => this.getFriendMap(data),
@@ -311,7 +310,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
       pickMember: (group_id, user_id) => this.pickMember(data, group_id, user_id),
       pickGroup: group_id => this.pickGroup(data, group_id),
-
       getGroupArray: () => this.getGroupArray(data),
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),

@@ -576,9 +576,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
       setProfile: profile => this.setProfile(data, profile),
       setNickname: nickname => this.setProfile(data, { nickname }),
 
-      pickUser: user_id => this.pickFriend(data, user_id),
       pickFriend: user_id => this.pickFriend(data, user_id),
-
+      get pickUser() { return this.pickFriend },
       getFriendArray: () => this.getFriendArray(data),
       getFriendList: () => this.getFriendList(data),
       getFriendMap: () => this.getFriendMap(data),
@@ -586,7 +585,6 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
       pickMember: (group_id, user_id) => this.pickMember(data, group_id, user_id),
       pickGroup: group_id => this.pickGroup(data, group_id),
-
       getGroupArray: () => this.getGroupArray(data),
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
