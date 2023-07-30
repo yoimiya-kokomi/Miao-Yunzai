@@ -276,7 +276,6 @@ export default class MysNews extends base {
 
     for (let gid of [1, 2, 3, 4, 6, 8]) {
       let type = gid == 1 ? 'bbb' : gid == 2 ? 'gs' : gid == 3 ? 'bb' : gid == 4 ? 'wd' : gid == 6 ? 'sr' : 'zzz'
-      if (lodash.isEmpty(cfg[`${type}announceGroup`]) && lodash.isEmpty(cfg[`${type}infoGroup`])) continue
 
       // 包含关键字不推送
       let banWord = cfg.banWord[type]
