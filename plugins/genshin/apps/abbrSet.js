@@ -126,7 +126,7 @@ export class abbrSet extends plugin {
   }
 
   async delAbbr() {
-    let role = gsCfg.getRole(this.e.msg, '#|删除|别名|昵称')
+    let role = gsCfg.getRole(this.e.msg, '#|星铁|删除|别名|昵称', this.e.isSr)
     if (!role) return false
 
     let nameArr = gsCfg.getConfig('role', 'name')
