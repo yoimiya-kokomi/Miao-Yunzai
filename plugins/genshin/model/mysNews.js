@@ -277,9 +277,6 @@ export default class MysNews extends base {
     for (let gid of [1, 2, 3, 4, 6, 8]) {
       let type = gid == 1 ? 'bbb' : gid == 2 ? 'gs' : gid == 3 ? 'bb' : gid == 4 ? 'wd' : gid == 6 ? 'sr' : 'zzz'
 
-      // 包含关键字不推送
-      let banWord = cfg.banWord[type]
-
       let news = []
       if (!lodash.isEmpty(cfg[`${type}announceGroup`])) {
         let anno = await this.postData('getNewsList', { gids: gid, page_size: 10, type: 1 })
@@ -303,7 +300,7 @@ export default class MysNews extends base {
         if (Number(now - val.post.created_at) > interval) {
           continue
         }
-        if (new RegExp(banWord).test(val.post.subject)) {
+        if (cfg.banWord[type] && new RegExp(cfg.banWord[type]).test(val.post.subject)) {
           continue
         }
         if (val.typeName == '公告') {
