@@ -1,6 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import MysNews from '../model/mysNews.js'
-import MysSrNews from '../model/mysSrNews.js'
 import fs from 'node:fs'
 import lodash from 'lodash'
 import gsCfg from '../model/gsCfg.js'
@@ -8,7 +7,7 @@ import YAML from 'yaml'
 
 gsCfg.cpCfg('mys', 'pushNews')
 export class mysNews extends plugin {
-  constructor (e) {
+  constructor(e) {
     super({
       name: '米游社公告',
       dsc: '#公告 #资讯 #活动',
@@ -16,25 +15,12 @@ export class mysNews extends plugin {
       priority: 700,
       rule: [
         {
-          reg: '^(#*官方(公告|资讯|活动)|#*原神(公告|资讯|活动)|#公告|#资讯|#活动)[0-9]*$',
+          reg: '^#*(官方|星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?(公告|资讯|活动)[0-9]*$',
           fnc: 'news'
         },
         {
           reg: '^(#米游社|#mys)(.*)',
           fnc: 'mysSearch'
-        },
-        {
-          reg: '^(#*铁道(公告|资讯|活动)|#*星铁(公告|资讯|活动)|#星穹公告|#星穹资讯|#星穹活动)[0-9]*$',
-          fnc: 'srNews'
-        },
-        {
-          reg: '^#*(开启|关闭)(铁道|星铁|星穹)(公告|资讯)推送$',
-          fnc: 'srSetPush'
-        },
-        {
-          reg: '^#推送(铁道|星铁|星穹)(公告|资讯)$',
-          permission: 'master',
-          fnc: 'srMysNewsTask'
         },
         {
           reg: '(.*)(bbs.mihoyo.com|miyoushe.com)/ys(.*)/article(.*)',
@@ -45,85 +31,66 @@ export class mysNews extends plugin {
           fnc: 'ysEstimate'
         },
         {
-          reg: '^#*(开启|关闭)(公告|资讯)推送$',
+          reg: '^#*(星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?(开启|关闭)(公告|资讯)推送$',
           fnc: 'setPush'
         },
         {
-          reg: '^#推送(公告|资讯)$',
+          reg: '^#(星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?推送(公告|资讯)$',
           permission: 'master',
           fnc: 'mysNewsTask'
         }
-
       ]
     })
 
     this.file = './plugins/genshin/config/mys.pushNews.yaml'
 
     /** 定时任务 */
-    this.task = [
-      {
-        cron: gsCfg.getConfig('mys', 'pushNews').pushTime,
-        name: '米游社公告推送任务',
-        fnc: () => this.mysNewsTask(),
-        log: false
-      },
-      {
-        cron: gsCfg.getConfig('mys', 'pushNews').pushTime,
-        name: '崩坏星穹铁道公告推送任务',
-        fnc: () => this.srMysNewsTask(),
-        log: false
-      }
-    ]
+    this.task = {
+      cron: gsCfg.getConfig('mys', 'pushNews').pushTime,
+      name: '米游社公告推送任务',
+      fnc: () => this.mysNewsTask(),
+      log: false
+    }
   }
 
-  async init () {
+  async init() {
     if (fs.existsSync(this.file)) return
 
     fs.copyFileSync('./plugins/genshin/defSet/mys/pushNews.yaml', this.file)
   }
 
-  async news () {
-    let data = await new MysNews(this.e).getNews()
+  async news() {
+    let gids = this.gids()
+    let data = await new MysNews(this.e).getNews(gids)
     if (!data) return
     await this.reply(data)
   }
 
-  async srNews () {
-    let data = await new MysSrNews(this.e).getNews()
-    if (!data) return
-    await this.reply(data)
-  }
-
-  async mysNewsTask () {
+  async mysNewsTask() {
     let mysNews = new MysNews(this.e)
     await mysNews.mysNewsTask()
   }
 
-  async srMysNewsTask () {
-    let mysNews = new MysSrNews(this.e)
-    await mysNews.mysNewsTask()
-  }
-
-  async mysSearch () {
+  async mysSearch() {
     if (/签到/g.test(this.e.msg)) return false
     let data = await new MysNews(this.e).mysSearch()
     if (!data) return
     await this.reply(data)
   }
 
-  async mysUrl () {
+  async mysUrl() {
     let data = await new MysNews(this.e).mysUrl()
     if (!data) return
     await this.reply(data)
   }
 
-  async ysEstimate () {
+  async ysEstimate() {
     let data = await new MysNews(this.e).ysEstimate()
     if (!data) return
     await this.reply(data)
   }
 
-  async srSetPush () {
+  async setPush() {
     if (!this.e.isGroup) {
       await this.reply('推送请在群聊中设置')
       return
@@ -134,25 +101,31 @@ export class mysNews extends plugin {
     }
 
     let cfg = gsCfg.getConfig('mys', 'pushNews')
+    let gids = this.gids()
 
-    let type = 'srannounceGroup'
+    let game = gids == 1 ? 'bbb' : gids == 2 ? 'gs' : gids == 3 ? 'bb' : gids == 4 ? 'wd' : gids == 6 ? 'sr' : 'zzz'
+    let type = `${game}announceGroup`
     let typeName = '公告'
     if (this.e.msg.includes('资讯')) {
-      type = 'srinfoGroup'
+      type = `${game}infoGroup`
       typeName = '资讯'
     }
 
     let model
-    let msg = `崩坏星穹铁道${typeName}推送已`
+    let name = await new MysNews(this.e).game(gids)
+    let msg = `${name}${typeName}推送已`
+    if (!Array.isArray(cfg[type][this.e.self_id]))
+      cfg[type][this.e.self_id] = []
+
     if (this.e.msg.includes('开启')) {
       model = '开启'
-      cfg[type].push(this.e.group_id)
-      cfg[type] = lodash.uniq(cfg[type])
+      cfg[type][this.e.self_id].push(this.e.group_id)
+      cfg[type][this.e.self_id] = lodash.uniq(cfg[type][this.e.self_id])
       msg += `${model}\n如有最新${typeName}将自动推送至此`
     } else {
       model = '关闭'
       msg += `${model}`
-      cfg[type] = lodash.difference(cfg[type], [this.e.group_id])
+      cfg[type][this.e.self_id] = lodash.difference(cfg[type][this.e.self_id], [this.e.group_id])
     }
 
     let yaml = YAML.stringify(cfg)
@@ -162,42 +135,26 @@ export class mysNews extends plugin {
     await this.reply(msg)
   }
 
-  async setPush () {
-    if (!this.e.isGroup) {
-      await this.reply('推送请在群聊中设置')
-      return
+  gids() {
+    let msg = this.e.msg.replace(/[#公告资讯活动开启关闭推送]/g, '');
+    switch (msg) {
+      case '崩坏三':
+      case '崩三':
+        return 1
+      case '原神':
+        return 2
+      case '崩坏学园二':
+      case '崩坏二':
+      case '崩二':
+        return 3
+      case '未定事件簿':
+      case '未定':
+        return 4
+      case '星铁':
+        return 6
+      case '绝区零':
+        return 8
     }
-    if (!this.e.member?.is_admin && !this.e.isMaster) {
-      await this.reply('暂无权限，只有管理员才能操作', true)
-      return true
-    }
-
-    let cfg = gsCfg.getConfig('mys', 'pushNews')
-
-    let type = 'announceGroup'
-    let typeName = '公告'
-    if (this.e.msg.includes('资讯')) {
-      type = 'infoGroup'
-      typeName = '资讯'
-    }
-
-    let model
-    let msg = `原神${typeName}推送已`
-    if (this.e.msg.includes('开启')) {
-      model = '开启'
-      cfg[type].push(this.e.group_id)
-      cfg[type] = lodash.uniq(cfg[type])
-      msg += `${model}\n如有最新${typeName}将自动推送至此`
-    } else {
-      model = '关闭'
-      msg += `${model}`
-      cfg[type] = lodash.difference(cfg[type], [this.e.group_id])
-    }
-
-    let yaml = YAML.stringify(cfg)
-    fs.writeFileSync(this.file, yaml, 'utf8')
-
-    logger.mark(`${this.e.logFnc} ${model}${typeName}推送：${this.e.group_id}`)
-    await this.reply(msg)
+    return 2
   }
 }
