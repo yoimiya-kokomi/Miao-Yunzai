@@ -45,11 +45,11 @@ export default class MysNews extends base {
 
     const img = await this.render(param)
     let game = this.game()
-    return await this.replyMsg(img, `${game}${typeName}：${param.data.post.subject}`)
+    return this.replyMsg(img, `${game}${typeName}：${param.data.post.subject}`)
   }
 
-  async render(param) {
-    return await puppeteer.screenshots(this.model, param)
+  render(param) {
+    return puppeteer.screenshots(this.model, param)
   }
 
   async newsDetail(postId, gid) {
@@ -210,7 +210,7 @@ export default class MysNews extends base {
 
     const img = await this.render(param)
 
-    return await this.replyMsg(img, `${param.data.post.subject}`)
+    return this.replyMsg(img, `${param.data.post.subject}`)
   }
 
   async mysUrl() {
@@ -223,7 +223,7 @@ export default class MysNews extends base {
 
     const img = await this.render(param)
 
-    return await this.replyMsg(img, `${param.data.post.subject}`)
+    return this.replyMsg(img, `${param.data.post.subject}`)
   }
 
   async ysEstimate() {
@@ -254,15 +254,16 @@ export default class MysNews extends base {
       img.push(segment.image(param.data.post.images[0] + '?x-oss-process=image//resize,s_600/quality,q_80/auto-orient,0/interlace,1/format,jpg'))
     }
 
-    return await this.replyMsg(img, `${param.data.post.subject}`)
+    return this.replyMsg(img, `${param.data.post.subject}`)
   }
 
-  async replyMsg(img, title = '') {
+  replyMsg(img, title = '') {
     if (!img || img.length <= 0) return false
     if (img.length == 1) {
-      return img[0]
+      if (title) img.unshift(title)
+      return img
     } else {
-      return await common.makeForwardMsg(this.e, img, title)
+      return common.makeForwardMsg(this.e, img, title)
     }
   }
 
@@ -297,26 +298,18 @@ export default class MysNews extends base {
       this.e.isGroup = true
       this.pushGroup = []
       for (let val of news) {
-        if (Number(now - val.post.created_at) > interval) {
+        if (Number(now - val.post.created_at) > interval)
           continue
-        }
-        if (cfg.banWord[type] && new RegExp(cfg.banWord[type]).test(val.post.subject)) {
+        if (cfg.banWord[type] && new RegExp(cfg.banWord[type]).test(val.post.subject))
           continue
-        }
-        if (val.typeName == '公告') {
-          for (let botId in cfg[`${type}announceGroup`]) {
-            for (let groupId of cfg[`${type}announceGroup`][botId]) {
+        if (val.typeName == '公告')
+          for (let botId in cfg[`${type}announceGroup`])
+            for (let groupId of cfg[`${type}announceGroup`][botId])
               await this.sendNews(botId, groupId, val.typeName, val.post.post_id, gid)
-            }
-          }
-        }
-        if (val.typeName == '资讯') {
-          for (let botId in cfg[`${type}infoGroup`]) {
-            for (let groupId of cfg[`${type}infoGroup`][botId]) {
+        if (val.typeName == '资讯')
+          for (let botId in cfg[`${type}infoGroup`])
+            for (let groupId of cfg[`${type}infoGroup`][botId])
               await this.sendNews(botId, groupId, val.typeName, val.post.post_id, gid)
-            }
-          }
-        }
       }
     }
   }
@@ -348,20 +341,11 @@ export default class MysNews extends base {
     }
 
     this.pushGroup[groupId]++
-    this.e.group_id = groupId
-    let tmp = await this.replyMsg(this[postId].img, `${game}${typeName}推送：${this[postId].title}`)
-
-    await common.sleep(1000)
-    if (!tmp) return
-
-    if (tmp?.type != 'xml') {
-      tmp = [`${game}${typeName}推送\n`, tmp]
-    }
-
     await redis.set(`${this.key}${botId}:${groupId}:${postId}`, '1', { EX: 3600 * 10 })
     // 随机延迟10-90秒
-    await common.sleep(lodash.random(10, 90) * 1000)
-    await this.e.group.sendMsg(tmp)
+    await common.sleep(lodash.random(10000, 90000))
+    const msg = await this.replyMsg(this[postId].img, `${game}${typeName}推送：${this[postId].title}`)
+    return this.e.group.sendMsg(msg)
   }
 
   game(gid) {
