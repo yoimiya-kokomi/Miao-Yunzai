@@ -329,7 +329,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     Bot[data.self_id].getFriendMap()
     Bot[data.self_id].getGroupMap()
 
-    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
+    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) ${Bot[data.self_id].version.impl}-${Bot[data.self_id].version.version} 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
     Bot.emit("connect", Bot[data.self_id])
   }

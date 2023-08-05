@@ -607,9 +607,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
     Bot[data.self_id].info = (await data.sendApi("get_login_info")).data
     Bot[data.self_id].guild_info = (await data.sendApi("get_guild_service_profile")).data
     Bot[data.self_id].clients = (await data.sendApi("get_online_clients")).clients
-    Bot[data.self_id].version = (await data.sendApi("get_version_info")).data
     Bot[data.self_id].version = {
-      ...Bot[data.self_id].version,
+      ...(await data.sendApi("get_version_info")).data,
       id: this.id,
       name: this.name,
     }
@@ -617,7 +616,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     Bot[data.self_id].getFriendMap()
     Bot[data.self_id].getGroupMap()
 
-    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
+    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) ${Bot[data.self_id].version.app_full_name} 已连接`)
     Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
     Bot.emit("connect", Bot[data.self_id])
   }

@@ -1,3 +1,3 @@
-import Yunzai from './lib/bot.js'
-global.Bot = new Yunzai()
+import Yunzai from "./lib/bot.js"
+global.Bot = new Yunzai
 Bot.run()
