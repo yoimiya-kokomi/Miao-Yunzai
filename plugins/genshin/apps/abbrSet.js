@@ -1,11 +1,12 @@
 import plugin from '../../../lib/plugins/plugin.js'
+import common from '../../../lib/common/common.js'
 import fs from 'node:fs'
 import gsCfg from '../model/gsCfg.js'
 import YAML from 'yaml'
 import lodash from 'lodash'
 
 export class abbrSet extends plugin {
-  constructor (e) {
+  constructor(e) {
     super({
       name: '别名设置',
       dsc: '角色别名设置',
@@ -13,24 +14,24 @@ export class abbrSet extends plugin {
       priority: 600,
       rule: [
         {
-          reg: '^#(设置|配置)(.*)(别名|昵称)$',
+          reg: '^#(星铁)?(设置|配置)(.*)(别名|昵称)$',
           fnc: 'abbr'
         },
         {
-          reg: '^#删除(别名|昵称)(.*)$',
+          reg: '^#(星铁)?删除(别名|昵称)(.*)$',
           fnc: 'delAbbr'
         },
         {
-          reg: '^#(.*)(别名|昵称)$',
+          reg: '^#(星铁)?(.*)(别名|昵称)$',
           fnc: 'abbrList'
         }
       ]
     })
-
+    this.isSr = false
     this.file = './plugins/genshin/config/role.name.yaml'
   }
 
-  async init () {
+  async init() {
     if (!fs.existsSync(this.file)) {
       fs.writeFileSync(this.file, `神里绫华:
   - 龟龟
@@ -38,17 +39,18 @@ export class abbrSet extends plugin {
     }
   }
 
-  async abbr () {
+  async abbr() {
     if (!await this.checkAuth()) return
-    let role = gsCfg.getRole(this.e.msg, '#|设置|配置|别名|昵称')
+    let role = gsCfg.getRole(this.e.msg, '#|星铁|设置|配置|别名|昵称', this.e.isSr)
     if (!role) return false
     this.e.role = role
+    this.isSr = this.e.isSr
     this.setContext('setAbbr')
 
     await this.reply(`请发送${role.alias}别名，多个用空格隔开`)
   }
 
-  async checkAuth () {
+  async checkAuth() {
     if (!this.e.isGroup && !this.e.isMaster) {
       await this.reply('禁止私聊设置角色别名')
       return false
@@ -76,7 +78,7 @@ export class abbrSet extends plugin {
     return true
   }
 
-  async setAbbr () {
+  async setAbbr() {
     if (!this.e.msg || this.e.at || this.e.img) {
       await this.reply('设置错误：请发送正确内容')
       return
@@ -96,10 +98,10 @@ export class abbrSet extends plugin {
 
     let ret = []
     for (let name of setName) {
-      name = name.replace(/#|设置|配置|别名|昵称/g, '')
+      name = name.replace(/#|星铁|设置|配置|别名|昵称/g, '')
       if (!name) continue
       /** 重复添加 */
-      if (nameArr[role.name].includes(name) || gsCfg.roleNameToID(name)) {
+      if (nameArr[role.name].includes(name) || gsCfg.roleNameToID(name, this.isSr)) {
         continue
       }
 
@@ -113,19 +115,18 @@ export class abbrSet extends plugin {
 
     this.save(nameArr)
 
-    gsCfg.nameID = false
+    gsCfg[this.isSr ? 'sr_nameID' : 'nameID'] = false
 
     await this.reply(`设置别名成功：${ret.join('、')}`)
   }
 
-  save (data) {
+  save(data) {
     data = YAML.stringify(data)
     fs.writeFileSync(this.file, data)
   }
 
-  async delAbbr () {
-    let role = gsCfg.getRole(this.e.msg, '#|删除|别名|昵称')
-
+  async delAbbr() {
+    let role = gsCfg.getRole(this.e.msg, '#|星铁|删除|别名|昵称', this.e.isSr)
     if (!role) return false
 
     let nameArr = gsCfg.getConfig('role', 'name')
@@ -145,12 +146,12 @@ export class abbrSet extends plugin {
     await this.reply(`设置${role.name}别名成功：${role.alias}`)
   }
 
-  async abbrList () {
-    let role = gsCfg.getRole(this.e.msg, '#|别名|昵称')
+  async abbrList() {
+    let role = gsCfg.getRole(this.e.msg, '#|星铁|别名|昵称', this.e.isSr)
 
     if (!role) return false
 
-    let name = gsCfg.getdefSet('role', 'name')[role.roleId]
+    let name = gsCfg.getdefSet('role', this.e.isSr ? 'sr_name' : 'name')[role.roleId]
     let nameUser = gsCfg.getConfig('role', 'name')[role.name] ?? []
 
     let list = lodash.uniq([...name, ...nameUser])
@@ -158,51 +159,13 @@ export class abbrSet extends plugin {
     let msg = []
     for (let i in list) {
       let num = Number(i) + 1
-      msg.push(`${num}.${list[i]}\n`)
+      msg.push(`${num}.${list[i]}`)
     }
 
     let title = `${role.name}别名，${list.length}个`
 
-    msg = await this.makeForwardMsg(this.e.bot.uin, title, msg)
+    msg = await common.makeForwardMsg(this.e, [title, msg.join("\n")], title)
 
     await this.e.reply(msg)
-  }
-
-  async makeForwardMsg (qq, title, msg) {
-    let nickname = this.e.bot.nickname
-    if (this.e.isGroup) {
-      let info = await this.e.bot.getGroupMemberInfo(this.e.group_id, qq)
-      nickname = info.card ?? info.nickname
-    }
-    let userInfo = {
-      user_id: this.e.bot.uin,
-      nickname
-    }
-
-    let forwardMsg = [
-      {
-        ...userInfo,
-        message: title
-      },
-      {
-        ...userInfo,
-        message: msg
-      }
-    ]
-
-    /** 制作转发内容 */
-    if (this.e.isGroup) {
-      forwardMsg = await this.e.group.makeForwardMsg(forwardMsg)
-    } else {
-      forwardMsg = await this.e.friend.makeForwardMsg(forwardMsg)
-    }
-
-    /** 处理描述 */
-    forwardMsg.data = forwardMsg.data
-      .replace(/\n/g, '')
-      .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-      .replace(/___+/, `<title color="#777777" size="26">${title}</title>`)
-
-    return forwardMsg
   }
 }

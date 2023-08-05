@@ -64,11 +64,6 @@ export default class GachaLog extends base {
     MakeMsg.push(tmpMsg)
     MakeMsg.push(`抽卡记录更新完成，您还可回复\n【#${this?.e?.isSr?'星铁光锥':'武器'}记录】统计${this?.e?.isSr?'星铁光锥':'武器'}池数据\n【#${this?.e?.isSr?'星铁':''}角色统计】按卡池统计数据\n【#导出记录】导出记录数据`)
     let Msg = await common.makeForwardMsg(this.e, MakeMsg, tmpMsg)
-    Msg.data=Msg.data
-        .replace(/\n/g, '')
-        .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
-        .replace(/___+/, `<title color="#777777" size="26">${tmpMsg}</title>`)
-
     await this.e.reply(Msg)
 
     this.isLogUrl = true
