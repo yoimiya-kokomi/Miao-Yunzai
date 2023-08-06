@@ -126,6 +126,8 @@ export class mysNews extends plugin {
       model = '关闭'
       msg += `${model}`
       cfg[type][this.e.self_id] = lodash.difference(cfg[type][this.e.self_id], [this.e.group_id])
+      if (lodash.isEmpty(cfg[type][this.e.self_id]))
+        delete cfg[type][this.e.self_id]
     }
 
     let yaml = YAML.stringify(cfg)
