@@ -1,29 +1,29 @@
-import plugin from '../../lib/plugins/plugin.js'
-import common from '../../lib/common/common.js'
-import fs from 'node:fs'
-import lodash from 'lodash'
-import moment from 'moment'
+import plugin from "../../lib/plugins/plugin.js"
+import common from "../../lib/common/common.js"
+import fs from "node:fs"
+import lodash from "lodash"
+import moment from "moment"
 
 export class sendLog extends plugin {
   constructor() {
     super({
-      name: '发送日志',
-      dsc: '发送最近100条运行日志',
-      event: 'message',
+      name: "发送日志",
+      dsc: "发送最近100条运行日志",
+      event: "message",
       rule: [
         {
-          reg: '^#(运行|错误)*日志[0-9]*(.*)',
-          fnc: 'sendLog',
-          permission: 'master'
+          reg: "^#(运行|错误)*日志[0-9]*(.*)",
+          fnc: "sendLog",
+          permission: "master"
         }
       ]
     })
 
-    this.lineNum = 50
-    this.maxNum = 800
+    this.lineNum = 100
+    this.maxNum = 1000
 
-    this.logFile = `./logs/command.${moment().format('YYYY-MM-DD')}.log`
-    this.errFile = './logs/error.log'
+    this.logFile = `logs/command.${moment().format("YYYY-MM-DD")}.log`
+    this.errFile = "logs/error.log"
   }
 
   async sendLog() {
@@ -31,53 +31,48 @@ export class sendLog extends plugin {
     if (lineNum) {
       this.lineNum = lineNum[0]
     } else {
-      this.keyWord = this.e.msg.replace(/#|运行|错误|日志|\d/g, '')
+      this.keyWord = this.e.msg.replace(/#|运行|错误|日志|\d/g, "")
     }
 
     let logFile = this.logFile
-    let type = '运行'
-    if (this.e.msg.includes('错误')) {
+    let type = "运行"
+    if (this.e.msg.includes("错误")) {
       logFile = this.errFile
-      type = '错误'
+      type = "错误"
     }
 
     if (this.keyWord) type = this.keyWord
 
-    let log = this.getLog(logFile)
+    const log = this.getLog(logFile)
 
-    if (lodash.isEmpty(log)) {
-      this.reply(`暂无相关日志：${type}`)
-      return
-    }
-    let title = `最近${log.length}条${type}日志`
+    if (lodash.isEmpty(log))
+      return this.reply(`暂无相关日志：${type}`)
 
-    let forwardMsg = await common.makeForwardMsg(this.e, [title, log.join("")], title)
-
-    await this.reply(forwardMsg)
+    return this.reply(await common.makeForwardMsg(this.e, [log.join("\n")], `最近${log.length}条${type}日志`))
   }
 
   getLog(logFile) {
-    let log = fs.readFileSync(logFile, { encoding: 'utf-8' })
-    log = log.split('\n')
+    let log = fs.readFileSync(logFile, { encoding: "utf-8" })
+    log = log.split("\n")
 
     if (this.keyWord) {
-      for (let i in log) {
-        if (!log[i].includes(this.keyWord)) delete log[i]
-      }
+      for (const i in log)
+        if (!log[i].includes(this.keyWord))
+          delete log[i]
     } else {
       log = lodash.slice(log, (Number(this.lineNum) + 1) * -1)
     }
     log = log.reverse()
-    let tmp = []
-    log.forEach(v => {
-      if (!v) return
+
+    const tmp = []
+    for (let i of log) {
+      if (!i) continue
       if (this.keyWord && tmp.length >= this.maxNum) return
       /* eslint-disable no-control-regex */
-      v = v.replace(/\x1b[[0-9;]*m/g, '')
-      v = v.replace(/\r|\n/, '') + '\n\n'
-      tmp.push(v)
-    })
-
+      i = i.replace(/\x1b[[0-9;]*m/g, "")
+      i = i.replace(/\r|\n/, "")
+      tmp.push(i)
+    }
     return tmp
   }
 }
