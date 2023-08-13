@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "art-template": "^4.13.2",
+    "axios": "^1.4.0",
     "chalk": "^5.2.0",
     "chokidar": "^3.5.3",
     "https-proxy-agent": "5.0.1",
