@@ -116,10 +116,6 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendFriendMsg(i, msg),
-      recallMsg: () => false,
-      makeForwardMsg: Bot.makeForwardMsg,
-      sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendFriendMsg(i, msg), msg),
-      getInfo: () => i,
     }
   }
 
@@ -147,10 +143,6 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendGroupMsg(i, msg),
-      recallMsg: () => false,
-      makeForwardMsg: Bot.makeForwardMsg,
-      sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendGroupMsg(i, msg), msg),
-      getInfo: () => i,
       pickMember: user_id => this.pickMember(id, group_id, user_id),
     }
   }
@@ -245,16 +237,12 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     if (data.user_type == "direct") {
       data.message_type = "private"
       logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息：[${data.user_id}] ${data.raw_message}`)
-      data.friend = data.bot.pickFriend(data.user_id)
     } else {
       data.message_type = "group"
       data.group_id = `${data.user_type}-${data.group_id}`
       if (!data.bot.gl.has(data.group_id))
         data.bot.gl.set(data.group_id, { group_id: data.group_id })
       logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.user_id}] ${data.raw_message}`)
-      data.friend = data.bot.pickFriend(data.user_id)
-      data.group = data.bot.pickGroup(data.group_id)
-      data.member = data.group.pickMember(data.user_id)
     }
 
     Bot.emit(`${data.post_type}.${data.message_type}`, data)

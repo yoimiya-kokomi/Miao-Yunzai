@@ -241,9 +241,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendFriendMsg(i, msg),
-      recallMsg: () => false,
-      makeForwardMsg: Bot.makeForwardMsg,
-      sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendFriendMsg(i, msg), msg),
       sendFile: (file, name) => this.sendFile(i, msg => this.sendFriendMsg(i, msg), file, name),
       getInfo: () => this.getFriendInfo(i),
       getAvatarUrl: async () => (await this.getFriendInfo(i))["wx.avatar"],
@@ -274,9 +271,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendGroupMsg(i, msg),
-      recallMsg: () => false,
-      makeForwardMsg: Bot.makeForwardMsg,
-      sendForwardMsg: msg => Bot.sendForwardMsg(msg => this.sendGroupMsg(i, msg), msg),
       sendFile: (file, name) => this.sendFile(i, msg => this.sendGroupMsg(i, msg), file, name),
       getInfo: () => this.getGroupInfo(i),
       getAvatarUrl: async () => (await this.getGroupInfo(i))["wx.avatar"],
@@ -367,13 +361,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
     switch (data.message_type) {
       case "private":
         logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息：[${data.user_id}] ${data.raw_message}`)
-        data.friend = data.bot.pickFriend(data.user_id)
         break
       case "group":
         logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.user_id}] ${data.raw_message}`)
-        data.friend = data.bot.pickFriend(data.user_id)
-        data.group = data.bot.pickGroup(data.group_id)
-        data.member = data.group.pickMember(data.user_id)
         break
       default:
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)

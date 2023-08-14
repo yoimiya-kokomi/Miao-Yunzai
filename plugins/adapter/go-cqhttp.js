@@ -630,21 +630,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
     switch (data.message_type) {
       case "private":
         logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息：[${data.sender.nickname}(${data.user_id})] ${data.raw_message}`)
-        data.friend = data.bot.pickFriend(data.user_id)
         break
       case "group":
         logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.sender.card||data.sender.nickname}(${data.user_id})] ${data.raw_message}`)
-        data.friend = data.bot.pickFriend(data.user_id)
-        data.group = data.bot.pickGroup(data.group_id)
-        data.member = data.group.pickMember(data.user_id)
         break
       case "guild":
         data.message_type = "group"
         data.group_id = `${data.guild_id}-${data.channel_id}`
         logger.info(`${logger.blue(`[${data.self_id}]`)} 频道消息：[${data.group_id}, ${data.sender.nickname}(${data.user_id})] ${JSON.stringify(data.message)}`)
-        data.group = data.bot.pickGroup(data.group_id)
-        data.member = data.group.pickMember(data.user_id)
-        data.friend = data.member
+        Object.defineProperty(data, "friend", { get() { return this.member }})
         break
       default:
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
@@ -757,16 +751,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
     if (notice)
       data.sub_type = notice
 
-    if (data.user_id)
-      data.friend = data.bot.pickFriend(data.user_id)
-    if (data.group_id) {
-      data.group = data.bot.pickGroup(data.group_id)
-      data.member = data.group.pickMember(data.user_id)
-    } else if (data.guild_id && data.channel_id) {
+    if (data.guild_id && data.channel_id) {
       data.group_id = `${data.guild_id}-${data.channel_id}`
-      data.group = data.bot.pickGroup(data.group_id)
-      data.member = data.group.pickMember(data.user_id)
-      data.friend = data.member
+      Object.defineProperty(data, "friend", { get() { return this.member }})
     }
 
     if (data.sub_type)
@@ -780,14 +767,10 @@ Bot.adapter.push(new class gocqhttpAdapter {
       case "friend":
         logger.info(`${logger.blue(`[${data.self_id}]`)} 加好友请求：[${data.user_id}] ${data.comment}(${data.flag})`)
         data.sub_type = "add"
-        data.friend = data.bot.pickFriend(data.user_id)
         data.approve = approve => data.bot.setFriendAddRequest(data.flag, approve)
         break
       case "group":
         logger.info(`${logger.blue(`[${data.self_id}]`)} 加群请求：[${data.group_id}, ${data.user_id}] ${data.sub_type} ${data.comment}(${data.flag})`)
-        data.friend = data.bot.pickFriend(data.user_id)
-        data.group = data.bot.pickGroup(data.group_id)
-        data.member = data.group.pickMember(data.user_id)
         data.approve = approve => data.bot.setGroupAddRequest(data.flag, data.sub_type, approve)
         break
       default:
