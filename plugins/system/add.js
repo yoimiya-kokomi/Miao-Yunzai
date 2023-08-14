@@ -395,7 +395,7 @@ export class add extends plugin {
 
     let num = 0
     if (isNaN(keyWord)) {
-      num = keyWord.charAt(keyWord.length - 1)
+      num = keyWord.trim().match(/[0-9]+$/)?.[0]
 
       if (!isNaN(num) && !textArr[this.group_id].has(keyWord) && !textArr[this.e.bot.uin].has(keyWord)) {
         keyWord = lodash.trimEnd(keyWord, num).trim()
@@ -712,16 +712,17 @@ export class add extends plugin {
 
       let keyWord = await this.keyWordTran(arr[i].key)
       if (!keyWord) continue
-
+      let result = []
       if (Array.isArray(keyWord)) {
-        keyWord.unshift(`${arr[i].num}、`)
+        keyWord.unshift(`${num + 1}、`)
         keyWord.push('\n')
-        keyWord.forEach(v => msg.push(v))
+        result.push(...keyWord)
       } else if (keyWord.type) {
-        msg.push(`\n${arr[i].num}、`, keyWord, '\n\n')
+        result.push(`\n${num + 1}、`, keyWord, '\n\n')
       } else {
-        msg.push(`${arr[i].num}、${keyWord}\n`)
+        result.push(`${num + 1}、${keyWord}\n`)
       }
+      msg.push(result)
       num++
     }
 
@@ -734,7 +735,7 @@ export class add extends plugin {
       title = `表情${search}，${count}条`
     }
 
-    let forwardMsg = await common.makeForwardMsg(this.e, [title, msg], title)
+    let forwardMsg = await common.makeForwardMsg(this.e, [title, ...msg], title)
 
     this.e.reply(forwardMsg)
   }
