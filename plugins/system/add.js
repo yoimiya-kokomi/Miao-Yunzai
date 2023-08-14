@@ -395,7 +395,7 @@ export class add extends plugin {
 
     let num = 0
     if (isNaN(keyWord)) {
-      num = keyWord.trim().match(/[0-9]+/g)[0]
+      num = keyWord.trim().match(/[0-9]+$/)?.[0]
 
       if (!isNaN(num) && !textArr[this.group_id].has(keyWord) && !textArr[this.e.bot.uin].has(keyWord)) {
         keyWord = lodash.trimEnd(keyWord, num).trim()
