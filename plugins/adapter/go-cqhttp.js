@@ -638,7 +638,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         data.message_type = "group"
         data.group_id = `${data.guild_id}-${data.channel_id}`
         logger.info(`${logger.blue(`[${data.self_id}]`)} 频道消息：[${data.group_id}, ${data.sender.nickname}(${data.user_id})] ${JSON.stringify(data.message)}`)
-        Object.defineProperty(data, "friend", { get() { return this.member }})
+        Object.defineProperty(data, "friend", { get() { return this.member || {}}})
         break
       default:
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
@@ -753,7 +753,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
     if (data.guild_id && data.channel_id) {
       data.group_id = `${data.guild_id}-${data.channel_id}`
-      Object.defineProperty(data, "friend", { get() { return this.member }})
+      Object.defineProperty(data, "friend", { get() { return this.member || {}}})
     }
 
     if (data.sub_type)
