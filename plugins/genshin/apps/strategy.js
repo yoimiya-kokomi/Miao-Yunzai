@@ -21,7 +21,7 @@ export class strategy extends plugin {
       name: '米游社攻略',
       dsc: '米游社攻略图',
       event: 'message',
-      priority: 500,
+      priority: 50,
       rule: [
         {
           reg: '^#?(更新)?\\S+攻略([1-4])?$',
