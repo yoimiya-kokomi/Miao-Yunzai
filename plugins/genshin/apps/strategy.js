@@ -46,7 +46,7 @@ export class strategy extends plugin {
     this.collection_id = [
       [],
       // 来源：西风驿站
-      [839176, 839179, 839181, 1180811],
+      [839176, 839179, 839181, 1180811, 2226210],
       // 来源：原神观测枢
       [813033],
       // 来源：派蒙喵喵屋
@@ -89,7 +89,7 @@ export class strategy extends plugin {
 
     /** 主角特殊处理 */
     if (['10000005', '10000007', '20000000'].includes(String(role.roleId))) {
-      let travelers = ['风主', '岩主', '雷主', '草主']
+      let travelers = ['风主', '岩主', '雷主', '草主', '水主']
       if (!travelers.includes(role.alias)) {
         let msg = '请选择：'
         for (let sub of travelers) {
