@@ -3,9 +3,9 @@
 <head>
   <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
   <link rel="shortcut icon" href="#"/>
-  <link rel="stylesheet" type="text/css" href="{{pluResPath}}StarRail/html/gachaLog/gachaLog.css"/>
+  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/gachaLog/gachaLog.css"/>
   <link rel="preload" href="{{resPath}}font/tttgbnumber.ttf" as="font">
-  <link rel="preload" href="{{pluResPath}}StarRail/img/worldcard/星穹列车.png" as="image">
+  <link rel="preload" href="{{pluResPath}}img/worldcard/星穹列车.png" as="image">
   {{@headStyle}}
 </head>
 <body id="container" class="body_box">
@@ -20,7 +20,7 @@
         {{allNum}}抽
         <span class="label label_{{type}}">{{typeName}}池</span>
       </h2>
-      <img class="starrail_logo" src="{{pluResPath}}StarRail/img/other/logo.png"/>
+      <img class="starrail_logo" src="{{pluResPath}}img/other/logo.png"/>
     </div>
 
     <div class="data_box">
@@ -50,7 +50,7 @@
             <span class="minimum">UP</span>
           {{/if}}
           <img class="role"
-               src="{{pluResPath}}StarRail/img/{{val.item_type=='角色'?'role':'weapon'}}/{{val.name}}.webp"
+               src="{{pluResPath}}img/{{val.item_type=='角色'?'role':'weapon'}}/{{val.name}}.webp"
                onerror="whenError(this,'{{val.item_type=='角色'?'role':'weapon'}}')"/>
           <!-- <div class="num">{{val.num}}</div>-->
           <div class="num_name">{{val.num}}</div>
