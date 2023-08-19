@@ -260,7 +260,7 @@ img {
   width: 440px;
   height: 440px;
   background: url(../../img/other/chart.png) no-repeat 50% / cover;
-  margin-left: 60px;
+  margin-left: 70px;
 }
 
 .tooltip {
@@ -284,7 +284,7 @@ img {
 }
 
 .tooltip li .action {
-  width: 300px;
+  width: 250px;
 }
 
 .tooltip li em {

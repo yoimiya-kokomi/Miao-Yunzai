@@ -120,10 +120,12 @@ export default class Ledger extends base {
 
     ledgerInfo.color = []
     ledgerInfo.month_data.group_by.forEach((item) => {
-      if (this.e.isSr)
+      if (this.e.isSr){
         item.color = this.color[this.action[item.action]]
-      else
+        item.action_name = item.action_name.slice(0, 4)
+      } else {
         item.color = this.color[item.action_id]
+      }
       ledgerInfo.color.push(item.color)
     })
 
@@ -412,7 +414,7 @@ export default class Ledger extends base {
     if (this.e.isSr)
       groupBy.forEach((item) => {
         item.action_id = this.action[item.action]
-        item.action = item.action_name
+        item.action = item.action_name.slice(0, 4)
       })
 
     let pieData = {}
