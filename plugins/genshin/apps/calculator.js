@@ -66,7 +66,7 @@ export class calculator extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(this.e.isSr ?'StarRail/calculator':'calculator', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}calculator`, data)
     if (img) await this.reply(img)
   }
 }

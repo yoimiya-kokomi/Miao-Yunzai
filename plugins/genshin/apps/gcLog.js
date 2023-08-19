@@ -98,7 +98,7 @@ export class gcLog extends plugin {
     let data = await new GachaLog(this.e).logUrl()
     if (!data) return
 
-    let img = await puppeteer.screenshot(this.e.isSr ? 'StarRail/gachaLog' : 'gachaLog', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}gachaLog`, data)
     if (img) await this.reply(img)
   }
 
@@ -121,7 +121,7 @@ export class gcLog extends plugin {
 
     if (typeof data != 'object') return
 
-    let img = await puppeteer.screenshot(this.e.isSr ? 'StarRail/gachaLog' : 'gachaLog', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}gachaLog`, data)
     if (img) await this.reply(img)
   }
 
@@ -130,7 +130,7 @@ export class gcLog extends plugin {
     let data = await new GachaLog(this.e).getLogData()
     if (!data) return
 
-    let img = await puppeteer.screenshot(this.e.isSr ? 'StarRail/gachaLog' : 'gachaLog', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}gachaLog`, data)
     if (img) await this.reply(img)
   }
 
@@ -204,7 +204,7 @@ export class gcLog extends plugin {
     let data = await new LogCount(this.e).count()
     if (!data) return
 
-    let img = await puppeteer.screenshot(this.e.isSr ? 'StarRail/logCount' : 'logCount', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}logCount`, data)
     if (img) await this.reply(img)
   }
 }

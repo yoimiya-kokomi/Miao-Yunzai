@@ -47,7 +47,7 @@ export class ledger extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(this.e.isSr ?'StarRail/ledger':'ledger', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}ledger`, data)
     if (img) await this.reply(img)
   }
 
@@ -62,7 +62,7 @@ export class ledger extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(this.e.isSr ?'StarRail/ledgerCount':'ledgerCount', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}ledgerCount`, data)
     if (img) await this.reply(img)
   }
 
@@ -71,7 +71,7 @@ export class ledger extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(this.e.isSr ? 'StarRail/ledgerCount' : 'ledgerCount', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}ledgerCount`, data)
     if (img) await this.reply(img)
   }
 }

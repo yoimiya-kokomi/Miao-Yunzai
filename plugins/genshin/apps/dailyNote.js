@@ -27,7 +27,7 @@ export class dailyNote extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(this.e.isSr ? 'StarRail/dailyNote' : 'dailyNote', data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}dailyNote`, data)
     if (img) await this.reply(img)
   }
 
