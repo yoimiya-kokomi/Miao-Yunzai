@@ -16,12 +16,12 @@ export class ledger extends plugin {
           fnc: 'ledger'
         },
         {
-          reg: '^#(原石|#*(星铁)?星琼)任务$',
+          reg: '^#(原石|(星铁)?星琼)任务$',
           permission: 'master',
           fnc: 'ledgerTask'
         },
         {
-          reg: '^#*(原石|札记|#*(星铁)?星琼)统计$',
+          reg: '^#*(原石|札记|(星铁)?星琼)统计$',
           fnc: 'ledgerCount'
         },
         {
