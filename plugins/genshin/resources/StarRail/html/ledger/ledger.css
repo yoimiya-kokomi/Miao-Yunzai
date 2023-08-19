@@ -95,7 +95,7 @@ body {
 
 .title_date {
   width: 370px;
-  height: 450px;
+  height: 470px;
   position: absolute;
   right: 83px;
   top: 27px;
@@ -118,7 +118,7 @@ body {
   flex-direction: column;
   font-size: 36px;
   color: #808080;
-  height: 80px;
+  height: 100px;
 }
 
 img {

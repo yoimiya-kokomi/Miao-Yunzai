@@ -133,11 +133,22 @@ export default class Ledger extends base {
     let files = fs.readdirSync('./plugins/genshin/resources/StarRail/img/role').filter(file => file.endsWith('.webp'))
     let icon = lodash.sample(files)
 
+    let week = [
+      '星期日',
+      '星期一',
+      '星期二',
+      '星期三',
+      '星期四',
+      '星期五',
+      '星期六'
+    ]
+    let srday = `${week[moment().day()]}`
+
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
-      day,
-      icon,
+      day, icon, srday,
+      nowDay: moment(new Date()).format('YYYY年MM月DD日'),
       ...ledgerInfo,
       ...this.screenData
     }
