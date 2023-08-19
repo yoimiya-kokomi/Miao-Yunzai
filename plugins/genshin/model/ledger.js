@@ -234,7 +234,7 @@ export default class Ledger extends base {
   }
 
   async ledgerTask(manual) {
-    let cks = await GsCfg.getBingCk(this.e?.isSr ? 'sr' : 'gs')
+    let cks = (await GsCfg.getBingCk(this.e?.isSr ? 'sr' : 'gs')).ck
     let uids = lodash.map(cks, 'uid')
     let finishTime = moment().add(uids.length * 0.7, 's').format('MM-DD HH:mm:ss')
     logger.mark(`${this.e?.isSr ? '开拓月历' : '札记'}ck:${uids.length}个，预计需要${this.countTime(uids.length)} ${finishTime} 完成`)
