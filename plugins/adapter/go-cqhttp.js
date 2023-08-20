@@ -1,4 +1,3 @@
-import { WebSocketServer } from "ws"
 import { randomUUID } from "crypto"
 import path from "node:path"
 import fs from "node:fs"
@@ -31,9 +30,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   sendApi(ws, action, params) {
     const echo = randomUUID()
-    const msg = JSON.stringify({ action, params, echo })
-    logger.debug(`发送 API 请求：${logger.cyan(this.makeLog(msg))}`)
-    ws.send(msg)
+    const msg = { action, params, echo }
+    ws.sendMsg(msg)
     return new Promise(resolve =>
       Bot.once(echo, data =>
         resolve({ ...data, ...data.data })))
@@ -64,7 +62,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     if (msg?.type == "node")
       return this.sendFriendForwardMsg(data, msg.data)
 
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(msg)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(msg)}`)
     return data.sendApi("send_msg", {
       user_id: data.user_id,
       message: this.makeMsg(msg),
@@ -75,7 +73,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     if (msg?.type == "node")
       return this.sendGroupForwardMsg(data, msg.data)
 
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(msg)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(msg)}`)
     return data.sendApi("send_msg", {
       group_id: data.group_id,
       message: this.makeMsg(msg),
@@ -84,9 +82,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   sendGuildMsg(data, msg) {
     if (msg?.type == "node")
-      return this.sendGuildForwardMsg(data, msg.data)
+      return Bot.sendForwardMsg(msg => this.sendGuildMsg(data, msg), msg)
 
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送频道消息：[${data.guild_id}-${data.channel_id}] ${this.makeLog(msg)}`)
+    logger.info(`${logger.blue(`[${data.self_id}] => ${data.guild_id}-${data.channel_id}`)} 发送频道消息：${this.makeLog(msg)}`)
     return data.sendApi("send_guild_channel_msg", {
       guild_id: data.guild_id,
       channel_id: data.channel_id,
@@ -132,7 +130,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async sendFriendForwardMsg(data, msg) {
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友转发消息：[${data.user_id}] ${this.makeLog(msg)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友转发消息：${this.makeLog(msg)}`)
     msg = await data.sendApi("send_private_forward_msg", {
       user_id: data.user_id,
       messages: this.makeForwardMsg(msg),
@@ -141,19 +139,12 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async sendGroupForwardMsg(data, msg) {
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群转发消息：[${data.group_id}] ${this.makeLog(msg)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群转发消息：${this.makeLog(msg)}`)
     msg = await data.sendApi("send_group_forward_msg", {
       group_id: data.group_id,
       messages: this.makeForwardMsg(msg),
     })
     return msg
-  }
-
-  async sendGuildForwardMsg(data, msg) {
-    const messages = []
-    for (const i of msg)
-      messages.push(await this.sendGuildMsg(data, i.message))
-    return messages
   }
 
   async getFriendArray(data) {
@@ -228,7 +219,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async getMemberMap(data) {
-    const map = new Map()
+    const map = new Map
     for (const i of (await this.getMemberArray(data)))
       map.set(i.user_id, i)
     return map
@@ -258,7 +249,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async getGuildChannelMap(data) {
-    const map = new Map()
+    const map = new Map
     for (const i of (await this.getGuildChannelArray(data)))
       map.set(i.channel_id, i)
     return map
@@ -292,7 +283,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async getGuildMemberMap(data) {
-    const map = new Map()
+    const map = new Map
     for (const i of (await this.getGuildMemberArray(data)))
       map.set(i.user_id, i)
     return map
@@ -366,7 +357,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async sendFriendFile(data, file, name) {
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友文件：[${data.user_id}] ${name}(${file})`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友文件：${name}(${file})`)
     return data.sendApi("upload_private_file", {
       user_id: data.user_id,
       ...await this.makeFile(data, file, name),
@@ -464,7 +455,6 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getMsg: message_id => this.getMsg(i, message_id),
       recallMsg: message_id => this.recallMsg(i, message_id),
       getForwardMsg: message_id => this.getForwardMsg(i, message_id),
-      makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => this.sendFriendForwardMsg(i, msg),
       sendFile: (file, name) => this.sendFriendFile(i, file, name),
       getInfo: () => this.getFriendInfo(i),
@@ -518,8 +508,6 @@ Bot.adapter.push(new class gocqhttpAdapter {
         getMsg: message_id => this.getMsg(i, message_id),
         recallMsg: message_id => this.recallMsg(i, message_id),
         getForwardMsg: message_id => this.getForwardMsg(i, message_id),
-        makeForwardMsg: Bot.makeForwardMsg,
-        sendForwardMsg: msg => this.sendGuildForwardMsg(i, msg),
         getInfo: () => this.getGuildInfo(i),
         getChannelArray: () => this.getGuildChannelArray(i),
         getChannelList: () => this.getGuildChannelList(i),
@@ -542,7 +530,6 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getMsg: message_id => this.getMsg(i, message_id),
       recallMsg: message_id => this.recallMsg(i, message_id),
       getForwardMsg: message_id => this.getForwardMsg(i, message_id),
-      makeForwardMsg: Bot.makeForwardMsg,
       sendForwardMsg: msg => this.sendGroupForwardMsg(i, msg),
       sendFile: (file, name) => this.sendGroupFile(i, file, undefined, name),
       getInfo: () => this.getGroupInfo(i),
@@ -581,14 +568,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getFriendArray: () => this.getFriendArray(data),
       getFriendList: () => this.getFriendList(data),
       getFriendMap: () => this.getFriendMap(data),
-      fl: new Map(),
+      fl: new Map,
 
       pickMember: (group_id, user_id) => this.pickMember(data, group_id, user_id),
       pickGroup: group_id => this.pickGroup(data, group_id),
       getGroupArray: () => this.getGroupArray(data),
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
-      gl: new Map(),
+      gl: new Map,
+      gml: new Map,
 
       request_list: [],
       getSystemMsg: () => Bot[data.self_id].request_list,
@@ -617,8 +605,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     Bot[data.self_id].getGroupMap()
 
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) ${Bot[data.self_id].version.app_full_name} 已连接`)
-    Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
-    Bot.emit("connect", Bot[data.self_id])
+    Bot.em(`connect.${data.self_id}`, data)
   }
 
   makeMessage(data) {
@@ -644,10 +631,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
     }
 
-    if (data.sub_type)
-      Bot.emit(`${data.post_type}.${data.message_type}.${data.sub_type}`, data)
-    Bot.emit(`${data.post_type}.${data.message_type}`, data)
-    Bot.emit(`${data.post_type}`, data)
+    Bot.em(`${data.post_type}.${data.message_type}.${data.sub_type}`, data)
   }
 
   async makeNotice(data) {
@@ -756,10 +740,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       Object.defineProperty(data, "friend", { get() { return this.member || {}}})
     }
 
-    if (data.sub_type)
-      Bot.emit(`${data.post_type}.${data.notice_type}.${data.sub_type}`, data)
-    Bot.emit(`${data.post_type}.${data.notice_type}`, data)
-    Bot.emit(`${data.post_type}`, data)
+    Bot.em(`${data.post_type}.${data.notice_type}.${data.sub_type}`, data)
   }
 
   makeRequest(data) {
@@ -778,10 +759,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     }
 
     data.bot.request_list.push(data)
-    if (data.sub_type)
-      Bot.emit(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
-    Bot.emit(`${data.post_type}.${data.request_type}`, data)
-    Bot.emit(`${data.post_type}`, data)
+    Bot.em(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
   }
 
   heartbeat(data) {
@@ -847,7 +825,6 @@ Bot.adapter.push(new class gocqhttpAdapter {
           logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
       }
     } else if (data.echo) {
-      logger.debug(`请求 API 返回：${logger.cyan(JSON.stringify(data))}`)
       Bot.emit(data.echo, data)
     } else {
       logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
@@ -855,11 +832,10 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   load() {
-    Bot.wss[this.path] = new WebSocketServer({ noServer: true })
-    Bot.wss[this.path].on("connection", ws => ws
-      .on("error", logger.error)
-      .on("message", data => this.message(data, ws))
+    if (!Array.isArray(Bot.wsf[this.path]))
+      Bot.wsf[this.path] = []
+    Bot.wsf[this.path].push((ws, ...args) =>
+      ws.on("message", data => this.message(data, ws, ...args))
     )
-    return true
   }
 })

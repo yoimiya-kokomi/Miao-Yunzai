@@ -16,3 +16,6 @@ proxyAddress:
 online_msg: true
 # 上线推送通知的冷却时间
 online_msg_exp: 86400
+
+# 单条日志长度
+logLength: 1000

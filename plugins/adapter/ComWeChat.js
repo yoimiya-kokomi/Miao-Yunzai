@@ -1,4 +1,3 @@
-import { WebSocketServer } from "ws"
 import { randomUUID } from "crypto"
 import path from "node:path"
 import fs from "node:fs"
@@ -32,9 +31,8 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   sendApi(ws, action, params = {}) {
     const echo = randomUUID()
-    const msg = JSON.stringify({ action, params, echo })
-    logger.debug(`发送 API 请求：${logger.cyan(this.makeLog(msg))}`)
-    ws.send(msg)
+    const msg = { action, params, echo }
+    ws.sendMsg(msg)
     return new Promise(resolve =>
       Bot.once(echo, data =>
         resolve({ ...data, ...data.data })))
@@ -125,7 +123,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       return Bot.sendForwardMsg(msg => this.sendFriendMsg(data, msg), msg.data)
 
     const message = await this.makeMsg(data, msg)
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(message)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(message)}`)
     return data.sendApi("send_message", {
       detail_type: "private",
       user_id: data.user_id,
@@ -138,7 +136,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       return Bot.sendForwardMsg(msg => this.sendGroupMsg(data, msg), msg.data)
 
     const message = await this.makeMsg(data, msg)
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(message)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(message)}`)
     return data.sendApi("send_message", {
       detail_type: "group",
       group_id: data.group_id,
@@ -212,7 +210,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async getMemberMap(data) {
-    const map = new Map()
+    const map = new Map
     for (const i of (await this.getMemberArray(data)))
       map.set(i.user_id, i)
     return map
@@ -300,14 +298,15 @@ Bot.adapter.push(new class ComWeChatAdapter {
       getFriendArray: () => this.getFriendArray(data),
       getFriendList: () => this.getFriendList(data),
       getFriendMap: () => this.getFriendMap(data),
-      fl: new Map(),
+      fl: new Map,
 
       pickMember: (group_id, user_id) => this.pickMember(data, group_id, user_id),
       pickGroup: group_id => this.pickGroup(data, group_id),
       getGroupArray: () => this.getGroupArray(data),
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
-      gl: new Map(),
+      gl: new Map,
+      gml: new Map,
     }
 
     if (!Bot.uin.includes(data.self_id))
@@ -324,8 +323,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     Bot[data.self_id].getGroupMap()
 
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) ${Bot[data.self_id].version.impl}-${Bot[data.self_id].version.version} 已连接`)
-    Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
-    Bot.emit("connect", Bot[data.self_id])
+    Bot.em(`connect.${data.self_id}`, data)
   }
 
   makeMessage(data) {
@@ -369,8 +367,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
     }
 
-    Bot.emit(`${data.post_type}.${data.message_type}`, data)
-    Bot.emit(`${data.post_type}`, data)
+    Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
 
   makeNotice(data) {
@@ -423,9 +420,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     if (!data.sub_type)
       data.sub_type = data.detail_type.split("_").pop()
 
-    Bot.emit(`${data.post_type}.${data.notice_type}.${data.sub_type}`, data)
-    Bot.emit(`${data.post_type}.${data.notice_type}`, data)
-    Bot.emit(`${data.post_type}`, data)
+    Bot.em(`${data.post_type}.${data.notice_type}.${data.sub_type}`, data)
   }
 
   makeRequest(data) {
@@ -446,9 +441,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     if (!data.sub_type)
       data.sub_type = data.detail_type.split("_").pop()
 
-    Bot.emit(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
-    Bot.emit(`${data.post_type}.${data.request_type}`, data)
-    Bot.emit(`${data.post_type}`, data)
+    Bot.em(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
   }
 
   makeMeta(data) {
@@ -503,7 +496,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
           logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
       }
     } else if (data.echo) {
-      logger.debug(`请求 API 返回：${logger.cyan(JSON.stringify(data))}`)
       Bot.emit(data.echo, data)
     } else {
       logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
@@ -511,11 +503,10 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   load() {
-    Bot.wss[this.path] = new WebSocketServer({ noServer: true })
-    Bot.wss[this.path].on("connection", ws => ws
-      .on("error", logger.error)
-      .on("message", data => this.message(data, ws))
+    if (!Array.isArray(Bot.wsf[this.path]))
+      Bot.wsf[this.path] = []
+    Bot.wsf[this.path].push((ws, ...args) =>
+      ws.on("message", data => this.message(data, ws, ...args))
     )
-    return true
   }
 })

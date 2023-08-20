@@ -1,4 +1,3 @@
-import { WebSocketServer } from "ws"
 import { randomUUID } from "crypto"
 import path from "node:path"
 import fs from "node:fs"
@@ -27,12 +26,6 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
   makeLog(msg) {
     return this.toStr(msg).replace(/base64:\/\/.*?"/g, "base64://...\"")
-  }
-
-  sendApi(ws, data) {
-    const msg = JSON.stringify(data)
-    logger.debug(`发送 API 请求：${logger.cyan(this.makeLog(msg))}`)
-    return ws.send(msg)
   }
 
   makeMsg(msg) {
@@ -81,7 +74,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
   sendFriendMsg(data, msg) {
     const content = this.makeMsg(msg)
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(content)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(content)}`)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
@@ -95,7 +88,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   sendGroupMsg(data, msg) {
     const target = data.group_id.split("-")
     const content = this.makeMsg(msg)
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(content)}`)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(content)}`)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
@@ -163,16 +156,13 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       get pickUser() { return this.pickFriend },
       pickMember: (group_id, user_id) => this.pickMember(data.self_id, group_id, user_id),
       pickGroup: group_id => this.pickGroup(data.self_id, group_id),
-      fl: new Map(),
-      gl: new Map(),
+      fl: new Map,
+      gl: new Map,
+      gml: new Map,
     }
 
-    if (!Bot.uin.includes(data.self_id))
-      Bot.uin.push(data.self_id)
-
     logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
-    Bot.emit(`connect.${data.self_id}`, Bot[data.self_id])
-    Bot.emit("connect", Bot[data.self_id])
+    Bot.em(`connect.${data.self_id}`, data)
   }
 
   message(data, ws) {
@@ -183,7 +173,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
 
     data.self_id = data.bot_self_id
-    data.sendApi = data => this.sendApi(ws, data)
+    data.sendApi = data => ws.sendMsg(data)
     if (Bot[data.self_id])
       Bot[data.self_id].sendApi = data.sendApi
     else
@@ -245,16 +235,14 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.user_id}] ${data.raw_message}`)
     }
 
-    Bot.emit(`${data.post_type}.${data.message_type}`, data)
-    Bot.emit(`${data.post_type}`, data)
+    Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
 
   load() {
-    Bot.wss[this.path] = new WebSocketServer({ noServer: true })
-    Bot.wss[this.path].on("connection", ws => ws
-      .on("error", logger.error)
-      .on("message", data => this.message(data, ws))
+    if (!Array.isArray(Bot.wsf[this.path]))
+      Bot.wsf[this.path] = []
+    Bot.wsf[this.path].push((ws, ...args) =>
+      ws.on("message", data => this.message(data, ws, ...args))
     )
-    return true
   }
 })
