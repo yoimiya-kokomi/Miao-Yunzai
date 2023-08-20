@@ -22,7 +22,8 @@ export default class RoleIndex extends base {
       渊下宫: 5,
       层岩巨渊: 6,
       层岩地下: 7,
-      须弥: 8
+      须弥: 8,
+      枫丹: 9
     }
 
     this.areaName = lodash.invert(this.area)
@@ -133,21 +134,21 @@ export default class RoleIndex extends base {
       ]
     ]
 
-    // 尘歌壶
-    let homesLevel = 0
-    // let homesItem = 0
-    if (resIndex.homes && resIndex.homes.length > 0) {
-      homesLevel = resIndex.homes[0].level
-      // homesItem = resIndex.homes[0].item_num
-    }
+    // // 尘歌壶
+    // let homesLevel = 0
+    // // let homesItem = 0
+    // if (resIndex.homes && resIndex.homes.length > 0) {
+    //   homesLevel = resIndex.homes[0].level
+    //   // homesItem = resIndex.homes[0].item_num
+    // }
 
     let worldExplorations = lodash.keyBy(resIndex.world_explorations, 'id')
 
     let explor = []
     let explor2 = []
 
-    let expArr = ['须弥', '层岩巨渊', '渊下宫', '稻妻']
-    let expArr2 = ['雪山', '璃月', '蒙德']
+    let expArr = ['枫丹', '须弥', '层岩巨渊', '渊下宫']
+    let expArr2 = ['稻妻', '雪山', '璃月', '蒙德']
 
     for (let val of expArr) {
       let tmp = { lable: val, num: `${(worldExplorations[this.area[val]]?.exploration_percentage ?? 0) / 10}%` }
@@ -159,7 +160,7 @@ export default class RoleIndex extends base {
       explor2.push(tmp)
     }
 
-    explor2.push({ lable: '家园等级', num: homesLevel })
+    // explor2.push({ lable: '家园等级', num: homesLevel })
 
     line.push(explor)
     line.push(explor2)
@@ -349,6 +350,8 @@ export default class RoleIndex extends base {
     }
 
     explor2 = explor2.concat([
+      { lable: '水神瞳', num: stats.hydroculus_number },
+      { lable: '草神瞳', num: stats.dendroculus_number },
       { lable: '雷神瞳', num: stats.electroculus_number },
       { lable: '岩神瞳', num: stats.geoculus_number },
       { lable: '风神瞳', num: stats.anemoculus_number }
@@ -417,20 +420,30 @@ export default class RoleIndex extends base {
         { lable: '普通宝箱', num: stats.common_chest_number }
       ],
       [
+        { lable: '水神瞳', num: stats.hydroculus_number },
         { lable: '草神瞳', num: stats.dendroculus_number },
         { lable: '雷神瞳', num: stats.electroculus_number },
-        { lable: '岩神瞳', num: stats.geoculus_number },
+        { lable: '岩神瞳', num: stats.geoculus_number }
+      ],
+      [
         { lable: '风神瞳', num: stats.anemoculus_number }
       ]
     ]
     // 尘歌壶
     if (res.homes && res.homes.length > 0) {
-      line.push([
+      // line.push([
+      //   { lable: '家园等级', num: res.homes[0].level },
+      //   { lable: '最高仙力', num: res.homes[0].comfort_num },
+      //   { lable: '获得摆设', num: res.homes[0].item_num },
+      //   { lable: '历史访客', num: res.homes[0].visit_num }
+      // ])
+      const anemoculus = { ...line[3][0] }
+      line[3] = [
+        anemoculus,
         { lable: '家园等级', num: res.homes[0].level },
         { lable: '最高仙力', num: res.homes[0].comfort_num },
-        { lable: '获得摆设', num: res.homes[0].item_num },
-        { lable: '历史访客', num: res.homes[0].visit_num }
-      ])
+        { lable: '获得摆设', num: res.homes[0].item_num }
+      ]
     }
 
     res.world_explorations = lodash.orderBy(res.world_explorations, ['id'], ['desc'])
@@ -451,7 +464,7 @@ export default class RoleIndex extends base {
         ]
       }
 
-      if (['蒙德', '璃月', '稻妻', '须弥'].includes(val.name)) {
+      if (['蒙德', '璃月', '稻妻', '须弥', '枫丹'].includes(val.name)) {
         tmp.line.push({
           name: '声望',
           text: `${val.level}级`
@@ -470,7 +483,7 @@ export default class RoleIndex extends base {
         }
       }
 
-      if (['雪山', '稻妻', '层岩巨渊', '须弥'].includes(val.name)) {
+      if (['雪山', '稻妻', '层岩巨渊', '须弥', '枫丹'].includes(val.name)) {
         if (val.offerings[0].name.includes('流明石')) {
           val.offerings[0].name = '流明石'
         }

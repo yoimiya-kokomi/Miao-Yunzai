@@ -32,7 +32,7 @@ export class gcLog extends plugin {
           fnc: 'logJson'
         },
         {
-          reg: '^#*(原神|星铁)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*(记录|祈愿|分析)$',
+          reg: '^#*(原神|星铁)?(全部)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*(记录|祈愿|分析)$',
           fnc: 'getLog'
         },
         {
@@ -133,10 +133,16 @@ export class gcLog extends plugin {
 
   /** #抽卡记录 */
   async getLog () {
+    this.e.isAll = !!(this.e.msg.includes('全部') && !this.e.isSr)
     let data = await new GachaLog(this.e).getLogData()
     if (!data) return
-    let url = this.srHead('gachaLog', data)
-    let img = await puppeteer.screenshot(url, data)
+    let name = 'gachaLog'
+    if (this.e.isAll) {
+      name = 'gachaAllLog'
+    } else {
+      name = this.srHead('gachaLog', data)
+    }
+    let img = await puppeteer.screenshot(name, data)
     if (img) await this.reply(img)
   }
 
