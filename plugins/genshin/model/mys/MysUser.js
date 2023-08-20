@@ -498,9 +498,10 @@ export default class MysUser extends BaseModel {
   }
 
   // 删除MysUser用户记录，会反向删除User中的记录及绑定关系
-  async delWithUser () {
+  async delWithUser (game = 'gs') {
     // 查找用户
-    let qqArr = await this.cache.kGet(tables.qq, this.ltuid, true)
+    let cache = this.getCache(game)
+    let qqArr = await cache.kGet(tables.qq, this.ltuid, true)
     if (qqArr && qqArr.length > 0) {
       for (let qq of qqArr) {
         let user = await NoteUser.create(qq)
