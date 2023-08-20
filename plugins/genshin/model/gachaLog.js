@@ -462,10 +462,9 @@ export default class GachaLog extends base {
       this.e.reply('暂无抽卡记录\n#记录帮助，查看配置说明', false, { at: true })
       return false
     }
-
-    this.uid = await redis.get(this.uidKey)
+    this.uid = this?.e?.isSr ? this.e.user?._games?.sr?.uid : this.e.user?._games?.gs?.uid
     if (!this.uid) {
-      this.uid = this?.e?.isSr ? this.e.user?._games?.sr?.uid : this.e.user?._games?.gs?.uid
+      this.uid = await redis.get(this.uidKey)
     }
 
     /** 记录有绑定的uid */
