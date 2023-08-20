@@ -1,4 +1,5 @@
 import base from './base.js'
+import GsCfg from './gsCfg.js'
 import MysInfo from './mys/mysInfo.js'
 import MysApi from './mys/mysApi.js'
 import lodash from 'lodash'
@@ -7,12 +8,26 @@ import fs from 'node:fs'
 import common from '../../../lib/common/common.js'
 
 export default class Ledger extends base {
-  constructor (e) {
+  constructor(e) {
     super(e)
+    this.e = e
     this.model = 'ledger'
+    if (this.e.msg?.includes('星琼'))
+      this.e.isSr = true
+
+    this.color = ['#73a9c6', '#d56565', '#70b2b4', '#bd9a5a', '#739970', '#7a6da7', '#597ea0']
+    this.action = {
+      "other": 0,
+      "adventure_reward": 1,
+      "space_reward": 2,
+      "daily_reward": 3,
+      "abyss_reward": 4,
+      "mail_reward": 5,
+      "event_reward": 6
+    }
   }
 
-  async get () {
+  async get() {
     this.getMonth()
     if (!this.month) return
 
@@ -27,8 +42,8 @@ export default class Ledger extends base {
     return data
   }
 
-  getMonth () {
-    let month = this.e.msg.replace(/#|原石|月|札记/g, '')
+  getMonth() {
+    let month = this.e.msg.replace(/#|原石|月|札记|星铁|星琼/g, '')
     let NowMonth = Number(moment().month()) + 1
     let monthData = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二']
     if (month) {
@@ -59,74 +74,102 @@ export default class Ledger extends base {
     if ((NowMonth >= 3 && month > NowMonth) || (NowMonth < 3 && month > NowMonth && month <= 9 + month)) {
       month = NowMonth
     }
-
-    this.NowMonth = NowMonth
-    this.month = month
+    if (this.e.isSr) {
+      this.NowMonth = moment().year().toString() + (NowMonth < 10 ? '0' : '') + NowMonth.toString()
+      this.month = moment().year().toString() + (month < 10 ? '0' : '') + month.toString()
+      this.srmonth = month
+    } else {
+      this.NowMonth = NowMonth
+      this.month = month
+    }
   }
 
-  dealData (ledgerInfo) {
+  dealData(ledgerInfo) {
     let day
     if (this.month == this.NowMonth) {
-      day = `${this.month}月${moment().date()}号`
+      day = `${this[this.e.isSr ? 'srmonth' : 'month']}月${moment().date()}号`
     } else {
-      day = `${this.month}月`
+      day = `${this[this.e.isSr ? 'srmonth' : 'month']}月`
     }
 
-    ledgerInfo.month_data.gacha = (ledgerInfo.month_data.current_primogems / 160).toFixed(0)
-    ledgerInfo.month_data.last_gacha = (ledgerInfo.month_data.last_primogems / 160).toFixed(0)
-    if (ledgerInfo.month_data.current_primogems > 10000) {
-      ledgerInfo.month_data.current_primogems = (ledgerInfo.month_data.current_primogems / 10000).toFixed(2) + ' w'
+    let gacha = this.e.isSr ? 'current_hcoin' : 'current_primogems'
+    let last_gacha = this.e.isSr ? 'last_hcoin' : 'last_primogems'
+    let mora = this.e.isSr ? 'current_rails_pass' : 'current_mora'
+    let last_mora = this.e.isSr ? 'last_rails_pass' : 'last_mora'
+
+    ledgerInfo.month_data.gacha = (ledgerInfo.month_data[gacha] / 160).toFixed(0)
+    ledgerInfo.month_data.last_gacha = (ledgerInfo.month_data[last_gacha] / 160).toFixed(0)
+    if (ledgerInfo.month_data[gacha] > 10000) {
+      ledgerInfo.month_data[gacha] = (ledgerInfo.month_data[gacha] / 10000).toFixed(2) + ' w'
     }
-    if (ledgerInfo.month_data.last_primogems > 10000) {
-      ledgerInfo.month_data.last_primogems = (ledgerInfo.month_data.last_primogems / 10000).toFixed(2) + ' w'
+    if (ledgerInfo.month_data[last_gacha] > 10000) {
+      ledgerInfo.month_data[last_gacha] = (ledgerInfo.month_data[last_gacha] / 10000).toFixed(2) + ' w'
     }
-    if (ledgerInfo.month_data.current_mora > 10000) {
-      ledgerInfo.month_data.current_mora = (ledgerInfo.month_data.current_mora / 10000).toFixed(1) + ' w'
+    if (ledgerInfo.month_data[mora] > 10000) {
+      ledgerInfo.month_data[mora] = (ledgerInfo.month_data[mora] / 10000).toFixed(1) + ' w'
     }
-    if (ledgerInfo.month_data.last_mora > 10000) {
-      ledgerInfo.month_data.last_mora = (ledgerInfo.month_data.last_mora / 10000).toFixed(1) + ' w'
+    if (ledgerInfo.month_data[last_mora] > 10000) {
+      ledgerInfo.month_data[last_mora] = (ledgerInfo.month_data[last_mora] / 10000).toFixed(1) + ' w'
     }
-    if (ledgerInfo.day_data.current_primogems > 10000) {
-      ledgerInfo.day_data.current_primogems = (ledgerInfo.day_data.current_primogems / 10000).toFixed(1) + ' w'
+    if (ledgerInfo.day_data[gacha] > 10000) {
+      ledgerInfo.day_data[gacha] = (ledgerInfo.day_data[gacha] / 10000).toFixed(1) + ' w'
     }
-    if (ledgerInfo.day_data.current_mora > 10000) {
-      ledgerInfo.day_data.current_mora = (ledgerInfo.day_data.current_mora / 10000).toFixed(1) + ' w'
+    if (ledgerInfo.day_data[mora] > 10000) {
+      ledgerInfo.day_data[mora] = (ledgerInfo.day_data[mora] / 10000).toFixed(1) + ' w'
     }
 
-    let color = ['#73a9c6', '#d56565', '#70b2b4', '#bd9a5a', '#739970', '#7a6da7', '#597ea0']
-    for (let i in ledgerInfo.month_data.group_by) {
-      ledgerInfo.month_data.group_by[i].color = color[ledgerInfo.month_data.group_by[i].action_id]
-    }
     ledgerInfo.color = []
     ledgerInfo.month_data.group_by.forEach((item) => {
-      ledgerInfo.color.push(['#73a9c6', '#d56565', '#70b2b4', '#bd9a5a', '#739970', '#7a6da7', '#597ea0'][item.action_id])
+      if (this.e.isSr){
+        item.color = this.color[this.action[item.action]]
+        item.action_name = item.action_name.slice(0, 4)
+      } else {
+        item.color = this.color[item.action_id]
+      }
+      ledgerInfo.color.push(item.color)
     })
+
     ledgerInfo.group_by = JSON.stringify(ledgerInfo.month_data.group_by)
     ledgerInfo.color = JSON.stringify(ledgerInfo.color)
+
+    let files = fs.readdirSync('./plugins/genshin/resources/StarRail/img/role').filter(file => file.endsWith('.webp'))
+    let icon = lodash.sample(files)
+
+    let week = [
+      '星期日',
+      '星期一',
+      '星期二',
+      '星期三',
+      '星期四',
+      '星期五',
+      '星期六'
+    ]
+    let srday = `${week[moment().day()]}`
 
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
-      day,
+      day, icon, srday,
+      nowDay: moment(new Date()).format('YYYY年MM月DD日'),
       ...ledgerInfo,
       ...this.screenData
     }
   }
 
   // 保存上两个原石数据
-  async saveLedger (uid, ck = '') {
+  async saveLedger(uid, ck = '', isTask = false) {
     if (ck) {
       uid = ck.uid
     } else {
       /** 获取个人ck */
-      ck = await MysInfo.checkUidBing(uid)
+      ck = await MysInfo.checkUidBing(uid, this.e.isSr ? 'sr' : 'gs')
     }
 
     if (!ck || lodash.isEmpty(ck)) {
       return false
     }
 
-    let dataPath = `./data/NoteData/${uid}.json`
+    let dataPath = `./data/${this.e?.isSr ? 'SR_NoteData' : 'NoteData'}/${uid}.json`
     let NoteData = {}
     if (fs.existsSync(dataPath)) {
       NoteData = JSON.parse(fs.readFileSync(dataPath, 'utf8'))
@@ -153,7 +196,10 @@ export default class Ledger extends base {
       if (NowMonth == month && this.e.nowData && this.e.nowData?.data?.data_month == NowMonth) {
         ledgerInfo = this.e.nowData
       } else {
-        ledgerInfo = await this.ysLedger(ck, month)
+        let months = month
+        if (this.e.isSr) months = String(year) + (month < 10 ? '0' : '') + String(month)
+
+        ledgerInfo = await this.ysLedger(ck, months, isTask)
         if (!ledgerInfo) continue
       }
 
@@ -166,47 +212,52 @@ export default class Ledger extends base {
       common.sleep(100)
     }
 
-    logger.mark(`[札记查询][自动保存] uid:${uid} 原石数据已保存`)
+    logger.mark(`[札记查询][自动保存] uid:${uid} 数据已保存`)
 
     fs.writeFileSync(dataPath, JSON.stringify(NoteData, '', '\t'))
     return NoteData
   }
 
-  async ysLedger (ck, month) {
-    let mysApi = new MysApi(ck.uid, ck.ck, { log: false })
-
-    let ledgerInfo = await mysApi.getData('ys_ledger', { month })
+  async ysLedger(ck, month, isTask) {
+    let ledgerInfo = {}
+    if (isTask) {
+      let mysApi = new MysApi(ck.uid, ck.ck, { log: false }, this.e?.isSr)
+      ledgerInfo = await mysApi.getData('ys_ledger', { month })
+      ledgerInfo = await new MysInfo(this.e).checkCode(ledgerInfo, 'ys_ledger', mysApi, { month }, isTask)
+    } else {
+      ledgerInfo = await MysInfo.get(this.e, 'ys_ledger', { month })
+    }
 
     if (!ledgerInfo || ledgerInfo.retcode != 0) return false
 
     return ledgerInfo.data
   }
 
-  async ledgerTask (manual) {
-    let cks = await MysInfo.getBingCkUid()
+  async ledgerTask(manual) {
+    let cks = (await GsCfg.getBingCk(this.e?.isSr ? 'sr' : 'gs')).ck
     let uids = lodash.map(cks, 'uid')
     let finishTime = moment().add(uids.length * 0.7, 's').format('MM-DD HH:mm:ss')
-    logger.mark(`札记ck:${uids.length}个，预计需要${this.countTime(uids.length)} ${finishTime} 完成`)
+    logger.mark(`${this.e?.isSr ? '开拓月历' : '札记'}ck:${uids.length}个，预计需要${this.countTime(uids.length)} ${finishTime} 完成`)
 
     if (manual) {
-      await this.e.reply('开始任务：保存原石数据，完成前请勿重复执行')
-      await this.e.reply(`札记ck：${uids.length}个\n预计需要：${this.countTime(uids.length)}\n完成时间：${finishTime}`)
+      await this.e.reply(`开始任务：保存${this.e?.isSr ? '星琼' : '原石'}数据，完成前请勿重复执行`)
+      await this.e.reply(`${this.e?.isSr ? '开拓月历' : '札记'}ck：${uids.length}个\n预计需要：${this.countTime(uids.length)}\n完成时间：${finishTime}`)
     }
 
     for (let uid of uids) {
       let ck = cks[uid]
       this.e.user_id = ck.qq
 
-      await this.saveLedger(uid, ck)
+      await this.saveLedger(uid, ck, true)
       await common.sleep(500)
     }
 
     if (manual) {
-      this.e.reply('原石任务完成')
+      this.e.reply(`${this.e?.isSr ? '星琼' : '原石'}任务完成`)
     }
   }
 
-  countTime (num) {
+  countTime(num) {
     let time = num * 0.7
     let hour = Math.floor((time / 3600) % 24)
     let min = Math.floor((time / 60) % 60)
@@ -218,7 +269,7 @@ export default class Ledger extends base {
     return msg
   }
 
-  async ledgerCount () {
+  async ledgerCount() {
     this.model = 'ledgerCount'
 
     let mysInfo = await MysInfo.init(this.e, 'ys_ledger')
@@ -231,7 +282,7 @@ export default class Ledger extends base {
     return this.ledgerCountData(NoteData)
   }
 
-  async ledgerCountHistory () {
+  async ledgerCountHistory() {
     let nowYear
     if (this.e.msg.includes('去年')) {
       nowYear = moment().year() - 1
@@ -251,19 +302,19 @@ export default class Ledger extends base {
     let mysInfo = await MysInfo.init(this.e, 'ys_ledger')
     let uid = mysInfo?.uid
     if (!uid) return false
-    let dataPath = `./data/NoteData/${uid}.json`
+    let dataPath = `./data/${this.e?.isSr ? 'SR_NoteData' : 'NoteData'}/${uid}.json`
     let NoteData = {}
     if (fs.existsSync(dataPath)) {
       NoteData = JSON.parse(fs.readFileSync(dataPath, 'utf8'))
     }
     // console.log(NoteData)
     if (!NoteData || lodash.isEmpty(NoteData)) {
-      this.e.reply('暂无原石数据，请先发送 #原石', false, { at: true })
+      this.e.reply(`${this.e?.isSr ? '暂无星琼数据，请先发送 *星琼' : '暂无原石数据，请先发送 #原石'}`, false, { at: true })
       return false
     }
     NoteData = NoteData[nowYear]
     if (!NoteData) {
-      this.e.reply(`uid：${uid} ${nowYear}年无原石统计数据！`, false, { at: true })
+      this.e.reply(`uid：${uid} ${nowYear}年无${this.e?.isSr ? '星琼' : '原石'}统计数据！`, false, { at: true })
       return false
     }
     lodash.forEach(NoteData, (val) => {
@@ -273,7 +324,7 @@ export default class Ledger extends base {
     return this.ledgerCountData(NoteData, String(nowYear))
   }
 
-  ledgerCountData (NoteData, nowYear) {
+  ledgerCountData(NoteData, nowYear) {
     let hasMore = false
     let yearText
     if (!nowYear) {
@@ -317,28 +368,38 @@ export default class Ledger extends base {
       yearText
     }
 
+    let Primogems = this.e.isSr ? 'current_hcoin' : 'current_primogems'
+    let Mora = this.e.isSr ? 'current_rails_pass' : 'current_mora'
     lodash.forEach(NoteData, (val) => {
-      data.allPrimogems += val.month_data.current_primogems
-      data.allMora += val.month_data.current_mora
+      data.allPrimogems += val.month_data[Primogems]
+      data.allMora += val.month_data[Mora]
       // 柱状图数据
+      if (this.e.isSr)
+        val.data_month = val.data_month.slice(-2, -1) == '0' ? val.data_month.slice(-1) : val.data_month.slice(-2)
+
       data.primogemsMonth.push({
-        value: val.month_data.current_primogems,
+        value: val.month_data[Primogems],
         month: String(val.data_month),
         year: String(val.year),
-        name: '原石'
+        name: this.e.isSr ? '星琼' : '原石'
       })
       data.moraMonth.push({
-        value: (val.month_data.current_mora / 1000).toFixed(0),
+        value: (val.month_data[Mora] / 1000).toFixed(0),
         month: String(val.data_month),
         year: String(val.year),
-        name: '摩拉'
+        name: this.e.isSr ? '专&通票' : '摩拉'
       })
     })
 
     // 单位处理
-    data.allMora = (data.allMora / 10000).toFixed(0) + 'w'
     data.allPrimogemsShow = (data.allPrimogems / 10000).toFixed(2) + 'w'
     data.allGacha = (data.allPrimogems / 160).toFixed(0)
+    if (this.e.isSr) {
+      data.allGacha = (data.allPrimogems / 160 + data.allMora).toFixed(0)
+      data.allMora = data.allMora.toFixed(0) + '张'
+    } else {
+      data.allMora = (data.allMora / 10000).toFixed(0) + 'w'
+    }
 
     // 原石最多
     data.maxPrimogems = lodash.maxBy(data.primogemsMonth, 'value')
@@ -349,6 +410,12 @@ export default class Ledger extends base {
     })
 
     let groupBy = lodash(NoteData).map('month_data').map('group_by').flatMap().value()
+
+    if (this.e.isSr)
+      groupBy.forEach((item) => {
+        item.action_id = this.action[item.action]
+        item.action = item.action_name.slice(0, 4)
+      })
 
     let pieData = {}
     for (let val of groupBy) {
@@ -370,7 +437,7 @@ export default class Ledger extends base {
 
     data.color = []
     pieData.forEach((item) => {
-      data.color.push(['#73a9c6', '#d56565', '#70b2b4', '#bd9a5a', '#739970', '#7a6da7', '#597ea0'][item.action_id])
+      data.color.push(this.color[item.action_id])
     })
 
     data.group_by = pieData

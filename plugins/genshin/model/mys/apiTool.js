@@ -161,7 +161,7 @@ export default class apiTool {
          * 开拓阅历接口
          */
         ys_ledger: {
-          url: `${host}/event/srledger/month_info`,
+          url: `${host}event/srledger/month_info`,
           query: `region=${this.server}&uid=${this.uid}&month=${data.month}`
         },
         /** 角色详情 */

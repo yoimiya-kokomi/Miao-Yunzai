@@ -177,7 +177,7 @@ export default class MysInfo {
       }
 
       for (let i in res) {
-        res[i] = await mysInfo.checkCode(res[i], res[i].api, mysApi)
+        res[i] = await mysInfo.checkCode(res[i], res[i].api, mysApi, api[res[i].api])
 
         if (res[i]?.retcode === 0) continue
 
@@ -185,7 +185,7 @@ export default class MysInfo {
       }
     } else {
       res = await mysApi.getData(api, data)
-      res = await mysInfo.checkCode(res, api, mysApi)
+      res = await mysInfo.checkCode(res, api, mysApi, data)
     }
 
     return res
@@ -329,15 +329,15 @@ export default class MysInfo {
       } else {
         // 重新分配
         await mysUser.disable(game)
-        return onlySelfCk ? '' : await this.getCookie()
+        return onlySelfCk ? '' : await this.getCookie(game)
       }
     }
     return this.ckUser?.ck
   }
 
-  async checkCode(res, type, mysApi = {}) {
+  async checkCode(res, type, mysApi = {}, data = {}, isTask = false) {
     if (!res) {
-      this.e.reply('米游社接口请求失败，暂时无法查询')
+      if (!isTask) this.e.reply('米游社接口请求失败，暂时无法查询')
       return false
     }
 
@@ -359,28 +359,30 @@ export default class MysInfo {
         if (/(登录|login)/i.test(res.message)) {
           if (this.ckInfo.uid) {
             logger.mark(`[ck失效][uid:${this.uid}][qq:${this.userId}]`)
-            this.e.reply(`UID:${this.ckInfo.uid}，米游社cookie已失效`)
+            if (!isTask) this.e.reply(`UID:${this.ckInfo.uid}，米游社cookie已失效`)
           } else {
             logger.mark(`[公共ck失效][ltuid:${this.ckInfo.ltuid}]`)
-            this.e.reply('米游社查询失败，请稍后再试')
+            if (!isTask) this.e.reply('米游社查询失败，请稍后再试')
           }
-          await this.delCk()
+          if (!isTask) await this.delCk()
         } else {
-          this.e.reply(`米游社接口报错，暂时无法查询：${res.message}`)
+          if (!isTask) this.e.reply(`米游社接口报错，暂时无法查询：${res.message}`)
         }
         break
       case 1008:
-        this.e.reply('\n请先去米游社绑定角色', false, { at: this.userId })
+        if (!isTask) this.e.reply('\n请先去米游社绑定角色', false, { at: this.userId })
         break
       case 10101:
-        await this.disableToday()
-        this.e.reply('查询已达今日上限')
+        if (!isTask) {
+          await this.disableToday()
+          this.e.reply('查询已达今日上限')
+        }
         break
       case 10102:
         if (res.message === 'Data is not public for the user') {
-          this.e.reply(`\nUID:${this.uid}，米游社数据未公开`, false, { at: this.userId })
+          if (!isTask) this.e.reply(`\nUID:${this.uid}，米游社数据未公开`, false, { at: this.userId })
         } else {
-          this.e.reply(`uid:${this.uid}，请先去米游社绑定角色`)
+          if (!isTask) this.e.reply(`uid:${this.uid}，请先去米游社绑定角色`)
         }
         break
       // 伙伴不存在~
@@ -389,17 +391,17 @@ export default class MysInfo {
         break
       case 1034:
         logger.mark(`[米游社查询失败][uid:${this.uid}][qq:${this.userId}] 遇到验证码`)
-        this.e.reply('米游社查询遇到验证码，请稍后再试')
+        if (!isTask) this.e.reply('米游社查询遇到验证码，请稍后再试')
         break
       default:
-        this.e.reply(`米游社接口报错，暂时无法查询：${res.message || 'error'}`)
+        if (!isTask) this.e.reply(`米游社接口报错，暂时无法查询：${res.message || 'error'}`)
         break
     }
     if (res.retcode !== 0) {
       logger.mark(`[mys接口报错]${JSON.stringify(res)}，uid：${this.uid}`)
     }
     // 添加请求记录
-    await this.ckUser.addQueryUid(this.uid)
+    if (!isTask) await this.ckUser.addQueryUid(this.uid)
     return res
   }
 

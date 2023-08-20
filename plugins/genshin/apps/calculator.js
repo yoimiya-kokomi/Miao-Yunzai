@@ -66,18 +66,7 @@ export class calculator extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let url = this.srHead('calculator', data)
-    let img = await puppeteer.screenshot(url, data)
+    let img = await puppeteer.screenshot(`${data.srtempFile}calculator`, data)
     if (img) await this.reply(img)
-  }
-  srHead = (url, data) => {
-    let name = url
-    if (this.e.isSr) {
-      name = `StarRail/${url}`
-      data.pluResPath = `${this._path}/plugins/genshin/resources/StarRail/`
-      data.tplFile = `./plugins/genshin/resources/StarRail/html/${url}/${url}.html`
-      data.headStyle = `<style> .head_box { background: url(${this._path}/plugins/genshin/resources/StarRail/img/worldcard/星穹列车.png) #fff; background-position-x: -10px; background-repeat: no-repeat; background-size: 540px; background-position-y: -100px; </style>`
-    }
-    return name
   }
 }

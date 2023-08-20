@@ -3,7 +3,7 @@
   <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <link rel="shortcut icon" href="#" />
-    <link rel="stylesheet" type="text/css" href="{{pluResPath}}StarRail/html/logCount/logCount.css"/>
+    <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/logCount/logCount.css"/>
     <link rel="preload" href="{{resPath}}/font/HYWenHei-55W.ttf" as="font">
     <link rel="preload" href="{{resPath}}/font/tttgbnumber.ttf" as="font"> 
     {{@headStyle}}
@@ -13,7 +13,7 @@
       <div class="head_box">
         <div class="id_text">ID: {{uid}}</div>
         <h2 class="day_text">抽卡统计-{{typeName}}</h2>
-        <img class="starrail_logo" src="{{pluResPath}}StarRail/img/other/logo.png"/>
+        <img class="starrail_logo" src="{{pluResPath}}img/other/logo.png"/>
       </div>
       {{each pool val}}
       {{if val.roleNum > 0}}
@@ -33,10 +33,10 @@
             <div class="bg{{v.rank_type}}"></div>
             <span class="num {{if v.count>=5 && v.rank_type ==5}}life5{{/if}}">{{v.count}}</span>
             {{if v.item_type=='角色'}}
-            <img class="role_img" src="{{pluResPath}}StarRail/img/role/{{v.name}}.webp" onerror="whenError(this,'role')"/>
+            <img class="role_img" src="{{pluResPath}}img/role/{{v.name}}.webp" onerror="whenError(this,'role')"/>
             {{/if}} 
             {{if v.item_type=='光锥'}}
-            <img class="role_img" src="{{pluResPath}}StarRail/img/weapon/{{v.name}}.webp" onerror="whenError(this)"/>
+            <img class="role_img" src="{{pluResPath}}img/weapon/{{v.name}}.webp" onerror="whenError(this)"/>
             {{/if}}
           </div>
           {{/each}}

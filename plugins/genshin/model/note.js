@@ -33,7 +33,6 @@ export default class Note extends base {
 
     let screenData = this.screenData
     if (this.e.isSr) {
-      screenData.tplFile = './plugins/genshin/resources/StarRail/html/dailyNote/dailyNote.html'
       resUser = await MysInfo.get(this.e, 'UserGame')
       resUser.data?.list?.forEach(v => this.e.uid.includes(v.game_biz))
       if (!resUser || resUser.retcode !== 0) return false
