@@ -71,7 +71,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
 
     logger.info(`${logger.blue(`[${data.self_id}]`)} 上传文件：${this.makeLog(opts)}`)
-    return data.sendApi("upload_file", opts)
+    return data.bot.sendApi("upload_file", opts)
   }
 
   async makeMsg(data, msg) {
@@ -124,7 +124,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     const message = await this.makeMsg(data, msg)
     logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(message)}`)
-    return data.sendApi("send_message", {
+    return data.bot.sendApi("send_message", {
       detail_type: "private",
       user_id: data.user_id,
       message,
@@ -137,7 +137,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     const message = await this.makeMsg(data, msg)
     logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(message)}`)
-    return data.sendApi("send_message", {
+    return data.bot.sendApi("send_message", {
       detail_type: "group",
       group_id: data.group_id,
       message,
@@ -146,7 +146,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async getFriendArray(data) {
     const array = []
-    for (const i of (await data.sendApi("get_friend_list")).data)
+    for (const i of (await data.bot.sendApi("get_friend_list")).data)
       array.push({
         ...i,
         nickname: i.user_remark == "null" ? i.user_displayname || i.user_name : i.user_remark,
@@ -163,18 +163,18 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async getFriendMap(data) {
     for (const i of (await this.getFriendArray(data)))
-      Bot[data.self_id].fl.set(i.user_id, i)
-    return Bot[data.self_id].fl
+      data.bot.fl.set(i.user_id, i)
+    return data.bot.fl
   }
 
   getFriendInfo(data) {
-    return data.sendApi("get_user_info", {
+    return data.bot.sendApi("get_user_info", {
       user_id: data.user_id,
     })
   }
 
   async getGroupArray(data) {
-    return (await data.sendApi("get_group_list")).data
+    return (await data.bot.sendApi("get_group_list")).data
   }
 
   async getGroupList(data) {
@@ -186,18 +186,18 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async getGroupMap(data) {
     for (const i of (await this.getGroupArray(data)))
-      Bot[data.self_id].gl.set(i.group_id, i)
-    return Bot[data.self_id].gl
+      data.bot.gl.set(i.group_id, i)
+    return data.bot.gl
   }
 
   getGroupInfo(data) {
-    return data.sendApi("get_group_info", {
+    return data.bot.sendApi("get_group_info", {
       group_id: data.group_id,
     })
   }
 
   async getMemberArray(data) {
-    return (await data.sendApi("get_group_member_list", {
+    return (await data.bot.sendApi("get_group_member_list", {
       group_id: data.group_id,
     })).data
   }
@@ -217,7 +217,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   getMemberInfo(data) {
-    return data.sendApi("get_group_member_info", {
+    return data.bot.sendApi("get_group_member_info", {
       group_id: data.group_id,
       user_id: data.user_id,
     })
@@ -232,7 +232,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   pickFriend(data, user_id) {
     const i = {
-      ...Bot[data.self_id].fl.get(user_id),
+      ...data.bot.fl.get(user_id),
       ...data,
       user_id,
     }
@@ -247,7 +247,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   pickMember(data, group_id, user_id) {
     const i = {
-      ...Bot[data.self_id].fl.get(user_id),
+      ...data.bot.fl.get(user_id),
       ...data,
       group_id,
       user_id,
@@ -262,7 +262,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   pickGroup(data, group_id) {
     const i = {
-      ...Bot[data.self_id].gl.get(group_id),
+      ...data.bot.gl.get(group_id),
       ...data,
       group_id,
     }
@@ -279,13 +279,14 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
   }
 
-  async connect(data) {
+  async connect(data, ws) {
     for (const bot of data.status.bots)
       data.self_id = bot.self.user_id
 
     Bot[data.self_id] = {
       adapter: this,
-      sendApi: data.sendApi,
+      ws: ws,
+      sendApi: (action, params) => this.sendApi(ws, action, params),
       stat: { ...data.status, start_time: data.time },
 
       info: {},
@@ -308,21 +309,22 @@ Bot.adapter.push(new class ComWeChatAdapter {
       gl: new Map,
       gml: new Map,
     }
+    data.bot = Bot[data.self_id]
 
     if (!Bot.uin.includes(data.self_id))
       Bot.uin.push(data.self_id)
 
-    Bot[data.self_id].info = (await data.sendApi("get_self_info")).data
-    Bot[data.self_id].version = {
-      ...(await data.sendApi("get_version")).data,
+    data.bot.info = (await data.bot.sendApi("get_self_info")).data
+    data.bot.version = {
+      ...(await data.bot.sendApi("get_version")).data,
       id: this.id,
       name: this.name,
     }
 
-    Bot[data.self_id].getFriendMap()
-    Bot[data.self_id].getGroupMap()
+    data.bot.getFriendMap()
+    data.bot.getGroupMap()
 
-    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) ${Bot[data.self_id].version.impl}-${Bot[data.self_id].version.version} 已连接`)
+    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) ${data.bot.version.impl}-${data.bot.version.version} 已连接`)
     Bot.em(`connect.${data.self_id}`, data)
   }
 
@@ -444,14 +446,14 @@ Bot.adapter.push(new class ComWeChatAdapter {
     Bot.em(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
   }
 
-  makeMeta(data) {
+  makeMeta(data, ws) {
     switch (data.detail_type) {
       case "heartbeat":
         break
       case "connect":
         break
       case "status_update":
-        this.connect(data)
+        this.connect(data, ws)
         break
       default:
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
@@ -476,12 +478,11 @@ Bot.adapter.push(new class ComWeChatAdapter {
         logger.warn(`${logger.blue(`[${data.self_id}]`)} 找不到对应Bot，忽略消息：${logger.magenta(JSON.stringify(data))}`)
         return false
       }
-      data.sendApi = (action, params) => this.sendApi(ws, action, params)
       data.bot = Bot[data.self_id]
 
       switch (data.type) {
         case "meta":
-          this.makeMeta(data)
+          this.makeMeta(data, ws)
           break
         case "message":
           this.makeMessage(data)

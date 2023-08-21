@@ -140,10 +140,11 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
   }
 
-  makeBot(data) {
+  makeBot(data, ws) {
     Bot[data.self_id] = {
       adapter: this,
-      sendApi: data.sendApi,
+      ws: ws,
+      get sendApi() { return this.ws.sendMsg },
       uin: data.self_id,
       bot_id: data.bot_id,
       bot_self_id: data.bot_self_id,
@@ -173,12 +174,12 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
 
     data.self_id = data.bot_self_id
-    data.sendApi = data => ws.sendMsg(data)
-    if (Bot[data.self_id])
-      Bot[data.self_id].sendApi = data.sendApi
-    else
-      this.makeBot(data)
-    data.bot = Bot[data.self_id]
+    if (Bot[data.self_id]) {
+      data.bot = Bot[data.self_id]
+      data.bot.ws = ws
+    } else {
+      this.makeBot(data, ws)
+    }
 
     data.post_type = "message"
     data.message_id = data.msg_id
