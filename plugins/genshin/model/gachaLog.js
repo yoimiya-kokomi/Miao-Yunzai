@@ -60,7 +60,7 @@ export default class GachaLog extends base {
       if (i <= 1) await common.sleep(500)
     }
     MakeMsg.push(tmpMsg)
-    MakeMsg.push(`\n抽卡记录更新完成，您还可回复\n【#${this?.e?.isSr ? '星铁光锥' : '武器'}记录】统计${this?.e?.isSr ? '星铁光锥' : '武器'}池数据\n【#${this?.e?.isSr ? '星铁' : ''}角色统计】按卡池统计数据\n【#导出记录】导出记录数据`)
+    MakeMsg.push(`\n抽卡记录更新完成，您还可回复\n【${this?.e?.isSr ? '*' : '#'}全部抽卡记录】展示全部抽卡数据\n【${this?.e?.isSr ? '*光锥' : '#武器'}记录】统计${this?.e?.isSr ? '星铁光锥' : '武器'}池数据\n【${this?.e?.isSr ? '*' : '#'}角色统计】按卡池统计数据\n【#导出记录】导出记录数据`)
     await this.e.reply(MakeMsg)
 
     this.isLogUrl = true
@@ -371,7 +371,8 @@ export default class GachaLog extends base {
   }
 
   async getAllGcLogData () {
-    const poolList = ['角色', '武器', '常驻', '新手']
+    this.model = 'gachaAllLog'
+    const poolList = ['角色', this.e?.isSr ? '光锥' : '武器', '常驻']
     const logData = []
     let fiveMaxNum = 0
     const originalMsg = this.e.msg
@@ -385,7 +386,7 @@ export default class GachaLog extends base {
       if (fiveMaxNum <= data.fiveLog.length) {
         fiveMaxNum = data.fiveLog.length
       }
-      data.max = i === '武器' ? 80 : 90
+      data.max = i === '武器' || i === '光锥' ? 80 : 90
       logData.push(data)
     }
     if (logData.length === 0) {
@@ -402,7 +403,6 @@ export default class GachaLog extends base {
       ...logData[0],
       data: logData
     }
-    data.tplFile = './plugins/genshin/resources/html/gachaAllLog/gachaAllLog.html'
     this.e.msg = originalMsg
     return data
   }
