@@ -132,8 +132,9 @@ dist
 
 # Yunzai data
 dump.rdb
-data/
+config/*.yaml
 config/test/*
+data/
 !config/test/default.yaml
 logs/
 resources/

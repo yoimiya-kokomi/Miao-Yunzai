@@ -38,43 +38,36 @@ Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、G
 
 > 环境准备： Windows or Linux，Node.js（ [版本至少 v18 以上](http://nodejs.cn/download) ）， [Redis](https://redis.io/docs/getting-started/installation)
 
-1.克隆项目并安装 genshin miao-plugin
+1.克隆项目并安装 genshin miao-plugin TRSS-Plugin(可选)
 
-请根据网络情况选择 Github 安装或 Gitee 安装
+请根据网络情况选择使用 GitHub 或 Gitee 安装
 
 ```
-# 使用 Github
 git clone --depth 1 https://github.com/TimeRainStarSky/Yunzai
 cd Yunzai
 git clone --depth 1 https://github.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
 git clone --depth 1 https://github.com/yoimiya-kokomi/miao-plugin plugins/miao-plugin
+git clone --depth 1 https://github.com/TimeRainStarSky/TRSS-Plugin plugins/TRSS-Plugin
+```
 
-# 使用Gitee
+```
 git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai
 cd Yunzai
 git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
 git clone --depth 1 https://gitee.com/yoimiya-kokomi/miao-plugin plugins/miao-plugin
+git clone --depth 1 https://Yunzai.TRSS.me plugins/TRSS-Plugin
 ```
 
-2.安装 [pnpm](https://pnpm.io/zh/installation)，已安装的可以跳过
+2.安装 [pnpm](https://pnpm.io/zh/installation)
 
 ```
-# 使用npmjs.org安装
-npm install pnpm -g
-
-# 指定国内源npmmirror.com安装
-npm --registry=https://registry.npmmirror.com install pnpm -g
+npm install -g pnpm
 ```
 
 3.安装依赖
 
 ```
-# 直接安装
-pnpm install -P
-
-# 如依赖安装缓慢或失败，可尝试更换国内npm源后再执行install命令
-pnpm config set registry https://registry.npmmirror.com
-pnpm install -P
+pnpm i
 ```
 
 4.运行
