@@ -51,7 +51,7 @@ export default class ExportLog extends base {
         lang: list[0].lang,
         export_time: moment().format('YYYY-MM-DD HH:mm:ss'),
         export_timestamp: moment().format('X'),
-        export_app: 'Yunzai-Bot',
+        export_app: 'Miao-Yunzai',
         export_app_version: cfg.package.version,
         uigf_version: 'v2.2'
       },
