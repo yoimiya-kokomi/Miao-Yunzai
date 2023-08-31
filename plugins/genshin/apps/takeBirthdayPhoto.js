@@ -56,7 +56,7 @@ export class takeBirthdayPhoto extends plugin {
         }
       }
     } catch (error) {
-      await e.reply(`获取角色留影叙佳期图片失败，可能是ck失效...`)
+      await e.reply(`获取角色留影叙佳期图片失败，可能是ck失效...`, true)
       logger.error(error)
     }
 
