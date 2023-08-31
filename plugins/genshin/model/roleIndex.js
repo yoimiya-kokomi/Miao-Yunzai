@@ -326,7 +326,7 @@ export default class RoleIndex extends base {
   }
 
   dayCount(num) {
-    let daysDifference = Math.floor((new Date() - new Date('2020-09-28')) / (1000 * 60 * 60 * 24))
+    let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24))
     let days = Math.floor(num)
     let msg = '活跃天数：' + days + `/${daysDifference}天`
     return msg
@@ -389,11 +389,11 @@ export default class RoleIndex extends base {
     }
 
     explor2 = explor2.concat([
+      { lable: '水神瞳', num: stats.hydroculus_number },
       { lable: '草神瞳', num: stats.dendroculus_number },
       { lable: '雷神瞳', num: stats.electroculus_number },
       { lable: '岩神瞳', num: stats.geoculus_number },
       { lable: '风神瞳', num: stats.anemoculus_number },
-      { lable: '水神瞳', num: stats.hydroculus_number },
       { lable: '秘境', num: stats.domain_number }
     ])
 
@@ -469,7 +469,7 @@ export default class RoleIndex extends base {
               ? 'A'
               : 'S') + `[${percentage}%]`
 
-    let daysDifference = Math.floor((new Date() - new Date('2020-09-28')) / (1000 * 60 * 60 * 24))
+    let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24))
 
     let line = [
       [
