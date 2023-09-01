@@ -594,7 +594,7 @@ export default class RoleIndex extends base {
     else if (this.e.friend?.getAvatarUrl)
       avatar = await this.e.friend.getAvatarUrl()
     else
-      avatar = lodash.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/img/role`).filter(file => file.endsWith('.png')))
+      avatar = resIndex.role.game_head_icon
       
     return {
       saveId: this.e.uid,
