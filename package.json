@@ -48,6 +48,10 @@
     "express": "^4.18.2",
     "express-art-template": "^1.0.1"
   },
+  "workspaces": [
+    "renderers/*",
+    "plugins/*"
+  ],
   "imports": {
     "#miao": "./plugins/miao-plugin/components/index.js",
     "#miao.models": "./plugins/miao-plugin/models/index.js"
