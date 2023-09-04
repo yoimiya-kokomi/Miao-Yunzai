@@ -65,7 +65,7 @@ export default class PuppeteerRenderer {
     if (this.lock) return false
     this.lock = true
 
-    logger.mark('puppeteer Chromium 启动中...')
+    logger.info('puppeteer Chromium 启动中...')
 
     let connectFlag = false
     try {
@@ -77,7 +77,7 @@ export default class PuppeteerRenderer {
       // 是否有browser实例
       const browserUrl = (await redis.get(this.browserMacKey)) || this.config.wsEndpoint
       if (browserUrl) {
-        logger.mark(`puppeteer Chromium from ${browserUrl}`)
+        logger.info(`puppeteer Chromium from ${browserUrl}`)
         const browserWSEndpoint = await puppeteer.connect({ browserWSEndpoint: browserUrl }).catch((err) => {
           logger.error('puppeteer Chromium 缓存的实例已关闭')
           redis.del(this.browserMacKey)
@@ -91,7 +91,7 @@ export default class PuppeteerRenderer {
         }
       }
     } catch (e) {
-      logger.mark('puppeteer Chromium 不存在已有实例')
+      logger.info('puppeteer Chromium 不存在已有实例')
     }
 
     if (!this.browser || !connectFlag) {
@@ -119,7 +119,7 @@ export default class PuppeteerRenderer {
       return false
     }
     if (connectFlag) {
-      logger.mark('puppeteer Chromium 已连接启动的实例')
+      logger.info('puppeteer Chromium 已连接启动的实例')
     } else {
       console.log('chromium', this.browser.wsEndpoint())
       if (process.env.pm_id && this.browserMacKey) {
@@ -127,7 +127,7 @@ export default class PuppeteerRenderer {
         const expireTime = 60 * 60 * 24 * 30
         await redis.set(this.browserMacKey, this.browser.wsEndpoint(), { EX: expireTime })
       }
-      logger.mark('puppeteer Chromium 启动成功')
+      logger.info('puppeteer Chromium 启动成功')
     }
 
     /** 监听Chromium实例是否断开 */
@@ -226,7 +226,7 @@ export default class PuppeteerRenderer {
         buff = await body.screenshot(randData)
         /** 计算图片大小 */
         const kb = (buff.length / 1024).toFixed(2) + 'kb'
-        logger.mark(`[图片生成][${name}][${this.renderNum}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`)
+        logger.info(`[图片生成][${name}][${this.renderNum}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`)
         this.renderNum++
         ret.push(buff)
       } else {
@@ -257,11 +257,11 @@ export default class PuppeteerRenderer {
 
           /** 计算图片大小 */
           const kb = (buff.length / 1024).toFixed(2) + 'kb'
-          logger.mark(`[图片生成][${name}][${i}/${num}] ${kb}`)
+          logger.info(`[图片生成][${name}][${i}/${num}] ${kb}`)
           ret.push(buff)
         }
         if (num > 1) {
-          logger.mark(`[图片生成][${name}] 处理完成`)
+          logger.info(`[图片生成][${name}] 处理完成`)
         }
       }
       page.close().catch((err) => logger.error(err))
@@ -328,7 +328,7 @@ export default class PuppeteerRenderer {
     const watcher = chokidar.watch(tplFile)
     watcher.on('change', path => {
       delete this.html[tplFile]
-      logger.mark(`[修改html模板] ${tplFile}`)
+      logger.info(`[修改html模板] ${tplFile}`)
     })
 
     this.watcher[tplFile] = watcher
@@ -344,10 +344,9 @@ export default class PuppeteerRenderer {
             await this.browser.close().catch((err) => logger.error(err))
           }
           this.browser = false
-          logger.mark('puppeteer 关闭重启...')
+          logger.info('puppeteer 关闭重启...')
         }, 100)
       }
     }
   }
 }
-

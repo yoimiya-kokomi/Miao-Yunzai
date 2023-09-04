@@ -127,7 +127,7 @@ export class update extends plugin {
   }
 
   async getTime(plugin = '') {
-    let cm = 'git log -1 --pretty=format:"%cd" --date=format:"%F %T"'
+    let cm = 'git log -1 --pretty=%cd --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
     let time = ''
@@ -191,7 +191,7 @@ export class update extends plugin {
   }
 
   async getLog(plugin = '') {
-    let cm = 'git log -100 --pretty=format:"%h||[%cd] %s" --date=format:"%F %T"'
+    let cm = 'git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
     let logAll
