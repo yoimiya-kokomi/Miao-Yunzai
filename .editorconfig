@@ -14,4 +14,11 @@ max_line_length = off
 # IntelliJ 系列配置项
 ij_any_space_before_colon = true
 ij_any_space_after_colon = true
+ij_javascript_use_semicolon_after_statement = false
 ij_javascript_use_double_quotes = false
+ij_javascript_enforce_trailing_comma = keep
+ij_typescript_enforce_trailing_comma = keep
+
+[*.json]
+ij_any_space_before_colon = false
+ij_json_keep_trailing_comma = false
