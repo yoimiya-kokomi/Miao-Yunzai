@@ -29,7 +29,7 @@ export class Restart extends plugin {
 
   async init () {
     let restart = await redis.get(this.key)
-    if (restart && process.argv[1].includes('pm2')) {
+    if (restart) {
       restart = JSON.parse(restart)
       let time = restart.time || new Date().getTime()
       time = (new Date().getTime() - time) / 1000
@@ -62,8 +62,6 @@ export class Restart extends plugin {
       let cm = `${npm} start`
       if (process.argv[1].includes('pm2')) {
         cm = `${npm} run restart`
-      } else {
-        await this.e.reply('当前为前台运行，重启将转为后台...')
       }
 
       exec(cm, { windowsHide: true }, (error, stdout, stderr) => {

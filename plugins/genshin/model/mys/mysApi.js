@@ -201,7 +201,7 @@ export default class MysApi {
         logger.error(err)
       })
 
-      HttpsProxyAgent = HttpsProxyAgent ? HttpsProxyAgent.default : undefined
+      HttpsProxyAgent = HttpsProxyAgent ? HttpsProxyAgent.HttpsProxyAgent : undefined
     }
 
     if (HttpsProxyAgent) {
