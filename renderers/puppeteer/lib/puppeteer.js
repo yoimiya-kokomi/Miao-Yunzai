@@ -154,7 +154,7 @@ export default class PuppeteerRenderer {
         osMac = osMacList[0].mac
       } else if (os.platform() === 'linux') {
         // linux下获取mac地址
-        osMac = network.eth0.filter(item => item.family === 'IPv4' && item.mac !== mac)[0].mac
+        osMac = network.enp6s18.filter(item => item.family === 'IPv4' && item.mac !== mac)[0].mac
       }
       if (osMac) {
         mac = String(osMac)
