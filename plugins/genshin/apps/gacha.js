@@ -119,8 +119,6 @@ export class gacha extends plugin {
 
   /** 初始化创建配置文件 */
   async init () {
-    GachaData.getStr()
-
     let file = './plugins/genshin/config/gacha.set.yaml'
 
     if (fs.existsSync(file)) return
