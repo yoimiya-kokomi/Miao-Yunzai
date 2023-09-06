@@ -21,7 +21,7 @@
     "chokidar": "^3.5.3",
     "express": "^4.18.2",
     "file-type": "^18.5.0",
-    "https-proxy-agent": "7.0.1",
+    "https-proxy-agent": "7.0.2",
     "image-size": "^1.0.2",
     "lodash": "^4.17.21",
     "log4js": "^6.9.1",

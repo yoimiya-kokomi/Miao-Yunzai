@@ -14,7 +14,7 @@ const _path = process.cwd()
 let mac = ''
 
 export default class PuppeteerRenderer {
-  constructor (config) {
+  constructor(config) {
     this.browser = false
     this.lock = false
     this.shoting = []
@@ -45,7 +45,7 @@ export default class PuppeteerRenderer {
     this.createDir('./temp/html')
   }
 
-  createDir (dir) {
+  createDir(dir) {
     if (!fs.existsSync(dir)) {
       let dirs = dir.split('/')
       for (let idx = 1; idx <= dirs.length; idx++) {
@@ -60,7 +60,7 @@ export default class PuppeteerRenderer {
   /**
    * 初始化chromium
    */
-  async browserInit () {
+  async browserInit() {
     if (this.browser) return this.browser
     if (this.lock) return false
     this.lock = true
@@ -103,12 +103,12 @@ export default class PuppeteerRenderer {
         } else {
           logger.error(err.toString())
           if (errMsg.includes('Could not find Chromium')) {
-            logger.error('没有正确安装Chromium，可以尝试执行安装命令：node ./node_modules/puppeteer/install.js')
-          } else if (errMsg.includes('libatk-bridge')) {
-            logger.error('没有正确安装Chromium，可尝试执行 sudo yum install -y chromium')
+            logger.error('没有正确安装 Chromium，可以尝试执行安装命令：node node_modules/puppeteer/install.js')
+          } else if (errMsg.includes('cannot open shared object file')) {
+            logger.error('没有正确安装 Chromium 运行库')
           }
         }
-        console.log(err, trace)
+        logger.error(err, trace)
       })
     }
 
@@ -121,7 +121,7 @@ export default class PuppeteerRenderer {
     if (connectFlag) {
       logger.info('puppeteer Chromium 已连接启动的实例')
     } else {
-      console.log('chromium', this.browser.wsEndpoint())
+      logger.info(`[Chromium] ${this.browser.wsEndpoint()}`)
       if (process.env.pm_id && this.browserMacKey) {
         //缓存一下实例30天
         const expireTime = 60 * 60 * 24 * 30
@@ -132,7 +132,7 @@ export default class PuppeteerRenderer {
 
     /** 监听Chromium实例是否断开 */
     this.browser.on('disconnected', (e) => {
-      logger.error('Chromium实例关闭或崩溃！')
+      logger.error('Chromium 实例关闭或崩溃！')
       this.browser = false
     })
 
@@ -140,29 +140,15 @@ export default class PuppeteerRenderer {
   }
 
   // 获取Mac地址
-  async getMac () {
-    // 获取Mac地址
-    let mac = '00:00:00:00:00:00'
+  getMac() {
+    const mac = '00:00:00:00:00:00'
     try {
       const network = os.networkInterfaces()
-      let osMac
-      // 判断系统
-      if (os.platform() === 'win32') {
-        // windows下获取mac地址
-        let osMacList = Object.keys(network).map(key => network[key]).flat()
-        osMacList = osMacList.filter(item => item.family === 'IPv4' && item.mac !== mac)
-        osMac = osMacList[0].mac
-      } else if (os.platform() === 'linux') {
-        // linux下获取mac地址
-        osMac = network.eth0.filter(item => item.family === 'IPv4' && item.mac !== mac)[0].mac
-      }
-      if (osMac) {
-        mac = String(osMac)
-      }
-    } catch (e) {
-      console.log('获取Mac地址失败', e.toString())
-    }
-    mac = mac.replace(/:/g, '')
+      for (const a in network)
+        for (const i of network[a])
+          if (i.mac && i.mac != mac)
+            return i.mac
+    } catch (e) {}
     return mac
   }
 
@@ -180,7 +166,7 @@ export default class PuppeteerRenderer {
    * @param data.pageGotoParams 页面goto时的参数
    * @return img/[]img 不做segment包裹
    */
-  async screenshot (name, data = {}) {
+  async screenshot(name, data = {}) {
     if (!await this.browserInit()) {
       return false
     }
@@ -225,8 +211,8 @@ export default class PuppeteerRenderer {
       if (!data.multiPage) {
         buff = await body.screenshot(randData)
         /** 计算图片大小 */
-        const kb = (buff.length / 1024).toFixed(2) + 'kb'
-        logger.info(`[图片生成][${name}][${this.renderNum}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`)
+        const kb = (buff.length / 1024).toFixed(2) + 'KB'
+        logger.mark(`[图片生成][${name}][${this.renderNum}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`)
         this.renderNum++
         ret.push(buff)
       } else {
@@ -256,18 +242,18 @@ export default class PuppeteerRenderer {
           this.renderNum++
 
           /** 计算图片大小 */
-          const kb = (buff.length / 1024).toFixed(2) + 'kb'
-          logger.info(`[图片生成][${name}][${i}/${num}] ${kb}`)
+          const kb = (buff.length / 1024).toFixed(2) + 'KB'
+          logger.mark(`[图片生成][${name}][${i}/${num}] ${kb}`)
           ret.push(buff)
         }
         if (num > 1) {
-          logger.info(`[图片生成][${name}] 处理完成`)
+          logger.mark(`[图片生成][${name}] 处理完成`)
         }
       }
       page.close().catch((err) => logger.error(err))
 
     } catch (error) {
-      logger.error(`图片生成失败:${name}:${error}`)
+      logger.error(`[图片生成][${name}] 图片生成失败：${error}`)
       /** 关闭浏览器 */
       if (this.browser) {
         await this.browser.close().catch((err) => logger.error(err))
@@ -280,7 +266,7 @@ export default class PuppeteerRenderer {
     this.shoting.pop()
 
     if (ret.length === 0 || !ret[0]) {
-      logger.error(`图片生成为空:${name}`)
+      logger.error(`[图片生成][${name}] 图片生成为空`)
       return false
     }
 
@@ -290,7 +276,7 @@ export default class PuppeteerRenderer {
   }
 
   /** 模板 */
-  dealTpl (name, data) {
+  dealTpl(name, data) {
     let { tplFile, saveId = name } = data
     let savePath = `./temp/html/${name}/${saveId}.html`
 
@@ -322,20 +308,20 @@ export default class PuppeteerRenderer {
   }
 
   /** 监听配置文件 */
-  watch (tplFile) {
+  watch(tplFile) {
     if (this.watcher[tplFile]) return
 
     const watcher = chokidar.watch(tplFile)
     watcher.on('change', path => {
       delete this.html[tplFile]
-      logger.info(`[修改html模板] ${tplFile}`)
+      logger.mark(`[修改html模板] ${tplFile}`)
     })
 
     this.watcher[tplFile] = watcher
   }
 
   /** 重启 */
-  restart () {
+  restart() {
     /** 截图超过重启数时，自动关闭重启浏览器，避免生成速度越来越慢 */
     if (this.renderNum % this.restartNum === 0) {
       if (this.shoting.length <= 0) {
@@ -344,7 +330,7 @@ export default class PuppeteerRenderer {
             await this.browser.close().catch((err) => logger.error(err))
           }
           this.browser = false
-          logger.info('puppeteer 关闭重启...')
+          logger.info('puppeteer Chromium 关闭重启...')
         }, 100)
       }
     }
