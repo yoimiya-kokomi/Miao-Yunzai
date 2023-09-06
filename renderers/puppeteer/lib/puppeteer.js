@@ -14,7 +14,7 @@ const _path = process.cwd()
 let mac = ''
 
 export default class PuppeteerRenderer {
-  constructor (config) {
+  constructor(config) {
     this.browser = false
     this.lock = false
     this.shoting = []
@@ -45,7 +45,7 @@ export default class PuppeteerRenderer {
     this.createDir('./temp/html')
   }
 
-  createDir (dir) {
+  createDir(dir) {
     if (!fs.existsSync(dir)) {
       let dirs = dir.split('/')
       for (let idx = 1; idx <= dirs.length; idx++) {
@@ -60,13 +60,9 @@ export default class PuppeteerRenderer {
   /**
    * 初始化chromium
    */
-  async browserInit () {
-    if (this.browser) {
-      return this.browser
-    }
-    if (this.lock) {
-      return false
-    }
+  async browserInit() {
+    if (this.browser) return this.browser
+    if (this.lock) return false
     this.lock = true
 
     logger.info('puppeteer Chromium 启动中...')
@@ -174,7 +170,7 @@ export default class PuppeteerRenderer {
    * @param data.pageGotoParams 页面goto时的参数
    * @return img/[]img 不做segment包裹
    */
-  async screenshot (name, data = {}) {
+  async screenshot(name, data = {}) {
     if (!await this.browserInit()) {
       return false
     }
@@ -287,7 +283,7 @@ export default class PuppeteerRenderer {
   }
 
   /** 模板 */
-  dealTpl (name, data) {
+  dealTpl(name, data) {
     let { tplFile, saveId = name } = data
     let savePath = `./temp/html/${name}/${saveId}.html`
 
@@ -319,10 +315,8 @@ export default class PuppeteerRenderer {
   }
 
   /** 监听配置文件 */
-  watch (tplFile) {
-    if (this.watcher[tplFile]) {
-      return
-    }
+  watch(tplFile) {
+    if (this.watcher[tplFile]) return
 
     const watcher = chokidar.watch(tplFile)
     watcher.on('change', path => {
@@ -334,7 +328,7 @@ export default class PuppeteerRenderer {
   }
 
   /** 重启 */
-  restart () {
+  restart() {
     /** 截图超过重启数时，自动关闭重启浏览器，避免生成速度越来越慢 */
     if (this.renderNum % this.restartNum === 0) {
       if (this.shoting.length <= 0) {
