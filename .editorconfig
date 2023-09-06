@@ -21,6 +21,7 @@ ij_javascript_enforce_trailing_comma = keep
 ij_javascript_space_before_method_parentheses = true
 ij_javascript_spaces_within_object_literal_braces = true
 ij_javascript_indent_chained_calls = true
+ij_javascript_if_brace_force = if_multiline
 
 [{*.json,*.json5}]
 ij_json_keep_trailing_comma = false
