@@ -1,5 +1,5 @@
 const os = require('os')
-const { existsSync, realpathSync } = require('fs')
+const { existsSync } = require('fs')
 const { execSync } = require('child_process')
 const arch = os.arch()
 
@@ -9,15 +9,14 @@ let executablePath
 // linux / android
 if (process.platform === 'linux' || process.platform === 'android') {
   for (const item of [
-    'chromium',
-    'chromium-browser',
-    'chrome',
-    'chrome-browser',
+    "chromium",
+    "chromium-browser",
+    "chrome",
   ]) {
     try {
       const chromiumPath = execSync(`command -v ${item}`).toString().trim()
       if (chromiumPath && existsSync(chromiumPath)) {
-        executablePath = realpathSync(chromiumPath)
+        executablePath = chromiumPath
         break
       }
     } catch (err) {
@@ -41,11 +40,11 @@ if (process.platform === 'darwin') {
 // windows 或其他
 if (!executablePath) {
   for (const item of [
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
     '/usr/bin/chromium',
     '/usr/bin/chromium-browser',
-    '/snap/bin/chromium',
+    '/usr/bin/chrome',
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
   ]) {
     if (existsSync(item)) {
       executablePath = item
