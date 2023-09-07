@@ -727,11 +727,11 @@ export class add extends plugin {
     for (const i in msg) {
       result.push([msg[i]])
     }
-    if (type == 'list' && count > 100) {
+    if (type == 'list' && count > pageSize) {
       msg.push(`更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`)
     }
 
-    let title = `表情列表，第${page}页，共${count}条`
+    let title = `表情列表，第${page}页，共${count}条，共${Math.floor(count / pageSize)}页`
     if (type == 'search') {
       title = `表情${search}，${count}条`
     }
