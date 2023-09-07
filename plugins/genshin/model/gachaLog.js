@@ -286,6 +286,9 @@ export default class GachaLog extends base {
       region: this.getServer()
     })
 
+    /** 延迟下防止武器记录获取失败 */
+    await common.sleep(1000)
+
     if (res.retcode != 0) {
       return { hasErr: true, list: [] }
     }
