@@ -408,8 +408,8 @@ export class add extends plugin {
     if (lodash.isEmpty(msg) && lodash.isEmpty(globalMsg)) return false
 
     msg = [...msg, ...globalMsg]
-
-    if (num >= 0 && num < msg.length) {
+    /** 如果只有一个则不随机 */
+    if (num >= 0 && msg.length === 1) {
       msg = msg[num]
     } else {
       /** 随机获取一个 */
@@ -705,37 +705,44 @@ export class add extends plugin {
       return
     }
 
-    let msg = []
-    let num = 0
+    let msg = [], result = [], num = 0
     for (let i in arr) {
       if (num >= page * pageSize) break
 
       let keyWord = await this.keyWordTran(arr[i].key)
       if (!keyWord) continue
-      let result = []
       if (Array.isArray(keyWord)) {
         keyWord.unshift(`${num + 1}、`)
-        keyWord.push('\n')
-        result.push(...keyWord)
+       // keyWord.push('\n')
+        keyWord.push(v => msg.push(v))
       } else if (keyWord.type) {
-        result.push(`\n${num + 1}、`, keyWord, '\n\n')
+        msg.push(`\n${num + 1}、`, keyWord)
       } else {
-        result.push(`${num + 1}、${keyWord}\n`)
+        msg.push(`${num + 1}、`, keyWord)
       }
-      msg.push(result)
       num++
     }
-
-    if (type == 'list' && count > 100) {
-      msg.push(`更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`)
+    /** 数组分段 */
+    for (const i in msg) {
+      result.push([msg[i]])
+    }
+    /** 计算页数 */
+    let book = count / pageSize;
+  if (book % 1 === 0) {
+     book = result;
+  } else {
+    book = Math.floor(book) + 1;
+  }
+    if (type == 'list' && msg.length >= pageSize) {
+      result.push(`更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`)
     }
 
-    let title = `表情列表，第${page}页，共${count}条`
+    let title = `表情列表，第${page}页，共${count}条，共${book}页`
     if (type == 'search') {
       title = `表情${search}，${count}条`
     }
 
-    let forwardMsg = await common.makeForwardMsg(this.e, [title, ...msg], title)
+    let forwardMsg = await common.makeForwardMsg(this.e, [title, ...result], title)
 
     this.e.reply(forwardMsg)
   }
