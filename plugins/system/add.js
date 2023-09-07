@@ -409,7 +409,7 @@ export class add extends plugin {
 
     msg = [...msg, ...globalMsg]
     /** 如果只有一个则不随机 */
-    if (msg.length === 1) {
+    if (num >= 0 && msg.length === 1) {
       msg = msg[num]
     } else {
       /** 随机获取一个 */
