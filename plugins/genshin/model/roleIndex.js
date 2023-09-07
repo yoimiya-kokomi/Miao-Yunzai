@@ -326,7 +326,7 @@ export default class RoleIndex extends base {
   }
 
   dayCount(num) {
-    let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24))
+    let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24)) + 1
     let days = Math.floor(num)
     let msg = '活跃天数：' + days + `/${daysDifference}天`
     return msg
@@ -469,7 +469,7 @@ export default class RoleIndex extends base {
               ? 'A'
               : 'S') + `[${percentage}%]`
 
-    let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24))
+    let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24)) + 1
 
     let line = [
       [
@@ -595,7 +595,7 @@ export default class RoleIndex extends base {
       avatar = await this.e.friend.getAvatarUrl()
     else
       avatar = resIndex.role.game_head_icon
-      
+
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
