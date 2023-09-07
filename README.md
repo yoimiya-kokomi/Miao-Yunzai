@@ -130,6 +130,12 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
+<details><summary>米游社大别野</summary>
+
+[TRSS-Yunzai mysVilla Plugin](../../../Yunzai-mysVilla-Plugin)
+
+</details>
+
 <details><summary>KOOK</summary>
 
 [TRSS-Yunzai KOOK Plugin](../../../Yunzai-KOOK-Plugin)

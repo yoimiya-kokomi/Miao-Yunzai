@@ -36,7 +36,7 @@
     "redis": "^4.6.8",
     "sequelize": "^6.32.1",
     "sqlite3": "^5.1.6",
-    "ws": "^8.13.0",
+    "ws": "^8.14.0",
     "yaml": "^2.3.2"
   },
   "devDependencies": {
