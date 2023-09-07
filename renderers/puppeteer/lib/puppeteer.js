@@ -23,7 +23,7 @@ export default class PuppeteerRenderer {
     /** 截图次数 */
     this.renderNum = 0
     this.config = {
-      headless: Data.def(config.headless, "new"),
+      headless: Data.def(config.headless, 'new'),
       args: Data.def(config.args, [
         '--disable-gpu',
         '--disable-setuid-sandbox',
@@ -123,7 +123,7 @@ export default class PuppeteerRenderer {
     } else {
       logger.info(`[Chromium] ${this.browser.wsEndpoint()}`)
       if (process.env.pm_id && this.browserMacKey) {
-        //缓存一下实例30天
+        // 缓存一下实例30天
         const expireTime = 60 * 60 * 24 * 30
         await redis.set(this.browserMacKey, this.browser.wsEndpoint(), { EX: expireTime })
       }
@@ -140,15 +140,19 @@ export default class PuppeteerRenderer {
   }
 
   // 获取Mac地址
-  getMac() {
+  getMac () {
     const mac = '00:00:00:00:00:00'
     try {
       const network = os.networkInterfaces()
-      for (const a in network)
-        for (const i of network[a])
-          if (i.mac && i.mac != mac)
+      for (const a in network) {
+        for (const i of network[a]) {
+          if (i.mac && i.mac != mac) {
             return i.mac
-    } catch (e) {}
+          }
+        }
+      }
+    } catch (e) {
+    }
     return mac
   }
 
@@ -173,7 +177,9 @@ export default class PuppeteerRenderer {
     const pageHeight = data.multiPageHeight || 4000
 
     let savePath = this.dealTpl(name, data)
-    if (!savePath) return false
+    if (!savePath) {
+      return false
+    }
 
     let buff = ''
     let start = Date.now()
@@ -238,7 +244,9 @@ export default class PuppeteerRenderer {
           } else {
             buff = await page.screenshot(randData)
           }
-          if (num > 2) await Data.sleep(200)
+          if (num > 2) {
+            await Data.sleep(200)
+          }
           this.renderNum++
 
           /** 计算图片大小 */
@@ -251,7 +259,6 @@ export default class PuppeteerRenderer {
         }
       }
       page.close().catch((err) => logger.error(err))
-
     } catch (error) {
       logger.error(`[图片生成][${name}] 图片生成失败：${error}`)
       /** 关闭浏览器 */
