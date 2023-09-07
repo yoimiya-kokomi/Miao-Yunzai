@@ -1,12 +1,12 @@
 @font-face {
   font-family: "华文中宋";
-  src: url("../../../../../resources/font/华文中宋.TTF");
+  src: url("../../font/华文中宋.TTF");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: "tttgbnumber";
-  src: url("../../../../../resources/font/tttgbnumber.ttf");
+  src: url("../../font/tttgbnumber.ttf");
   font-weight: normal;
   font-style: normal;
 }

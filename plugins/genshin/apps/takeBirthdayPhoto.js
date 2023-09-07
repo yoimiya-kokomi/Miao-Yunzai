@@ -3,25 +3,22 @@ import gsCfg from '../model/gsCfg.js'
 import fetch from 'node-fetch'
 
 export class takeBirthdayPhoto extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '留影叙佳期',
       dsc: '留影叙佳期',
-      /** https://oicqjs.github.io/oicq/#events */
       event: 'message',
       priority: 5000,
       rule: [
         {
-          /** 命令正则匹配 */
-          reg: '#?留影叙佳期$',
-          /** 执行方法 */
+          reg: '#?(留影(叙佳期)?|((领)?((角色)?生日)(卡)?))$',
           fnc: 'birthdaystar'
         }
       ]
     })
   }
 
-  async birthdaystar (e) {
+  async birthdaystar(e) {
     const { user_id } = e
 
     const userInfo = await this.getCookie(user_id)
@@ -46,28 +43,32 @@ export class takeBirthdayPhoto extends plugin {
       e.reply('今天没有生日角色哦~', true)
       return true
     }
-
-    for (const role of birthday_star_list) {
-      await e.reply(`正在获取${role.name}的图片，请稍等~`, true)
-      await e.reply(segment.image(role.take_picture))
-      const message = await this.getBirthdayStarImg(userInfo.uid, e_hk4e_token, userInfo.ck, role.role_id)
-      if (message != 'success') {
-        await e.reply(message)
-        return true
-      } else {
-        await e.reply(`获取${role.name}的图片成功~`, true)
+    try {
+      for (const role of birthday_star_list) {
+        await e.reply(`正在获取${role.name}的图片，请稍等~`, true)
+        await e.reply(segment.image(role.take_picture))
+        const message = await this.getBirthdayStarImg(userInfo.uid, e_hk4e_token, userInfo.ck, role.role_id)
+        if (message != 'success') {
+          await e.reply(message)
+          return true
+        } else {
+          await e.reply(`获取${role.name}的图片成功~`, true)
+        }
       }
+    } catch (error) {
+      await e.reply(`获取角色留影叙佳期图片失败，可能是ck失效...`, true)
+      logger.error(error)
     }
 
     return true
   }
 
-  async getCookie (user_id) {
+  async getCookie(user_id) {
     const userInfo = ((await gsCfg.getBingCk()).ckQQ)[user_id]
     return userInfo
   }
 
-  async getEHK4EToken (ck, uid) {
+  async getEHK4EToken(ck, uid) {
     const isCN = uid.toString().match(/^[125]/) ? true : false
     const url = isCN ? 'https://api-takumi.mihoyo.com/common/badge/v1/login/account' : 'https://api-os-takumi.mihoyo.com/common/badge/v1/login/account'
     const game_biz = isCN ? 'hk4e_cn' : 'hk4e_global'
@@ -93,7 +94,7 @@ export class takeBirthdayPhoto extends plugin {
     return e_hk4e_token
   }
 
-  async getServer (uid) {
+  async getServer(uid) {
     switch (String(uid)[0]) {
       case '1':
       case '2':
@@ -112,7 +113,7 @@ export class takeBirthdayPhoto extends plugin {
     return 'cn_gf01'
   }
 
-  async getBirthdayStar (uid, e_hk4e_token, ck) {
+  async getBirthdayStar(uid, e_hk4e_token, ck) {
     const cookie = `e_hk4e_token=${e_hk4e_token};${ck}`
     const badge_region = await this.getServer(uid)
     const isCN = uid.toString().match(/^[125]/) ? true : false
@@ -124,7 +125,7 @@ export class takeBirthdayPhoto extends plugin {
     return res.data.role
   }
 
-  async getBirthdayStarImg (uid, e_hk4e_token, ck, role_id) {
+  async getBirthdayStarImg(uid, e_hk4e_token, ck, role_id) {
     const cookie = `e_hk4e_token=${e_hk4e_token};${ck}`
     const badge_region = await this.getServer(uid)
     const isCN = uid.toString().match(/^[125]/) ? true : false

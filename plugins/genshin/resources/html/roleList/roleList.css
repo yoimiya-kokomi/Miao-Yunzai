@@ -1,12 +1,12 @@
 @font-face {
   font-family: "tttgbnumber";
-  src: url("../../../../../resources/font/tttgbnumber.ttf");
+  src: url("../../font/tttgbnumber.ttf");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: "HYWenHei-55W";
-  src: url("../../../../../resources/font/HYWenHei-55W.ttf");
+  src: url("../../font/HYWenHei-55W.ttf");
   font-weight: normal;
   font-style: normal;
 }

@@ -120,7 +120,7 @@ export default class Ledger extends base {
 
     ledgerInfo.color = []
     ledgerInfo.month_data.group_by.forEach((item) => {
-      if (this.e.isSr){
+      if (this.e.isSr) {
         item.color = this.color[this.action[item.action]]
         item.action_name = item.action_name.slice(0, 4)
       } else {
@@ -132,8 +132,9 @@ export default class Ledger extends base {
     ledgerInfo.group_by = JSON.stringify(ledgerInfo.month_data.group_by)
     ledgerInfo.color = JSON.stringify(ledgerInfo.color)
 
-    let files = fs.readdirSync('./plugins/genshin/resources/StarRail/img/role').filter(file => file.endsWith('.webp'))
-    let icon = lodash.sample(files)
+    let icon = ''
+    if(this.e.isSr)
+      icon = lodash.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/StarRail/img/role`).filter(file => file.endsWith('.webp')))
 
     let week = [
       '星期日',
@@ -144,12 +145,12 @@ export default class Ledger extends base {
       '星期五',
       '星期六'
     ]
-    let srday = `${week[moment().day()]}`
 
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
-      day, icon, srday,
+      day, icon, 
+      srday: `${week[moment().day()]}`,
       nowDay: moment(new Date()).format('YYYY年MM月DD日'),
       ...ledgerInfo,
       ...this.screenData

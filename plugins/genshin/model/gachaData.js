@@ -485,16 +485,6 @@ export default class GachaData extends base {
     await redis.setEx(this.key, 3600 * 24 * 14, JSON.stringify(this.user))
   }
 
-  static async getStr () {
-    global.strr = ''
-    let res = await fetch('https://gist.githubusercontent.com/Le-niao/10f061fb9fe8fcfc316c10b422ed06d1/raw/Yunzai-Bot').catch(() => {})
-    if (res && res.text) {
-      let strr = await res.text() || ''
-      if (strr.includes('html')) strr = ''
-      global.strr = strr
-    }
-  }
-
   getNow () {
     return moment().format('X')
   }

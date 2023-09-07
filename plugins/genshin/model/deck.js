@@ -1,13 +1,10 @@
 import base from './base.js'
 import MysInfo from './mys/mysInfo.js'
-import lodash from 'lodash'
 
 export default class Deck extends base {
   constructor(e) {
     super(e)
     this.model = 'deck'
-
-    this.headIndexStyle = `<style> .head_box { background: url(${this.screenData.pluResPath}img/roleIndex/namecard/${lodash.random(1, 8)}.png) #f5f5f5; background-position-x: 30px; background-repeat: no-repeat; border-radius: 15px; font-family: tttgbnumber; padding: 10px 20px; position: relative; background-size: auto 101%; }</style>`
   }
 
   async getIndex(id, list = false) {
@@ -36,8 +33,7 @@ export default class Deck extends base {
       saveId: this.e.uid,
       nickname: res.data.nickname,
       level: res.data.level,
-      Data,
-      headIndexStyle: this.headIndexStyle
+      Data
     }
     return data
   }
@@ -54,8 +50,7 @@ export default class Deck extends base {
       ...this.screenData,
       uid: this.e.uid,
       saveId: this.e.uid,
-      ...res,
-      headIndexStyle: this.headIndexStyle
+      ...res
     }
     return data
   }
