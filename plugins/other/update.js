@@ -204,7 +204,7 @@ export class update extends plugin {
 
     if (!logAll) return false
 
-    logAll = logAll.split('\n')
+    logAll = logAll.trim().split('\n')
 
     let log = []
     for (let str of logAll) {
