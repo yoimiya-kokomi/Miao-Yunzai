@@ -26,7 +26,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   makeLog(msg) {
-    return this.toStr(msg).replace(/(base64:\/\/|"type":"data","data":").*?(,|]|")/g, "$1...$2")
+    return this.toStr(msg).replace(/(base64:\/\/|"type":"data","data":").*?"/g, '$1..."')
   }
 
   sendApi(ws, action, params = {}) {
@@ -63,7 +63,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       opts.type = "data"
       opts.data = file.replace(/^base64:\/\//, "")
     } else if (fs.existsSync(file)) {
-      opts.type = "data",
+      opts.type = "data"
       opts.data = fs.readFileSync(file).toString("base64")
     } else {
       opts.type = "path"
@@ -84,16 +84,16 @@ Bot.adapter.push(new class ComWeChatAdapter {
       else if (!i.data)
         i = { type: i.type, data: { ...i, type: undefined }}
       if (i.data.file)
-        i.data = { file_id: (await this.uploadFile(data, i.data.file)).file_id }
+        i.data = { file_id: (await this.uploadFile(data, i.data.file, i.data.name)).file_id }
 
       switch (i.type) {
         case "text":
-          break
         case "image":
+        case "file":
+        case "wx.emoji":
+        case "wx.link":
           break
         case "record":
-          i.type = "file"
-          break
         case "video":
           i.type = "file"
           break
@@ -105,11 +105,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
           break
         case "reply":
           continue
-          break
-        case "wx.emoji":
-          break
-        case "wx.link":
-          break
         default:
           i = { type: "text", data: { text: JSON.stringify(i) }}
       }
@@ -223,13 +218,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
     })
   }
 
-  async sendFile(data, send, file, name) {
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送文件：${name}(${file})`)
-    return send(segment.custom("file", {
-      file_id: (await this.uploadFile(data, file, name)).file_id
-    }))
-  }
-
   pickFriend(data, user_id) {
     const i = {
       ...data.bot.fl.get(user_id),
@@ -239,7 +227,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendFriendMsg(i, msg),
-      sendFile: (file, name) => this.sendFile(i, msg => this.sendFriendMsg(i, msg), file, name),
+      sendFile: (file, name) => this.sendFriendMsg(i, segment.file(file, name)),
       getInfo: () => this.getFriendInfo(i),
       getAvatarUrl: async () => (await this.getFriendInfo(i))["wx.avatar"],
     }
@@ -269,7 +257,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendGroupMsg(i, msg),
-      sendFile: (file, name) => this.sendFile(i, msg => this.sendGroupMsg(i, msg), file, name),
+      sendFile: (file, name) => this.sendGroupMsg(i, segment.file(file, name)),
       getInfo: () => this.getGroupInfo(i),
       getAvatarUrl: async () => (await this.getGroupInfo(i))["wx.avatar"],
       getMemberArray: () => this.getMemberArray(i),

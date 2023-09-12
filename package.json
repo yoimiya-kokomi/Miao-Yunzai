@@ -34,16 +34,16 @@
     "pm2": "^5.3.0",
     "puppeteer": "^21.1.1",
     "redis": "^4.6.8",
-    "sequelize": "^6.32.1",
+    "sequelize": "^6.33.0",
     "sqlite3": "^5.1.6",
-    "ws": "^8.14.0",
+    "ws": "^8.14.1",
     "yaml": "^2.3.2"
   },
   "devDependencies": {
-    "eslint": "^8.48.0",
+    "eslint": "^8.49.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.28.1",
-    "eslint-plugin-n": "^16.0.2",
+    "eslint-plugin-n": "^16.1.0",
     "eslint-plugin-promise": "^6.1.1"
   },
   "imports": {
