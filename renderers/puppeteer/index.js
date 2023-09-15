@@ -10,13 +10,5 @@ import Puppeteer from './lib/puppeteer.js'
  */
 export default function (config) {
   // TODO Puppeteer待简化重构
-  const PuppeteerRender = new Puppeteer(config)
-
-  return {
-    id: 'puppeteer',
-    type: 'image',
-    async render (name, data) {
-      return await PuppeteerRender.screenshot(name, data)
-    }
-  }
+  return new Puppeteer(config)
 }
