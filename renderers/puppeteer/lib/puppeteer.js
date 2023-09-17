@@ -1,20 +1,22 @@
-import fs from 'node:fs'
+import Renderer from '../../../lib/renderer/Renderer.js'
 import os from 'node:os'
 import lodash from 'lodash'
-import template from 'art-template'
-import chokidar from 'chokidar'
 import puppeteer from 'puppeteer'
 // 暂时保留对原config的兼容
 import cfg from '../../../lib/config/config.js'
 import { Data } from '#miao'
-
-const _path = process.cwd()
+import path from 'path'
 
 // mac地址
 let mac = ''
 
-export default class PuppeteerRenderer {
+export default class Puppeteer extends Renderer {
   constructor(config) {
+    super({
+      id: 'puppeteer',
+      type: 'image',
+      render: 'screenshot'
+    })
     this.browser = false
     this.lock = false
     this.shoting = []
@@ -23,7 +25,7 @@ export default class PuppeteerRenderer {
     /** 截图次数 */
     this.renderNum = 0
     this.config = {
-      headless: Data.def(config.headless, "new"),
+      headless: Data.def(config.headless, 'new'),
       args: Data.def(config.args, [
         '--disable-gpu',
         '--disable-setuid-sandbox',
@@ -38,22 +40,6 @@ export default class PuppeteerRenderer {
     if (config.puppeteerWS || cfg?.bot?.puppeteer_ws) {
       /** chromium其他路径 */
       this.config.wsEndpoint = config.puppeteerWS || cfg?.bot?.puppeteer_ws
-    }
-
-    this.html = {}
-    this.watcher = {}
-    this.createDir('./temp/html')
-  }
-
-  createDir(dir) {
-    if (!fs.existsSync(dir)) {
-      let dirs = dir.split('/')
-      for (let idx = 1; idx <= dirs.length; idx++) {
-        let temp = dirs.slice(0, idx).join('/')
-        if (!fs.existsSync(temp)) {
-          fs.mkdirSync(temp)
-        }
-      }
     }
   }
 
@@ -123,7 +109,7 @@ export default class PuppeteerRenderer {
     } else {
       logger.info(`[Chromium] ${this.browser.wsEndpoint()}`)
       if (process.env.pm_id && this.browserMacKey) {
-        //缓存一下实例30天
+        // 缓存一下实例30天
         const expireTime = 60 * 60 * 24 * 30
         await redis.set(this.browserMacKey, this.browser.wsEndpoint(), { EX: expireTime })
       }
@@ -140,15 +126,19 @@ export default class PuppeteerRenderer {
   }
 
   // 获取Mac地址
-  getMac() {
+  getMac () {
     const mac = '00:00:00:00:00:00'
     try {
       const network = os.networkInterfaces()
-      for (const a in network)
-        for (const i of network[a])
-          if (i.mac && i.mac != mac)
+      for (const a in network) {
+        for (const i of network[a]) {
+          if (i.mac && i.mac != mac) {
             return i.mac
-    } catch (e) {}
+          }
+        }
+      }
+    } catch (e) {
+    }
     return mac
   }
 
@@ -173,7 +163,9 @@ export default class PuppeteerRenderer {
     const pageHeight = data.multiPageHeight || 4000
 
     let savePath = this.dealTpl(name, data)
-    if (!savePath) return false
+    if (!savePath) {
+      return false
+    }
 
     let buff = ''
     let start = Date.now()
@@ -184,7 +176,7 @@ export default class PuppeteerRenderer {
     try {
       const page = await this.browser.newPage()
       let pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
-      await page.goto(`file://${_path}${lodash.trim(savePath, '.')}`, pageGotoParams)
+      await page.goto('file://' + path.resolve(savePath), pageGotoParams)
       let body = await page.$('#container') || await page.$('body')
 
       // 计算页面高度
@@ -238,7 +230,9 @@ export default class PuppeteerRenderer {
           } else {
             buff = await page.screenshot(randData)
           }
-          if (num > 2) await Data.sleep(200)
+          if (num > 2) {
+            await Data.sleep(200)
+          }
           this.renderNum++
 
           /** 计算图片大小 */
@@ -251,7 +245,6 @@ export default class PuppeteerRenderer {
         }
       }
       page.close().catch((err) => logger.error(err))
-
     } catch (error) {
       logger.error(`[图片生成][${name}] 图片生成失败：${error}`)
       /** 关闭浏览器 */
@@ -273,51 +266,6 @@ export default class PuppeteerRenderer {
     this.restart()
 
     return data.multiPage ? ret : ret[0]
-  }
-
-  /** 模板 */
-  dealTpl(name, data) {
-    let { tplFile, saveId = name } = data
-    let savePath = `./temp/html/${name}/${saveId}.html`
-
-    /** 读取html模板 */
-    if (!this.html[tplFile]) {
-      this.createDir(`./temp/html/${name}`)
-
-      try {
-        this.html[tplFile] = fs.readFileSync(tplFile, 'utf8')
-      } catch (error) {
-        logger.error(`加载html错误：${tplFile}`)
-        return false
-      }
-
-      this.watch(tplFile)
-    }
-
-    data.resPath = `${_path}/resources/`
-
-    /** 替换模板 */
-    let tmpHtml = template.render(this.html[tplFile], data)
-
-    /** 保存模板 */
-    fs.writeFileSync(savePath, tmpHtml)
-
-    logger.debug(`[图片生成][使用模板] ${savePath}`)
-
-    return savePath
-  }
-
-  /** 监听配置文件 */
-  watch(tplFile) {
-    if (this.watcher[tplFile]) return
-
-    const watcher = chokidar.watch(tplFile)
-    watcher.on('change', path => {
-      delete this.html[tplFile]
-      logger.mark(`[修改html模板] ${tplFile}`)
-    })
-
-    this.watcher[tplFile] = watcher
   }
 
   /** 重启 */
