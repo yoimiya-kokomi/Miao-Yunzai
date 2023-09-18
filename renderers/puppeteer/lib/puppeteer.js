@@ -5,8 +5,8 @@ import puppeteer from 'puppeteer'
 // 暂时保留对原config的兼容
 import cfg from '../../../lib/config/config.js'
 import { Data } from '#miao'
-import path from 'path'
 
+const _path = process.cwd()
 // mac地址
 let mac = ''
 
@@ -176,7 +176,7 @@ export default class Puppeteer extends Renderer {
     try {
       const page = await this.browser.newPage()
       let pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
-      await page.goto('file://' + path.resolve(savePath), pageGotoParams)
+      await page.goto(`file://${_path}${lodash.trim(savePath, '.')}`, pageGotoParams)
       let body = await page.$('#container') || await page.$('body')
 
       // 计算页面高度
