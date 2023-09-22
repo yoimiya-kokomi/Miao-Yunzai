@@ -9,9 +9,11 @@ import { Data } from '#miao'
 const _path = process.cwd()
 // mac地址
 let mac = ''
+// 超时计时器
+let overtimeList = []
 
 export default class Puppeteer extends Renderer {
-  constructor(config) {
+  constructor (config) {
     super({
       id: 'puppeteer',
       type: 'image',
@@ -41,12 +43,14 @@ export default class Puppeteer extends Renderer {
       /** chromium其他路径 */
       this.config.wsEndpoint = config.puppeteerWS || cfg?.bot?.puppeteer_ws
     }
+    /** puppeteer超时超时时间 */
+    this.puppeteerTimeout = config.puppeteerTimeout || cfg?.bot?.puppeteer_timeout || 0
   }
 
   /**
    * 初始化chromium
    */
-  async browserInit() {
+  async browserInit () {
     if (this.browser) return this.browser
     if (this.lock) return false
     this.lock = true
@@ -64,7 +68,7 @@ export default class Puppeteer extends Renderer {
       const browserUrl = (await redis.get(this.browserMacKey)) || this.config.wsEndpoint
       if (browserUrl) {
         logger.info(`puppeteer Chromium from ${browserUrl}`)
-        const browserWSEndpoint = await puppeteer.connect({ browserWSEndpoint: browserUrl }).catch((err) => {
+        const browserWSEndpoint = await puppeteer.connect({ browserWSEndpoint: browserUrl }).catch(() => {
           logger.error('puppeteer Chromium 缓存的实例已关闭')
           redis.del(this.browserMacKey)
         })
@@ -117,7 +121,7 @@ export default class Puppeteer extends Renderer {
     }
 
     /** 监听Chromium实例是否断开 */
-    this.browser.on('disconnected', (e) => {
+    this.browser.on('disconnected', () => {
       logger.error('Chromium 实例关闭或崩溃！')
       this.browser = false
     })
@@ -127,23 +131,31 @@ export default class Puppeteer extends Renderer {
 
   // 获取Mac地址
   getMac () {
-    const mac = '00:00:00:00:00:00'
+    let mac = '00:00:00:00:00:00'
     try {
       const network = os.networkInterfaces()
+      let macFlag = false
       for (const a in network) {
         for (const i of network[a]) {
-          if (i.mac && i.mac != mac) {
-            return i.mac
+          if (i.mac && i.mac !== mac) {
+            macFlag = true
+            mac = i.mac
+            break
           }
+        }
+        if (macFlag) {
+          break
         }
       }
     } catch (e) {
     }
+    mac = mac.replace(/:/g, '')
     return mac
   }
 
   /**
    * `chromium` 截图
+   * @param name
    * @param data 模板参数
    * @param data.tplFile 模板路径，必传
    * @param data.saveId  生成html名称，为空name代替
@@ -154,9 +166,9 @@ export default class Puppeteer extends Renderer {
    * @param data.multiPage 是否分页截图，默认false
    * @param data.multiPageHeight 分页状态下页面高度，默认4000
    * @param data.pageGotoParams 页面goto时的参数
-   * @return img/[]img 不做segment包裹
+   * @return img 不做segment包裹
    */
-  async screenshot(name, data = {}) {
+  async screenshot (name, data = {}) {
     if (!await this.browserInit()) {
       return false
     }
@@ -172,6 +184,23 @@ export default class Puppeteer extends Renderer {
 
     let ret = []
     this.shoting.push(name)
+
+    const puppeteerTimeout = this.puppeteerTimeout
+    let overtime
+    let overtimeFlag = false
+    if (puppeteerTimeout > 0) {
+      // TODO 截图超时处理
+      overtime = setTimeout(() => {
+        if (!overtimeFlag) {
+          logger.error(`[图片生成][${name}] 截图超时，当前等待队列：${this.shoting.join(',')}`)
+          this.restart(true)
+          this.shoting = []
+          overtimeList.forEach(item => {
+            clearTimeout(item)
+          })
+        }
+      }, puppeteerTimeout)
+    }
 
     try {
       const page = await this.browser.newPage()
@@ -254,6 +283,12 @@ export default class Puppeteer extends Renderer {
       this.browser = false
       ret = []
       return false
+    } finally {
+      if (overtime) {
+        overtimeFlag = true
+        clearTimeout(overtime)
+        overtimeList = []
+      }
     }
 
     this.shoting.pop()
@@ -263,22 +298,22 @@ export default class Puppeteer extends Renderer {
       return false
     }
 
-    this.restart()
+    this.restart(false)
 
     return data.multiPage ? ret : ret[0]
   }
 
   /** 重启 */
-  restart() {
+  restart (force = false) {
     /** 截图超过重启数时，自动关闭重启浏览器，避免生成速度越来越慢 */
-    if (this.renderNum % this.restartNum === 0) {
-      if (this.shoting.length <= 0) {
+    if (this.renderNum % this.restartNum === 0 || force) {
+      if (this.shoting.length <= 0 || force) {
         setTimeout(async () => {
           if (this.browser) {
             await this.browser.close().catch((err) => logger.error(err))
           }
           this.browser = false
-          logger.info('puppeteer Chromium 关闭重启...')
+          logger.info(`puppeteer Chromium ${force ? '强制' : ''}关闭重启...`)
         }, 100)
       }
     }
