@@ -6,6 +6,7 @@ import { Restart } from "./restart.js"
 let insing = false
 const list = {
   "Atlas":"https://gitee.com/Nwflower/atlas",
+  "ws-plugin":"https://gitee.com/xiaoye12123/ws-plugin",
   "TRSS-Plugin"   :"https://Yunzai.TRSS.me",
   "yenai-plugin"  :"https://gitee.com/yeyang52/yenai-plugin",
   "flower-plugin" :"https://gitee.com/Nwflower/flower-plugin",

@@ -32,15 +32,15 @@
     "node-xlsx": "^0.23.0",
     "oicq": "link:lib/modules/oicq",
     "pm2": "^5.3.0",
-    "puppeteer": "^21.3.1",
-    "redis": "^4.6.9",
+    "puppeteer": "^21.3.4",
+    "redis": "^4.6.10",
     "sequelize": "^6.33.0",
     "sqlite3": "^5.1.6",
     "ws": "^8.14.2",
     "yaml": "^2.3.2"
   },
   "devDependencies": {
-    "eslint": "^8.49.0",
+    "eslint": "^8.50.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-n": "^16.1.0",
