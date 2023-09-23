@@ -13,18 +13,16 @@ export default class GachaLog extends base {
     this.urlKey = `${this.prefix}url:`
     /** 绑定的uid */
     this.uidKey = `Yz:genshin:mys:qq-uid:${this.userId}`
-
     this.path = `./data/gachaJson/${this.e.user_id}/`
-
     this.pool = [
       { type: 301, typeName: '角色' },
       { type: 302, typeName: '武器' },
       { type: 200, typeName: '常驻' }
     ]
-    if (e.isSr) {
-      /** 绑定的uid */
-      this.uidKey = `Yz:srJson:mys:qq-uid:${this.userId}`
 
+    if (!e.isSr && e.msg) e.isSr = /\/(common|hkrpg)\//.test(e.msg)
+    if (e.isSr) {
+      this.uidKey = `Yz:srJson:mys:qq-uid:${this.userId}`
       this.path = `./data/srJson/${this.e.user_id}/`
       this.pool = [
         { type: 11, typeName: '角色' },
@@ -87,8 +85,6 @@ export default class GachaLog extends base {
   }
 
   dealUrl(url) {
-    if (!this.e.isSr) this.e.isSr = /hkrpg/.test(this.e.msg)
-
     // timestamp=1641338980〈=zh-cn 修复链接有奇怪符号
     url = url.replace(/〈=/g, '&')
     if (url.includes('getGachaLog?')) url = url.split('getGachaLog?')[1]
