@@ -6,7 +6,7 @@ import common from '../../../lib/common/common.js'
 import gsCfg from './gsCfg.js'
 
 export default class GachaLog extends base {
-  constructor (e) {
+  constructor(e) {
     super(e)
     this.model = 'gachaLog'
 
@@ -35,7 +35,7 @@ export default class GachaLog extends base {
     }
   }
 
-  async logUrl () {
+  async logUrl() {
     let url = this.e.msg
 
     /** 处理url */
@@ -73,7 +73,7 @@ export default class GachaLog extends base {
     return data
   }
 
-  async logFile () {
+  async logFile() {
     let url = await this.downFile()
     if (!url) {
       if (this.e?.file?.name.includes('output')) {
@@ -86,7 +86,9 @@ export default class GachaLog extends base {
     return this.logUrl()
   }
 
-  dealUrl (url) {
+  dealUrl(url) {
+    if (!this.e.isSr) this.e.isSr = /hkrpg/.test(this.e.msg)
+
     // timestamp=1641338980〈=zh-cn 修复链接有奇怪符号
     url = url.replace(/〈=/g, '&')
     if (url.includes('getGachaLog?')) url = url.split('getGachaLog?')[1]
@@ -111,7 +113,7 @@ export default class GachaLog extends base {
     return params
   }
 
-  async downFile () {
+  async downFile() {
     this.creatFile()
 
     let textPath = `${this.path}output_log.txt`
@@ -140,7 +142,7 @@ export default class GachaLog extends base {
     return url[0]
   }
 
-  async checkUrl (param) {
+  async checkUrl(param) {
     if (!param.region) {
       let res = await this.logApi({
         size: 6,
@@ -209,7 +211,7 @@ export default class GachaLog extends base {
     }
   }
 
-  async logApi (param) {
+  async logApi(param) {
     // 调用一次接口判断链接是否正确
     let logUrl = 'https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?'
     /** 国际服 */
@@ -252,7 +254,7 @@ export default class GachaLog extends base {
   }
 
   /** 更新抽卡记录 */
-  async updateLog () {
+  async updateLog() {
     /** 获取authkey */
     let authkey = await redis.get(`${this.urlKey}${this.uid}`)
     if (!authkey) return false
@@ -295,7 +297,7 @@ export default class GachaLog extends base {
   }
 
   /** 递归获取所有数据 */
-  async getAllLog (ids, authkey, page = 1, endId = 0) {
+  async getAllLog(ids, authkey, page = 1, endId = 0) {
     let res = await this.logApi({
       gacha_type: this.type,
       page,
@@ -342,7 +344,7 @@ export default class GachaLog extends base {
   }
 
   // 读取本地json
-  readJson () {
+  readJson() {
     let logJson = []; let ids = new Map()
     let file = `${this.path}/${this.uid}/${this.type}.json`
     if (fs.existsSync(file)) {
@@ -358,7 +360,7 @@ export default class GachaLog extends base {
     return { list: logJson, ids }
   }
 
-  creatFile () {
+  creatFile() {
     if (!fs.existsSync(this.path)) {
       fs.mkdirSync(this.path)
     }
@@ -369,7 +371,7 @@ export default class GachaLog extends base {
     }
   }
 
-  writeJson (data) {
+  writeJson(data) {
     this.creatFile()
 
     let file = `${this.path}${this.uid}/`
@@ -378,7 +380,7 @@ export default class GachaLog extends base {
   }
 
   /** #抽卡记录 */
-  async getLogData () {
+  async getLogData() {
     /** 判断uid */
     await this.getUid()
     if (!this.uid) {
@@ -391,7 +393,7 @@ export default class GachaLog extends base {
     }
   }
 
-  async getAllGcLogData () {
+  async getAllGcLogData() {
     this.model = 'gachaAllLog'
     const poolList = ['角色', this.e?.isSr ? '光锥' : '武器', '常驻']
     const logData = []
@@ -428,7 +430,7 @@ export default class GachaLog extends base {
     return data
   }
 
-  async getGcLogData () {
+  async getGcLogData() {
     /** 卡池 */
     this.getPool()
     /** 更新记录 */
@@ -440,7 +442,7 @@ export default class GachaLog extends base {
     return data
   }
 
-  getPool () {
+  getPool() {
     let msg = this.e.msg.replace(/#|抽卡|记录|祈愿|分析|池|原神|星铁|崩坏星穹铁道|铁道/g, '')
     this.type = this.e.isSr ? 11 : 301
     this.typeName = '角色'
@@ -471,7 +473,7 @@ export default class GachaLog extends base {
     }
   }
 
-  async getUid () {
+  async getUid() {
     if (!fs.existsSync(this.path)) {
       this.e.reply('暂无抽卡记录\n#记录帮助，查看配置说明', false, { at: true })
       return false
@@ -521,7 +523,7 @@ export default class GachaLog extends base {
   }
 
   /** 统计计算记录 */
-  analyse () {
+  analyse() {
     if (lodash.isEmpty(this.all)) {
       this.all = this.readJson().list
     }
@@ -684,7 +686,7 @@ export default class GachaLog extends base {
     }
   }
 
-  checkIsUp () {
+  checkIsUp() {
     if (['莫娜', '七七', '迪卢克', '琴', '姬子', '杰帕德', '彦卿', '白露', '瓦尔特', '克拉拉', '布洛妮娅'].includes(this.role.name)) {
       return false
     }
@@ -717,7 +719,7 @@ export default class GachaLog extends base {
   }
 
   /** 渲染数据 */
-  randData (data) {
+  randData(data) {
     let line = []
     let weapon = this.e.isSr ? '光锥' : '武器'
     if ([301, 11].includes(this.type)) {
@@ -796,7 +798,7 @@ export default class GachaLog extends base {
     }
   }
 
-  getServer () {
+  getServer() {
     let uid = this.uid
     switch (String(uid)[0]) {
       case '1':
