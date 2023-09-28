@@ -311,7 +311,7 @@ export default class NoteUser extends BaseModel {
     this._map = false
     MysUtil.eachGame((game) => {
       let uid = mysUser.getUid(game)
-      if (uid) {
+      if (uid && this.getUid(game) == '') {
         this.setMainUid(uid, game, false)
       }
     })
