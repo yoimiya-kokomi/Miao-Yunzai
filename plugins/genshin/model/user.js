@@ -64,7 +64,7 @@ export default class User extends base {
     }
 
     // TODO：独立的mys数据，不走缓存ltuid
-    let mys = await MysUser.create(param.ltuid || param.ltuid_v2 || param.ltmid_v2)
+    let mys = await MysUser.create(param.ltuid || param.ltuid_v2 || param.account_id_v2 || param.ltmid_v2)
     if (!mys) {
       await this.e.reply('发送cookie不完整或数据错误')
       return
@@ -82,7 +82,7 @@ export default class User extends base {
       data.ck += ` mi18nLang=${param.mi18nLang};`
     }
     /** 拼接ck */
-    data.ltuid = param.ltuid || param.ltmid_v2
+    data.ltuid = param.ltuid || param.ltuid_v2 || param.account_id_v2 || param.ltmid_v2
 
     /** 米游币签到字段 */
     data.login_ticket = param.login_ticket ?? ''
@@ -98,7 +98,8 @@ export default class User extends base {
       return await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
     }
 
-    if (flagV2) {
+    // 判断data.ltuid是否是数字
+    if (flagV2 && isNaN(data.ltuid)) {
       // 获取米游社通行证id
       let userFullInfo = await mys.getUserFullInfo()
       if (userFullInfo?.data?.user_info) {
@@ -119,7 +120,7 @@ export default class User extends base {
 
     logger.mark(`${this.e.logFnc} 保存cookie成功 [ltuid:${mys.ltuid}]`)
 
-    let uidMsg = [`绑定cookie成功`, mys.getUidInfo()]
+    let uidMsg = ['绑定cookie成功', mys.getUidInfo()]
     await this.e.reply(uidMsg.join('\n'))
     let msg = []
     if (mys.hasGame('gs')) {
@@ -159,7 +160,7 @@ export default class User extends base {
     if (!mys) {
       return `删除失败：当前的UID${uidData?.uid}无CK信息`
     }
-    let msg = [`绑定cookie已删除`, mys.getUidInfo()]
+    let msg = ['绑定cookie已删除', mys.getUidInfo()]
     await user.delMysUser(uidData.ltuid)
     return msg.join('\n')
   }
@@ -344,7 +345,7 @@ export default class User extends base {
 
   async loadOldUid () {
     // 从DB中导入
-    await sequelize.query(`delete from UserGames where userId is null or data is null`, {})
+    await sequelize.query('delete from UserGames where userId is null or data is null', {})
     let games = await UserGameDB.findAll()
     let count = 0
     await Data.forEach(games, async (game) => {
@@ -380,7 +381,7 @@ export default class User extends base {
       }
       redis.del(key)
     }
-    await sequelize.query(`delete from Users where (ltuids is null or ltuids='') and games is null`, {})
+    await sequelize.query('delete from Users where (ltuids is null or ltuids=\'\') and games is null', {})
     console.log('load Uid Data Done...')
   }
 
