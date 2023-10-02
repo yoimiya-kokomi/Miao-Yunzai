@@ -28,3 +28,6 @@ online_msg_exp: 86400
 sign_api_addr:
 # 传入的QQ版本(如:8.9.63、8.9.68)
 ver:
+
+# 验证码API地址(如:http://api.example.com/geetest?gt={0}&challenge={1})
+geeAddress: 

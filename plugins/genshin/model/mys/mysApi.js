@@ -116,6 +116,19 @@ export default class MysApi {
       return false
     }
 
+    if (res.retcode === 1034) {
+      // 验证码
+      logger.mark(`[米游社接口][${type}][${this.uid}] 遇到验证码`)
+      if (headers && headers.hasOwnProperty("x-rpc-challenge")) return false // 防止循环出验证码爆金币
+      let challenge = await this.bbsGeetest()
+      if (challenge) {
+        data.headers = {
+          "x-rpc-challenge": challenge
+        }
+        return this.getData(type, data, cached)
+      }
+    }
+
     if (res.retcode !== 0 && this.option.log) {
       logger.debug(`[米游社接口][请求参数] ${url} ${JSON.stringify(param)}`)
     }
@@ -125,6 +138,35 @@ export default class MysApi {
     if (cached) this.cache(res, cacheKey)
 
     return res
+  }
+
+  // copy from csv
+  async bbsGeetest() {
+    if (!cfg.bot.geeAddress) return ""
+    try {
+      let res = await this.getData('createVerification')
+      let gt = res.data.gt
+      let challenge = res.data.challenge
+
+      let response = await fetch(cfg.bot.geeAddress.replace('{0}', gt).replace('{1}', challenge))
+      if (!response.ok) {
+        logger.error(`[validate][${this.uid}] ${response.status} ${response.statusText}`)
+        return false
+      }
+      if (this.option.log) {
+        logger.mark(`[validate][${this.uid}] ${Date.now() - start}ms`)
+      }
+      res = await response.json()
+      if (res?.data?.validate) {
+        logger.mark(`[validate][${this.uid}] 消耗token一次`)
+        res = await this.getData("verifyVerification", res.data)
+        return res.data.challenge
+      }
+    } catch (error) {
+      //大概率是数据空导致报错这种情况很少见捏，所以你可以忽略不看
+      Bot.logger.error(`[validate][${this.uid}] 出错：${error}`)
+    }
+    return ""
   }
 
   getHeaders (query = '', body = '') {

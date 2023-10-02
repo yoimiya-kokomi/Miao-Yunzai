@@ -119,7 +119,20 @@ export default class apiTool {
             app_name: 'account_cn',
             device_fp: '38d7ee834d1e9'
           },
-        }
+        },
+        /** 过验证码 */
+        createVerification: {
+          url: `${hostRecord}game_record/app/card/wapi/createVerification`,
+          query: 'is_high=true'
+        },
+        verifyVerification: {
+          url: `${hostRecord}game_record/app/card/wapi/verifyVerification`,
+          body: {
+            "geetest_challenge": data.challenge,
+            "geetest_validate": data.validate,
+            "geetest_seccode": `${data.validate}|jordan`
+          },
+        },
       },
       honkaisr: {
         /** 首页宝箱 */
