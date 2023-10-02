@@ -129,9 +129,9 @@ export default class MysApi {
 
   getHeaders (query = '', body = '') {
     const cn = {
-      app_version: '2.40.1',
-      User_Agent: `Mozilla/5.0 (Linux; Android 12; ${this.device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.73 Mobile Safari/537.36 miHoYoBBS/2.40.1`,
-      client_type: 5,
+      app_version: '2.59.1',
+      User_Agent: `Mozilla/5.0 (Linux; Android 13; ${this.device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36 miHoYoBBS/2.59.1`,
+      client_type: '5',
       Origin: 'https://webstatic.mihoyo.com',
       X_Requested_With: 'com.mihoyo.hyperion',
       Referer: 'https://webstatic.mihoyo.com'
@@ -152,6 +152,7 @@ export default class MysApi {
     }
     return {
       'x-rpc-app_version': client.app_version,
+      'x-rpc-device_fp': md5(this.device).substring(0, 12),
       'x-rpc-client_type': client.client_type,
       'User-Agent': client.User_Agent,
       Referer: client.Referer,
