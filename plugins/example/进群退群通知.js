@@ -1,6 +1,6 @@
 import plugin from '../../lib/plugins/plugin.js'
 export class newcomer extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '欢迎新人',
       dsc: '新人入群欢迎',
@@ -11,13 +11,13 @@ export class newcomer extends plugin {
   }
 
   /** 接受到消息都会执行一次 */
-  async accept () {
+  async accept() {
+    if (this.e.user_id == this.e.self_id) return
+
     /** 定义入群欢迎内容 */
     let msg = '欢迎新人！'
     /** 冷却cd 30s */
     let cd = 30
-
-    if (this.e.user_id == this.e.bot.uin) return
 
     /** cd */
     let key = `Yz:newcomers:${this.e.group_id}`
@@ -34,7 +34,7 @@ export class newcomer extends plugin {
 }
 
 export class outNotice extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '退群通知',
       dsc: 'xx退群了',
@@ -45,8 +45,8 @@ export class outNotice extends plugin {
     this.tips = '退群了'
   }
 
-  async accept () {
-    if (this.e.user_id == this.e.bot.uin) return
+  async accept() {
+    if (this.e.user_id == this.e.self_id) return
 
     let name, msg
     if (this.e.member) {

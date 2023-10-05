@@ -10,7 +10,7 @@ export class quit extends plugin {
   }
 
   async accept () {
-    if (this.e.user_id != this.e.bot.uin) return
+    if (this.e.user_id != this.e.self_id) return
 
     let other = cfg.other
     if (other.autoQuit <= 0) return
@@ -18,7 +18,7 @@ export class quit extends plugin {
     /** 判断主人，主人邀请不退群 */
     let gl = await this.e.group.getMemberMap()
     for (let qq of cfg.masterQQ) {
-      if (gl.has(Number(qq))) {
+      if (gl.has(Number(qq) || String(qq))) {
         logger.mark(`[主人拉群] ${this.e.group_id}`)
         return
       }

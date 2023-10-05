@@ -8,6 +8,8 @@ port: 2536
 chromium_path:
 # puppeteer接口地址
 puppeteer_ws:
+# puppeteer截图超时时间
+puppeteer_timeout:
 
 # 米游社接口代理地址，国际服用
 proxyAddress:
