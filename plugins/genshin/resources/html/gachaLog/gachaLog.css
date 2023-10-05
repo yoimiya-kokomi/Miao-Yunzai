@@ -349,3 +349,24 @@ body {
   margin: 6px 0;
   color: #7f858a;
 }
+
+
+.gold {
+  background: #ffeb73;
+  color: #6f4b00;
+}
+
+.good {
+  background: #168b2c;
+  color: #fff;
+}
+
+.normal {
+  background: #6939b7;
+  color: #fff;
+}
+
+.bad {
+  background: #9d3333;
+  color: #fff;
+}
