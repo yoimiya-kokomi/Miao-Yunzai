@@ -11,7 +11,7 @@ export default class MysApi {
    * @param option 其他参数
    * @param option.log 是否显示日志
    */
-  constructor (uid, cookie, option = {}, isSr = false) {
+  constructor (uid, cookie, option = {}, isSr = false, device = '') {
     this.uid = uid
     this.cookie = cookie
     this.isSr = isSr
@@ -20,6 +20,7 @@ export default class MysApi {
     /** 5分钟缓存 */
     this.cacheCd = 300
 
+    this._device = device
     this.option = {
       log: true,
       ...option
@@ -66,7 +67,23 @@ export default class MysApi {
     return 'cn_gf01'
   }
 
-  async getData (type, data = {}, cached = false) {
+  async getData (type, data = {}, cached = false, isGetFP = false) {
+    if (!isGetFP && !data.device_fp) {
+      let seed_id = this.generateSeed(16)
+      let device_fp = await this.getData('getFp', {
+        seed_id
+      }, false, true)
+      if (!data) {
+        data = {}
+      }
+      if (data?.headers) {
+        data.headers['x-rpc-device_fp'] = device_fp?.data?.device_fp
+      } else {
+        data.headers = {
+          'x-rpc-device_fp': device_fp?.data?.device_fp
+        }
+      }
+    }
     let { url, headers, body } = this.getUrl(type, data)
 
     if (!url) return false
@@ -210,4 +227,14 @@ export default class MysApi {
 
     return null
   }
+
+  generateSeed (length = 16) {
+    const characters = '0123456789abcdef'
+    let result = ''
+    for (let i = 0; i < length; i++) {
+      result += characters[Math.floor(Math.random() * characters.length)]
+    }
+    return result
+  }
 }
+

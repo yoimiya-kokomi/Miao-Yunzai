@@ -32,7 +32,7 @@ export default class base {
         srtempFile: 'StarRail/'
       }
     }
-    
+
     let headImg = _.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/img/namecard`).filter(file => file.endsWith('.png')))
     return {
       saveId: this.userId,
