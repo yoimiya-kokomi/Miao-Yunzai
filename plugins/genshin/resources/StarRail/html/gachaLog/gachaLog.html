@@ -45,7 +45,7 @@
 
       <div class="card_list">
         {{each fiveLog val}}
-        <div class="item star5">
+        <div class="item star5 {{val.num<=10?'gold': (val.num<max*0.5 ? 'good' : (num<max*0.83) ? 'normal': 'bad')}}">
           {{ if val.isUp && typeName == '角色' }}
             <span class="minimum">UP</span>
           {{/if}}
@@ -53,7 +53,7 @@
                src="{{pluResPath}}img/{{val.item_type=='角色'?'role':'weapon'}}/{{val.name}}.webp"
                onerror="whenError(this,'{{val.item_type=='角色'?'role':'weapon'}}')"/>
           <!-- <div class="num">{{val.num}}</div>-->
-          <div class="num_name">{{val.num}}</div>
+          <div class="num_name {{val.num<=10?'gold': (val.num<log.max*0.5 ? 'good' : (val.num<log.max*0.83) ? 'normal': 'bad')}}" >{{val.num}}</div>
         </div>
         {{/each}}
       </div>
