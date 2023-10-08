@@ -37,7 +37,7 @@ body {
 
 .head_box .id_text {
   color: #f5e7f4;
-  padding: 5px 0; 
+  padding: 5px 0;
   font-size: 26px;
 }
 
@@ -352,4 +352,24 @@ body {
   font-size: 12px;
   margin: 6px 0;
   color: #7f858a;
+}
+
+.gold {
+  background: #ffeb73;
+  color: #6f4b00;
+}
+
+.good {
+  background: #168b2c;
+  color: #fff;
+}
+
+.normal {
+  background: #6939b7;
+  color: #fff;
+}
+
+.bad {
+  background: #9d3333;
+  color: #fff;
 }
