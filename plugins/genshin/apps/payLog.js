@@ -22,7 +22,7 @@ export class payLog extends plugin {
           fnc: 'payLog'
         },
         {
-          reg: '^#?更新(充值|消费)(记录|统计)',
+          reg: '^#?更新(充值|消费)(记录|统计)$',
           fnc: 'updatePayLog'
         },
         {
@@ -31,7 +31,7 @@ export class payLog extends plugin {
           fnc: 'getAuthKey'
         },
         {
-          reg: '^#?(充值|消费)(记录|统计)帮助',
+          reg: '^#?(充值|消费)(记录|统计)帮助$',
           fnc: 'payLogHelp'
         }
       ]

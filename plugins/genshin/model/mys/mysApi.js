@@ -133,9 +133,9 @@ export default class MysApi {
       return false
     }
 
-    if (res.retcode !== 0 && this.option.log) {
+    /* if (res.retcode !== 0 && this.option.log) {
       logger.debug(`[米游社接口][请求参数] ${url} ${JSON.stringify(param)}`)
-    }
+    } */
 
     res.api = type
 

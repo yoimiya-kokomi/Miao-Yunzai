@@ -17,7 +17,7 @@ export class exchange extends plugin {
           fnc: 'getCode'
         },
         {
-          reg: '#(兑换码使用|cdk-u) .+',
+          reg: '^#(兑换码使用|cdk-u) .+',
           fnc: 'useCode'
         }
       ]
