@@ -11,7 +11,7 @@ export class takeBirthdayPhoto extends plugin {
       priority: 5000,
       rule: [
         {
-          reg: '#?(留影(叙佳期)?|((领)?((角色)?生日)(卡)?))$',
+          reg: '^#?(留影(叙佳期)?|((领)?((角色)?生日)(卡)?))$',
           fnc: 'birthdaystar'
         }
       ]
