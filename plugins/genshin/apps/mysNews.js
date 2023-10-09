@@ -27,7 +27,7 @@ export class mysNews extends plugin {
           fnc: 'mysUrl'
         },
         {
-          reg: '#*原(石|神)(预估|盘点)$',
+          reg: '^#*原(石|神)(预估|盘点)$',
           fnc: 'ysEstimate'
         },
         {
