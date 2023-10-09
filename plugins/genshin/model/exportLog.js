@@ -9,7 +9,7 @@ import lodash from 'lodash'
 let xlsx = {}
 
 export default class ExportLog extends base {
-  constructor (e) {
+  constructor(e) {
     super(e)
     this.model = 'gachaLog'
 
@@ -17,28 +17,46 @@ export default class ExportLog extends base {
     /** 绑定的uid */
     this.uidKey = `Yz:genshin:mys:qq-uid:${this.userId}`
 
-    this.path = `./data/gachaJson/${this.e.user_id}/`
+    this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`
 
-    this.pool = [
+    const gsPool = [
       { type: 301, typeName: '角色活动' },
       { type: 302, typeName: '武器活动' },
       { type: 200, typeName: '常驻' }
-    ]
+    ];
 
-    this.typeName = {
+    const srPool = [
+      { type: 11, typeName: '角色活动' },
+      { type: 12, typeName: '武器活动' },
+      { type: 2, typeName: '新手活动' },
+      { type: 1, typeName: '常驻' }
+    ];
+
+    this.pool = this.e.isSr ? srPool : gsPool;
+
+    const gsTypeName = {
       301: '角色',
       302: '武器',
       200: '常驻'
-    }
+    };
+
+    const srTypeName = {
+      11: '角色',
+      12: '武器',
+      2: '新手',
+      1: '常驻'
+    };
+
+    this.typeName = this.e.isSr ? srTypeName : gsTypeName;
   }
 
-  async initXlsx () {
+  async initXlsx() {
     if (!lodash.isEmpty(xlsx)) return xlsx
 
     xlsx = await import('node-xlsx')
   }
 
-  async exportJson () {
+  async exportJson() {
     await this.getUid()
 
     if (!this.uid) return false
@@ -71,10 +89,10 @@ export default class ExportLog extends base {
     })
 
     /** 删除文件 */
-    fs.unlink(saveFile, () => {})
+    fs.unlink(saveFile, () => { })
   }
 
-  async exportXlsx () {
+  async exportXlsx() {
     await this.getUid()
 
     if (!this.uid) return false
@@ -109,10 +127,10 @@ export default class ExportLog extends base {
     if (res) this.e.reply(`${this.uid}.xlsx上传成功，共${line}条\n请接收文件`)
 
     /** 删除文件 */
-    fs.unlink(saveFile, () => {})
+    fs.unlink(saveFile, () => { })
   }
 
-  async getUid () {
+  async getUid() {
     let gachLog = new GachaLog(this.e)
     let uid = await gachLog.getUid()
 
@@ -122,7 +140,7 @@ export default class ExportLog extends base {
     return this.uid
   }
 
-  getAllList () {
+  getAllList() {
     let res = {
       list: []
     }
@@ -166,12 +184,12 @@ export default class ExportLog extends base {
     return res
   }
 
-  loadJson (json) {
+  loadJson(json) {
     if (!fs.existsSync(json)) return []
     return JSON.parse(fs.readFileSync(json, 'utf8'))
   }
 
-  xlsxDataPool (data) {
+  xlsxDataPool(data) {
     let xlsxData = []
 
     for (let v of this.pool) {
@@ -195,7 +213,7 @@ export default class ExportLog extends base {
     return xlsxData
   }
 
-  xlsxDataAll (data) {
+  xlsxDataAll(data) {
     let list = [
       [
         'count', 'gacha_type', 'id', 'item_id', 'item_type', 'lang', 'name', 'rank_type', 'time', 'uid', 'uigf_gacha_type'
@@ -217,7 +235,7 @@ export default class ExportLog extends base {
   }
 
   /** xlsx导入抽卡记录 */
-  async logXlsx () {
+  async logXlsx() {
     await this.initXlsx()
 
     let uid = /[1-9][0-9]{8}/g.exec(this.e.file.name)[0]
@@ -256,12 +274,12 @@ export default class ExportLog extends base {
     }
 
     /** 删除文件 */
-    fs.unlink(textPath, () => {})
+    fs.unlink(textPath, () => { })
 
     await this.e.reply(`${this.e.file.name}，导入成功\n${msg.join('\n')}`)
   }
 
-  dealXlsx (list) {
+  dealXlsx(list) {
     /** 必要字段 */
     let reqField = ['uigf_gacha_type', 'gacha_type', 'item_type', 'name', 'time']
     /** 不是必要字段 */
@@ -312,7 +330,7 @@ export default class ExportLog extends base {
   }
 
   /** json导入抽卡记录 */
-  async logJson () {
+  async logJson() {
     let uid = /[1-9][0-9]{8}/g.exec(this.e.file.name)[0]
     let textPath = `${this.path}${this.e.file.name}`
     /** 获取文件下载链接 */
@@ -352,12 +370,12 @@ export default class ExportLog extends base {
     }
 
     /** 删除文件 */
-    fs.unlink(textPath, () => {})
+    fs.unlink(textPath, () => { })
 
     await this.e.reply(`${this.e.file.name}，导入成功\n${msg.join('\n')}`)
   }
 
-  dealJson (list) {
+  dealJson(list) {
     let data = {}
 
     /** 必要字段 */
