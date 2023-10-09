@@ -20,15 +20,15 @@ export class gcLog extends plugin {
           fnc: 'logUrl'
         },
         {
-          reg: '#txt日志文件导入记录',
+          reg: '#txt(日志)?(文件)?导入记录',
           fnc: 'logFile'
         },
         {
-          reg: '#xlsx文件导入记录',
+          reg: '#*(原神|星铁)?(xlsx|excel)(文件)?导入记录',
           fnc: 'logXlsx'
         },
         {
-          reg: '#json文件导入记录',
+          reg: '#*(原神|星铁)?json(文件)?导入记录',
           fnc: 'logJson'
         },
         {
@@ -160,26 +160,46 @@ export class gcLog extends plugin {
       return true
     }
 
-    if (!this.e.file) {
-      await this.e.reply('请发送xlsx文件')
-      return true
-    }
+    const gsTips = `注：不支持https://github.com/biuuu/genshin-wish-export项目导出的excel文件,如果是该项目的文件请发送任意消息，取消excel导入后，使用【#json导入记录】`;
+    const srTips = `注:适配https://github.com/biuuu/star-rail-warp-export项目导出的excel文件`;
 
-    await new ExportLog(this.e).logXlsx()
+    await this.e.reply(`请发送xlsx文件，该文件需要以${this.e?.isSr ? '*' : '#'}的uid命名，如：100000000.xlsx\n否则可能无法正确识别，如果误触可发送任意消息取消导入\n${this.e?.isSr ? srTips : gsTips}`);
+    this.setContext('importLogXlsx');
+  }
+
+  async importLogXlsx() {
+    if (!this.e.file) {
+      await this.e.reply(`未检测到excel文件，操作已取消，请重新发送【${this.e?.isSr ? '*' : '#'}excel导入记录】`);
+    }
+    else {
+      this.e.isSr = this.getContext()?.importLogXlsx.isSr;
+      await new ExportLog(this.e).logXlsx();
+    }
+    this.finish('importLogXlsx');
   }
 
   async logJson() {
     if (!this.e.isPrivate) {
-      await this.e.reply('请私聊发送Json文件', false, { at: true })
+      await this.e.reply('请私聊发送日志文件', false, { at: true })
       return true
     }
 
+    const gsTips = `注：适配https://github.com/biuuu/genshin-wish-export项目导出的json文件`;
+    const srTips = `注:适配https://github.com/biuuu/star-rail-warp-export项目导出的json文件`;
+
+    await this.e.reply(`请发送json文件，该文件需要以${this.e?.isSr ? '*' : '#'}的uid命名\n如：100000000.json，否则可能无法正确识别，如果误触可发送任意消息取消导入\n${this.e?.isSr ? srTips : gsTips}`);
+    this.setContext('importLogJson');
+  }
+
+  async importLogJson() {
+    this.e.isSr = this.getContext()?.importLogJson.isSr;
     if (!this.e.file) {
-      await this.e.reply('请发送Json文件')
-      return true
+      await this.e.reply(`未检测到json文件，操作已取消，请重新发送【${this.e?.isSr ? '*' : '#'}json导入记录】`);
     }
-
-    await new ExportLog(this.e).logJson()
+    else {
+      await new ExportLog(this.e).logJson();
+    }
+    this.finish('importLogJson');
   }
 
   async help() {
