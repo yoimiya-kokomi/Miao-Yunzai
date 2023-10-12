@@ -9,7 +9,7 @@ import lodash from 'lodash'
 let xlsx = {}
 
 export default class ExportLog extends base {
-  constructor (e) {
+  constructor(e) {
     super(e)
     this.model = 'gachaLog'
 
@@ -17,28 +17,46 @@ export default class ExportLog extends base {
     /** 绑定的uid */
     this.uidKey = `Yz:genshin:mys:qq-uid:${this.userId}`
 
-    this.path = `./data/gachaJson/${this.e.user_id}/`
+    this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`
 
-    this.pool = [
+    const gsPool = [
       { type: 301, typeName: '角色活动' },
       { type: 302, typeName: '武器活动' },
       { type: 200, typeName: '常驻' }
-    ]
+    ];
 
-    this.typeName = {
+    const srPool = [
+      { type: 11, typeName: '角色活动' },
+      { type: 12, typeName: '武器活动' },
+      { type: 2, typeName: '新手活动' },
+      { type: 1, typeName: '常驻' }
+    ];
+
+    this.pool = this.e.isSr ? srPool : gsPool;
+
+    const gsTypeName = {
       301: '角色',
       302: '武器',
       200: '常驻'
-    }
+    };
+
+    const srTypeName = {
+      11: '角色',
+      12: '武器',
+      2: '新手',
+      1: '常驻'
+    };
+
+    this.typeName = this.e.isSr ? srTypeName : gsTypeName;
   }
 
-  async initXlsx () {
+  async initXlsx() {
     if (!lodash.isEmpty(xlsx)) return xlsx
 
     xlsx = await import('node-xlsx')
   }
 
-  async exportJson () {
+  async exportJson() {
     await this.getUid()
 
     if (!this.uid) return false
@@ -71,10 +89,10 @@ export default class ExportLog extends base {
     })
 
     /** 删除文件 */
-    fs.unlink(saveFile, () => {})
+    fs.unlink(saveFile, () => { })
   }
 
-  async exportXlsx () {
+  async exportXlsx() {
     await this.getUid()
 
     if (!this.uid) return false
@@ -109,10 +127,10 @@ export default class ExportLog extends base {
     if (res) this.e.reply(`${this.uid}.xlsx上传成功，共${line}条\n请接收文件`)
 
     /** 删除文件 */
-    fs.unlink(saveFile, () => {})
+    fs.unlink(saveFile, () => { })
   }
 
-  async getUid () {
+  async getUid() {
     let gachLog = new GachaLog(this.e)
     let uid = await gachLog.getUid()
 
@@ -122,7 +140,7 @@ export default class ExportLog extends base {
     return this.uid
   }
 
-  getAllList () {
+  getAllList() {
     let res = {
       list: []
     }
@@ -166,12 +184,12 @@ export default class ExportLog extends base {
     return res
   }
 
-  loadJson (json) {
+  loadJson(json) {
     if (!fs.existsSync(json)) return []
     return JSON.parse(fs.readFileSync(json, 'utf8'))
   }
 
-  xlsxDataPool (data) {
+  xlsxDataPool(data) {
     let xlsxData = []
 
     for (let v of this.pool) {
@@ -195,7 +213,7 @@ export default class ExportLog extends base {
     return xlsxData
   }
 
-  xlsxDataAll (data) {
+  xlsxDataAll(data) {
     let list = [
       [
         'count', 'gacha_type', 'id', 'item_id', 'item_type', 'lang', 'name', 'rank_type', 'time', 'uid', 'uigf_gacha_type'
@@ -217,7 +235,7 @@ export default class ExportLog extends base {
   }
 
   /** xlsx导入抽卡记录 */
-  async logXlsx () {
+  async logXlsx() {
     await this.initXlsx()
 
     let uid = /[1-9][0-9]{8}/g.exec(this.e.file.name)[0]
@@ -234,13 +252,36 @@ export default class ExportLog extends base {
     let list = xlsx.parse(textPath)
     list = lodash.keyBy(list, 'name')
 
-    if (!list['原始数据']) {
+    // 适配StarRailExport导出的xlsx，该xlsx没有原始数据表.
+    let rawData = list['原始数据'] ? list['原始数据'] : list['rawData'];
+    if (!list['原始数据'] && list['rawData']) {
+      // 获取rawData的time字段（第9列）的索引
+      const timeIndex = 8;
+
+      // 对rawData进行排序（按照time字段，除第一行外）
+      const headerRow = rawData.data[0]; // 保存标题行
+      const dataToSort = rawData.data.slice(1); // 除第一行外的数据
+
+      dataToSort.sort((a, b) => {
+        return moment(a[timeIndex]).format('x') - moment(b[timeIndex]).format('x');
+      });
+
+      // 重新构建rawData的数据，包括标题行
+      rawData.data = [headerRow, ...dataToSort];
+
+      // 将数据写回原文件，重新读取
+      fs.writeFileSync(textPath, xlsx.build([rawData]));
+      list = lodash.keyBy(xlsx.parse(textPath), 'name');
+      rawData = list['rawData'];
+    }
+
+    if (!rawData) {
       this.e.reply('xlsx文件内容错误：非统一祈愿记录标准')
       return false
     }
 
     /** 处理xlsx数据 */
-    let data = this.dealXlsx(list['原始数据'].data)
+    let data = this.dealXlsx(rawData.data);
     if (!data) return false
 
     /** 保存json */
@@ -256,12 +297,12 @@ export default class ExportLog extends base {
     }
 
     /** 删除文件 */
-    fs.unlink(textPath, () => {})
+    fs.unlink(textPath, () => { })
 
     await this.e.reply(`${this.e.file.name}，导入成功\n${msg.join('\n')}`)
   }
 
-  dealXlsx (list) {
+  dealXlsx(list) {
     /** 必要字段 */
     let reqField = ['uigf_gacha_type', 'gacha_type', 'item_type', 'name', 'time']
     /** 不是必要字段 */
@@ -270,6 +311,11 @@ export default class ExportLog extends base {
     let field = {}
     for (let i in list[0]) {
       field[list[0][i]] = i
+    }
+
+    // 适配StarRailExport导出的xlsx，该xlsx没有uigf_gacha_type字段.
+    if (!field['uigf_gacha_type'] && field['gacha_type']) {
+      field['uigf_gacha_type'] = field['gacha_type']
     }
 
     /** 判断字段 */
@@ -312,7 +358,7 @@ export default class ExportLog extends base {
   }
 
   /** json导入抽卡记录 */
-  async logJson () {
+  async logJson() {
     let uid = /[1-9][0-9]{8}/g.exec(this.e.file.name)[0]
     let textPath = `${this.path}${this.e.file.name}`
     /** 获取文件下载链接 */
@@ -352,12 +398,12 @@ export default class ExportLog extends base {
     }
 
     /** 删除文件 */
-    fs.unlink(textPath, () => {})
+    fs.unlink(textPath, () => { })
 
     await this.e.reply(`${this.e.file.name}，导入成功\n${msg.join('\n')}`)
   }
 
-  dealJson (list) {
+  dealJson(list) {
     let data = {}
 
     /** 必要字段 */
@@ -370,12 +416,22 @@ export default class ExportLog extends base {
       }
     }
 
+    // 对json进行排序（按照time字段）
+    list.sort((a, b) => {
+      return moment(a.time).format('x') - moment(b.time).format('x');
+    });
+
     /** 倒序 */
     if (moment(list[0].time).format('x') < moment(list[list.length - 1].time).format('x')) {
       list = list.reverse()
     }
 
     for (let v of list) {
+      // 适配StarRailExport导出的json，该json没有uigf_gacha_type字段.
+      if (!v['uigf_gacha_type'] && v['gacha_type']) {
+        v['uigf_gacha_type'] = v['gacha_type']
+      }
+      
       if (!data[v.uigf_gacha_type]) data[v.uigf_gacha_type] = []
       data[v.uigf_gacha_type].push(v)
     }

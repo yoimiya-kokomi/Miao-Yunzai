@@ -10,27 +10,27 @@ export default class GachaLog extends base {
     super(e)
     this.model = 'gachaLog'
 
+    if (!e.isSr && e.msg) e.isSr = /\/(common|hkrpg)\//.test(e.msg)
+
     this.urlKey = `${this.prefix}url:`
     /** 绑定的uid */
-    this.uidKey = `Yz:genshin:mys:qq-uid:${this.userId}`
-    this.path = `./data/gachaJson/${this.e.user_id}/`
-    this.pool = [
+    this.uidKey = this.e.isSr ? `Yz:srJson:mys:qq-uid:${this.userId}` : `Yz:genshin:mys:qq-uid:${this.userId}`;
+    this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`;
+    
+    const gsPool = [
       { type: 301, typeName: '角色' },
       { type: 302, typeName: '武器' },
       { type: 200, typeName: '常驻' }
-    ]
+    ];
 
-    if (!e.isSr && e.msg) e.isSr = /\/(common|hkrpg)\//.test(e.msg)
-    if (e.isSr) {
-      this.uidKey = `Yz:srJson:mys:qq-uid:${this.userId}`
-      this.path = `./data/srJson/${this.e.user_id}/`
-      this.pool = [
-        { type: 11, typeName: '角色' },
-        { type: 12, typeName: '光锥' },
-        { type: 1, typeName: '常驻' },
-        { type: 2, typeName: '新手' }
-      ]
-    }
+    const srPool = [
+      { type: 11, typeName: '角色' },
+      { type: 12, typeName: '光锥' },
+      { type: 1, typeName: '常驻' },
+      { type: 2, typeName: '新手' }
+    ];
+
+    this.pool = e.isSr ? srPool : gsPool;
   }
 
   async logUrl () {
@@ -409,7 +409,7 @@ export default class GachaLog extends base {
       logData.push(data)
     }
     if (logData.length === 0) {
-      this.e.reply('暂无抽卡记录\n#记录帮助，查看配置说明', false, { at: true })
+      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? '*' : '#'}记录帮助，查看配置说明`, false, { at: true })
       return true
     }
     for (let i of logData) {
