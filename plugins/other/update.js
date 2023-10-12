@@ -19,11 +19,11 @@ export class update extends plugin {
       priority: 4000,
       rule: [
         {
-          reg: '^#更新日志',
+          reg: '^#更新日志$',
           fnc: 'updateLog'
         },
         {
-          reg: '^#(强制)?更新',
+          reg: '^#(强制)?更新$',
           fnc: 'update'
         },
         {
