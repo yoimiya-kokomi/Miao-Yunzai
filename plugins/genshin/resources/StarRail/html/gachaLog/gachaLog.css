@@ -150,7 +150,7 @@ body {
   height: 90px;
   position: relative;
   overflow: hidden;
-  background: #e7e5d9;
+  /*background: #e7e5d9;*/
 }
 
 .card_list .item img {
