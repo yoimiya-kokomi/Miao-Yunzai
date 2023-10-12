@@ -66,11 +66,11 @@ export default class apiTool {
         /** 养成计算器 */
         compute: {
           url: `${host}event/e20200928calculate/v2/compute`,
-          body: data
+          body: data.body
         },
         blueprintCompute: {
           url: `${host}event/e20200928calculate/v1/furniture/compute`,
-          body: data
+          body: data.body
         },
         /** 养成计算器 */
         blueprint: {
@@ -178,7 +178,7 @@ export default class apiTool {
         compute: {
           url: `${host}event/rpgcalc/compute?`,
           query:`game=hkrpg`,
-          body: data
+          body: data.body
         },
         /** 详情 */
         detail: {
@@ -197,7 +197,7 @@ export default class apiTool {
       urlMap.genshin.blueprint.url = 'https://sg-public-api.hoyolab.com/event/calculateos/furniture/blueprint'
       urlMap.genshin.blueprint.query = `share_code=${data.share_code}&region=${this.server}&lang=zh-cn`
       urlMap.genshin.blueprintCompute.url = 'https://sg-public-api.hoyolab.com/event/calculateos/furniture/compute'
-      urlMap.genshin.blueprintCompute.body = { lang: 'zh-cn', ...data }
+      urlMap.genshin.blueprintCompute.body = { lang: 'zh-cn', ...data.body }
       urlMap.genshin.ys_ledger.url = 'https://hk4e-api-os.mihoyo.com/event/ysledgeros/month_info'// 支持了国际服札记
       urlMap.genshin.ys_ledger.query = `lang=zh-cn&month=${data.month}&uid=${this.uid}&region=${this.server}`
       urlMap.genshin.useCdk.url = 'https://sg-hk4e-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey'

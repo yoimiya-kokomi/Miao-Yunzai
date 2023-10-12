@@ -53,7 +53,7 @@ export default class blueprint extends base {
   }
 
   async computes (body) {
-    let computes = await this.mysApi.getData('blueprintCompute', body)
+    let computes = await this.mysApi.getData('blueprintCompute', { body })
     if (!computes || computes.retcode !== 0) return false
     computes = computes.data?.list
     return computes

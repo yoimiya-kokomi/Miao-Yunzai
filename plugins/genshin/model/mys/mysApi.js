@@ -10,6 +10,8 @@ export default class MysApi {
    * @param cookie 米游社cookie
    * @param option 其他参数
    * @param option.log 是否显示日志
+   * @param isSr 是否星铁
+   * @param device 设备device_id
    */
   constructor (uid, cookie, option = {}, isSr = false, device = '') {
     this.uid = uid
@@ -37,12 +39,12 @@ export default class MysApi {
     let urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
 
-    let { url, query = '', body = '', sign = '' } = urlMap[type]
+    let { url, query = '', body = '' } = urlMap[type]
 
     if (query) url += `?${query}`
     if (body) body = JSON.stringify(body)
 
-    let headers = this.getHeaders(query, body, sign)
+    let headers = this.getHeaders(query, body)
 
     return { url, headers, body }
   }
@@ -64,26 +66,11 @@ export default class MysApi {
       case '9':
         return this.isSr ? 'prod_official_cht' : 'os_cht' // 港澳台服
     }
-    return 'cn_gf01'
+    return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
   }
 
-  async getData (type, data = {}, cached = false, isGetFP = false) {
-    if (!isGetFP && !data.device_fp) {
-      let seed_id = this.generateSeed(16)
-      let device_fp = await this.getData('getFp', {
-        seed_id
-      }, false, true)
-      if (!data) {
-        data = {}
-      }
-      if (data?.headers) {
-        data.headers['x-rpc-device_fp'] = device_fp?.data?.device_fp
-      } else {
-        data.headers = {
-          'x-rpc-device_fp': device_fp?.data?.device_fp
-        }
-      }
-    }
+  async getData (type, data = {}, cached = false) {
+    if (type == 'getFp') data = { seed_id: this.generateSeed(16) }
     let { url, headers, body } = this.getUrl(type, data)
 
     if (!url) return false
@@ -96,7 +83,6 @@ export default class MysApi {
 
     if (data.headers) {
       headers = { ...headers, ...data.headers }
-      delete data.headers
     }
 
     let param = {
@@ -237,4 +223,3 @@ export default class MysApi {
     return result
   }
 }
-
