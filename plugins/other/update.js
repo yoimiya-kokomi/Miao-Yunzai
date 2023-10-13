@@ -19,11 +19,11 @@ export class update extends plugin {
       priority: 4000,
       rule: [
         {
-          reg: '^#更新日志',
+          reg: '^#更新日志$',
           fnc: 'updateLog'
         },
         {
-          reg: '^#(强制)?更新',
+          reg: '^#(强制)?更新$',
           fnc: 'update'
         },
         {
@@ -223,7 +223,7 @@ export class update extends plugin {
       cm = 'git config -l'
       if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
       end = await execSync(cm, { encoding: 'utf-8' })
-      end = end.match(/remote\..*\.url=.+/g).join('\n\n').replace(/remote\..*\.url=/g, '')
+      end = end.match(/remote\..*\.url=.+/g).join('\n\n').replace(/remote\..*\.url=/g, '').replace(/\/\/([^@]+)@/, '//')
     } catch (error) {
       logger.error(error.toString())
       await this.reply(error.toString())
