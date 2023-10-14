@@ -419,9 +419,13 @@ export default class MysInfo {
         if (res.api === 'detail') res.retcode = 0
         break
       case 1034:
-        try {
-          res = await Gtest.getvali(mysApi, type, data, this.gtest)
-        } catch (error) { }
+        let handler = this.e.runtime?.handler || {}
+
+        // 如果有注册的mys.req.err，调用
+        if (handler.has('mys.req.err')) {
+          logger.mark(`[米游社查询][uid:${this.uid}][qq:${this.userId}] 遇到验证码，尝试调用 Handler mys.req.err`)
+          res = await handler.call('mys.req.err', this.e, { mysApi, type, res, data, mysInfo: this }) || res
+        }
 
         if (!res || res?.retcode == 1034) {
           logger.mark(`[米游社查询失败][uid:${this.uid}][qq:${this.userId}] 遇到验证码`)
