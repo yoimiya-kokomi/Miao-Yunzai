@@ -87,6 +87,13 @@ body {
   border-radius: 100%;
   margin-right: 4px;
 }
+.lab-item-3{
+  background: #4c99b9;
+  width: 6px;
+  height: 6px;
+  border-radius: 100%;
+  margin-right: 4px;
+}
 .lab-item-weapon{
   width: 16px;
   height: 16px;
