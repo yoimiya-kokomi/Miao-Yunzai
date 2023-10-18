@@ -418,6 +418,7 @@ export default class MysInfo {
       case -1002:
         if (res.api === 'detail') res.retcode = 0
         break
+      case 5003:
       case 1034:
         let handler = this.e.runtime?.handler || {}
 
