@@ -163,35 +163,11 @@ export default class MysInfo {
     let user = e.user?.getMysUser()
     let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option, e.isSr, user.device)
 
-    let devicefp = ''
-    if (!data?.headers?.['x-rpc-device_fp'] && api !== 'getFp') {
-      devicefp = (await mysApi.getData('getFp')).data?.device_fp
-      if (data?.headers) {
-        data.headers['x-rpc-device_fp'] = devicefp
-      } else {
-        if (!data) data = {}
-        data.headers = {
-          'x-rpc-device_fp': devicefp
-        }
-      }
-    }
-
     let res
     if (lodash.isObject(api)) {
       let all = []
+      await mysApi.getData('getFp')
       /** 同步请求 */
-      for (let i in api) {
-        if (!api[i]?.headers?.['x-rpc-device_fp']) {
-          if (api[i]?.headers) {
-            api[i].headers['x-rpc-device_fp'] = devicefp
-          } else {
-            if (!api[i]) api[i] = {}
-            api[i].headers = {
-              'x-rpc-device_fp': devicefp
-            }
-          }
-        }
-      }
       if (e.apiSync) {
         res = []
         for (let i in api) {
