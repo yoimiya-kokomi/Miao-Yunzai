@@ -20,15 +20,15 @@ export class gcLog extends plugin {
           fnc: 'logUrl'
         },
         {
-          reg: '#txt日志文件导入记录$',
+          reg: '^#txt日志文件导入记录$',
           fnc: 'logFile'
         },
         {
-          reg: '#xlsx文件导入记录$',
+          reg: '^#xlsx文件导入记录$',
           fnc: 'logXlsx'
         },
         {
-          reg: '#json文件导入记录$',
+          reg: '^#json文件导入记录$',
           fnc: 'logJson'
         },
         {
