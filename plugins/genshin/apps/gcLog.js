@@ -91,7 +91,8 @@ export class gcLog extends plugin {
   /** 抽卡记录链接 */
   async logUrl () {
     if (!this.e.isPrivate) {
-      this.e.reply('发送链接后请自行撤回链接', false, { at: true })
+      this.e.reply('请私聊发送链接', false, { at: true })
+      return true
     }
 
     let data = await new GachaLog(this.e).logUrl()
@@ -149,6 +150,7 @@ export class gcLog extends plugin {
     if (this.e.msg.includes('json')) {
       return await exportLog.exportJson()
     } else {
+      await this.e.reply('如需要将此记录导入到其他平台，请导出json格式文件')
       return await exportLog.exportXlsx()
     }
   }
@@ -163,7 +165,7 @@ export class gcLog extends plugin {
       await this.e.reply('请发送xlsx文件')
       return true
     }
-
+    await this.e.reply('如果是星铁记录，请在【原始数据】工作表复制【gacha_type】列，粘贴并把此标题重命名为【srgf_gacha_type】，否则可能无法正确识别')
     await new ExportLog(this.e).logXlsx()
   }
 
