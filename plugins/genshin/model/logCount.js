@@ -5,7 +5,7 @@ import gsCfg from './gsCfg.js'
 import moment from 'moment'
 
 export default class LogCount extends base {
-  constructor(e) {
+  constructor (e) {
     super(e)
     this.model = 'logCount'
 
@@ -44,7 +44,7 @@ export default class LogCount extends base {
   }
 
   // 读取本地json
-  readJson() {
+  readJson () {
     let logJson = []; let ids = []
     let file = `${this.path}/${this.uid}/${this.type}.json`
     if (fs.existsSync(file)) {
@@ -61,7 +61,7 @@ export default class LogCount extends base {
   }
 
   /** #抽卡统计 */
-  async count() {
+  async count () {
     /** 卡池 */
     this.getPool()
 
@@ -84,9 +84,9 @@ export default class LogCount extends base {
     }
   }
 
-  getPool() {
+  getPool () {
     let msg = this.e.msg.replace(/#|抽卡|记录|祈愿|分析|池|原神|星铁|崩坏星穹铁道|铁道|抽卡|统计|池/g, '')
-    this.type = this.e.isSr?11:301
+    this.type = this.e.isSr ? 11 : 301
     this.typeName = '角色'
     switch (msg) {
       case 'up':
@@ -104,31 +104,34 @@ export default class LogCount extends base {
         this.type = this.e.isSr ? 12 : 302
         this.typeName = this.e.isSr ? '光锥' : '武器'
         break
-      case "光锥":
+      case '光锥':
         this.type = 12
         this.typeName = '光锥'
         break
-      case "新手":
-        this.type = this.e.isSr? 2:100
+      case '新手':
+        this.type = this.e.isSr ? 2 : 100
         this.typeName = '新手'
         break
     }
   }
 
-  async getUid() {
+  async getUid () {
     if (!fs.existsSync(this.path)) {
-      this.e.reply('暂无抽卡记录\n#记录帮助，查看配置说明', false, { at: true })
+      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? '*' : '#'}记录帮助，查看配置说明`, false, { at: true })
       return false
     }
 
     let logs = fs.readdirSync(this.path)
 
     if (lodash.isEmpty(logs)) {
-      this.e.reply('暂无抽卡记录\n#记录帮助，查看配置说明', false, { at: true })
+      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? '*' : '#'}记录帮助，查看配置说明`, false, { at: true })
       return false
     }
 
-    this.uid = await redis.get(this.uidKey)
+    if (!this.uid) {
+      this.e.at = false
+      this.uid = this?.e?.isSr ? this.e.user?._games?.sr?.uid : this.e.user?._games?.gs?.uid || await this.e.runtime.getUid(this.e) || await redis.get(this.uidKey)
+    }
 
     /** 记录有绑定的uid */
     if (this.uid && logs.includes(String(this.uid))) {
@@ -162,7 +165,7 @@ export default class LogCount extends base {
     return uidArr[0].uid
   }
 
-  getPoolCfg() {
+  getPoolCfg () {
     let poolCfg = gsCfg.getdefSet('pool', this.type)
 
     poolCfg.forEach(v => {
@@ -174,7 +177,7 @@ export default class LogCount extends base {
   }
 
   /** 统计计算记录 */
-  analyseHistory() {
+  analyseHistory () {
     let all = this.readJson().list
 
     all = all.reverse()

@@ -10,8 +10,10 @@ export default class MysApi {
    * @param cookie 米游社cookie
    * @param option 其他参数
    * @param option.log 是否显示日志
+   * @param isSr 是否星铁
+   * @param device 设备device_id
    */
-  constructor (uid, cookie, option = {}, isSr = false) {
+  constructor (uid, cookie, option = {}, isSr = false, device = '') {
     this.uid = uid
     this.cookie = cookie
     this.isSr = isSr
@@ -20,6 +22,7 @@ export default class MysApi {
     /** 5分钟缓存 */
     this.cacheCd = 300
 
+    this._device = device
     this.option = {
       log: true,
       ...option
@@ -36,12 +39,12 @@ export default class MysApi {
     let urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
 
-    let { url, query = '', body = '', sign = '' } = urlMap[type]
+    let { url, query = '', body = '' } = urlMap[type]
 
     if (query) url += `?${query}`
     if (body) body = JSON.stringify(body)
 
-    let headers = this.getHeaders(query, body, sign)
+    let headers = this.getHeaders(query, body)
 
     return { url, headers, body }
   }
@@ -63,10 +66,18 @@ export default class MysApi {
       case '9':
         return this.isSr ? 'prod_official_cht' : 'os_cht' // 港澳台服
     }
-    return 'cn_gf01'
+    return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
   }
 
   async getData (type, data = {}, cached = false) {
+    if (!this._device_fp && !data?.Getfp) {
+      this._device_fp = await this.getData('getFp', {
+        seed_id: this.generateSeed(16),
+        Getfp: true
+      })
+    }
+    if (type === 'getFp' && !data?.Getfp) return this._device_fp
+
     let { url, headers, body } = this.getUrl(type, data)
 
     if (!url) return false
@@ -79,7 +90,10 @@ export default class MysApi {
 
     if (data.headers) {
       headers = { ...headers, ...data.headers }
-      delete data.headers
+    }
+
+    if (type !== 'getFp' && !headers['x-rpc-device_fp']) {
+      headers['x-rpc-device_fp'] = this._device_fp.data?.device_fp
     }
 
     let param = {
@@ -114,10 +128,6 @@ export default class MysApi {
     if (!res) {
       logger.mark('mys接口没有返回')
       return false
-    }
-
-    if (res.retcode !== 0 && this.option.log) {
-      logger.debug(`[米游社接口][请求参数] ${url} ${JSON.stringify(param)}`)
     }
 
     res.api = type
@@ -209,5 +219,14 @@ export default class MysApi {
     }
 
     return null
+  }
+
+  generateSeed (length = 16) {
+    const characters = '0123456789abcdef'
+    let result = ''
+    for (let i = 0; i < length; i++) {
+      result += characters[Math.floor(Math.random() * characters.length)]
+    }
+    return result
   }
 }

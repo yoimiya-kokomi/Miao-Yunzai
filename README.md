@@ -15,6 +15,7 @@
 * **移除了签到功能：** 与原Yunzai独立的仓库，去除了较为敏感的签到功能，以尝试恢复[Github](https://github.com/yoimiya-kokomi/Miao-Yunzai.git)
   环境。附加[Gitee](https://gitee.com/yoimiya-kokomi/Miao-Yunzai.git)
 * **默认启用喵版的功能：** 【#角色】【#深渊】【#帮助】等功能默认启用喵版，原版的逻辑会屏蔽，以便于后续逐步精简资源
+* **一键迁移 TRSS-Yunzai：** 若无法登录QQ，可尝试 `node trss` 迁移，迁移后可登录其他协议端 [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
 ## Miao-Yunzai后续计划
 

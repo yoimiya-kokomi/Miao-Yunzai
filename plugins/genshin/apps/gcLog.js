@@ -20,23 +20,23 @@ export class gcLog extends plugin {
           fnc: 'logUrl'
         },
         {
-          reg: '#txt日志文件导入记录',
+          reg: '^#txt日志文件导入记录$',
           fnc: 'logFile'
         },
         {
-          reg: '#xlsx文件导入记录',
+          reg: '^#xlsx文件导入记录$',
           fnc: 'logXlsx'
         },
         {
-          reg: '#json文件导入记录',
+          reg: '^#json文件导入记录$',
           fnc: 'logJson'
         },
         {
-          reg: '^#*(原神|星铁)?(全部)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*(记录|祈愿|分析)$',
+          reg: '^#*(原神|星铁)?(全部)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥|全部)池*(记录|祈愿|分析)$',
           fnc: 'getLog'
         },
         {
-          reg: '^#*导出记录(excel|xlsx|json)*$',
+          reg: '^#*(原神|星铁)?导出记录(excel|xlsx|json)*$',
           fnc: 'exportLog'
         },
         {
@@ -58,7 +58,7 @@ export class gcLog extends plugin {
   }
 
   async init () {
-    let file = ['./data/gachaJson', './data/srJson', './temp/html/StarRail']
+    let file = ['./data/gachaJson', './data/srJson', './temp/html/StarRail', './temp/uigf']
     for (let i of file) {
       if (!fs.existsSync(i)) {
         fs.mkdirSync(i)
@@ -150,6 +150,7 @@ export class gcLog extends plugin {
     if (this.e.msg.includes('json')) {
       return await exportLog.exportJson()
     } else {
+      await this.e.reply('如需要将此记录导入到其他平台，请导出json格式文件')
       return await exportLog.exportXlsx()
     }
   }
@@ -164,7 +165,7 @@ export class gcLog extends plugin {
       await this.e.reply('请发送xlsx文件')
       return true
     }
-
+    await this.e.reply('如果是星铁记录，请在【原始数据】工作表复制【gacha_type】列，粘贴并把此标题重命名为【srgf_gacha_type】，否则可能无法正确识别')
     await new ExportLog(this.e).logXlsx()
   }
 
