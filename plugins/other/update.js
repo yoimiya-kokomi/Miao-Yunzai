@@ -11,7 +11,7 @@ const { exec, execSync } = require('child_process')
 let uping = false
 
 export class update extends plugin {
-  constructor() {
+  constructor () {
     super({
       name: '更新',
       dsc: '#更新 #强制更新',
@@ -37,18 +37,25 @@ export class update extends plugin {
     this.typeName = 'Miao-Yunzai'
   }
 
-  async update() {
+  async update () {
     if (!this.e.isMaster) return false
     if (uping) return this.reply('已有命令更新中..请勿重复操作')
 
     if (/详细|详情|面板|面版/.test(this.e.msg)) return false
 
     /** 获取插件 */
-    const plugin = this.getPlugin()
+    let plugin = this.getPlugin()
     if (plugin === false) return false
 
     /** 执行更新 */
-    await this.runUpdate(plugin)
+    if (plugin === '') {
+      await this.runUpdate('')
+      await common.sleep(1000)
+      plugin = this.getPlugin('miao-plugin')
+      await this.runUpdate(plugin)
+    } else {
+      await this.runUpdate(plugin)
+    }
 
     /** 是否需要重启 */
     if (this.isUp) {
@@ -57,7 +64,7 @@ export class update extends plugin {
     }
   }
 
-  getPlugin(plugin = '') {
+  getPlugin (plugin = '') {
     if (!plugin) {
       plugin = this.e.msg.replace(/#(强制)?更新(日志)?/, '')
       if (!plugin) return ''
@@ -69,7 +76,7 @@ export class update extends plugin {
     return plugin
   }
 
-  async execSync(cmd) {
+  async execSync (cmd) {
     return new Promise((resolve, reject) => {
       exec(cmd, { windowsHide: true }, (error, stdout, stderr) => {
         resolve({ error, stdout, stderr })
@@ -77,7 +84,7 @@ export class update extends plugin {
     })
   }
 
-  async runUpdate(plugin = '') {
+  async runUpdate (plugin = '') {
     this.isNowUp = false
 
     let cm = 'git pull --no-rebase'
@@ -118,7 +125,7 @@ export class update extends plugin {
     return true
   }
 
-  async getcommitId(plugin = '') {
+  async getcommitId (plugin = '') {
     let cm = 'git rev-parse --short HEAD'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
@@ -126,7 +133,7 @@ export class update extends plugin {
     return lodash.trim(commitId)
   }
 
-  async getTime(plugin = '') {
+  async getTime (plugin = '') {
     let cm = 'git log -1 --pretty=%cd --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
@@ -142,7 +149,7 @@ export class update extends plugin {
     return time
   }
 
-  async gitErr(err, stdout) {
+  async gitErr (err, stdout) {
     const msg = '更新失败！'
     const errMsg = err.toString()
     stdout = stdout.toString()
@@ -168,7 +175,7 @@ export class update extends plugin {
     return this.reply([errMsg, stdout])
   }
 
-  async updateAll() {
+  async updateAll () {
     const dirs = fs.readdirSync('./plugins/')
 
     await this.runUpdate()
@@ -186,11 +193,11 @@ export class update extends plugin {
     }
   }
 
-  restart() {
+  restart () {
     new Restart(this.e).restart()
   }
 
-  async getLog(plugin = '') {
+  async getLog (plugin = '') {
     let cm = 'git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
@@ -232,7 +239,7 @@ export class update extends plugin {
     return common.makeForwardMsg(this.e, [log, end], `${plugin || 'Miao-Yunzai'} 更新日志，共${line}条`)
   }
 
-  async updateLog() {
+  async updateLog () {
     const plugin = this.getPlugin()
     if (plugin === false) return false
     return this.reply(await this.getLog(plugin))
