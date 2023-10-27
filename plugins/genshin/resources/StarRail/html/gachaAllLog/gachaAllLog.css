@@ -80,7 +80,7 @@ body {
   border-radius: 15px;
   margin-top: 20px;
   margin-bottom: 20px;
-  padding: 20px 0px 5px 10px;
+  padding: 20px 5px;
   background: #fff;
   box-shadow: 0 5px 10px 0 rgb(0 0 0 / 15%);
   position: relative;
@@ -193,6 +193,34 @@ body {
 .card_list .item.star4 img {
   background: #343659;
   background: linear-gradient(180deg,#343659,#8a5fcc 53%);
+  width: 100%;
+  height: 70px;
+}
+
+.card_list .item.gold img {
+  background: #885550;
+  background: linear-gradient(180deg,#885550,#c9a36a 53%);
+  width: 100%;
+  height: 70px;
+}
+
+.card_list .item.good img {
+  background: #345859;
+  background: linear-gradient(180deg,#134E5E,#71B280 53%);
+  width: 100%;
+  height: 70px;
+}
+
+.card_list .item.normal img {
+  background: #343659;
+  background: linear-gradient(180deg,#343659,#8a5fcc 53%);
+  width: 100%;
+  height: 70px
+}
+
+.card_list .item.bad img {
+  background: #593434;
+  background: linear-gradient(180deg,#480048,#C04848 53%);
   width: 100%;
   height: 70px;
 }
@@ -373,25 +401,4 @@ body {
   font-size: 12px;
   margin: 6px 0;
   color: #7f858a;
-}
-
-
-.gold {
-  background: #ffeb73;
-  color: #6f4b00;
-}
-
-.good {
-  background: #168b2c;
-  color: #fff;
-}
-
-.normal {
-  background: #6939b7;
-  color: #fff;
-}
-
-.bad {
-  background: #9d3333;
-  color: #fff;
 }
