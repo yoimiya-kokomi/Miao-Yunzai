@@ -16,7 +16,7 @@ export default class GachaLog extends base {
     /** 绑定的uid */
     this.uidKey = this.e.isSr ? `Yz:srJson:mys:qq-uid:${this.userId}` : `Yz:genshin:mys:qq-uid:${this.userId}`;
     this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`;
-    
+
     const gsPool = [
       { type: 301, typeName: '角色' },
       { type: 302, typeName: '武器' },
@@ -58,7 +58,7 @@ export default class GachaLog extends base {
       if (i <= 1) await common.sleep(500)
     }
     MakeMsg.push(tmpMsg)
-    MakeMsg.push(`\n抽卡记录更新完成，您还可回复\n【${this?.e?.isSr ? '*' : '#'}全部记录】统计全部抽卡数据\n【${this?.e?.isSr ? '*光锥' : '#武器'}记录】统计${this?.e?.isSr ? '星铁光锥' : '武器'}池数据\n【${this?.e?.isSr ? '*' : '#'}角色统计】按卡池统计数据\n${this?.e?.isSr ? '' : '【#导出记录】导出记录数据'}`)
+    MakeMsg.push(`\n抽卡记录更新完成，您还可回复\n【${this?.e?.isSr ? '*' : '#'}全部记录】统计全部抽卡数据\n【${this?.e?.isSr ? '*光锥' : '#武器'}记录】统计${this?.e?.isSr ? '星铁光锥' : '武器'}池数据\n【${this?.e?.isSr ? '*' : '#'}角色统计】按卡池统计数据\n【${this?.e?.isSr ? '*' : '#'}导出记录】导出记录数据`)
     await this.e.reply(MakeMsg)
 
     this.isLogUrl = true
@@ -428,11 +428,13 @@ export default class GachaLog extends base {
 
   async getGcLogData () {
     /** 卡池 */
-    this.getPool()
+    const { type, typeName } = this.getPool()
     /** 更新记录 */
     if (!this.isLogUrl) await this.updateLog()
     /** 统计计算记录 */
     let data = this.analyse()
+    data.type = type
+    data.typeName = typeName
     /** 渲染数据 */
     data = this.randData(data)
     return data
@@ -440,33 +442,36 @@ export default class GachaLog extends base {
 
   getPool () {
     let msg = this.e.msg.replace(/#|抽卡|记录|祈愿|分析|池|原神|星铁|崩坏星穹铁道|铁道/g, '')
-    this.type = this.e.isSr ? 11 : 301
-    this.typeName = '角色'
+    let type = this.e.isSr ? 11 : 301
+    let typeName = '角色'
     switch (msg) {
       case 'up':
       case '抽卡':
       case '角色':
       case '抽奖':
-        this.type = this.e.isSr ? 11 : 301
-        this.typeName = '角色'
+        type = this.e.isSr ? 11 : 301
+        typeName = '角色'
         break
       case '常驻':
-        this.type = this.e.isSr ? 1 : 200
-        this.typeName = '常驻'
+        type = this.e.isSr ? 1 : 200
+        typeName = '常驻'
         break
       case '武器':
-        this.type = this.e.isSr ? 12 : 302
-        this.typeName = this.e.isSr ? '光锥' : '武器'
+        type = this.e.isSr ? 12 : 302
+        typeName = this.e.isSr ? '光锥' : '武器'
         break
       case '光锥':
-        this.type = 12
-        this.typeName = '光锥'
+        type = 12
+        typeName = '光锥'
         break
       case '新手':
-        this.type = this.e.isSr ? 2 : 100
-        this.typeName = '新手'
+        type = this.e.isSr ? 2 : 100
+        typeName = '新手'
         break
     }
+    this.type = type
+    this.typeName = typeName
+    return { type, typeName }
   }
 
   async getUid () {
@@ -717,10 +722,12 @@ export default class GachaLog extends base {
 
   /** 渲染数据 */
   randData (data) {
-    const max = this.type === 12 || this.type === 302 ? 80 : 90
+    const type = data.type || this.type
+    const typeName = data.typeName || this.typeName
+    const max = type === 12 || type === 302 ? 80 : 90
     let line = []
     let weapon = this.e.isSr ? '光锥' : '武器'
-    if ([301, 11].includes(this.type)) {
+    if ([301, 11].includes(type)) {
       line = [[
         { lable: '未出五星', num: data.noFiveNum, unit: '抽' },
         { lable: '五星', num: data.fiveNum, unit: '个' },
@@ -734,7 +741,7 @@ export default class GachaLog extends base {
       ]]
     }
     // 常驻池
-    if ([200, 1].includes(this.type)) {
+    if ([200, 1].includes(type)) {
       line = [[
         { lable: '未出五星', num: data.noFiveNum, unit: '抽' },
         { lable: '五星', num: data.fiveNum, unit: '个' },
@@ -748,7 +755,7 @@ export default class GachaLog extends base {
       ]]
     }
     // 武器池
-    if ([302, 12].includes(this.type)) {
+    if ([302, 12].includes(type)) {
       line = [[
         { lable: '未出五星', num: data.noFiveNum, unit: '抽' },
         { lable: '五星', num: data.fiveNum, unit: '个' },
@@ -762,7 +769,7 @@ export default class GachaLog extends base {
       ]]
     }
     // 新手池
-    if ([100, 2].includes(this.type)) {
+    if ([100, 2].includes(type)) {
       line = [[
         { lable: '未出五星', num: data.noFiveNum, unit: '抽' },
         { lable: '五星', num: data.fiveNum, unit: '个' },
@@ -776,17 +783,17 @@ export default class GachaLog extends base {
       ]]
     }
     let hasMore = false
-    if (this.e.isGroup && data.fiveLog.length > 48) {
-      data.fiveLog = data.fiveLog.slice(0, 48)
-      hasMore = true
-    }
+    // if (this.e.isGroup && data.fiveLog.length > 48) {
+    //   data.fiveLog = data.fiveLog.slice(0, 48)
+    //   hasMore = true
+    // }
 
     return {
       ...this.screenData,
       saveId: this.uid,
       uid: this.uid,
-      type: this.type,
-      typeName: this.typeName,
+      type,
+      typeName,
       allNum: data.allNum,
       firstTime: data.firstTime,
       lastTime: data.lastTime,

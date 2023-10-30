@@ -45,7 +45,7 @@
 
       <div class="card_list">
         {{each fiveLog val}}
-        <div class="item star5 {{val.num<=10?'gold': (val.num<max*0.5 ? 'good' : (num<max*0.83) ? 'normal': 'bad')}}">
+        <div class="item star5 {{val.num<=10?'gold': (val.num<max*0.5 ? 'good' : (val.num<max*0.83) ? 'normal': 'bad')}}">
           {{ if val.isUp && typeName == '角色' }}
             <span class="minimum">UP</span>
           {{/if}}
