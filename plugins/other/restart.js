@@ -31,15 +31,26 @@ export class Restart extends plugin {
     let restart = await redis.get(this.key)
     if (restart) {
       restart = JSON.parse(restart)
+      const uin = restart?.uin || Bot.uin
       let time = restart.time || new Date().getTime()
       time = (new Date().getTime() - time) / 1000
 
       let msg = `重启成功：耗时${time.toFixed(2)}秒`
-
-      if (restart.isGroup) {
-        Bot.pickGroup(restart.id).sendMsg(msg)
-      } else {
-        Bot.pickUser(restart.id).sendMsg(msg)
+      try {
+        if (restart.isGroup) {
+          Bot[uin].pickGroup(restart.id).sendMsg(msg)
+        } else {
+          Bot[uin].pickUser(restart.id).sendMsg(msg)
+        }
+      } catch (error) {
+        /** 发送失败后等待5s重试一次，适配器可能没连接bot */
+        await new Promise((resolve) => setTimeout(resolve, 5000))
+        msg = `重启成功：耗时${(time + 5).toFixed(2)}秒`
+        if (restart.isGroup) {
+          Bot[uin].pickGroup(restart.id).sendMsg(msg)
+        } else {
+          Bot[uin].pickUser(restart.id).sendMsg(msg)
+        }
       }
       redis.del(this.key)
     }
@@ -50,6 +61,7 @@ export class Restart extends plugin {
     logger.mark(`${this.e.logFnc} 开始执行重启，请稍等...`)
 
     let data = JSON.stringify({
+      uin: this.e?.self_id || this.e.bot.uin,
       isGroup: !!this.e.isGroup,
       id: this.e.isGroup ? this.e.group_id : this.e.user_id,
       time: new Date().getTime()
