@@ -52,6 +52,14 @@ export class user extends plugin {
         {
           reg: '^#\\s*(检查|我的)*ck(状态)*$',
           fnc: 'checkCkStatus'
+        },
+        {
+          reg: '^#(接受)?绑定(主|子)?用户(\\[\\w+\\]){0,2}$',
+          fnc: 'bindNoteUser'
+        },
+        {
+          reg: '^#(删除绑定|取消绑定|解除绑定|解绑|删除|取消)(主|子)用户$',
+          fnc: 'bindNoteUser'
         }
       ]
     })
@@ -174,5 +182,9 @@ export class user extends plugin {
   /** 检查用户CK状态 **/
   async checkCkStatus () {
     await this.User.checkCkStatus()
+  }
+
+  async bindNoteUser () {
+    await this.User.bindNoteUser()
   }
 }

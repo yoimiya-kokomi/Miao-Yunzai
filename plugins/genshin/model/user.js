@@ -499,4 +499,90 @@ export default class User extends base {
       ...this.screenData
     }
   }
+
+  async bindNoteUser () {
+    let user = await this.user()
+    let id = user.qq
+    let { e } = this
+    let { msg } = e
+    if (!id) {
+      return true
+    }
+    if (/(删除绑定|取消绑定|解除绑定|解绑|删除|取消)/.test(msg)) {
+      // 删除用户
+      id = e.originalUserId || id
+      if (/主/.test(msg)) {
+        let mainId = await redis.get(`Yz:NoteUser:mainId:${id}`)
+        if (!mainId) {
+          e.reply('当前用户没有主用户，在主用户中通过【#绑定用户】可进行绑定...')
+          return true
+        }
+        let subIds = await Data.getCacheJSON(`Yz:NoteUser:subIds:${mainId}`)
+        delete subIds[id]
+        await redis.del(`Yz:NoteUser:mainId:${id}`)
+        await Data.setCacheJSON(`Yz:NoteUser:subIds:${mainId}`, subIds)
+        e.reply('已经解除与主用户的绑定...')
+      } else if (/子/.test(msg)) {
+        let subIds = await Data.getCacheJSON(`Yz:NoteUser:subIds:${id}`)
+        let count = 0
+        for (let key in subIds) {
+          await redis.del(`Yz:NoteUser:mainId:${key}`)
+          count++
+        }
+        if (count > 0) {
+          e.reply(`已删除${count}个子用户...`)
+          await redis.del(`Yz:NoteUser:subIds:${id}`)
+        } else {
+          e.reply(`当前用户没有子用户，通过【#绑定用户】可绑定子用户...`)
+        }
+      }
+      return true
+    }
+    msg = msg.replace(/^#\s*(接受)?绑定(主|子)?用户/, '')
+    let idRet = /^\[(\w{5,})](?:\[(\w+)])?$/.exec(msg)
+    if (idRet && idRet[1]) {
+      let mainId = idRet[1]
+      let currId = id.toString()
+      if (!idRet[2]) {
+        // 子用户绑定
+        if (currId === mainId) {
+          e.reply('请切换到需要绑定的子用户并发送绑定命令...')
+          return true
+        }
+        let verify = (Math.floor(100000000 + Math.random() * 100000000)).toString()
+        await redis.set(`Yz:NoteUser:verify:${mainId}`, verify + '||' + currId, { EX: 300 })
+        e.reply(['此账号即将作为子用户，绑定至主用户:${mainId}',
+          '成功绑定后，此用户输入的命令，将视作主用户命令，使用主用户的CK与UID等信息',
+          '如需继续绑定，请在5分钟内，使用主账户发送以下命令：', '',
+          `#接受绑定子用户[${mainId}][${verify}]`
+        ].join('\n'))
+        return true
+      } else {
+        // 接受绑定
+        if (currId !== mainId) {
+          e.reply('请切换到主用户并发送接受绑定的命令...')
+          return true
+        }
+        let verify = await redis.get(`Yz:NoteUser:verify:${mainId}`) || ''
+        verify = verify.split('||')
+        if (!verify || verify[0] !== idRet[2] || !verify[1]) {
+          e.reply('校验失败，请发送【#绑定用户】重新开始绑定流程')
+          return true
+        }
+        let subId = verify[1]
+        await redis.del(`Yz:NoteUser:verify:${mainId}`)
+        await redis.set(`Yz:NoteUser:mainId:${subId}`, mainId, { EX: 3600 * 24 * 365 })
+        let subIds = await Data.getCacheJSON(`Yz:NoteUser:subIds:${mainId}`)
+        subIds[subId] = 'true'
+        await Data.setCacheJSON(`Yz:NoteUser:subIds:${mainId}`, subIds)
+        e.reply('绑定成功，绑定的子用户可使用主用户的UID/CK等信息\n请勿接受不是自己用户的绑定，如需解绑可通过【#解绑子用户】进行解绑')
+        return true
+      }
+    } else {
+      this.e.reply(['将此账号作为主用户，同Bot已绑定的子用户可使用主用户的CK及UID信息等信息。',
+        '可在多个QQ或频道间打通用户信息，推荐使用QQ账户作为主用户。',
+        '请【切换至需要绑定的子用户】，输入以下命令，获得绑定验证码', '请勿接受不是自己用户的绑定！', '',
+        `#绑定主用户[${id}]`].join('\n'))
+    }
+  }
 }

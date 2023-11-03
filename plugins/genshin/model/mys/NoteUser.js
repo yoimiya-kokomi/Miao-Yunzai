@@ -86,7 +86,14 @@ export default class NoteUser extends BaseModel {
     // 兼容处理传入e
     if (qq && qq.user_id) {
       let e = qq
-      let user = await NoteUser.create(e.user_id)
+      let id = e.originalUserId || e.user_id
+      let mainId = await redis.get(`Yz:NoteUser:mainId:${e.user_id}`)
+      if (mainId) {
+        id = mainId
+        e.mainUserId = mainId
+        e.originalUserId = e.originalUserId || e.user_id
+      }
+      let user = await NoteUser.create(id)
       e.user = user
       return user
     }
