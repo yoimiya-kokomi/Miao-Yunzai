@@ -19,7 +19,7 @@ export default class ExportLog extends base {
 
     this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`
 
-    this.game = this.e.game || this.e.isSr ? 'sr' : 'gs'
+    this.game = this.e.game
 
     this.pool = (game = 'gs') => {
       let pool = {
@@ -156,7 +156,12 @@ export default class ExportLog extends base {
   }
 
   getAllList() {
-    let uigf = JSON.parse(fs.readFileSync('./temp/uigf/genshin.json', 'utf8'))
+    let uigf = './temp/uigf/genshin.json'
+    try {
+      uigf = JSON.parse(fs.readFileSync(uigf, 'utf8'))
+    } catch (error) {
+      uigf = false
+    }
     let res = {
       list: []
     }
@@ -171,8 +176,7 @@ export default class ExportLog extends base {
       }
       res[v.type] = json
       for (let v of json) {
-        // item_id必要字段
-        if (!v.item_id) {
+        if (!v.item_id && uigf) {
           v.item_id = String(uigf[v.name])
         }
         if (!this.e.isSr) {
