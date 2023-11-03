@@ -504,13 +504,13 @@ export default class User extends base {
     let user = await this.user()
     let id = user.qq
     let { e } = this
-    let { msg } = e
+    let { msg, mainUserId, originalUserId } = e
     if (!id) {
       return true
     }
     if (/(删除绑定|取消绑定|解除绑定|解绑|删除|取消)/.test(msg)) {
       // 删除用户
-      id = e.originalUserId || id
+      id = originalUserId || id
       if (/主/.test(msg)) {
         let mainId = await redis.get(`Yz:NoteUser:mainId:${id}`)
         if (!mainId) {
@@ -538,7 +538,7 @@ export default class User extends base {
       }
       return true
     }
-    msg = msg.replace(/^#\s*(接受)?绑定(主|子)?用户/, '')
+    msg = msg.replace(/^#\s*(接受)?绑定(主|子)?(用户|账户|账号)/, '')
     let idRet = /^\[(\w{5,})](?:\[(\w+)])?$/.exec(msg)
     if (idRet && idRet[1]) {
       let mainId = idRet[1]
@@ -546,12 +546,16 @@ export default class User extends base {
       if (!idRet[2]) {
         // 子用户绑定
         if (currId === mainId) {
-          e.reply('请切换到需要绑定的子用户并发送绑定命令...')
+          if (originalUserId && originalUserId !== mainId && mainUserId === mainId) {
+            e.reply('当前账户已完成绑定...')
+          } else {
+            e.reply('请切换到需要绑定的子用户并发送绑定命令...')
+          }
           return true
         }
         let verify = (Math.floor(100000000 + Math.random() * 100000000)).toString()
         await redis.set(`Yz:NoteUser:verify:${mainId}`, verify + '||' + currId, { EX: 300 })
-        e.reply(['此账号即将作为子用户，绑定至主用户:${mainId}',
+        e.reply([`此账号将作为子用户，绑定至主用户:${mainId}`,
           '成功绑定后，此用户输入的命令，将视作主用户命令，使用主用户的CK与UID等信息',
           '如需继续绑定，请在5分钟内，使用主账户发送以下命令：', '',
           `#接受绑定子用户[${mainId}][${verify}]`
@@ -567,6 +571,7 @@ export default class User extends base {
         verify = verify.split('||')
         if (!verify || verify[0] !== idRet[2] || !verify[1]) {
           e.reply('校验失败，请发送【#绑定用户】重新开始绑定流程')
+          await redis.del(`Yz:NoteUser:verify:${mainId}`)
           return true
         }
         let subId = verify[1]
@@ -579,9 +584,14 @@ export default class User extends base {
         return true
       }
     } else {
-      this.e.reply(['将此账号作为主用户，同Bot已绑定的子用户可使用主用户的CK及UID信息等信息。',
-        '可在多个QQ或频道间打通用户信息，推荐使用QQ账户作为主用户。',
-        '请【切换至需要绑定的子用户】，输入以下命令，获得绑定验证码', '请勿接受不是自己用户的绑定！', '',
+      if (mainUserId && originalUserId && originalUserId !== mainUserId) {
+        e.reply('当前账户已有绑定的主账户，请使用主账户发起绑定...')
+        return true
+      }
+      e.reply(['将此账号作为【主用户】，绑定其他子用户。', '',
+        '可在多个QQ或频道间打通用户信息，子用户会使用主用户的CK与UID等信息',
+        '注意：请勿接受不是自己用户的绑定！',
+        '请【切换至需要绑定的子用户】并发送以下命令，获得验证命令...', '',
         `#绑定主用户[${id}]`].join('\n'))
     }
   }
