@@ -1,6 +1,6 @@
 {
   "name": "trss-yunzai",
-  "version": "3.1.0",
+  "version": "3.1.2",
   "author": "TimeRainStarSky, Yoimiya-Kokomi, Le-niao",
   "description": "Bot",
   "main": "app.js",
@@ -13,14 +13,14 @@
     "start": "pm2 start ./config/pm2/pm2.json",
     "stop": "pm2 stop ./config/pm2/pm2.json",
     "restart": "pm2 restart ./config/pm2/pm2.json",
-    "log": "node ./lib/tools/name.js"
+    "log": "node ./lib/tools/log.js"
   },
   "dependencies": {
     "art-template": "^4.13.2",
     "chalk": "^5.3.0",
     "chokidar": "^3.5.3",
     "express": "^4.18.2",
-    "file-type": "^18.5.0",
+    "file-type": "^18.6.0",
     "https-proxy-agent": "7.0.2",
     "image-size": "^1.0.2",
     "lodash": "^4.17.21",
@@ -32,7 +32,7 @@
     "node-xlsx": "^0.23.0",
     "oicq": "link:lib/modules/oicq",
     "pm2": "^5.3.0",
-    "puppeteer": "^21.3.8",
+    "puppeteer": "^21.4.1",
     "redis": "^4.6.10",
     "sequelize": "^6.33.0",
     "sqlite3": "^5.1.6",
@@ -40,9 +40,9 @@
     "yaml": "^2.3.3"
   },
   "devDependencies": {
-    "eslint": "^8.51.0",
+    "eslint": "^8.52.0",
     "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-n": "^16.2.0",
     "eslint-plugin-promise": "^6.1.1"
   },

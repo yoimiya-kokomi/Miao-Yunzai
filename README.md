@@ -2,7 +2,7 @@
 
 # TRSS-Yunzai
 
-Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、GSUIDCore、ICQQ、QQ频道、微信、KOOK、Telegram、Discord
+Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、GSUIDCore、ICQQ、QQBot、QQ频道、微信、KOOK、Telegram、Discord、OPQBot
 
 [![访问量](https://visitor-badge.glitch.me/badge?page_id=TimeRainStarSky.Yunzai&right_color=red&left_text=访%20问%20量)](https://github.com/TimeRainStarSky/Yunzai)
 [![Stars](https://img.shields.io/github/stars/TimeRainStarSky/Yunzai?color=yellow&label=收藏)](../../stargazers)
@@ -118,6 +118,12 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
+<details><summary>QQBot</summary>
+
+[TRSS-Yunzai QQBot Plugin](../../../Yunzai-QQBot-Plugin)
+
+</details>
+
 <details><summary>QQ频道</summary>
 
 [TRSS-Yunzai QQGuild Plugin](../../../Yunzai-QQGuild-Plugin)
@@ -154,9 +160,19 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
-<details><summary>代理</summary>
+<details><summary>OPQBot</summary>
 
-[TRSS-Yunzai Proxy Plugin](../../../Yunzai-Proxy-Plugin)
+下载运行 [OPQBot](https://opqbot.com)，启动参数添加：
+
+```
+-wsserver ws://localhost:2536/OPQBot
+```
+
+</details>
+
+<details><summary>路由</summary>
+
+[TRSS-Yunzai Route Plugin](../../../Yunzai-Route-Plugin)
 
 </details>
 
