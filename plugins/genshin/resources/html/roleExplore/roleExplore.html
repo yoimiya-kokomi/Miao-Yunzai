@@ -4,9 +4,9 @@
 <head>
   <meta http-equiv="content-type" content="text/html;charset=utf-8" />
   <link rel="shortcut icon" href="#" />
-  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/roleExplore/roleExplore.css" />
-  <link rel="preload" href="{{resPath}}/font/tttgbnumber.ttf" as="font">
-  <link rel="preload" href="{{pluResPath}}img/other/原神.png" as="image">
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}html/roleExplore/roleExplore.css" />
+  <link rel="preload" href="{{_miao_path}}/font/tttgbnumber.ttf" as="font">
+  <link rel="preload" href="{{_res_path}}img/other/原神.png" as="image">
   {{@headIndexStyle}}
 </head>
 
@@ -19,7 +19,7 @@
       <div class="day_text">
         {{gamefwq}} | UID{{uid}}
       </div>
-      <img class="genshin_logo" src="{{pluResPath}}img/other/原神.png">
+      <img class="genshin_logo" src="{{_res_path}}img/other/原神.png">
     </div>
     <div class="data_box">
       <div class="tab_lable">数据总览</div>
@@ -60,7 +60,7 @@
       <div class="tab_lable">地图探险</div>
       {{each explor val}}
       <div class="item">
-        <img class="icon" src="{{pluResPath}}img/other/{{val.name}}.png" />
+        <img class="icon" src="{{_res_path}}img/other/{{val.name}}.png" />
         <div class="content">
           {{each val.line line}}
           <p class="name">{{line.name}}：<span class="num">{{line.text}}</span></p>

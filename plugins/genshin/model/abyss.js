@@ -2,7 +2,7 @@ import moment from 'moment'
 import lodash from 'lodash'
 import base from './base.js'
 import MysInfo from './mys/mysInfo.js'
-import gsCfg from './gsCfg.js'
+import { Character } from '#miao.models'
 
 export default class Abyss extends base {
   constructor (e) {
@@ -82,9 +82,13 @@ export default class Abyss extends base {
           }
         ]
       }
+
+      let char = Character.get(data[`${val}_rank`][0].avatar_id)
+
       rankData[val] = {
         num: data[`${val}_rank`][0].value,
-        name: gsCfg.roleIdToName(data[`${val}_rank`][0].avatar_id)
+        name: char.abbr,
+        icon: char.side,
       }
 
       if (rankData[val].num > 1000) {
@@ -94,7 +98,9 @@ export default class Abyss extends base {
     }
 
     for (let i in data.reveal_rank) {
-      data.reveal_rank[i].name = gsCfg.roleIdToName(data.reveal_rank[i].avatar_id)
+      let char = Character.get(data.reveal_rank[i].avatar_id)
+      data.reveal_rank[i].name = char.abbr
+      data.reveal_rank[i].icon = char.face
     }
 
     return {
@@ -204,10 +210,9 @@ export default class Abyss extends base {
 
       for (let i in val.battles) {
         for (let j in val.battles[i].avatars) {
-          val.battles[i].avatars[j].name = roleArr[val.battles[i].avatars[j].id].name
-
-          val.battles[i].avatars[j].name = gsCfg.roleIdToName(val.battles[i].avatars[j].id)
-
+          let char = Character.get(val.battles[i].avatars[j].id)
+          val.battles[i].avatars[j].name = char.abbr
+          val.battles[i].avatars[j].icon = char.face
           val.battles[i].avatars[j].life = roleArr[val.battles[i].avatars[j].id].actived_constellation_num
         }
       }

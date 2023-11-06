@@ -1,13 +1,10 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import fs from 'node:fs'
 import gsCfg from '../model/gsCfg.js'
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import RoleIndex from '../model/roleIndex.js'
-import RoleDetail from '../model/roleDetail.js'
 import Abyss from '../model/abyss.js'
 import Weapon from '../model/weapon.js'
-import RoleBag from '../model/roleBag.js'
-import RoleList from '../model/roleList.js'
+
 export class role extends plugin {
   constructor () {
     super({
@@ -15,44 +12,22 @@ export class role extends plugin {
       dsc: '原神角色信息查询',
       event: 'message',
       priority: 200,
-      rule: [
-        {
-          reg: '^(#(角色|查询|查询角色|角色查询|人物)[ |0-9]*$)|(^(#*uid|#*UID)\\+*[1|2|5-9][0-9]{8}$)|(^#[\\+|＋]*[1|2|5-9][0-9]{8})',
-          fnc: 'roleIndex'
-        },
-        {
-          reg: '^#角色详情[0-9]*$',
-          fnc: 'roleDetail'
-        },
-        {
-          reg: '^(#*角色3|#*角色卡片|角色)$',
-          fnc: 'roleCard'
-        },
-        {
-          reg: '^#[上期|往期|本期]*(深渊|深境|深境螺旋)[上期|往期|本期]*[ |0-9]*$',
-          fnc: 'abyss'
-        },
-        {
-          reg: '^#*[上期|往期|本期]*(深渊|深境|深境螺旋)[上期|往期|本期]*[第]*(9|10|11|12|九|十|十一|十二)层[ |0-9]*$',
-          fnc: 'abyssFloor'
-        },
-        {
-          reg: '^#[五星|四星|5星|4星]*武器[ |0-9]*$',
-          fnc: 'weapon'
-        },
-        {
-          reg: '^#(五星|四星|5星|4星|命座|角色|武器)[命座|角色|背包]*[信息|阵容]*[ |0-9]*$',
-          fnc: 'roleBag'
-        },
-        {
-          reg: '^#*(我的)*(技能|天赋|武器|角色|练度|五|四|5|4|星)+(汇总|统计|列表)(force|五|四|5|4|星)*[ |0-9]*$',
-          fnc: 'roleList'
-        },
-        {
-          reg: '^#(角色2|宝箱|成就|尘歌壶|家园|探索|探险|声望|探险度|探索度)[ |0-9]*$',
-          fnc: 'roleExplore'
-        }
-      ]
+      rule: [{
+        reg: '^(#*角色3|#*角色卡片|角色)$',
+        fnc: 'roleCard'
+      }, {
+        reg: '^#[上期|往期|本期]*(深渊|深境|深境螺旋)[上期|往期|本期]*[ |0-9]*$',
+        fnc: 'abyss'
+      }, {
+        reg: '^#*[上期|往期|本期]*(深渊|深境|深境螺旋)[上期|往期|本期]*[第]*(9|10|11|12|九|十|十一|十二)层[ |0-9]*$',
+        fnc: 'abyssFloor'
+      }, {
+        reg: '^#[五星|四星|5星|4星]*武器[ |0-9]*$',
+        fnc: 'weapon'
+      }, {
+        reg: '^#(宝箱|成就|尘歌壶|家园|探索|探险|声望|探险度|探索度)[ |0-9]*$',
+        fnc: 'roleExplore'
+      }]
     })
   }
 
@@ -67,10 +42,6 @@ export class role extends plugin {
     let set = './plugins/genshin/config/mys.set.yaml'
     if (!fs.existsSync(set)) {
       fs.copyFileSync('./plugins/genshin/defSet/mys/set.yaml', set)
-    }
-
-    if (!fs.existsSync('./data/roleDetail')) {
-      fs.mkdirSync('./data/roleDetail')
     }
   }
 
@@ -92,31 +63,13 @@ export class role extends plugin {
     }
   }
 
-  /** #角色 */
-  async roleIndex () {
-    let data = await RoleIndex.get(this.e)
-    if (!data) return
-
-    let img = await puppeteer.screenshot('roleIndex', data)
-    if (img) await this.reply(img)
-  }
-
-  /** 刻晴 */
-  async roleDetail () {
-    let data = await RoleDetail.get(this.e)
-    if (!data) return
-
-    let img = await puppeteer.screenshot('roleDetail', data)
-    if (img) await this.reply(img)
-  }
-
   /** 深渊 */
   async abyss () {
     let data = await new Abyss(this.e).getAbyss()
+    console.log('abyss', data)
     if (!data) return
 
-    let img = await puppeteer.screenshot('abyss', data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', 'html/abyss/abyss', data)
   }
 
   /** 深渊十二层 */
@@ -124,8 +77,7 @@ export class role extends plugin {
     let data = await new Abyss(this.e).getAbyssFloor()
     if (!data) return
 
-    let img = await puppeteer.screenshot('abyssFloor', data)
-    if (img) await this.reply(img)
+    await this.renderImg('genshin', 'html/abyssFloor/abyssFloor', data)
   }
 
   /** 武器 */
@@ -133,26 +85,7 @@ export class role extends plugin {
     let data = await Weapon.get(this.e)
     if (!data) return
 
-    let img = await puppeteer.screenshot('weapon', data)
-    if (img) await this.reply(img)
-  }
-
-  /** 角色背包 */
-  async roleBag () {
-    let data = await RoleBag.get(this.e)
-    if (!data) return
-
-    let img = await puppeteer.screenshot('roleBag', data)
-    if (img) await this.reply(img)
-  }
-
-  /** 练度统计 */
-  async roleList () {
-    let data = await RoleList.get(this.e)
-    if (!data) return
-
-    let img = await puppeteer.screenshot('roleList', data)
-    if (img) await this.reply(img)
+    await this.renderImg('genshin', 'html/weapon/weapon', data)
   }
 
   /** 角色卡片 */
@@ -160,8 +93,7 @@ export class role extends plugin {
     let data = await new RoleIndex(this.e).roleCard()
     if (!data) return
 
-    let img = await puppeteer.screenshot('roleCard', data)
-    if (img) await this.reply(img)
+    await this.renderImg('genshin', 'html/roleCard/roleCard', data)
   }
 
   /** 探险 */
@@ -169,7 +101,6 @@ export class role extends plugin {
     let data = await new RoleIndex(this.e).roleExplore()
     if (!data) return
 
-    let img = await puppeteer.screenshot('roleExplore', data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', 'html/roleExplore/roleExplore', data)
   }
 }

@@ -1,16 +1,25 @@
 import fs from 'node:fs'
 import _ from 'lodash'
+import { Common } from '#miao'
 
 export default class base {
-  constructor(e = {}) {
+  constructor (e = {}) {
     this.e = e
     this.userId = e?.user_id
     this.model = 'genshin'
     this._path = process.cwd().replace(/\\/g, '/')
   }
 
-  get prefix() {
+  get prefix () {
     return `Yz:genshin:${this.model}:`
+  }
+
+  // 统一封装渲染
+  async renderImg (tpl, data, cfg = {}) {
+    return Common.render('genshin', `html/${tpl}`, data, {
+      ...cfg,
+      e: this.e
+    })
   }
 
   /**
@@ -19,7 +28,7 @@ export default class base {
    * @param tplFile 模板html路径
    * @param pluResPath 插件资源路径
    */
-  get screenData() {
+  get screenData () {
     if (this.e?.isSr) {
       let headImg = _.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/StarRail/img/worldcard`).filter(file => file.endsWith('.png')))
       return {

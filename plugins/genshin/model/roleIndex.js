@@ -4,11 +4,13 @@ import gsCfg from './gsCfg.js'
 import lodash from 'lodash'
 import moment from 'moment'
 import fs from 'node:fs'
+import { Character } from '#miao.models'
+
 let dsz = '待实装'
 let imgFile = {}
 
 export default class RoleIndex extends base {
-  constructor(e) {
+  constructor (e) {
     super(e)
     this.model = 'roleIndex'
     this.other = gsCfg.getdefSet('role', 'other')
@@ -32,12 +34,12 @@ export default class RoleIndex extends base {
     this.headIndexStyle = `<style> .head_box { background: url(${this.screenData.pluResPath}img/roleIndex/namecard/${lodash.random(1, 8)}.png) #f5f5f5; background-position-x: 30px; background-repeat: no-repeat; border-radius: 15px; font-family: tttgbnumber; padding: 10px 20px; position: relative; background-size: auto 101%; }</style>`
   }
 
-  static async get(e) {
+  static async get (e) {
     let roleIndex = new RoleIndex(e)
     return await roleIndex.getIndex()
   }
 
-  async getIndex() {
+  async getIndex () {
     let ApiData = {
       index: '',
       spiralAbyss: { schedule_type: 1 },
@@ -61,7 +63,7 @@ export default class RoleIndex extends base {
     return data
   }
 
-  dealData(data) {
+  dealData (data) {
     let [resIndex, resAbyss, resDetail, basicInfo] = data
 
     let avatars = resDetail.avatars || []
@@ -115,10 +117,10 @@ export default class RoleIndex extends base {
 
     let percentage = lodash.round(
       ((stats.precious_chest_number +
-        stats.luxurious_chest_number +
-        stats.exquisite_chest_number +
-        stats.common_chest_number +
-        stats.magic_chest_number) /
+          stats.luxurious_chest_number +
+          stats.exquisite_chest_number +
+          stats.common_chest_number +
+          stats.magic_chest_number) /
         this.lable.all_chest) *
       100,
       1
@@ -238,7 +240,7 @@ export default class RoleIndex extends base {
   }
 
   // 处理深渊数据
-  abyssAll(roleArr, resAbyss) {
+  abyssAll (roleArr, resAbyss) {
     let abyss = {}
 
     if (roleArr.length <= 0) {
@@ -325,14 +327,14 @@ export default class RoleIndex extends base {
     }
   }
 
-  dayCount(num) {
+  dayCount (num) {
     let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24)) + 1
     let days = Math.floor(num)
     let msg = '活跃天数：' + days + `/${daysDifference}天`
     return msg
   }
 
-  async roleCard() {
+  async roleCard () {
     this.model = 'roleCard'
     let res = await MysInfo.get(this.e, 'index')
 
@@ -341,7 +343,7 @@ export default class RoleIndex extends base {
     return this.roleCardData(res.data)
   }
 
-  roleCardData(res) {
+  roleCardData (res) {
     this.initFile()
 
     let stats = res.stats
@@ -412,7 +414,8 @@ export default class RoleIndex extends base {
         avatars[i].name = '荧'
       }
       avatars[i].element = element[avatars[i].name]
-      avatars[i].img = imgFile[avatars[i].name] || `${avatars[i].name}.png`
+      let char = Character.get(avatars[i].name)
+      avatars[i].img = char.imgs?.gacha
     }
 
     return {
@@ -427,7 +430,7 @@ export default class RoleIndex extends base {
     }
   }
 
-  async roleExplore() {
+  async roleExplore () {
     this.model = 'roleExplore'
     let ApiData = {
       index: '',
@@ -443,16 +446,16 @@ export default class RoleIndex extends base {
     return this.roleExploreData(ret)
   }
 
-  async roleExploreData(res) {
+  async roleExploreData (res) {
     let [resIndex, basicInfo] = res
 
     let stats = resIndex.stats
     let percentage = lodash.round(
       ((stats.precious_chest_number +
-        stats.luxurious_chest_number +
-        stats.exquisite_chest_number +
-        stats.common_chest_number +
-        stats.magic_chest_number) *
+          stats.luxurious_chest_number +
+          stats.exquisite_chest_number +
+          stats.common_chest_number +
+          stats.magic_chest_number) *
         100) /
       this.lable.all_chest,
       2
@@ -462,12 +465,12 @@ export default class RoleIndex extends base {
       percentage < 60
         ? 'D'
         : (percentage < 70
-          ? 'C'
-          : percentage < 80
-            ? 'B'
-            : percentage < 90
-              ? 'A'
-              : 'S') + `[${percentage}%]`
+        ? 'C'
+        : percentage < 80
+          ? 'B'
+          : percentage < 90
+            ? 'A'
+            : 'S') + `[${percentage}%]`
 
     let daysDifference = Math.floor((new Date() - new Date('2020-09-15')) / (1000 * 60 * 60 * 24)) + 1
 
@@ -554,8 +557,9 @@ export default class RoleIndex extends base {
         ]
       }
 
-      if (['蒙德', '璃月', '稻妻', '须弥', '枫丹'].includes(val.name))
+      if (['蒙德', '璃月', '稻妻', '须弥', '枫丹'].includes(val.name)) {
         tmp.line.push({ name: '声望', text: `${val.level}级` })
+      }
 
       if (val.id == 6) {
         let underground = lodash.find(resIndex.world_explorations, function (o) {
@@ -570,14 +574,17 @@ export default class RoleIndex extends base {
       }
 
       if (['雪山', '稻妻', '层岩巨渊', '须弥', '枫丹'].includes(val.name)) {
-        if (val.offerings[0].name.includes('流明石'))
+        if (val.offerings[0].name.includes('流明石')) {
           val.offerings[0].name = '流明石'
+        }
 
-        if (val.offerings[0].name.includes('露景泉'))
+        if (val.offerings[0].name.includes('露景泉')) {
           val.offerings[0].name = '露景泉'
+        }
 
-        if (val.offerings[0].name == '恒那兰那的梦之树')
+        if (val.offerings[0].name == '恒那兰那的梦之树') {
           val.offerings[0].name = '梦之树'
+        }
 
         tmp.line.push({
           name: val.offerings[0].name,
@@ -589,12 +596,13 @@ export default class RoleIndex extends base {
     }
 
     let avatar = ''
-    if (this.e.member?.getAvatarUrl)
+    if (this.e.member?.getAvatarUrl) {
       avatar = await this.e.member.getAvatarUrl()
-    else if (this.e.friend?.getAvatarUrl)
+    } else if (this.e.friend?.getAvatarUrl) {
       avatar = await this.e.friend.getAvatarUrl()
-    else
+    } else {
       avatar = resIndex.role.game_head_icon
+    }
 
     return {
       saveId: this.e.uid,
@@ -613,7 +621,7 @@ export default class RoleIndex extends base {
     }
   }
 
-  initFile() {
+  initFile () {
     if (imgFile['刻晴']) return imgFile
     let path = './plugins/genshin/resources/img/gacha/'
     let character = fs.readdirSync(path + 'character/')

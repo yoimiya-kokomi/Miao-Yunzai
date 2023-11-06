@@ -1,7 +1,6 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import User from '../model/user.js'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
-import fs from 'fs'
 import MysInfo from '../model/mys/mysInfo.js'
 
 export class user extends plugin {
@@ -42,8 +41,7 @@ export class user extends plugin {
     if (!data) return true
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot('userAdmin', data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', 'html/userAdmin/userAdmin', data)
   }
 
   /** #刷新用户缓存 / #重置用户缓存 */

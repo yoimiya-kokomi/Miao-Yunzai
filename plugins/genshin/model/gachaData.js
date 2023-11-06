@@ -4,6 +4,7 @@ import lodash from 'lodash'
 import moment from 'moment'
 import fetch from 'node-fetch'
 import fs from 'node:fs'
+import { Character, Weapon } from '#miao.models'
 
 let imgFile = {}
 
@@ -396,10 +397,10 @@ export default class GachaData extends base {
       if (this.user[this.type].num5 >= 90) {
         tmpChance5 = 10000
       } else if (this.user[this.type].num5 >= 74) {
-      /** 74抽之后逐渐增加概率 */
+        /** 74抽之后逐渐增加概率 */
         tmpChance5 = 590 + (this.user[this.type].num5 - 74) * 530
       } else if (this.user[this.type].num5 >= 60) {
-      /** 60抽之后逐渐增加概率 */
+        /** 60抽之后逐渐增加概率 */
         tmpChance5 = this.def.chance5 + (this.user[this.type].num5 - 50) * 40
       }
     }
@@ -449,9 +450,11 @@ export default class GachaData extends base {
       if (v.star == 5) {
         nowFive++
         if (v.type == 'role') {
-          info = gsCfg.shortName(v.name)
+          let char = Character.get(v.name)
+          info = char?.abbr || ''
         } else {
-          info = gsCfg.shortName(v.name, true)
+          let weapon = Weapon.get(v.name)
+          info = weapon.abbr || ''
         }
         info += `「${v.num}抽」`
         if (v.isBigUP) info += '大保底'

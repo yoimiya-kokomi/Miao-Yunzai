@@ -4,12 +4,12 @@
 <head>
   <meta http-equiv="content-type" content="text/html;charset=utf-8" />
   <link rel="shortcut icon" href="#" />
-  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/deckList/deckList.css" />
-  <link rel="preload" href="{{pluResPath}}font/tttgbnumber.ttf" as="font">
-  <link rel="preload" href="{{pluResPath}}img/other/bg5.png" as="image">
-  <link rel="preload" href="{{pluResPath}}img/other/bg4.png" as="image">
-  <link rel="preload" href="{{pluResPath}}img/other/bg105.png" as="image">
-  <link rel="preload" href="{{pluResPath}}img/abyss/bg.png" as="image">
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}html/deckList/deckList.css" />
+  <link rel="preload" href="{{_res_path}}font/tttgbnumber.ttf" as="font">
+  <link rel="preload" href="{{_res_path}}img/other/bg5.png" as="image">
+  <link rel="preload" href="{{_res_path}}img/other/bg4.png" as="image">
+  <link rel="preload" href="{{_res_path}}img/other/bg105.png" as="image">
+  <link rel="preload" href="{{_res_path}}img/abyss/bg.png" as="image">
   {{@headStyle}}
 </head>
 
@@ -22,7 +22,7 @@
       <div class="id_text">
         UID: {{uid}}
       </div>
-      <img class="genshin_logo" src="{{pluResPath}}img/other/原神.png" />
+      <img class="genshin_logo" src="{{_res_path}}img/other/原神.png" />
     </div>
     <div style="height: 12px;"></div>
 
@@ -34,14 +34,14 @@
         {{each vals.avatar_cards val}}
         <div class="card-wrapper">
           <div class="overlay">
-            <img src="{{pluResPath}}img/deck/边框.png" alt="">
+            <img src="{{_res_path}}img/deck/边框.png" alt="">
           </div>
           <div class="overlay">
             <div class="rq-container">
-              <img src="{{pluResPath}}img/deck/容器.png" alt="">
+              <img src="{{_res_path}}img/deck/容器.png" alt="">
             </div>
             <div class="hp-container">
-              <img src="{{pluResPath}}img/deck/{{val.hp}}.png" alt="">
+              <img src="{{_res_path}}img/deck/{{val.hp}}.png" alt="">
             </div>
           </div>
           <img src="{{val.image}}" alt="">
