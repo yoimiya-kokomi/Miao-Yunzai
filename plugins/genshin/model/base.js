@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import _ from 'lodash'
-import { Common } from '#miao'
+import { Common, Version } from '#miao'
+import { Character } from '#miao.models'
 
 export default class base {
   constructor (e = {}) {
@@ -29,28 +30,35 @@ export default class base {
    * @param pluResPath 插件资源路径
    */
   get screenData () {
+    const layoutPath = process.cwd() + '/plugins/genshin/resources/html/layout/'
+    let data = {
+      saveId: this.userId,
+      cwd: this._path,
+      yzVersion: `v${Version.yunzai}`,
+      genshinLayout: layoutPath + 'genshin.html',
+      defaultLayout: layoutPath + 'default.html'
+    }
     if (this.e?.isSr) {
-      let headImg = _.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/StarRail/img/worldcard`).filter(file => file.endsWith('.png')))
+      let char = Character.get('银狼', 'sr')
       return {
-        saveId: this.userId,
-        cwd: this._path,
+        ...data,
         tplFile: `./plugins/genshin/resources/StarRail/html/${this.model}/${this.model}.html`,
         /** 绝对路径 */
         pluResPath: `${this._path}/plugins/genshin/resources/StarRail/`,
-        headStyle: `<style> .head_box { background: url(${this._path}/plugins/genshin/resources/StarRail/img/worldcard/${headImg}) #fff; background-position-x: -10px; background-repeat: no-repeat; background-size: 540px; background-position-y: -100px; </style>`,
-        srtempFile: 'StarRail/'
+        srtempFile: 'StarRail/',
+        headImg: char?.imgs?.banner,
+        game: 'sr',
       }
     }
-
-    let headImg = _.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/img/namecard`).filter(file => file.endsWith('.png')))
+    let char = Character.get('芙宁娜', 'gs')
     return {
-      saveId: this.userId,
-      cwd: this._path,
+      ...data,
       tplFile: `./plugins/genshin/resources/html/${this.model}/${this.model}.html`,
       /** 绝对路径 */
       pluResPath: `${this._path}/plugins/genshin/resources/`,
-      headStyle: `<style> .head_box { background: url(${this._path}/plugins/genshin/resources/img/namecard/${headImg}) #fff; background-position-x: 42px; background-repeat: no-repeat; background-size: auto 101%; }</style>`,
-      srtempFile: ''
+      headImg: char?.imgs?.banner,
+      srtempFile: '',
+      game: 'gs',
     }
   }
 }

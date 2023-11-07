@@ -33,7 +33,7 @@ export class gacha extends plugin {
     let data = await this.GachaData.run()
 
     /** 生成图片 */
-    await this.renderImg('genshin', 'html/gacha/gacha', data, {
+    await this.renderImg('genshin', 'html/gacha/gacha-trial', data, {
       recallMsg: data.nowFive >= 1 || data.nowFour >= 4 ? false : this.GachaData.set.delMsg
     })
   }

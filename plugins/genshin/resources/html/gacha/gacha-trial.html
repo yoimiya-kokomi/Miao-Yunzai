@@ -1,0 +1,71 @@
+{{extend genshinLayout}}
+
+{{block 'css'}}
+<link rel="stylesheet" type="text/css" href="{{_res_path}}html/gacha/gacha-trial.css"/>
+{{/block}}
+
+{{block 'main'}}
+{{if nowFive < 4}}
+<div class="info-bg info-name">{{name}}</div>
+<div class="info-bg info-count">{{info}}</div>
+{{if isWeapon}}
+{{if bingWeapon}}
+<div class="info-bg poor-info">定轨：{{bingWeapon}}</div>
+<div class="info-bg poor-bing">命定值：{{lifeNum}}</div>
+{{/if}}
+{{else if poolName}}
+<div class="info-bg poor-info">{{poolName}}</div>
+{{/if}}
+{{/if}}
+<div class="list-box">
+  {{each list}}
+  <div class="item">
+    <div class="item-bg-box">
+      <img class="item-bg" src="{{_res_path}}img/gacha/items/bg.png"/>
+      {{if $value.type=='weapon' && $value.star==5}}
+      <img class="item-bg-weapon" src="{{_res_path}}img/gacha/items/bgWeapon.png"/>
+      {{/if}}
+    </div>
+    <img class="item-shadow" src="{{_res_path}}img/gacha/items/shadow-{{$value.star}}{{$value.rand ? '-' + $value.rand : ''}}.png"/>
+    <img class="item-shadow2" src="{{_res_path}}img/gacha/items/bg2.png"/>
+    {{if $value.type=='weapon'}}
+    <div class="item-weapon-box">
+      <span class="item-character-img" style="background-image:url({{_miao_path}}{{$value.imgFile}})"></span>
+    </div>
+    {{else}}
+    <div class="item-img-box {{if $value.have && $value.type == 'role'}}fiveHave{{/if}}">
+      <span class="item-character-img" style="background-image:url({{_miao_path}}{{$value.imgFile}})"></span>
+    </div>
+    {{/if}}
+
+    {{if $value.star==5 && nowFive < 4 && !$value.have }}
+    <div class="times">「{{$value.num}}抽」</div>
+    {{/if}}
+    {{if $value.have && $value.type == 'role'}}
+    {{if $value.star == 5}}
+    <img class="item-starGold" src="{{_res_path}}img/gacha/items/星尘金.png"/>
+    <img class="item-starlight" src="{{_res_path}}img/gacha/items/星辉10.png"/>
+    {{else}}
+    <img class="item-starGold" src="{{_res_path}}img/gacha/items/星尘紫.png"/>
+    <img class="item-starlight" src="{{_res_path}}img/gacha/items/星辉2.png"/>
+    {{/if}}
+    {{else}}
+    {{if $value.element }}
+    <img class="item-element" src="{{_res_path}}img/gacha/items/{{$value.element}}.png"/>
+    {{/if}}
+    {{if $value.star }}
+    <img class="item-star" src="{{_res_path}}img/gacha/items/s-{{$value.star}}.png"/>
+    {{/if}}
+    {{/if}}
+  </div>
+  {{/each}}
+</div>
+</div>
+<svg viewBox="0 0 302.22 1333.94" height="0" width="0">
+  <clipPath id="wishframe" transform="scale(0.003308 0.00074965)" clipPathUnits="objectBoundingBox">
+    <path
+      d="M0.01 168.12l0 -9.64c4.32,-21.34 12,-32.33 25.46,-25.58 -2.35,-10.3 -1.53,-26.06 5.79,-25.96 19.18,0.25 29.95,-3.14 40.24,-13.16 -4.5,-66.43 51.39,-54.26 79.61,-93.78l0 0c28.22,39.52 84.1,27.34 79.61,93.78 10.29,10.02 21.06,13.41 40.24,13.16 7.32,-0.1 8.13,15.66 5.79,25.96 13.46,-6.75 21.14,4.24 25.46,25.58l0 9.64 0.01 0 0 1004.21 -0.01 0 0 3.13c-4.32,21.34 -12,32.33 -25.46,25.58 2.35,10.3 1.53,26.06 -5.79,25.96 -19.18,-0.25 -29.95,3.14 -40.24,13.16 4.5,66.43 -51.39,54.26 -79.61,93.78l0 0c-28.22,-39.52 -84.1,-27.34 -79.61,-93.78 -10.29,-10.02 -21.06,-13.41 -40.24,-13.16 -7.32,0.1 -8.13,-15.66 -5.79,-25.96 -13.46,6.75 -21.14,-4.24 -25.46,-25.58l0 -3.13 -0.01 0 0 -1004.21 0.01 0z"
+    />
+  </clipPath>
+</svg>
+{{/block}}'

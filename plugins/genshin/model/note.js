@@ -2,6 +2,7 @@ import moment from 'moment'
 import lodash from 'lodash'
 import base from './base.js'
 import MysInfo from './mys/mysInfo.js'
+import { Character } from '#miao.models'
 
 export default class Note extends base {
   constructor (e) {
@@ -72,9 +73,9 @@ export default class Note extends base {
         const dayDiff = date.getDate() - now.getDate()
         const str = dayDiff === 0 ? '今日' : '明日'
         const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date
-              .getMinutes()
-              .toString()
-              .padStart(2, '0')}`
+          .getMinutes()
+          .toString()
+          .padStart(2, '0')}`
         let recoverTimeStr = ` | [${str}]${timeStr}`
         resinMaxTime += recoverTimeStr
       }
@@ -93,7 +94,8 @@ export default class Note extends base {
       }
     }
     // 标识属性图标~
-    let icon = lodash.sample(['希儿', '白露', '艾丝妲', '布洛妮娅', '姬子', '卡芙卡', '克拉拉', '停云', '佩拉', '黑塔', '希露瓦', '银狼'])
+    let iconChar = lodash.sample(['希儿', '白露', '艾丝妲', '布洛妮娅', '姬子', '卡芙卡', '克拉拉', '停云', '佩拉', '黑塔', '希露瓦', '银狼'])
+    let char = Character.get(iconChar, 'gs')
     let week = [
       '星期日',
       '星期一',
@@ -107,7 +109,7 @@ export default class Note extends base {
     return {
       uid: this.e.uid,
       saveId: this.e.uid,
-      icon,
+      icon: char.imgs?.face,
       day,
       resinMaxTime,
       nowDay: moment(new Date()).format('YYYY年MM月DD日'),

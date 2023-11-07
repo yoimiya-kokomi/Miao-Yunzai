@@ -1,0 +1,116 @@
+{{extend defaultLayout}}
+
+{{block 'css'}}
+<link rel="stylesheet" type="text/css" href="{{_res_path}}html/player/daily-note-gs.css"/>
+{{/block}}
+
+{{block 'main'}}
+<div class="title">
+  <div class="id">
+    <span>ID：{{uid}}</span>
+  </div>
+  <div class="day">
+    <span>{{day}}</span>
+  </div>
+</div>
+<div class="item">
+  <div class="main">
+    <div class="bg"></div>
+    <div class="icon icon-树脂"></div>
+    <div class="info">
+      <div class="name">原粹树脂</div>
+      <div class="time">
+        {{if resinMaxTime}}
+        将于{{resinMaxTime}} 全部恢复
+        {{else}}树脂已完全恢复{{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="right">
+    <span>{{current_resin}}/{{max_resin}}</span>
+  </div>
+</div>
+<div class="item">
+  <div class="main">
+    <div class="bg"></div>
+    <div class="icon icon-洞天宝钱"></div>
+    <div class="info">
+      <div class="name">洞天宝钱</div>
+      <div class="time">
+        {{if coinTime}}
+        预计{{coinTime}}后达到上限
+        {{else}}存储已满{{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="right">
+    <span class="{{if current_home_coin/max_home_coin > 0.9}}red{{/if}}">{{current_home_coin}}/{{max_home_coin}}</span>
+  </div>
+</div>
+<div class="item">
+  <div class="main">
+    <div class="bg"></div>
+    <div class="icon icon-委托"></div>
+    <div class="info">
+      <div class="name">每日委托任务</div>
+      <div class="time">今日委托奖励{{if is_extra_task_reward_received==1}}已{{else}}未{{/if}}领取</div>
+    </div>
+  </div>
+  <div class="right">
+    <span>{{finished_task_num}}/{{total_task_num}}</span>
+  </div>
+</div>
+<div class="item">
+  <div class="main">
+    <div class="bg"></div>
+    <div class="icon icon-派遣"></div>
+    <div class="info">
+      <div class="name">探索派遣</div>
+      <div class="time">
+        {{if !expeditions || expeditions.length<=0}}尚未进行派遣
+        {{else if remainedTime && remainedTime!=0}}将于{{remainedTime}} 完成
+        {{else}}派遣已完成{{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="right">
+    <span>{{current_expedition_num}}/{{max_expedition_num}}</span>
+  </div>
+</div>
+<div class="item">
+  <div class="main">
+    <div class="bg"></div>
+    <div class="icon icon-周本"></div>
+    <div class="info">
+      <div class="name">值得铭记的强敌</div>
+      <div class="time">
+        {{if remain_resin_discount_num<=0}}周本已完成
+        {{else}}周本树脂减半次数已用{{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="right">
+    <span>{{3-remain_resin_discount_num}}/{{resin_discount_num_limit}}</span>
+  </div>
+</div>
+<div class="item">
+  <div class="main">
+    <div class="bg"></div>
+    <div class="icon icon-参量质变仪"></div>
+    <div class="info">
+      <div class="name">参量质变仪</div>
+      <div class="time">
+        {{if transformer.obtained }}
+        {{if transformer.reached}}已准备完成
+        {{else}}{{transformer.recovery_time}}后可使用{{/if}}
+        {{else}}
+        尚未获得
+        {{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="right">
+    <span class="{{if transformer.obtained && transformer.reached }}red{{/if}}">{{if transformer.obtained }}{{if transformer.reached}}可使用{{else}}冷却中{{/if}}{{else}}尚未获得{{/if}}</span>
+  </div>
+</div>
+{{/block}}

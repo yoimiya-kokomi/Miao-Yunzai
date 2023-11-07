@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+  <link rel="shortcut icon" href="#"/>
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}html/abyss/abyss-floor.css"/>
+</head>
+<body>
+<div class="container" id="container">
+  <div class="page bg{{floorIndex}}">
+    <div class="border"></div>
+    <div class="header">
+      <div>
+        <div class="uid">ID:{{uid}}</div>
+        <div class="title">深境第{{floorIndex}}层</div>
+      </div>
+      <div class="star">
+        <img src="{{_res_path}}img/abyss/star.png"/>
+        <span>{{floor.star}}/{{floor.max_star}}</span>
+      </div>
+    </div>
+    <div class="room-list">
+      {{ each list val}}
+      <div class="floor">
+        <div class="floor-header">
+          <span class="index">第{{val.index}}间</span>
+          <span class="date">{{val.time}}</span>
+        </div>
+        <div class="content">
+          <div class="role-box">
+            {{ each val.battles vv}}
+            <div class="roles">
+              {{ each vv.avatars v}}
+              <div class="item">
+                {{ if v.life>0}}
+                <span class="life life{{v.life}}">{{v.life}}命</span>
+                {{/if}}
+                <img class="role_img bg{{v.rarity}}" src="{{_miao_path}}{{v.icon}}" onerror="whenError(this)"/>
+                <div class="desc">Lv.{{v.level}}</div>
+                <img class="fill_img" src="{{_res_path}}img/other/fill.png"/>
+              </div>
+              {{/each}}
+              <div class="split-text split-text-{{vv.index}}">{{if vv.index==1 }}上{{else}}下{{/if}}半</div>
+            </div>
+            {{ /each}}
+          </div>
+          <div class="star-box">
+            <img class="{{if val.star<1 }}nostar{{/if}}" src="{{_res_path}}img/abyss/star.png"/>
+            <img class="{{if val.star<2 }}nostar{{/if}}" src="{{_res_path}}img/abyss/star.png"/>
+            <img class="{{if val.star<3 }}nostar{{/if}}" src="{{_res_path}}img/abyss/star.png"/>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div>
+</body>
+</html>

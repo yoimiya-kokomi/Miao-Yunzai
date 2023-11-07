@@ -4,6 +4,8 @@ import lodash from 'lodash'
 import fs from 'node:fs'
 import common from '../../../lib/common/common.js'
 import gsCfg from './gsCfg.js'
+import GachaData from './gachaData.js'
+import { Character, Weapon } from '../../miao-plugin/models/index.js'
 
 export default class GachaLog extends base {
   constructor (e) {
@@ -14,23 +16,39 @@ export default class GachaLog extends base {
 
     this.urlKey = `${this.prefix}url:`
     /** 绑定的uid */
-    this.uidKey = this.e.isSr ? `Yz:srJson:mys:qq-uid:${this.userId}` : `Yz:genshin:mys:qq-uid:${this.userId}`;
-    this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`;
+    this.uidKey = this.e.isSr ? `Yz:srJson:mys:qq-uid:${this.userId}` : `Yz:genshin:mys:qq-uid:${this.userId}`
+    this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`
 
     const gsPool = [
       { type: 301, typeName: '角色' },
       { type: 302, typeName: '武器' },
       { type: 200, typeName: '常驻' }
-    ];
+    ]
 
     const srPool = [
       { type: 11, typeName: '角色' },
       { type: 12, typeName: '光锥' },
       { type: 1, typeName: '常驻' },
       { type: 2, typeName: '新手' }
-    ];
+    ]
 
-    this.pool = e.isSr ? srPool : gsPool;
+    this.pool = e.isSr ? srPool : gsPool
+  }
+
+  static getIcon (name, type = 'role', game = '') {
+    if (type === 'role' || type === '角色') {
+      let char = Character.get(name, game)
+      if (!char) {
+        console.log('not-found-char', name, game)
+      }
+      return char?.imgs?.face || ''
+    } else if (type === 'weapon' || type === '武器' || type === '光锥') {
+      let weapon = Weapon.get(name, game)
+      if (!weapon) {
+        console.log('not-found-weapon',`[${name}]`, game)
+      }
+      return weapon?.imgs?.icon || ''
+    }
   }
 
   async logUrl () {
@@ -129,7 +147,8 @@ export default class GachaLog extends base {
     let url = txt.match(/auth_appid=webview_gacha(.*)hk4e_cn/)
 
     /** 删除文件 */
-    fs.unlink(textPath, () => { })
+    fs.unlink(textPath, () => {
+    })
 
     if (!url || !url[0]) {
       return false
@@ -341,7 +360,8 @@ export default class GachaLog extends base {
 
   // 读取本地json
   readJson () {
-    let logJson = []; let ids = new Map()
+    let logJson = []
+    let ids = new Map()
     let file = `${this.path}/${this.uid}/${this.type}.json`
     if (fs.existsSync(file)) {
       // 获取本地数据 进行数据合并
@@ -542,6 +562,7 @@ export default class GachaLog extends base {
     let weaponFourNum = 0
     let allNum = this.all.length
     let bigNum = 0
+    let game = this.e?.game
 
     for (let val of this.all) {
       this.role = val
@@ -584,6 +605,7 @@ export default class GachaLog extends base {
 
         fiveLog.push({
           name: val.name,
+          icon: GachaLog.getIcon(val.name, val.item_type, game),
           abbrName: gsCfg.shortName(val.name),
           item_type: val.item_type,
           num: 0,
@@ -625,7 +647,9 @@ export default class GachaLog extends base {
         num: fourLog[i]
       })
     }
-    four = four.sort((a, b) => { return b.num - a.num })
+    four = four.sort((a, b) => {
+      return b.num - a.num
+    })
 
     if (four.length <= 0) {
       four.push({ name: '无', num: 0 })

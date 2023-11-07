@@ -1,0 +1,71 @@
+{{extend genshinLayout}}
+
+{{block 'css'}}
+<link rel="stylesheet" type="text/css" href="{{_res_path}}html/gacha/gacha-log.css"/>
+<link rel="stylesheet" type="text/css" href="{{_res_path}}html/gacha/gacha-all-log.css"/>
+<style>
+  .container {
+    width: 1800px;
+  }
+</style>
+{{/block}}
+
+{{block 'main'}}
+{{each data log}}
+<div class="info_box">
+  <div class="head_box">
+    <div class="id_text">
+      ID: {{log.uid}}
+    </div>
+    <h2 class="day_text">
+      {{log.allNum}}抽
+      <span class="label label_{{type}}">{{log.typeName}}池</span>
+    </h2>
+    {{if game === 'gs'}}
+    <img class="genshin_logo" src="{{pluResPath}}img/other/原神.png"/>
+    {{else}}
+    <img class="starrail_logo" src="{{pluResPath}}/StarRail/img/other/logo.png"/>
+    {{/if}}
+  </div>
+  <div class="data_box">
+    <div class="tab_lable">数据总览</div>
+    {{each log.line val}}
+    <div class="data_line">
+      {{each val item}}
+      <div class="data_line_item">
+        <div class="num">{{item.num}}<span class="unit">{{item.unit}}</span></div>
+        <div class="lable">{{item.lable}}</div>
+      </div>
+      {{/each}}
+    </div>
+    {{/each}}
+    <div class="line_box">
+      <span class="line"></span>
+      <span class="text">五星历史 {{firstTime}} ~ {{lastTime}}</span>
+      <span class="line"></span>
+    </div>
+    <div class="card_list">
+      {{each log.fiveLog val}}
+      <div
+        class="item {{val.isNull?'isNull':''}} star5 {{val.num<=10?'gold': (val.num<log.max*0.5 ? 'good' : (val.num<log.max*0.83) ? 'normal': 'bad')}}">
+        {{ if val.isUp && typeName == '角色' }}
+        <span class="minimum">UP</span>
+        {{/if}}
+        {{ if val.isNull }}
+        <div class="role"></div>
+        <div class="num_name">{{val.num}}</div>
+        {{/if}}
+        {{ if !val.isNull }}
+        <span class="role_img" style="background-image:url({{_miao_path}}{{val.icon}})"></span>
+        <!-- <div class="num">{{val.num}}</div>-->
+        <div class="num_name {{val.num<=10?'gold': (val.num<log.max*0.5 ? 'good' : (val.num<log.max*0.83) ? 'normal': 'bad')}}">
+          {{val.num}}
+        </div>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div>
+{{/each}}
+{{/block}}

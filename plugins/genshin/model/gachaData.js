@@ -3,10 +3,7 @@ import gsCfg from './gsCfg.js'
 import lodash from 'lodash'
 import moment from 'moment'
 import fetch from 'node-fetch'
-import fs from 'node:fs'
 import { Character, Weapon } from '#miao.models'
-
-let imgFile = {}
 
 export default class GachaData extends base {
   /**
@@ -35,7 +32,6 @@ export default class GachaData extends base {
 
   static async init (e) {
     let gacha = new GachaData(e)
-    gacha.initFile()
     /** 抽卡类型 */
     gacha.getTpye()
     /** 用户抽卡数据 */
@@ -44,6 +40,16 @@ export default class GachaData extends base {
     await gacha.getPool()
 
     return gacha
+  }
+
+  static getImg (name, type = 'role') {
+    if (type === 'role' || type === '角色') {
+      let char = Character.get(name)
+      return char?.imgs?.gacha || ''
+    } else if (type === 'weapon' || type === '武器') {
+      let weapon = Weapon.get(name)
+      return weapon?.imgs?.gacha || ''
+    }
   }
 
   /** 抽卡 */
@@ -291,7 +297,7 @@ export default class GachaData extends base {
       isBigUP,
       isBing,
       have,
-      imgFile: imgFile[tmpName] || `${tmpName}.png`,
+      imgFile: GachaData.getImg(tmpName, type),
       rand: lodash.random(1, 7)
     })
 
@@ -362,7 +368,7 @@ export default class GachaData extends base {
       type,
       element: this.ele[tmpName] || '',
       index: this.index,
-      imgFile: imgFile[tmpName] || `${tmpName}.png`,
+      imgFile: GachaData.getImg(tmpName, type),
       have
     })
 
@@ -378,7 +384,7 @@ export default class GachaData extends base {
       type: 'weapon',
       element: this.ele[tmpName] || '',
       index: this.index,
-      imgFile: imgFile[tmpName] || `${tmpName}.png`
+      imgFile: GachaData.getImg(tmpName, 'weapon')
     })
 
     return true
@@ -505,20 +511,5 @@ export default class GachaData extends base {
 
   getWeekEnd () {
     return Number(moment().day(7).endOf('day').format('X'))
-  }
-
-  initFile () {
-    if (imgFile['刻晴']) return imgFile
-    let path = './plugins/genshin/resources/img/gacha/'
-    let character = fs.readdirSync(path + 'character/')
-    let weapon = fs.readdirSync(path + 'weapon/')
-
-    let nameSet = (v) => {
-      let name = v.split('.')
-      imgFile[name[0]] = v
-    }
-    character.forEach(v => nameSet(v))
-    weapon.forEach(v => nameSet(v))
-    return imgFile
   }
 }

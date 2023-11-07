@@ -3,6 +3,7 @@ import lodash from 'lodash'
 import fs from 'node:fs'
 import gsCfg from './gsCfg.js'
 import moment from 'moment'
+import GachaLog from './gachaLog.js'
 
 export default class LogCount extends base {
   constructor (e) {
@@ -45,7 +46,8 @@ export default class LogCount extends base {
 
   // 读取本地json
   readJson () {
-    let logJson = []; let ids = []
+    let logJson = []
+    let ids = []
     let file = `${this.path}/${this.uid}/${this.type}.json`
     if (fs.existsSync(file)) {
       // 获取本地数据 进行数据合并
@@ -179,6 +181,7 @@ export default class LogCount extends base {
   /** 统计计算记录 */
   analyseHistory () {
     let all = this.readJson().list
+    let game = this.e?.game
 
     all = all.reverse()
 
@@ -218,6 +221,7 @@ export default class LogCount extends base {
             if (row.name != '未知') {
               pool[poolCfg[i].start].list.push({
                 name: row.name,
+                icon: GachaLog.getIcon(row.name, row.item_type, game),
                 rank_type: row.rank_type,
                 item_type: row.item_type,
                 time,
@@ -229,6 +233,7 @@ export default class LogCount extends base {
           } else if (row.rank_type == 4) {
             pool[poolCfg[i].start].list.push({
               name: row.name,
+              icon: GachaLog.getIcon(row.name, row.item_type, game),
               rank_type: row.rank_type,
               item_type: row.item_type,
               time,
@@ -270,6 +275,7 @@ export default class LogCount extends base {
         if (!pool[i].role[val.name]) {
           pool[i].role[val.name] = {
             name: val.name,
+            icon: GachaLog.getIcon(val.name, val.item_type, game),
             rank_type: val.rank_type,
             item_type: val.item_type,
             count: 1

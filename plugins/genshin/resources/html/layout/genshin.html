@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+  <link rel="shortcut icon" href="#"/>
+  {{block 'css'}}{{/block}}
+  <style>
+    .head_box {
+      background-image: url('{{_miao_path}}{{headImg}}');
+      background-position: right;
+      background-size: auto 100%;
+      background-repeat: no-repeat;
+      border-radius: 15px 50px 50px 15px;
+    }
+  </style>
+</head>
+
+<body id="container" class="body_box">
+<div class="container">
+  {{block 'main'}}{{/block}}
+  <div class="logo">Created By Miao-Yunzai {{yzVersion}}</div>
+</div>
+</body>
+</html>

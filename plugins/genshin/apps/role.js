@@ -77,7 +77,7 @@ export class role extends plugin {
     let data = await new Abyss(this.e).getAbyssFloor()
     if (!data) return
 
-    await this.renderImg('genshin', 'html/abyssFloor/abyssFloor', data)
+    await this.renderImg('genshin', 'html/abyss/abyss-floor', data)
   }
 
   /** 武器 */
@@ -85,7 +85,7 @@ export class role extends plugin {
     let data = await Weapon.get(this.e)
     if (!data) return
 
-    await this.renderImg('genshin', 'html/weapon/weapon', data)
+    await this.renderImg('genshin', 'html/avatar/weapon', data)
   }
 
   /** 角色卡片 */
@@ -93,7 +93,7 @@ export class role extends plugin {
     let data = await new RoleIndex(this.e).roleCard()
     if (!data) return
 
-    await this.renderImg('genshin', 'html/roleCard/roleCard', data)
+    await this.renderImg('genshin', 'html/player/role-card', data)
   }
 
   /** 探险 */
@@ -101,6 +101,6 @@ export class role extends plugin {
     let data = await new RoleIndex(this.e).roleExplore()
     if (!data) return
 
-    this.renderImg('genshin', 'html/roleExplore/roleExplore', data)
+    this.renderImg('genshin', 'html/player/role-explore', data)
   }
 }

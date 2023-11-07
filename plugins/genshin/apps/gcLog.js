@@ -1,5 +1,4 @@
 import plugin from '../../../lib/plugins/plugin.js'
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import fs from 'node:fs'
 import GachaLog from '../model/gachaLog.js'
 import ExportLog from '../model/exportLog.js'
@@ -98,8 +97,7 @@ export class gcLog extends plugin {
     let data = await new GachaLog(this.e).logUrl()
     if (!data) return
 
-    let img = await puppeteer.screenshot(`${data.srtempFile}gachaLog`, data)
-    if (img) await this.reply(img)
+    await this.renderImg('genshin', `html/gacha/gacha-log`, data)
   }
 
   /** 发送output_log.txt日志文件 */
@@ -121,8 +119,7 @@ export class gcLog extends plugin {
 
     if (typeof data != 'object') return
 
-    let img = await puppeteer.screenshot(`${data.srtempFile}gachaLog`, data)
-    if (img) await this.reply(img)
+    await this.renderImg('genshin', `html/gacha/gacha-log`, data)
   }
 
   /** #抽卡记录 */
@@ -130,12 +127,11 @@ export class gcLog extends plugin {
     this.e.isAll = !!(this.e.msg.includes('全部'))
     let data = await new GachaLog(this.e).getLogData()
     if (!data) return
-    let name = `${data.srtempFile}gachaLog`
+    let name = `html/gacha/gacha-log`
     if (this.e.isAll) {
-      name = `${data.srtempFile}gachaAllLog`
+      name = `html/gacha/gacha-all-log`
     }
-    let img = await puppeteer.screenshot(name, data)
-    if (img) await this.reply(img)
+    await this.renderImg('genshin', name, data)
   }
 
   /** 导出记录 */
@@ -202,7 +198,6 @@ export class gcLog extends plugin {
   async logCount () {
     let data = await new LogCount(this.e).count()
     if (!data) return
-    let img = await puppeteer.screenshot(`${data.srtempFile}logCount`, data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', `html/gacha/log-count`, data)
   }
 }

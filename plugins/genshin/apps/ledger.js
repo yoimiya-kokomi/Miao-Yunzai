@@ -4,7 +4,7 @@ import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import fs from 'node:fs'
 
 export class ledger extends plugin {
-  constructor() {
+  constructor () {
     super({
       name: '札记查询',
       dsc: '米游社札记·开拓月历查询',
@@ -32,7 +32,7 @@ export class ledger extends plugin {
     })
   }
 
-  async init() {
+  async init () {
     let file = ['./data/NoteData', './data/SR_NoteData']
     for (let i of file) {
       if (!fs.existsSync(i)) {
@@ -42,31 +42,29 @@ export class ledger extends plugin {
   }
 
   /** #原石札记 */
-  async ledger() {
+  async ledger () {
     let data = await new Ledger(this.e).get()
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(`${data.srtempFile}ledger`, data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', `html/ledger/ledger-${data.game}`, data)
   }
 
   /** 原石任务 */
-  async ledgerTask() {
+  async ledgerTask () {
     let ledger = new Ledger(this.e)
     await ledger.ledgerTask(!!this?.e?.msg)
   }
 
-  async ledgerCount() {
+  async ledgerCount () {
     let data = await new Ledger(this.e).ledgerCount()
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(`${data.srtempFile}ledgerCount`, data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', `html/ledger/ledger-count-${data.game}`, data)
   }
 
-  async ledgerCountHistory() {
+  async ledgerCountHistory () {
     let data = await new Ledger(this.e).ledgerCountHistory()
     if (!data) return
 
