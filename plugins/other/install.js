@@ -22,7 +22,7 @@ const list = {
   "Discord-Plugin":"https://gitee.com/TimeRainStarSky/Yunzai-Discord-Plugin",
   "QQGuild-Plugin":"https://gitee.com/TimeRainStarSky/Yunzai-QQGuild-Plugin",
   "WeChat-Plugin" :"https://gitee.com/TimeRainStarSky/Yunzai-WeChat-Plugin",
-  "Proxy-Plugin"  :"https://gitee.com/TimeRainStarSky/Yunzai-Proxy-Plugin",
+  "Route-Plugin"  :"https://gitee.com/TimeRainStarSky/Yunzai-Route-Plugin",
   "ICQQ-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin",
   "KOOK-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-KOOK-Plugin",
 }
