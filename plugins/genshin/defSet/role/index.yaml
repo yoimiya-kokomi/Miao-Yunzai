@@ -1,5 +1,5 @@
 # 成就
-achievement: 1095
+achievement: 1138
 
 # 角色数
 avatar: 75
@@ -8,28 +8,28 @@ avatar: 75
 level: 60
 
 # 总宝箱
-all_chest: 5826
+all_chest: 6038
 
 # 奇馈宝箱
-magic_chest: 206
+magic_chest: 221
 
 # 华丽宝箱
-luxurious_chest: 232
+luxurious_chest: 242
 
 # 珍贵宝箱
-precious_chest: 598
+precious_chest: 632
 
 # 精致宝箱
-exquisite_chest: 1969
+exquisite_chest: 2076
 
 # 普通宝箱
-common_chest: 2821
+common_chest: 2867
 
 # 传送点
-way_point: 372
+way_point: 399
 
 # 秘境
-domain: 54
+domain: 55
 
 # 风神瞳
 anemoculus: 66
@@ -44,4 +44,4 @@ electroculus: 181
 dendroculus: 271
 
 # 水神瞳
-hydroculus: 150
+hydroculus: 216
