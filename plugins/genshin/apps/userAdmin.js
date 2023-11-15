@@ -41,7 +41,7 @@ export class user extends plugin {
     if (!data) return true
 
     /** 生成图片 */
-    this.renderImg('genshin', 'html/userAdmin/userAdmin', data)
+    this.renderImg('genshin', 'html/admin/userAdmin', data)
   }
 
   /** #刷新用户缓存 / #重置用户缓存 */
