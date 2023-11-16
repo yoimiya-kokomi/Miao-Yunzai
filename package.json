@@ -32,9 +32,9 @@
     "node-xlsx": "^0.23.0",
     "oicq": "link:lib/modules/oicq",
     "pm2": "^5.3.0",
-    "puppeteer": "^21.5.1",
+    "puppeteer": "^21.5.2",
     "redis": "^4.6.10",
-    "sequelize": "^6.34.0",
+    "sequelize": "^6.35.0",
     "sqlite3": "^5.1.6",
     "ws": "^8.14.2",
     "yaml": "^2.3.4"
