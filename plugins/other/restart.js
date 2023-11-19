@@ -29,6 +29,14 @@ export class Restart extends plugin {
   }
 
   async init() {
+    Bot.once("online", () => this.restartMsg())
+    if (cfg.bot.restart_time) {
+      this.e = { reply: msg => Bot.sendMasterMsg(msg) }
+      setTimeout(() => this.restart(), cfg.bot.restart_time*60000)
+    }
+  }
+
+  async restartMsg() {
     let restart = await redis.get(this.key)
     if (restart) {
       restart = JSON.parse(restart)
@@ -43,13 +51,7 @@ export class Restart extends plugin {
       } else {
         Bot.sendMasterMsg(msg)
       }
-
       redis.del(this.key)
-    }
-
-    if (cfg.bot.restart_time) {
-      this.e = { reply: msg => Bot.sendMasterMsg(msg) }
-      setTimeout(() => this.restart(), cfg.bot.restart_time*60000)
     }
   }
 
