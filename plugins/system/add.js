@@ -193,21 +193,11 @@ export class add extends plugin {
     fs.writeFileSync(`${this.path}${this.group_id}.json`, JSON.stringify(obj, "", "\t"))
   }
 
-  async makeBuffer(file) {
-    if (file.match(/^base64:\/\//))
-      return Buffer.from(file.replace(/^base64:\/\//, ""), "base64")
-    else if (file.match(/^https?:\/\//))
-      return Buffer.from(await (await fetch(file)).arrayBuffer())
-    else if (fs.existsSync(file))
-      return Buffer.from(fs.readFileSync(file))
-    return file
-  }
-
   async fileType(data) {
     const file = { name: `${this.group_id}/${data.type}/${Date.now()}` }
     try {
       file.url = data.url.replace(/^base64:\/\/.*/, "base64://...")
-      file.buffer = await this.makeBuffer(data.url)
+      file.buffer = await Bot.Buffer(data.url)
       file.type = await fileTypeFromBuffer(file.buffer)
       file.name = `${file.name}.${file.type.ext}`
     } catch (err) {
@@ -261,7 +251,7 @@ export class add extends plugin {
     msg = [...msg[num]]
     for (const i in msg)
       if (msg[i].file && fs.existsSync(`${this.path}${msg[i].file}`))
-        msg[i] = { ...msg[i], file: `base64://${fs.readFileSync(`${this.path}${msg[i].file}`).toString("base64")}` }
+        msg[i] = { ...msg[i], file: fs.readFileSync(`${this.path}${msg[i].file}`) }
 
     logger.mark(`[发送消息]${this.e.logText} ${this.keyWord}`)
     const groupCfg = cfg.getGroup(this.e.self_id, this.group_id)

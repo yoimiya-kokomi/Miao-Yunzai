@@ -10,23 +10,8 @@ Bot.adapter.push(new class ComWeChatAdapter {
     this.path = this.name
   }
 
-  toStr(data) {
-    switch (typeof data) {
-      case "string":
-        return data
-      case "number":
-        return String(data)
-      case "object":
-        if (Buffer.isBuffer(data))
-          return Buffer.from(data, "utf8").toString()
-        else
-          return JSON.stringify(data)
-    }
-    return data
-  }
-
   makeLog(msg) {
-    return this.toStr(msg).replace(/(base64:\/\/|"type":"data","data":").*?"/g, '$1..."')
+    return Bot.String(msg).replace(/(base64:\/\/|"type":"data","data":").*?"/g, '$1..."')
   }
 
   sendApi(ws, action, params = {}) {
@@ -39,8 +24,8 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async fileName(file) {
     try {
-      if (file.match(/^base64:\/\//)) {
-        const buffer = Buffer.from(file.replace(/^base64:\/\//, ""), "base64")
+      const buffer = Bot.Buffer(file, { http: true })
+      if (Buffer.isBuffer(file)) {
         const type = await fileTypeFromBuffer(buffer)
         return `${Date.now()}.${type.ext}`
       } else {
@@ -53,9 +38,12 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async uploadFile(data, file, name) {
-    const opts = { name: name || await this.fileName(file) || randomUUID() }
+    const opts = { name: name || await this.fileName(file) || String(Date.now()) }
 
-    if (file.match(/^https?:\/\//)) {
+    if (Buffer.isBuffer(file)) {
+      opts.type = "data"
+      opts.data = file.toString("base64")
+    } else if (file.match(/^https?:\/\//)) {
       opts.type = "url"
       opts.url = file
     } else if (file.match(/^base64:\/\//)) {

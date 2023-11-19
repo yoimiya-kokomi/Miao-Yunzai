@@ -9,23 +9,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
     this.path = this.name
   }
 
-  toStr(data) {
-    switch (typeof data) {
-      case "string":
-        return data
-      case "number":
-        return String(data)
-      case "object":
-        if (Buffer.isBuffer(data))
-          return Buffer.from(data, "utf8").toString()
-        else
-          return JSON.stringify(data)
-    }
-    return data
-  }
-
   makeLog(msg) {
-    return this.toStr(msg).replace(/base64:\/\/.*?(,|]|")/g, "base64://...$1")
+    return Bot.String(msg).replace(/base64:\/\/.*?(,|]|")/g, "base64://...$1")
   }
 
   sendApi(ws, action, params) {
@@ -45,12 +30,14 @@ Bot.adapter.push(new class gocqhttpAdapter {
     if (!Array.isArray(msg))
       msg = [msg]
     const msgs = []
-    for (const i of msg)
+    for (let i of msg)
       if (typeof i == "object") {
-        if (i.data)
-          msgs.push(i)
-        else
-          msgs.push({ type: i.type, data: { ...i, type: undefined }})
+        if (!i.data)
+          i = { type: i.type, data: { ...i, type: undefined }}
+        if (Buffer.isBuffer(i.data.file))
+          i.data.file = `base64://${i.data.file.toString("base64")}`
+
+        msgs.push(i)
       } else {
         msgs.push({ type: "text", data: { text: i }})
       }
@@ -61,10 +48,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
     if (msg?.type == "node")
       return this.sendFriendForwardMsg(data, msg.data)
 
-    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(msg)}`)
+    const message = this.makeMsg(msg)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(message)}`)
     return data.bot.sendApi("send_msg", {
       user_id: data.user_id,
-      message: this.makeMsg(msg),
+      message,
     })
   }
 
@@ -72,10 +60,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
     if (msg?.type == "node")
       return this.sendGroupForwardMsg(data, msg.data)
 
-    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(msg)}`)
+    const message = this.makeMsg(msg)
+    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(message)}`)
     return data.bot.sendApi("send_msg", {
       group_id: data.group_id,
-      message: this.makeMsg(msg),
+      message,
     })
   }
 
@@ -83,11 +72,12 @@ Bot.adapter.push(new class gocqhttpAdapter {
     if (msg?.type == "node")
       return Bot.sendForwardMsg(msg => this.sendGuildMsg(data, msg), msg)
 
-    logger.info(`${logger.blue(`[${data.self_id}] => ${data.guild_id}-${data.channel_id}`)} 发送频道消息：${this.makeLog(msg)}`)
+    const message = this.makeMsg(msg)
+    logger.info(`${logger.blue(`[${data.self_id}] => ${data.guild_id}-${data.channel_id}`)} 发送频道消息：${this.makeLog(message)}`)
     return data.bot.sendApi("send_guild_channel_msg", {
       guild_id: data.guild_id,
       channel_id: data.channel_id,
-      message: this.makeMsg(msg),
+      message,
     })
   }
 

@@ -9,23 +9,8 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     this.path = this.id
   }
 
-  toStr(data) {
-    switch (typeof data) {
-      case "string":
-        return data
-      case "number":
-        return String(data)
-      case "object":
-        if (Buffer.isBuffer(data))
-          return Buffer.from(data, "utf8").toString()
-        else
-          return JSON.stringify(data)
-    }
-    return data
-  }
-
   makeLog(msg) {
-    return this.toStr(msg).replace(/base64:\/\/.*?"/g, "base64://...\"")
+    return Bot.String(msg).replace(/base64:\/\/.*?"/g, "base64://...\"")
   }
 
   makeMsg(msg) {
@@ -35,6 +20,8 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     for (let i of msg) {
       if (typeof i != "object")
         i = { type: "text", text: i }
+      if (Buffer.isBuffer(i.file))
+        i.file = `base64://${i.file.toString("base64")}`
 
       switch (i.type) {
         case "text":

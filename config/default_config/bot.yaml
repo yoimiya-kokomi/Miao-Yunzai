@@ -1,10 +1,19 @@
-# 日志等级:trace,debug,info,warn,fatal,mark,error,off
-# mark时只显示执行命令，不显示聊天记录
+# 日志等级 trace,debug,info,warn,fatal,mark,error,off
 log_level: info
+# 单条日志长度
+log_length: 1000
+
 # 服务器地址
 url: http://localhost:2536
 # 服务器端口
 port: 2536
+
+# 自动更新时间
+update_time: 1440
+# 自动重启时间
+restart_time: 0
+# 上线推送通知的冷却时间
+online_msg_exp: 1440
 
 # chromium其他路径
 chromium_path:
@@ -15,11 +24,3 @@ puppeteer_timeout:
 
 # 米游社接口代理地址，国际服用
 proxyAddress:
-
-# 上线时给主人推送帮助
-online_msg: true
-# 上线推送通知的冷却时间
-online_msg_exp: 86400
-
-# 单条日志长度
-logLength: 1000

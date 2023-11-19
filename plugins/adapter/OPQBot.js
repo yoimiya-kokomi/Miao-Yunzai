@@ -21,29 +21,16 @@ Bot.adapter.push(new class OPQBotAdapter {
       Bot.once(ReqId, data => resolve(data)))
   }
 
-  toStr(data) {
-    switch (typeof data) {
-      case "string":
-        return data
-      case "number":
-        return String(data)
-      case "object":
-        if (Buffer.isBuffer(data))
-          return Buffer.from(data, "utf8").toString()
-        else
-          return JSON.stringify(data)
-    }
-    return data
-  }
-
   makeLog(msg) {
-    return this.toStr(msg).replace(/base64:\/\/.*?"/g, 'base64://..."')
+    return Bot.String(msg).replace(/base64:\/\/.*?"/g, 'base64://..."')
   }
 
   async uploadFile(id, type, file) {
     const opts = { CommandId: this.CommandId[type] }
 
-    if (file.match(/^base64:\/\//))
+    if (Buffer.isBuffer(file))
+      opts.Base64Buf = file.toString("base64")
+    else if (file.match(/^base64:\/\//))
       opts.Base64Buf = file.replace(/^base64:\/\//, "")
     else if (file.match(/^https?:\/\//))
       opts.FileUrl = file
@@ -157,6 +144,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendFriendMsg(i, msg),
+      getAvatarUrl: () => `https://q1.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
     }
   }
 
@@ -186,6 +174,7 @@ Bot.adapter.push(new class OPQBotAdapter {
       ...i,
       sendMsg: msg => this.sendGroupMsg(i, msg),
       pickMember: user_id => this.pickMember(id, group_id, user_id),
+      getAvatarUrl: () => `https://p.qlogo.cn/gh/${group_id}/${group_id}/0`,
     }
   }
 
