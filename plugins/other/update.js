@@ -36,13 +36,16 @@ export class update extends plugin {
     })
 
     this.typeName = 'TRSS-Yunzai'
+  }
+
+  init() {
     if (cfg.bot.update_time) {
       this.e = {
         isMaster: true,
         logFnc: "[自动更新]",
         msg: "#全部更新",
-        reply: msg => Bot.sendMasterMsg(msg),
       }
+      this.reply = msg => Bot.sendMasterMsg(msg)
       this.autoUpdate()
     }
   }

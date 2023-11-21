@@ -28,10 +28,13 @@ export class Restart extends plugin {
     this.key = "Yz:restart"
   }
 
-  async init() {
+  init() {
     Bot.once("online", () => this.restartMsg())
     if (cfg.bot.restart_time) {
-      this.e = { reply: msg => Bot.sendMasterMsg(msg) }
+      this.e = {
+        logFnc: "[自动重启]" ,
+        reply: msg => Bot.sendMasterMsg(msg),
+      }
       setTimeout(() => this.restart(), cfg.bot.restart_time*60000)
     }
   }
