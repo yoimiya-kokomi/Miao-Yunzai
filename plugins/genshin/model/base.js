@@ -50,7 +50,7 @@ export default class base {
         game: 'sr',
       }
     }
-    let char = Character.get('芙宁娜', 'gs')
+    let char = Character.get('赛诺', 'gs')
     return {
       ...data,
       tplFile: `./plugins/genshin/resources/html/${this.model}/${this.model}.html`,
