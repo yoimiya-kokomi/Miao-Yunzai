@@ -38,7 +38,7 @@ export class user extends plugin {
           fnc: 'delCk'
         },
         {
-          reg: '^#?(原神|星铁)?(删除|解绑)(uid|UID)?\\s*[0-9]{1,2}$',
+          reg: '^#?(原神|星铁)?(删除|解绑)(uid|UID)\\s*[0-9]{1,2}$',
           fnc: 'delUid'
         },
         {
