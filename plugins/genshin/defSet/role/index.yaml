@@ -8,7 +8,7 @@ avatar: 75
 level: 60
 
 # 总宝箱
-all_chest: 6038
+all_chest: 6044
 
 # 奇馈宝箱
 magic_chest: 221
@@ -20,7 +20,7 @@ luxurious_chest: 242
 precious_chest: 632
 
 # 精致宝箱
-exquisite_chest: 2076
+exquisite_chest: 2082
 
 # 普通宝箱
 common_chest: 2867

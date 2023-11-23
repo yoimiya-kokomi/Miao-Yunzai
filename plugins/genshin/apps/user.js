@@ -38,11 +38,11 @@ export class user extends plugin {
           fnc: 'delCk'
         },
         {
-          reg: '^#?(原神|星铁)?(删除|解绑)uid\\s*[0-9]{1,2}$',
+          reg: '^#?(原神|星铁)?(删除|解绑)(uid|UID)?\\s*[0-9]{1,2}$',
           fnc: 'delUid'
         },
         {
-          reg: '^#(原神|星铁)?绑定(uid|UID)? ?[1-9][0-9]{8}$',
+          reg: '^#(原神|星铁)?绑定(uid|UID)?\\s*[1-9][0-9]{8}$',
           fnc: 'bingUid'
         },
         {
