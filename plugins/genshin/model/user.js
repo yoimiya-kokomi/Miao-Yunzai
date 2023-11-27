@@ -140,6 +140,7 @@ export default class User extends base {
       msg.push(
         '星穹铁道支持：',
         '【*uid】当前绑定ck uid列表',
+        '【*删除ck】删除当前绑定ck',
         '【*体力】体力信息',
         '【*面板】【*更新面板】面板信息'
       )
@@ -150,9 +151,16 @@ export default class User extends base {
 
   /** 删除绑定ck */
   async delCk () {
+    let game;
+    if (this.e.game) {
+      game = this.e.game;
+    } else {
+      game = 'gs';
+    }
+    //判断是原神还是星铁
     let user = await this.user()
     // 获取当前uid
-    let uidData = user.getUidData('', this.e)
+    let uidData = user.getUidData('' , game=game, this.e)
     if (!uidData || uidData.type !== 'ck' || !uidData.ltuid) {
       return `删除失败：当前的UID${uidData?.uid}无CK信息`
     }
