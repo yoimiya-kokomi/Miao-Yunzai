@@ -87,6 +87,10 @@ export class add extends plugin {
       this.e.reply('添加错误：没有关键词')
       return
     }
+    if (/uid/i.test(this.keyWord)) {
+      this.e.reply('请勿添加特殊关键词')
+      return
+    }
 
     this.setContext('addContext')
 
