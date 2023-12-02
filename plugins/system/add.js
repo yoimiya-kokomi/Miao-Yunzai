@@ -32,7 +32,7 @@ export class add extends plugin {
           log: false
         },
         {
-          reg: '^#+(全局)?(?:表情|词条)详情(.+)$',
+          reg: '^#+(全局)?(?:查看|查询)(?:表情|词条)(.+)$',
           fnc: 'faceDetail'
         },
         {
@@ -802,20 +802,20 @@ export class add extends plugin {
     return msg
   }
 
-  async faceDetail() {
+  async faceDetail () {
     if (!this.e.message) return false
     this.isGlobal = false
     await this.getGroupId()
     if (!this.group_id) return false
-    let faceDetailReg = /^#+(全局)?表情详情(.+)$/
+    let faceDetailReg = /^#+(全局)?(?:查看|查询)(?:表情|词条)(.+)$/
     let regGroup = faceDetailReg.exec(this.e.msg)
-    let keyWord = ""
+    let keyWord
     if (regGroup[1]) {
       this.isGlobal = true
     }
-      keyWord = regGroup[2].trim()
+    keyWord = regGroup[2].trim()
 
-    if (keyWord === "") return
+    if (keyWord === '') return
 
     this.initTextArr()
     this.initGlobalTextArr()
@@ -863,8 +863,19 @@ export class add extends plugin {
       } else {
         fromUser = '未知'
       }
-      let faceContent = (faceItem.type === 'image') ? `图片链接[${faceItem.url}]` : `内容[${faceItem.text}]`
-      replyArr.push(`${i + 1}、${faceContent}: ${fromUser}`)
+      let faceContent
+      console.log(faceItem)
+      if (faceItem.type === 'image') {
+        // face is an image
+        let tmp = segment.image(faceItem.local)
+        tmp.asface = faceItem.asface
+        faceContent = tmp
+        replyArr.push(`${i + 1}、${fromUser}`)
+        replyArr.push(faceContent)
+      } else {
+        faceContent = `${faceItem.text}`
+        replyArr.push(`${i + 1}、${fromUser}: ` + faceContent)
+      }
     }
 
     if (lodash.isEmpty(replyArr)) {
