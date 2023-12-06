@@ -69,7 +69,6 @@ export class ledger extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(`${data.srtempFile}ledgerCount`, data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', `html/ledger/ledger-count-${data.game}`, data)
   }
 }
