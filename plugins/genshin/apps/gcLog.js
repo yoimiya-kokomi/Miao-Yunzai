@@ -23,10 +23,6 @@ export class gcLog extends plugin {
           fnc: 'logFile'
         },
         {
-          reg: '^#xlsx文件导入记录$',
-          fnc: 'logXlsx'
-        },
-        {
           reg: '^#json文件导入记录$',
           fnc: 'logJson'
         },
@@ -35,7 +31,7 @@ export class gcLog extends plugin {
           fnc: 'getLog'
         },
         {
-          reg: '^#*(原神|星铁)?导出记录(excel|xlsx|json)*$',
+          reg: '^#*(原神|星铁)?导出记录(json)?$',
           fnc: 'exportLog'
         },
         {
@@ -71,10 +67,6 @@ export class gcLog extends plugin {
       if (name.includes('txt')) {
         this.e.msg = '#txt日志文件导入记录'
         if (name.includes('output')) return true
-      }
-      if (/(.*)[1-9][0-9]{8}(.*).xlsx$/ig.test(name)) {
-        this.e.msg = '#xlsx文件导入记录'
-        return true
       }
       if (/(.*)[1-9][0-9]{8}(.*).json/ig.test(name)) {
         this.e.msg = '#json文件导入记录'
@@ -142,27 +134,7 @@ export class gcLog extends plugin {
     }
 
     let exportLog = new ExportLog(this.e)
-
-    if (this.e.msg.includes('json')) {
-      return await exportLog.exportJson()
-    } else {
-      await this.e.reply('如需要将此记录导入到其他平台，请导出json格式文件')
-      return await exportLog.exportXlsx()
-    }
-  }
-
-  async logXlsx () {
-    if (!this.e.isPrivate) {
-      await this.e.reply('请私聊发送日志文件', false, { at: true })
-      return true
-    }
-
-    if (!this.e.file) {
-      await this.e.reply('请发送xlsx文件')
-      return true
-    }
-    await this.e.reply('如果是星铁记录，请在【原始数据】工作表复制【gacha_type】列，粘贴并把此标题重命名为【srgf_gacha_type】，否则可能无法正确识别')
-    await new ExportLog(this.e).logXlsx()
+    return await exportLog.exportJson()
   }
 
   async logJson () {

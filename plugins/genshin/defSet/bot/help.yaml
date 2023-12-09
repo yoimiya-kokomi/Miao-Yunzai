@@ -40,7 +40,7 @@
       desc: 按卡池统计抽卡数据
     - icon: excel
       title: 导出记录、导入记录
-      desc: 导出导入xlsx、json抽卡记录
+      desc: 导出导入json抽卡记录
     - icon: 纠缠之缘
       title: 十连 十连2 定轨 十连武器 
       desc: 真实模拟抽卡
