@@ -25,7 +25,7 @@ export default class MysNews extends base {
       typeName = '活动'
     }
 
-    const res = await this.postData('getNewsList', { gids: gid, page_size: 20, type })
+    const res = await this.postData('getNewsList', { gids: gid, page_size: this.e.msg.includes('列表') ? 5 : 20, type })
     if (!res) return
 
     const data = res.data.list
@@ -33,19 +33,36 @@ export default class MysNews extends base {
       return true
     }
 
-    const page = this.e.msg.replace(/#|＃|官方|星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿|公告|资讯|活动/g, '').trim() || 1
-    if (page > data.length) {
-      await this.e.reply('目前只查前20条最新的公告，请输入1-20之间的整数。')
-      return true
+    let param = {}
+    let game = this.game(gid)
+    if (this.e.msg.includes('列表')) {
+      this.model = 'mysNews-list'
+      data.forEach(element => {
+        element.post.created_at = new Date(element.post.created_at * 1000).toLocaleString()
+      })
+
+      param = {
+        ...this.screenData,
+        saveId: this.e.user_id,
+        data,
+        game,
+        typeName
+      }
+
+    } else {
+      const page = this.e.msg.replace(/#|＃|官方|星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿|公告|资讯|活动/g, '').trim() || 1
+      if (page > data.length) {
+        await this.e.reply('目前只查前20条最新的公告，请输入1-20之间的整数。')
+        return true
+      }
+
+      const postId = data[page - 1].post.post_id
+
+      param = await this.newsDetail(postId, gid)
     }
 
-    const postId = data[page - 1].post.post_id
-
-    const param = await this.newsDetail(postId, gid)
-
     const img = await this.render(param)
-    let game = this.game()
-    return this.replyMsg(img, `${game}${typeName}：${param.data.post.subject}`)
+    return this.replyMsg(img, `${game}${typeName}：${param?.data?.post?.subject || `米游社${game}${typeName}列表`}`)
   }
 
   render(param) {

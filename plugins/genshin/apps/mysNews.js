@@ -12,10 +12,10 @@ export class mysNews extends plugin {
       name: '米游社公告',
       dsc: '#公告 #资讯 #活动',
       event: 'message',
-      priority: 700,
+      priority: 7000,
       rule: [
         {
-          reg: '^#*(官方|星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?(公告|资讯|活动)[0-9]*$',
+          reg: '^#*(官方|星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?(公告|资讯|活动)(列表|[0-9])*$',
           fnc: 'news'
         },
         {
@@ -138,7 +138,7 @@ export class mysNews extends plugin {
   }
 
   gids() {
-    let msg = this.e.msg.replace(/[#公告资讯活动开启关闭推送]/g, '');
+    let msg = this.e.msg.replace(/[#公告资讯活动开启关闭推送列表]/g, '');
     switch (msg) {
       case '崩坏三':
       case '崩三':

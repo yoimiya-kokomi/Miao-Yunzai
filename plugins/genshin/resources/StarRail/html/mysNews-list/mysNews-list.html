@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <link rel="shortcut icon" href="#" />
+  <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/mysNews-list/mysNews-list.css" />
+  <link rel="preload" href="{{pluResPath}}font/tttgbnumber.ttf" as="font" />
+</head>
+
+<body>
+  <div class="container" id="container">
+    <div class="container">
+      <div class="head_box">
+        <h1>米游社·{{game}}{{typeName}}列表</h1>
+      </div>
+      <div class="body_box">
+        <div class="data_box">
+          {{each data data iCount}}
+          {{if iCount == data.length - 1}}
+          <div class="newscard" style="border-bottom: 0px">
+            {{else}}
+            <div class="newscard">
+              {{/if}}
+              <div class="newscard-left">
+                <div style="height:100%;display:table;width:100%">
+                  <span class="newscard-num">{{iCount + 1}}</span>
+                </div>
+              </div>
+              <div class="newscard-info">
+                <h3 class="newscard-title">{{data.post.subject}}</h3>
+                <div class="newscard-content">{{data.post.content}}</div>
+                <div class="newscard-time">{{data.post.created_at}}</div>
+              </div>
+              <div class="newscard-cover">
+                <div class="newscard-img"
+                  style='background-image: url("{{data.post.images[0]}}?x-oss-process=image/resize,s_200/quality,q_80/auto-orient,0/interlace,1/format,jpg");'>
+                </div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        <div class="logo">详情内容使用【#{{game}}{{typeName}}】加上序号查看，如【#{{game}}{{typeName}}2】</div>
+        <div class="logo">Created By Miao-Yunzai</div>
+      </div>
+    </div>
+</body>
+<script type="text/javascript"></script>
+
+</html>
