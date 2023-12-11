@@ -39,7 +39,7 @@ export default class base {
       defaultLayout: layoutPath + 'default.html'
     }
     if (this.e?.isSr) {
-      let char = Character.get('藿藿', 'sr')
+      let char = Character.get('银枝', 'sr')
       return {
         ...data,
         tplFile: `./plugins/genshin/resources/StarRail/html/${this.model}/${this.model}.html`,
