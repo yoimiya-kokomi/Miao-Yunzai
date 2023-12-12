@@ -155,7 +155,9 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
   message(data, ws) {
     try {
+      const raw = Bot.String(data)
       data = JSON.parse(data)
+      data.raw = raw
     } catch (err) {
       return logger.error(`解码数据失败：${logger.red(err)}`)
     }

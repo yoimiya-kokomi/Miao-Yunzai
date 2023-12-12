@@ -619,7 +619,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         Object.defineProperty(data, "friend", { get() { return this.member || {}}})
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
     }
 
     Bot.em(`${data.post_type}.${data.message_type}.${data.sub_type}`, data)
@@ -677,7 +677,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
             logger.info(`${logger.blue(`[${data.self_id}]`)} 群头衔：[${data.group_id}, ${data.user_id}] ${data.title}`)
             break
           default:
-            logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(JSON.stringify(data))}`)
+            logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(data.raw)}`)
         }
         break
       case "group_card":
@@ -717,7 +717,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         data.bot.getGroupMap()
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(data.raw)}`)
     }
 
     let notice = data.notice_type.split("_")
@@ -746,7 +746,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         data.approve = approve => data.bot.setGroupAddRequest(data.flag, data.sub_type, approve)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知请求：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知请求：${logger.magenta(data.raw)}`)
     }
 
     data.bot.request_list.push(data)
@@ -776,20 +776,22 @@ Bot.adapter.push(new class gocqhttpAdapter {
         this.connect(data, ws)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
     }
   }
 
   message(data, ws) {
     try {
+      const raw = Bot.String(data)
       data = JSON.parse(data)
+      data.raw = raw
     } catch (err) {
       return logger.error(`解码数据失败：${logger.red(err)}`)
     }
 
     if (data.post_type) {
       if (data.meta_event_type != "lifecycle" && !Bot.uin.includes(data.self_id)) {
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 找不到对应Bot，忽略消息：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 找不到对应Bot，忽略消息：${logger.magenta(data.raw)}`)
         return false
       }
       data.bot = Bot[data.self_id]
@@ -812,12 +814,12 @@ Bot.adapter.push(new class gocqhttpAdapter {
           this.makeMessage(data)
           break
         default:
-          logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+          logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
       }
     } else if (data.echo) {
       Bot.emit(data.echo, data)
     } else {
-      logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+      logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
     }
   }
 

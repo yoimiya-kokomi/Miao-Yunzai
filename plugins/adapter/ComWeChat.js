@@ -341,7 +341,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.user_id}] ${data.raw_message}`)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
     }
 
     Bot.em(`${data.post_type}.${data.message_type}`, data)
@@ -392,7 +392,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         logger.info(`${logger.blue(`[${data.self_id}]`)} 群用户名片：[${data.group_id}, ${data.user_id}] ${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(data.raw)}`)
     }
     if (!data.sub_type)
       data.sub_type = data.detail_type.split("_").pop()
@@ -413,7 +413,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         data.sub_type = "add"
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知请求：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知请求：${logger.magenta(data.raw)}`)
     }
     if (!data.sub_type)
       data.sub_type = data.detail_type.split("_").pop()
@@ -431,13 +431,15 @@ Bot.adapter.push(new class ComWeChatAdapter {
         this.connect(data, ws)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
     }
   }
 
   message(data, ws) {
     try {
+      const raw = Bot.String(data)
       data = JSON.parse(data)
+      data.raw = raw
     } catch (err) {
       return logger.error(`解码数据失败：${logger.red(err)}`)
     }
@@ -450,7 +452,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     if (data.type) {
       if (data.type != "meta" && !Bot.uin.includes(data.self_id)) {
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 找不到对应Bot，忽略消息：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${data.self_id}]`)} 找不到对应Bot，忽略消息：${logger.magenta(data.raw)}`)
         return false
       }
       data.bot = Bot[data.self_id]
@@ -469,12 +471,12 @@ Bot.adapter.push(new class ComWeChatAdapter {
           this.makeRequest(data)
           break
         default:
-          logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+          logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
       }
     } else if (data.echo) {
       Bot.emit(data.echo, data)
     } else {
-      logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+      logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
     }
   }
 

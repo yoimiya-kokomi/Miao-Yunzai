@@ -258,7 +258,7 @@ Bot.adapter.push(new class OPQBotAdapter {
         this.makeGroupMessage(id, data.EventData)
         break
       default:
-        logger.warn(`${logger.blue(`[${id}]`)} 未知事件：${logger.magenta(JSON.stringify(data))}`)
+        logger.warn(`${logger.blue(`[${id}]`)} 未知事件：${logger.magenta(data.raw)}`)
     }
   }
 
@@ -297,7 +297,9 @@ Bot.adapter.push(new class OPQBotAdapter {
 
   message(data, ws) {
     try {
+      const raw = Bot.String(data)
       data = JSON.parse(data)
+      data.raw = raw
     } catch (err) {
       return logger.error(`解码数据失败：${logger.red(err)}`)
     }
@@ -313,7 +315,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     } else if (data.ReqId) {
       Bot.emit(data.ReqId, data)
     } else {
-      logger.warn(`${logger.blue(`[${id}]`)} 未知消息：${logger.magenta(JSON.stringify(data))}`)
+      logger.warn(`${logger.blue(`[${id}]`)} 未知消息：${logger.magenta(data.raw)}`)
     }
   }
 
