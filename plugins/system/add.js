@@ -5,7 +5,6 @@ import fs from "node:fs"
 import path from "node:path"
 import lodash from "lodash"
 import fetch from "node-fetch"
-import { fileTypeFromBuffer } from "file-type"
 
 let messageMap = {}
 
@@ -193,24 +192,14 @@ export class add extends plugin {
     fs.writeFileSync(`${this.path}${this.group_id}.json`, JSON.stringify(obj, "", "\t"))
   }
 
-  async fileType(data) {
-    const file = { name: `${this.group_id}/${data.type}/${Date.now()}` }
-    try {
-      file.url = data.url.replace(/^base64:\/\/.*/, "base64://...")
-      file.buffer = await Bot.Buffer(data.url)
-      file.type = await fileTypeFromBuffer(file.buffer)
-      file.name = `${file.name}.${file.type.ext}`
-    } catch (err) {
-      logger.error(`文件类型检测错误：${logger.red(err)}`)
-      file.name = `${file.name}-${path.basename(data.file || data.url)}`
-    }
-    return file
-  }
-
   async saveFile(data) {
-    const file = await this.fileType(data)
-    if (file.name && Buffer.isBuffer(file.buffer) && common.mkdirs(path.dirname(`${this.path}${file.name}`))) {
-      fs.writeFileSync(`${this.path}${file.name}`, file.buffer)
+    const file = await Bot.fileType(data)
+    if (Buffer.isBuffer(file.buffer)) {
+      if (!file.name) file.name = `${Date.now()}-${path.basename(data.file || data.url)}`
+      file.name = `${this.group_id}/${data.type}/${file.name}`
+      file.path = `${this.path}${file.name}`
+      common.mkdirs(path.dirname(file.path))
+      fs.writeFileSync(file.path, file.buffer)
       return file.name
     }
     return data.url

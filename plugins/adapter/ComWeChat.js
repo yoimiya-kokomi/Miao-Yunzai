@@ -29,16 +29,16 @@ Bot.adapter.push(new class ComWeChatAdapter {
         const type = await fileTypeFromBuffer(buffer)
         return `${Date.now()}.${type.ext}`
       } else {
-        return path.basename(file)
+        return `${Date.now()}-${path.basename(file)}`
       }
     } catch (err) {
       logger.error(`文件类型检测错误：${logger.red(err)}`)
     }
-    return false
+    return String(Date.now())
   }
 
   async uploadFile(data, file, name) {
-    const opts = { name: name || await this.fileName(file) || String(Date.now()) }
+    const opts = { name: name || await this.fileName(file) }
 
     if (Buffer.isBuffer(file)) {
       opts.type = "data"
