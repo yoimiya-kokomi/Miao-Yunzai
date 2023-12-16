@@ -27,7 +27,7 @@ body {
   width: 1200px;
   height: 1835px;
   background-color: #f5f6fb;
-  background-image: url("../../img/note/bg.png");
+  background-image: url("../../StarRail/img/note/bg.png");
 }
 
 .uid {
@@ -39,7 +39,7 @@ body {
   flex-direction: column;
   margin-top: 195px;
   margin-left: 50px;
-  background-image: url('../../img/note/uidbg.png');
+  background-image: url('../../StarRail/img/note/uidbg.png');
 }
 
 .uid_item {
@@ -197,7 +197,7 @@ img {
   width: 80px;
   height: 80px;
   margin-left: 20px;
-  background: url(../../img/other/rails_pass.png) no-repeat 50% / cover;
+  background: url(../../StarRail/img/other/rails_pass.png) no-repeat 50% / cover;
 }
 
 .primogems .text {
@@ -259,7 +259,7 @@ img {
 #chartContainer {
   width: 440px;
   height: 440px;
-  background: url(../../img/other/chart.png) no-repeat 50% / cover;
+  background: url(../../StarRail/img/other/chart.png) no-repeat 50% / cover;
   margin-left: 70px;
 }
 
