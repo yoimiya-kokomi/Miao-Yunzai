@@ -2,7 +2,7 @@
 
 {{block 'css'}}
 <link rel="stylesheet" type="text/css" href="{{_res_path}}html/ledger/ledger-sr.css"/>
-<link rel="preload" href="https://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js" as="script"/>
+<link rel="preload" href="{{_res_path}}script/g2plot.min.js" as="script"/>
 {{/block}}
 
 {{block 'main'}}
@@ -16,7 +16,7 @@
   </div>
   <div class="title_date">
     <div class="icon">
-      <img src="{{_res_path}}/StarRail/img/role/{{icon}}"/>
+      <img src="{{_res_path}}StarRail/img/role/{{icon}}"/>
     </div>
     <div class="title_date_text">
       <div>{{nowDay}}</div>
@@ -72,7 +72,7 @@
   </div>
 </div>
 
-<script type="text/javascript" src="https://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js"></script>
+<script type="text/javascript" src="{{_res_path}}script/g2plot.min.js"></script>
 <script>
   const { Pie } = G2Plot
   const data = JSON.parse(`{{@ group_by}}`)

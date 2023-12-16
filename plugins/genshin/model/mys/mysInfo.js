@@ -395,6 +395,8 @@ export default class MysInfo {
         if (res.api === 'detail') res.retcode = 0
         break
       case 5003:
+        if (!isTask) this.e.reply('米游社账号异常，暂时无法查询')
+        break
       case 1034:
         let handler = this.e.runtime?.handler || {}
 
