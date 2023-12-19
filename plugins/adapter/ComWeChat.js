@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto"
+import { randomUUID } from "node:crypto"
 import path from "node:path"
 import fs from "node:fs"
 import { fileTypeFromBuffer } from "file-type"
@@ -91,6 +91,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
             i = { type: "mention", data: { user_id: i.data.qq }}
           break
         case "reply":
+        case "button":
           continue
         default:
           i = { type: "text", data: { text: JSON.stringify(i) }}

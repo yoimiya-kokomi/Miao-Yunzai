@@ -1,5 +1,5 @@
-import fs from "fs"
-import { randomUUID } from "crypto"
+import fs from "node:fs"
+import { randomUUID } from "node:crypto"
 let code = {}
 let file = "config/config/other.yaml"
 export class master extends plugin {

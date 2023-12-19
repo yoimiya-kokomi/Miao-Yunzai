@@ -70,6 +70,7 @@ Bot.adapter.push(new class OPQBotAdapter {
         case "file":
         case "face":
         case "reply":
+        case "button":
           continue
         case "node":
           await Bot.sendForwardMsg(msg => this.sendMsg(send, upload, msg), i.data)
