@@ -1,11 +1,10 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import common from '../../../lib/common/common.js'
 import fetch from 'node-fetch'
-import lodash from 'lodash'
 import MysInfo from '../model/mys/mysInfo.js'
 
 export class exchange extends plugin {
-  constructor(e) {
+  constructor() {
     super({
       name: '兑换码',
       dsc: '前瞻直播兑换码',
@@ -13,7 +12,7 @@ export class exchange extends plugin {
       priority: 1000,
       rule: [
         {
-          reg: '^#*(直播|前瞻)*兑换码$',
+          reg: /^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3)?(直播|前瞻)?兑换码$/,
           fnc: 'getCode'
         },
         {
@@ -25,48 +24,52 @@ export class exchange extends plugin {
   }
 
   async getCode() {
-    this.code_ver = ''
+    let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3)?(直播|前瞻)?兑换码$/)
+    this.uid = '75276550'
+    if (reg[1] == '*' || ["星铁", "崩铁"].includes(reg[2])) {
+      this.uid = '80823548'
+    }
+    if (reg[3] == ["崩三", "崩坏三", "崩坏3"].includes(reg[4])) {
+      this.uid = '73565430'
+    }
     this.now = parseInt(Date.now() / 1000)
     let actid = await this.getActId()
-    if (!actid) return
+    if (!actid) {
+      logger.info('[兑换码] 未获取到actId')
+      return true
+    }
     this.actId = actid
 
     /** index info */
     let index = await this.getData('index')
-    if (!index || !index.data) return
+    if (!index || !index.data) { return true }
     if (index.data === null) {
       return await this.reply(`错误：\n${index.message}`)
     }
-    
+
     let index_data = index.data.live;
     let title = index_data['title'];
     this.code_ver = index_data['code_ver'];
     if (index_data.remain > 0) {
-      return await this.reply(`暂无直播兑换码\n${title}`)
+      return await this.reply(`暂无${title}直播兑换码`, true)
     }
 
     let code = await this.getData('code')
-    if (!code || !code.data?.code_list) return
+    if (!code || !code.data?.code_list) {
+      logger.info('[兑换码] 未获取到兑换码')
+      return true
+    }
     let codes = [];
 
     for (let val of code.data.code_list) {
-      if (val.code){
-        //let title = (val.title || '').replace(/\<.*?\>/g,'')
+      if (val.code) {
         codes.push(val.code)
       }
     }
 
-    let msg = ''
-    if (codes.length >= 3) {
-      msg = [`${title}-直播兑换码`, `兑换码存在有效期，请及时兑换哦~`, ...codes]
-      msg = await common.makeForwardMsg(this.e, msg, msg[0])
-    } else if (this.e.msg.includes('#')) {
-      msg += codes.join('\n')
-    } else {
-      msg = `${title}-直播兑换码\n`
-      msg += codes.join('\n')
-    }
 
+    let msg = [`${title}-直播兑换码`, `兑换码过期时间: \n${this.deadline}`, ...codes]
+    msg = await common.makeForwardMsg(this.e, msg, msg[0])
     await this.reply(msg)
   }
 
@@ -74,7 +77,7 @@ export class exchange extends plugin {
     let url = {
       index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
       code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${this.now}`,
-      actId: "https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=75276550",
+      actId: `https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=${this.uid}`,
     }
 
     let response
@@ -98,40 +101,29 @@ export class exchange extends plugin {
     return res
   }
 
+  // 获取 "act_id"
   async getActId() {
-    // 获取 "act_id"
     let ret = await this.getData('actId')
     if (ret.error || ret.retcode !== 0) {
       return "";
     }
 
-    let actId = "";
-    let keywords = ["来看《原神》", "版本前瞻特别节目"];
     for (const p of ret.data.list) {
       const post = p.post.post;
       if (!post) {
         continue;
       }
-      if (!keywords.every((word) => post.subject.includes(word))) {
-        continue;
-      }
-      let shit = JSON.parse(post.structured_content);
-      for (let segment of shit) {
-        if (segment.insert.toString().includes('观看直播') && segment.attributes.link) {
-          let matched = segment.attributes.link.match(/act_id=(.*?)&/);
-          if (matched) {
-            actId = matched[1];
-          }
-        }
-      }
-
-      if (actId) {
-        break;
+      let date = new Date(post.created_at * 1000)
+      date.setDate(date.getDate() + 1)
+      this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
+      let structured_content = post.structured_content
+      let result = structured_content.match(/{\"link\":\"https:\/\/webstatic.mihoyo.com\/bbs\/event\/live\/index.html\?act_id=(.*?)\\/)
+      if (result) {
+        return result[1]
       }
     }
-
-    return actId;
   }
+  // 兑换码使用
   async useCode() {
     let cdkCode = this.e.message[0].text.split(/#(兑换码使用|cdk-u) /, 3)[2];
     let res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
