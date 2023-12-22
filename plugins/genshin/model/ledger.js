@@ -310,7 +310,11 @@ export default class Ledger extends base {
     }
     // console.log(NoteData)
     if (!NoteData || lodash.isEmpty(NoteData)) {
-      this.e.reply(`${this.e?.isSr ? '暂无星琼数据，请先发送 *星琼' : '暂无原石数据，请先发送 #原石'}`, false, { at: true })
+      this.e.reply(this.e?.isSr ? ['暂无星琼数据，请先发送 *星琼', segment.button([
+        { text: "星琼", input: "*星琼" },
+      ])] : ['暂无原石数据，请先发送 #原石', segment.button([
+        { text: "原石", input: "#原石" },
+      ])], false, { at: true })
       return false
     }
     NoteData = NoteData[nowYear]

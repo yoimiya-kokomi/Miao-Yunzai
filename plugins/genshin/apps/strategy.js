@@ -13,6 +13,9 @@ gsCfg.cpCfg('mys', 'set')
  * 1.增加多个来源的攻略图
  * 2.优化获取攻略图逻辑，更改为对比图片大小来寻找
  * 3.增加攻略说明、设置默认攻略功能
+ *
+ * 从拓展插件更新
+ * 作者：曉K 更新：🌌
  */
 
 export class strategy extends plugin {
@@ -24,7 +27,7 @@ export class strategy extends plugin {
       priority: 50,
       rule: [
         {
-          reg: '^#?(更新)?\\S+攻略([1-4])?$',
+          reg: '^#?(更新)?\\S+攻略([1-7])?$',
           fnc: 'strategy'
         },
         {
@@ -32,7 +35,7 @@ export class strategy extends plugin {
           fnc: 'strategy_help'
         },
         {
-          reg: '^#?设置默认攻略([1-4])?$',
+          reg: '^#?设置默认攻略([1-7])?$',
           fnc: 'strategy_setting'
         }
       ]
@@ -52,10 +55,16 @@ export class strategy extends plugin {
       // 来源：派蒙喵喵屋
       [341284],
       // 来源：OH是姜姜呀(需特殊处理)
-      [341523]
+      [341523],
+      // 来源：曉K → 废物一个
+      [1582613],
+      // 来源：坤易
+      [22148],
+      // 来源：婧枫赛赛
+      [1812949]
     ]
 
-    this.source = ['西风驿站', '原神观测枢', '派蒙喵喵屋', 'OH是姜姜呀']
+    this.source = ['西风驿站', '原神观测枢', '派蒙喵喵屋', 'OH是姜姜呀', '曉K', '坤易', '婧枫赛赛']
 
     this.oss = '?x-oss-process=image//resize,s_1200/quality,q_90/auto-orient,0/interlace,1/format,jpg'
   }
@@ -66,7 +75,7 @@ export class strategy extends plugin {
       fs.mkdirSync(this.path)
     }
     /** 初始化子目录 */
-    for (let subId of [1, 2, 3, 4]) {
+    for (let subId of [1, 2, 3, 4, 5, 6, 7]) {
       let path = this.path + '/' + subId
       if (!fs.existsSync(path)) {
         fs.mkdirSync(path)
@@ -76,7 +85,7 @@ export class strategy extends plugin {
 
   /** #心海攻略 */
   async strategy () {
-    let match = /^#?(更新)?(\S+)攻略([1-4])?$/.exec(this.e.msg)
+    let match = /^#?(更新)?(\S+)攻略([1-7])?$/.exec(this.e.msg)
 
     // let isUpdate = !!this.e.msg.includes('更新')
     let isUpdate = !!match[1]
@@ -104,33 +113,37 @@ export class strategy extends plugin {
     }
 
     this.sfPath = `${this.path}/${group}/${role.name}.jpg`
+    let button = []
+    for (const i of [1, 2, 3, 4, 5, 6, 7])
+      button.push({ text: String(i), callback: `#${role.name}攻略${i}` })
+    button = segment.button(button)
 
     if (fs.existsSync(this.sfPath) && !isUpdate) {
-      await this.e.reply(segment.image(`file://${this.sfPath}`))
+      await this.e.reply([segment.image(`file://${this.sfPath}`), button])
       return
     }
 
     if (await this.getImg(role.name, group)) {
-      await this.e.reply(segment.image(`file://${this.sfPath}`))
+      await this.e.reply([segment.image(`file://${this.sfPath}`), button])
     }
   }
 
   /** #攻略帮助 */
   async strategy_help () {
-    await this.e.reply('攻略帮助:\n#心海攻略[1234]\n#更新早柚攻略[1234]\n#设置默认攻略[1234]\n示例: 心海攻略4\n\n攻略来源:\n1——西风驿站\n2——原神观测枢\n3——派蒙喵喵屋\n4——OH是姜姜呀')
+    await this.e.reply('攻略帮助:\n#心海攻略[1234567]\n#更新早柚攻略[1234567]\n#设置默认攻略[1234567]\n示例: 心海攻略4\n\n攻略来源:\n1——西风驿站\n2——原神观测枢\n3——派蒙喵喵屋\n4——OH是姜姜呀\n5——曉K\n6——坤易\n7——婧枫赛赛(角色配队一图流)')
   }
 
   /** #设置默认攻略1 */
   async strategy_setting () {
-    let match = /^#?设置默认攻略([1-4])?$/.exec(this.e.msg)
+    let match = /^#?设置默认攻略([1-7])?$/.exec(this.e.msg)
     let set = './plugins/genshin/config/mys.set.yaml'
     let config = fs.readFileSync(set, 'utf8')
     let num = Number(match[1])
     if(isNaN(num)) {
-		await this.e.reply('默认攻略设置方式为: \n#设置默认攻略[1234] \n 请增加数字1-4其中一个')
+		await this.e.reply('默认攻略设置方式为: \n#设置默认攻略[1234567] \n 请增加数字1-7其中一个')
 		return
     }
-    config = config.replace(/defaultSource: [1-4]/g, 'defaultSource: ' + num)
+    config = config.replace(/defaultSource: [1-7]/g, 'defaultSource: ' + num)
     fs.writeFileSync(set, config, 'utf8')
 
     await this.e.reply('默认攻略已设置为: ' + match[1])

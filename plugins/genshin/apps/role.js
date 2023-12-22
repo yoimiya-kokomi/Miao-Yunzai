@@ -29,6 +29,14 @@ export class role extends plugin {
         fnc: 'roleExplore'
       }]
     })
+
+    this.prefix = this.e?.isSr ? "*" : "#"
+    this.button = segment.button([
+      { text: "角色", callback: `${this.prefix}角色` },
+      { text: "探索", callback: `${this.prefix}探索` },
+      { text: "武器", callback: `${this.prefix}武器` },
+      { text: "深渊", callback: `${this.prefix}深渊` },
+    ])
   }
 
   /** 初始化配置文件 */
@@ -69,7 +77,7 @@ export class role extends plugin {
     console.log('abyss', data)
     if (!data) return
 
-    this.renderImg('genshin', 'html/abyss/abyss', data)
+    this.reply([await this.renderImg('genshin', 'html/abyss/abyss', data, { retType: "base64" }), this.button])
   }
 
   /** 深渊十二层 */
@@ -77,7 +85,7 @@ export class role extends plugin {
     let data = await new Abyss(this.e).getAbyssFloor()
     if (!data) return
 
-    await this.renderImg('genshin', 'html/abyss/abyss-floor', data)
+    this.reply([await this.renderImg('genshin', 'html/abyss/abyss-floor', data, { retType: "base64" }), this.button])
   }
 
   /** 武器 */
@@ -85,7 +93,7 @@ export class role extends plugin {
     let data = await Weapon.get(this.e)
     if (!data) return
 
-    await this.renderImg('genshin', 'html/avatar/weapon', data)
+    this.reply([await this.renderImg('genshin', 'html/avatar/weapon', data, { retType: "base64" }), this.button])
   }
 
   /** 角色卡片 */
@@ -93,7 +101,7 @@ export class role extends plugin {
     let data = await new RoleIndex(this.e).roleCard()
     if (!data) return
 
-    await this.renderImg('genshin', 'html/player/role-card', data)
+    this.reply([await this.renderImg('genshin', 'html/player/role-card', data, { retType: "base64" }), this.button])
   }
 
   /** 探险 */
@@ -101,6 +109,6 @@ export class role extends plugin {
     let data = await new RoleIndex(this.e).roleExplore()
     if (!data) return
 
-    this.renderImg('genshin', 'html/player/role-explore', data)
+    this.reply([await this.renderImg('genshin', 'html/player/role-explore', data, { retType: "base64" }), this.button])
   }
 }

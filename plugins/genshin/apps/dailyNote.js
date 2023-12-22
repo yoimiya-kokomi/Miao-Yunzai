@@ -29,6 +29,4 @@ export class dailyNote extends plugin {
     /** 生成图片 */
     this.renderImg('genshin', `html/player/daily-note-${data.game}`, data)
   }
-
-
 }

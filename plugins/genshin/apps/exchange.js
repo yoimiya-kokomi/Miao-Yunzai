@@ -63,13 +63,14 @@ export class exchange extends plugin {
 
     for (let val of code.data.code_list) {
       if (val.code) {
-        codes.push(val.code)
+        codes.push([val.code, segment.button([
+          { text: "兑换", callback: `#兑换码使用${val.code}` },
+        ])])
       }
     }
 
-
-    let msg = [`${title}-直播兑换码`, `兑换码过期时间: \n${this.deadline}`, ...codes]
-    msg = await common.makeForwardMsg(this.e, msg, msg[0])
+    let msg = [`兑换码过期时间: \n${this.deadline}`, ...codes]
+    msg = await common.makeForwardMsg(this.e, msg, `${title}-直播兑换码`)
     await this.reply(msg)
   }
 

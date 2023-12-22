@@ -276,11 +276,9 @@ export default class MysNews extends base {
 
   replyMsg(img, title) {
     if (!img || img.length <= 0) return false
-    if (img.length == 1) {
-      if (title) return [title, ...img]
-      return img
-    }
-    return common.makeForwardMsg(this.e, img, title)
+    if (title) img = [title, ...img]
+    if (img.length <= 2) return img
+    return common.makeForwardMsg(this.e, [img])
   }
 
   async mysNewsTask() {

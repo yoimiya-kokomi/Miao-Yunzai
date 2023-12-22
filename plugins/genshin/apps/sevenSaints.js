@@ -20,6 +20,12 @@ export class sevenSaints extends plugin {
         }
       ]
     })
+
+    this.button = segment.button([
+      { text: "牌组", callback: `#七圣召唤查询牌组` },
+      { text: "角色牌", callback: `#七圣召唤查询角色牌` },
+      { text: "行动牌", callback: `#七圣召唤查询行动牌` },
+    ])
   }
 
   async deckIndex() {
@@ -36,7 +42,7 @@ export class sevenSaints extends plugin {
     if (!data) return
 
     let img = await puppeteer.screenshot('deck', data)
-    if (img) await this.reply(img)
+    if (img) await this.reply([img, this.button])
   }
 
   async deck_list(id = 0) {
@@ -44,7 +50,7 @@ export class sevenSaints extends plugin {
     if (!data) return
 
     let img = await puppeteer.screenshot('deckList', data)
-    if (img) await this.reply(img)
+    if (img) await this.reply([img, this.button])
   }
   async deck_cards(id = 0) {
     if (this.e.msg.includes('角色')) id = 1
@@ -54,6 +60,6 @@ export class sevenSaints extends plugin {
     if (!data) return
 
     let img = await puppeteer.screenshot('deckCard', data)
-    if (img) await this.reply(img)
+    if (img) await this.reply([img, this.button])
   }
 }

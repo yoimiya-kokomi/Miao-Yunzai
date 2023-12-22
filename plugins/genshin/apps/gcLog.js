@@ -50,6 +50,17 @@ export class gcLog extends plugin {
     })
 
     this.androidUrl = 'https://docs.qq.com/doc/DUWpYaXlvSklmVXlX'
+    this.prefix = this.e?.isSr ? "*" : "#"
+    this.button = segment.button([
+      { text: "角色记录", callback: `${this.prefix}角色记录` },
+      { text: "角色统计", callback: `${this.prefix}角色统计` },
+    ],[
+      { text: "武器记录", callback: `${this.prefix}武器记录` },
+      { text: "武器统计", callback: `${this.prefix}武器统计` },
+    ],[
+      { text: "常驻记录", callback: `${this.prefix}常驻记录` },
+      { text: "常驻统计", callback: `${this.prefix}常驻统计` },
+    ])
   }
 
   async init () {
@@ -111,7 +122,7 @@ export class gcLog extends plugin {
 
     if (typeof data != 'object') return
 
-    await this.renderImg('genshin', `html/gacha/gacha-log`, data)
+    this.reply([await this.renderImg('genshin', `html/gacha/gacha-log`, data, { retType: "base64" }), this.button])
   }
 
   /** #抽卡记录 */
@@ -123,7 +134,7 @@ export class gcLog extends plugin {
     if (this.e.isAll) {
       name = `html/gacha/gacha-all-log`
     }
-    await this.renderImg('genshin', name, data)
+    this.reply([await this.renderImg('genshin', name, data, { retType: "base64" }), this.button])
   }
 
   /** 导出记录 */
@@ -152,7 +163,11 @@ export class gcLog extends plugin {
   }
 
   async help () {
-    await this.e.reply(segment.image(`file://${_path}/resources/logHelp/记录帮助.png`))
+    await this.e.reply([segment.image(`file://${_path}/resources/logHelp/记录帮助.png`), segment.button([
+      { text: "电脑", callback: "#电脑帮助" },
+      { text: "安卓", callback: "#安卓帮助" },
+      { text: "苹果", callback: "#苹果帮助" },
+    ])])
   }
 
   async helpPort () {
@@ -170,6 +185,7 @@ export class gcLog extends plugin {
   async logCount () {
     let data = await new LogCount(this.e).count()
     if (!data) return
-    this.renderImg('genshin', `html/gacha/log-count`, data)
+
+    this.reply([await this.renderImg('genshin', `html/gacha/log-count`, data, { retType: "base64" }), this.button])
   }
 }

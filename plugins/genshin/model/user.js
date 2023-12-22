@@ -46,7 +46,7 @@ export default class User extends base {
       this.e.ck = this.ck
     }
     if (!this.e.ck) {
-      await this.e.reply(`请【私聊】发送米游社cookie，获取教程：\n${set.cookieDoc}`)
+      await this.e.reply(`请【私聊】发送米游社Cookie，获取教程：\n${set.cookieDoc}`)
       return
     }
 
@@ -59,14 +59,14 @@ export default class User extends base {
     })
 
     if (!param.cookie_token && !param.cookie_token_v2) {
-      await this.e.reply('发送cookie不完整\n请退出米游社【重新登录】，刷新完整cookie')
+      await this.e.reply('发送Cookie不完整\n请退出米游社【重新登录】，刷新完整Cookie')
       return
     }
 
     // TODO：独立的mys数据，不走缓存ltuid
     let mys = await MysUser.create(param.ltuid || param.ltuid_v2 || param.account_id_v2 || param.ltmid_v2)
     if (!mys) {
-      await this.e.reply('发送cookie不完整或数据错误')
+      await this.e.reply('发送Cookie不完整或数据错误')
       return
     }
     let data = {}
@@ -92,10 +92,10 @@ export default class User extends base {
     /** 检查ck是否失效 */
     let uidRet = await mys.reqMysUid()
     if (uidRet.status !== 0) {
-      logger.mark(`绑定cookie错误1：${this.checkMsg || 'cookie错误'}`)
+      logger.mark(`绑定Cookie错误1：${this.checkMsg || 'Cookie错误'}`)
       // 清除mys数据
       mys._delCache()
-      return await this.e.reply(`绑定cookie失败：${this.checkMsg || 'cookie错误'}`)
+      return await this.e.reply(`绑定Cookie失败：${this.checkMsg || 'Cookie错误'}`)
     }
 
     // 判断data.ltuid是否是数字
@@ -107,22 +107,23 @@ export default class User extends base {
         this.ltuid = userInfo.uid || this.ltuid
         this.ck = `${this.ck}ltuid=${this.ltuid};`
       } else {
-        logger.mark(`绑定cookie错误2：${userFullInfo.message || 'cookie错误'}`)
-        return await this.e.reply(`绑定cookie失败：${userFullInfo.message || 'cookie错误'}`)
+        logger.mark(`绑定Cookie错误2：${userFullInfo.message || 'Cookie错误'}`)
+        return await this.e.reply(`绑定Cookie失败：${userFullInfo.message || 'Cookie错误'}`)
       }
     }
 
-    logger.mark(`${this.e.logFnc} 检查cookie正常 [ltuid:${mys.ltuid}]`)
+    logger.mark(`${this.e.logFnc} 检查Cookie正常 [ltuid:${mys.ltuid}]`)
 
     await user.addMysUser(mys)
     await mys.initCache()
     await user.save()
 
-    logger.mark(`${this.e.logFnc} 保存cookie成功 [ltuid:${mys.ltuid}]`)
+    logger.mark(`${this.e.logFnc} 保存Cookie成功 [ltuid:${mys.ltuid}]`)
 
-    let uidMsg = ['绑定cookie成功', mys.getUidInfo()]
+    let uidMsg = ['绑定Cookie成功', mys.getUidInfo()]
     await this.e.reply(uidMsg.join('\n'))
     let msg = []
+    let button = []
     if (mys.hasGame('gs')) {
       msg.push(
         '原神模块支持：',
@@ -135,6 +136,19 @@ export default class User extends base {
         '【#练度统计】技能统计列表',
         '【#面板】【#更新面板】面板信息'
       )
+      button.push([
+        { text: "#uid", callback: "#uid" },
+        { text: "#我的ck", callback: "#我的ck" },
+        { text: "#删除ck", callback: "#删除ck" },
+      ],[
+        { text: "#体力", callback: "#体力" },
+        { text: "#原石", callback: "#原石" },
+        { text: "#原石统计", callback: "#原石统计" },
+      ],[
+        { text: "#练度统计", callback: "#练度统计" },
+        { text: "#面板", callback: "#面板" },
+        { text: "#更新面板", callback: "#更新面板" },
+      ])
     }
     if (mys.hasGame('sr')) {
       msg.push(
@@ -144,8 +158,16 @@ export default class User extends base {
         '【*体力】体力信息',
         '【*面板】【*更新面板】面板信息'
       )
+      button.push([
+        { text: "*uid", callback: "*uid" },
+        { text: "*删除ck", callback: "*删除ck" },
+        { text: "*体力", callback: "*体力" },
+      ],[
+        { text: "*面板", callback: "*面板" },
+        { text: "*更新面板", callback: "*更新面板" },
+      ])
     }
-    msg = await common.makeForwardMsg(this.e, ['使用命令说明', msg.join('\n')], '绑定成功：使用命令说明')
+    msg = await common.makeForwardMsg(this.e, [[msg.join('\n'), segment.button(...button)]], '绑定成功：使用命令说明')
     await this.e.reply(msg)
   }
 
@@ -168,7 +190,7 @@ export default class User extends base {
     if (!mys) {
       return `删除失败：当前的UID${uidData?.uid}无CK信息`
     }
-    let msg = ['绑定cookie已删除', mys.getUidInfo()]
+    let msg = ['绑定Cookie已删除', mys.getUidInfo()]
     await user.delMysUser(uidData.ltuid)
     return msg.join('\n')
   }
@@ -188,12 +210,16 @@ export default class User extends base {
     let game = this.e
     let uidList = user.getUidList(game)
     if (index > uidList.length) {
-      return await this.e.reply('uid序号输入错误')
+      return await this.e.reply(['uid序号输入错误', segment.button([
+      { text: "删除uid", input: "#删除uid" },
+    ])])
     }
     index = Number(index) - 1
     let uidObj = uidList[index]
     if (uidObj.type === 'ck') {
-      return await this.e.reply('CK对应UID无法直接删除，请通过【#删除ck】命令来删除')
+      return await this.e.reply(['CK对应UID无法直接删除，请通过【#删除ck】命令来删除', segment.button([
+      { text: "删除ck", callback: "#删除ck" },
+    ])])
     }
     await user.delRegUid(uidObj.uid, game)
     return await this.showUid()
@@ -248,10 +274,26 @@ export default class User extends base {
         }
       })
     })
-    let e = this.e
-    return e.runtime.render('genshin', 'html/user/uid-list', {
-      uids
-    })
+    return this.e.reply([await this.e.runtime.render('genshin', 'html/user/uid-list', { uids }, { retType: "base64" }), segment.button([
+      { text: "绑定UID", input: "#绑定uid" },
+      { text: "切换UID", input: "#uid" },
+      { text: "删除UID", input: "#删除uid" },
+    ],[
+      { text: "角色", callback: "#角色" },
+      { text: "探索", callback: "#探索" },
+      { text: "武器", callback: "#武器" },
+      { text: "深渊", callback: "#深渊" },
+    ],[
+      { text: "统计", callback: "#练度统计" },
+      { text: "面板", callback: "#面板" },
+      { text: "体力", callback: "#体力" },
+      { text: "原石", callback: "#原石" },
+    ],[
+      { text: "留影", callback: "#留影叙佳期" },
+      { text: "七圣", callback: "#七圣召唤查询牌组" },
+      { text: "抽卡", callback: "#抽卡记录" },
+      { text: "充值", callback: "#充值记录" },
+    ])])
   }
 
   /** 切换uid */
@@ -260,7 +302,9 @@ export default class User extends base {
     let game = this.e
     let uidList = user.getUidList(game)
     if (index > uidList.length) {
-      return await this.e.reply('uid序号输入错误')
+      return await this.e.reply(['uid序号输入错误', segment.button([
+        { text: "切换uid", input: "#uid" },
+      ])])
     }
     index = Number(index) - 1
     user.setMainUid(index, game)
@@ -455,11 +499,13 @@ export default class User extends base {
   async myCk () {
     let user = await this.user()
     if (!user.hasCk) {
-      this.e.reply('当前尚未绑定cookie')
+      this.e.reply(['当前尚未绑定Cookie', segment.button([
+        { text: "帮助", input: "#Cookie帮助" },
+      ])])
     }
     let mys = user.getMysUser(this.e)
     if (mys) {
-      await this.e.reply(`当前绑定cookie\nuid：${mys.getUid(this.e)}`)
+      await this.e.reply(`当前绑定Cookie\nuid：${mys.getUid(this.e)}`)
       await this.e.reply(mys.ck)
     }
   }
@@ -493,7 +539,11 @@ export default class User extends base {
       cks.push(`当前生效uid：${uid}\n通过【#uid】命令可查看并切换UID`)
     }
 
-    await this.e.reply(cks.join('\n----\n'), false, { at: true })
+    await this.e.reply([cks.join('\n----\n'), segment.button([
+      { text: "绑定UID", input: "#绑定uid" },
+      { text: "切换UID", input: "#uid" },
+      { text: "删除UID", input: "#删除uid" },
+    ])], false, { at: true })
   }
 
   async userAdmin () {

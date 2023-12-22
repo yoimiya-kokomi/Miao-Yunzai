@@ -12,15 +12,15 @@ export class user extends plugin {
       priority: 300,
       rule: [
         {
-          reg: '^#*(体力|ck|cookie)帮助',
+          reg: '^#?(体力|[Cc](oo)?[Kk](ie)?)帮助',
           fnc: 'ckHelp'
         },
         {
-          reg: '^(ck|cookie|js)代码$',
+          reg: '^#[Cc](oo)?[Kk](ie)?代码$',
           fnc: 'ckCode'
         },
         {
-          reg: '^#绑定(cookie|ck)$',
+          reg: '^#绑定[Cc](oo)?[Kk](ie)?$',
           fnc: 'bingCk'
         },
         {
@@ -29,12 +29,12 @@ export class user extends plugin {
           fnc: 'noLogin'
         },
         {
-          reg: '^#?(原神|星铁)?我的(ck|cookie)$',
+          reg: '^#?(原神|星铁)?我的[Cc](oo)?[Kk](ie)?$',
           event: 'message',
           fnc: 'myCk'
         },
         {
-          reg: '^#?(原神|星铁)?删除(ck|cookie)$',
+          reg: '^#?(原神|星铁)?删除[Cc](oo)?[Kk](ie)?$',
           fnc: 'delCk'
         },
         {
@@ -50,7 +50,7 @@ export class user extends plugin {
           fnc: 'showUid'
         },
         {
-          reg: '^#\\s*(检查|我的)*ck(状态)*$',
+          reg: '^#\\s*(检查|我的)*[Cc](oo)?[Kk](ie)?(状态)*$',
           fnc: 'checkCkStatus'
         },
         {
@@ -77,11 +77,11 @@ export class user extends plugin {
     // 由于手机端米游社网页可能获取不到ltuid 可以尝试在通行证页面获取login_uid
     if (/(ltoken|ltoken_v2)/.test(this.e.msg) && /(ltuid|login_uid|ltmid_v2)/.test(this.e.msg)) {
       if (this.e.isGroup) {
-        this.reply('请私聊发送cookie', false, { at: true })
+        this.reply('请私聊发送Cookie', false, { at: true })
         return true
       }
       this.e.ck = this.e.msg
-      this.e.msg = '#绑定cookie'
+      this.e.msg = '#绑定Cookie'
       return true
     }
 
@@ -107,7 +107,7 @@ export class user extends plugin {
 
   /** 未登录ck */
   async noLogin () {
-    this.reply('绑定cookie失败\n请先【登录米游社】或【登录通行证】再获取cookie')
+    this.reply('绑定Cookie失败\n请先【登录米游社】或【登录通行证】再获取Cookie')
   }
 
   /** #ck代码 */
@@ -118,7 +118,7 @@ export class user extends plugin {
   /** ck帮助 */
   async ckHelp () {
     let set = gsCfg.getConfig('mys', 'set')
-    await this.reply(`Cookie绑定配置教程：${set.cookieDoc}\n获取cookie后【私聊发送】进行绑定`)
+    await this.reply(`Cookie绑定配置教程：${set.cookieDoc}\n获取Cookie后【私聊发送】进行绑定`)
   }
 
   /** 绑定ck */
@@ -126,7 +126,7 @@ export class user extends plugin {
     let set = gsCfg.getConfig('mys', 'set')
 
     if (!this.e.ck) {
-      await this.reply(`请【私聊】发送米游社cookie，获取教程：\n${set.cookieDoc}`)
+      await this.reply(`请【私聊】发送米游社Cookie，获取教程：\n${set.cookieDoc}`)
       return
     }
 
