@@ -13,6 +13,50 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return Bot.String(msg).replace(/base64:\/\/.*?"/g, "base64://...\"")
   }
 
+  makeButton(data, button) {
+    const msg = {
+      text: button.text,
+      pressed_text: button.clicked_text,
+      ...button.GSUIDCore,
+    }
+
+    if (button.input) {
+      msg.data = button.input
+      msg.action = 2
+    } else if (button.callback) {
+      msg.data = button.callback
+      msg.action = 1
+    } else if (button.link) {
+      msg.data = button.link
+      msg.action = 0
+    } else return false
+
+    if (button.permission) {
+      if (button.permission == "admin") {
+        msg.permission = 1
+      } else {
+        msg.permission = 0
+        if (!Array.isArray(button.permission))
+          button.permission = [button.permission]
+        msg.specify_user_ids = button.permission
+      }
+    }
+    return msg
+  }
+
+  makeButtons(button_square) {
+    const msgs = []
+    for (const button_row of button_square) {
+      const buttons = []
+      for (let button of button_row) {
+        button = this.makeButton(button)
+        if (button) buttons.push(button)
+      }
+      msgs.push(buttons)
+    }
+    return msgs
+  }
+
   makeMsg(msg) {
     if (!Array.isArray(msg))
       msg = [msg]
@@ -31,7 +75,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
           i = { type: "image", data: i.file }
           break
         case "record":
-          i = { type: "file", data: i.file }
+          i = { type: "record", data: i.file }
           break
         case "video":
           i = { type: "file", data: i.file }
@@ -44,6 +88,11 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
           break
         case "reply":
           i = { type: "reply", data: i.id }
+          break
+        case "button":
+          i = { type: "buttons", data: this.makeButtons(i.data) }
+          break
+        case "markdown":
           break
         case "node": {
           const array = []

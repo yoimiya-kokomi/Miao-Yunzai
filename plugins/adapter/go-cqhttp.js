@@ -32,12 +32,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
     const msgs = []
     for (let i of msg)
       if (typeof i == "object") {
-        if (!i.data)
-          i = { type: i.type, data: { ...i, type: undefined }}
-        if (Buffer.isBuffer(i.data.file))
-          i.data.file = `base64://${i.data.file.toString("base64")}`
+        switch (i.type) {
+          case "button":
+            continue
+        }
 
-        msgs.push(i)
+        if (Buffer.isBuffer(i.file))
+          i.file = `base64://${i.file.toString("base64")}`
+
+        msgs.push({ type: i.type, data: { ...i, type: undefined }})
       } else {
         msgs.push({ type: "text", data: { text: i }})
       }
