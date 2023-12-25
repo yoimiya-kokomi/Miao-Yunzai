@@ -140,7 +140,7 @@ body {
   white-space: nowrap;
 }
 .weapon_bg5 {
-  background-image: url(../../../img/other/bg5.png);
+  background-image: url(../../img/other/bg5.png);
   width: 100%;
   height: 95px;
   background-size: 100%;
@@ -149,40 +149,40 @@ body {
 .weapon_bg4 {
   width: 100%;
   height: 95px;
-  background-image: url(../../../img/other/bg4.png);
+  background-image: url(../../img/other/bg4.png);
   background-size: 100%;
   background-repeat: no-repeat;
 }
 .weapon_bg3 {
   width: 100%;
   height: 95px;
-  background-image: url(../../../img/other/bg3.png);
+  background-image: url(../../img/other/bg3.png);
   background-size: 100%;
   background-repeat: no-repeat;
 }
 .weapon_bg2 {
   width: 100%;
   height: 95px;
-  background-image: url(../../../img/other/bg3.png);
+  background-image: url(../../img/other/bg3.png);
   background-size: 100%;
   background-repeat: no-repeat;
 }
 .weapon_bg1 {
   width: 100%;
   height: 95px;
-  background-image: url(../../../img/other/bg3.png);
+  background-image: url(../../img/other/bg3.png);
   background-size: 100%;
   background-repeat: no-repeat;
 }
 .bg105 {
-  background-image: url(../../../img/other/bg105.png);
+  background-image: url(../../img/other/bg105.png);
   width: 100%;
   height: 95px;
   background-size: 100%;
   background-repeat: no-repeat;
 }
 .bg5 {
-  background-image: url(../../../img/other/bg5.png);
+  background-image: url(../../img/other/bg5.png);
   width: 100%;
   height: 112px;
   /*filter: brightness(1.1);*/
@@ -192,7 +192,7 @@ body {
 .bg4 {
   width: 100%;
   height: 112px;
-  background-image: url(../../../img/other/bg4.png);
+  background-image: url(../../img/other/bg4.png);
   background-size: 100%;
   background-repeat: no-repeat;
 }
