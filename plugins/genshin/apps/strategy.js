@@ -192,7 +192,9 @@ export class strategy extends plugin {
     }
 
     if (!url) {
-      this.e.reply(`暂无${name}攻略（${this.source[group - 1]}）\n请尝试其他的攻略来源查询\n#攻略帮助，查看说明`)
+      this.e.reply([`暂无${name}攻略（${this.source[group - 1]}）\n请尝试其他的攻略来源查询\n#攻略帮助，查看说明`, segment.button([
+        { text: "攻略帮助", callback: "#攻略帮助" },
+      ])])
       return false
     }
 

@@ -7,7 +7,7 @@ import LogCount from '../model/logCount.js'
 const _path = process.cwd() + '/plugins/genshin'
 
 export class gcLog extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '抽卡记录',
       dsc: '抽卡记录数据统计',
@@ -50,20 +50,22 @@ export class gcLog extends plugin {
     })
 
     this.androidUrl = 'https://docs.qq.com/doc/DUWpYaXlvSklmVXlX'
-    this.prefix = this.e?.isSr ? "*" : "#"
-    this.button = segment.button([
-      { text: "角色记录", callback: `${this.prefix}角色记录` },
-      { text: "角色统计", callback: `${this.prefix}角色统计` },
-    ],[
-      { text: "武器记录", callback: `${this.prefix}武器记录` },
-      { text: "武器统计", callback: `${this.prefix}武器统计` },
-    ],[
-      { text: "常驻记录", callback: `${this.prefix}常驻记录` },
-      { text: "常驻统计", callback: `${this.prefix}常驻统计` },
-    ])
+    Object.defineProperty(this, "button", { get() {
+      this.prefix = this.e?.isSr ? "*" : "#"
+      return segment.button([
+        { text: "角色记录", callback: `${this.prefix}角色记录` },
+        { text: "角色统计", callback: `${this.prefix}角色统计` },
+      ],[
+        { text: "武器记录", callback: `${this.prefix}武器记录` },
+        { text: "武器统计", callback: `${this.prefix}武器统计` },
+      ],[
+        { text: "常驻记录", callback: `${this.prefix}常驻记录` },
+        { text: "常驻统计", callback: `${this.prefix}常驻统计` },
+      ])
+    }})
   }
 
-  async init () {
+  async init() {
     let file = ['./data/gachaJson', './data/srJson', './temp/html/StarRail', './temp/uigf']
     for (let i of file) {
       if (!fs.existsSync(i)) {
@@ -72,7 +74,7 @@ export class gcLog extends plugin {
     }
   }
 
-  accept () {
+  accept() {
     if (this.e.file && this.e.isPrivate) {
       let name = this.e.file?.name
       if (name.includes('txt')) {
@@ -91,7 +93,7 @@ export class gcLog extends plugin {
   }
 
   /** 抽卡记录链接 */
-  async logUrl () {
+  async logUrl() {
     if (!this.e.isPrivate) {
       this.e.reply('请私聊发送链接', false, { at: true })
       return true
@@ -104,7 +106,7 @@ export class gcLog extends plugin {
   }
 
   /** 发送output_log.txt日志文件 */
-  async logFile () {
+  async logFile() {
     if (!this.e.isPrivate) {
       await this.e.reply('请私聊发送日志文件', false, { at: true })
       return true
@@ -126,7 +128,7 @@ export class gcLog extends plugin {
   }
 
   /** #抽卡记录 */
-  async getLog () {
+  async getLog() {
     this.e.isAll = !!(this.e.msg.includes('全部'))
     let data = await new GachaLog(this.e).getLogData()
     if (!data) return
@@ -138,7 +140,7 @@ export class gcLog extends plugin {
   }
 
   /** 导出记录 */
-  async exportLog () {
+  async exportLog() {
     if (this.e.isGroup) {
       await this.reply('请私聊导出', false, { at: true })
       return
@@ -148,7 +150,7 @@ export class gcLog extends plugin {
     return await exportLog.exportJson()
   }
 
-  async logJson () {
+  async logJson() {
     if (!this.e.isPrivate) {
       await this.e.reply('请私聊发送Json文件', false, { at: true })
       return true
@@ -162,7 +164,7 @@ export class gcLog extends plugin {
     await new ExportLog(this.e).logJson()
   }
 
-  async help () {
+  async help() {
     await this.e.reply([segment.image(`file://${_path}/resources/logHelp/记录帮助.png`), segment.button([
       { text: "电脑", callback: "#电脑帮助" },
       { text: "安卓", callback: "#安卓帮助" },
@@ -170,7 +172,7 @@ export class gcLog extends plugin {
     ])])
   }
 
-  async helpPort () {
+  async helpPort() {
     let msg = this.e.msg.replace(/#|帮助/g, '')
 
     if (['电脑', 'pc'].includes(msg)) {
@@ -182,7 +184,7 @@ export class gcLog extends plugin {
     }
   }
 
-  async logCount () {
+  async logCount() {
     let data = await new LogCount(this.e).count()
     if (!data) return
 

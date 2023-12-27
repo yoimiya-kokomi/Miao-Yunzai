@@ -6,7 +6,7 @@ import Abyss from '../model/abyss.js'
 import Weapon from '../model/weapon.js'
 
 export class role extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '角色查询',
       dsc: '原神角色信息查询',
@@ -30,17 +30,19 @@ export class role extends plugin {
       }]
     })
 
-    this.prefix = this.e?.isSr ? "*" : "#"
-    this.button = segment.button([
-      { text: "角色", callback: `${this.prefix}角色` },
-      { text: "探索", callback: `${this.prefix}探索` },
-      { text: "武器", callback: `${this.prefix}武器` },
-      { text: "深渊", callback: `${this.prefix}深渊` },
-    ])
+    Object.defineProperty(this, "button", { get() {
+      this.prefix = this.e?.isSr ? "*" : "#"
+      return segment.button([
+        { text: "角色", callback: `${this.prefix}角色` },
+        { text: "探索", callback: `${this.prefix}探索` },
+        { text: "武器", callback: `${this.prefix}武器` },
+        { text: "深渊", callback: `${this.prefix}深渊` },
+      ])
+    }})
   }
 
   /** 初始化配置文件 */
-  async init () {
+  async init() {
 
     let pubCk = './plugins/genshin/config/mys.pubCk.yaml'
     if (!fs.existsSync(pubCk)) {
@@ -54,7 +56,7 @@ export class role extends plugin {
   }
 
   /** 接受到消息都会先执行一次 */
-  accept () {
+  accept() {
     if (!this.e.msg) return
     if (!/^#(.*)$/.test(this.e.msg)) return
 
@@ -72,7 +74,7 @@ export class role extends plugin {
   }
 
   /** 深渊 */
-  async abyss () {
+  async abyss() {
     let data = await new Abyss(this.e).getAbyss()
     console.log('abyss', data)
     if (!data) return
@@ -81,7 +83,7 @@ export class role extends plugin {
   }
 
   /** 深渊十二层 */
-  async abyssFloor () {
+  async abyssFloor() {
     let data = await new Abyss(this.e).getAbyssFloor()
     if (!data) return
 
@@ -89,7 +91,7 @@ export class role extends plugin {
   }
 
   /** 武器 */
-  async weapon () {
+  async weapon() {
     let data = await Weapon.get(this.e)
     if (!data) return
 
@@ -97,7 +99,7 @@ export class role extends plugin {
   }
 
   /** 角色卡片 */
-  async roleCard () {
+  async roleCard() {
     let data = await new RoleIndex(this.e).roleCard()
     if (!data) return
 
@@ -105,7 +107,7 @@ export class role extends plugin {
   }
 
   /** 探险 */
-  async roleExplore () {
+  async roleExplore() {
     let data = await new RoleIndex(this.e).roleExplore()
     if (!data) return
 
