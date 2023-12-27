@@ -138,7 +138,7 @@ export class mysNews extends plugin {
   }
 
   gids() {
-    let msg = this.e.msg.replace(/[#公告资讯活动开启关闭推送列表]/g, '');
+    let msg = this.e.msg.replace(/[#公告资讯活动开启关闭推送列表0-9]/g, '');
     switch (msg) {
       case '崩坏三':
       case '崩三':

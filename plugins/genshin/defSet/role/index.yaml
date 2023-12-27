@@ -1,8 +1,8 @@
 # 成就
-achievement: 1138
+achievement: 1139
 
 # 角色数
-avatar: 75
+avatar: 77
 
 # 等级
 level: 60
@@ -29,7 +29,7 @@ common_chest: 2867
 way_point: 400
 
 # 秘境
-domain: 55
+domain: 56
 
 # 风神瞳
 anemoculus: 66
