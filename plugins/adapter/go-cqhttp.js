@@ -332,6 +332,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
+  muteMember(data, user_id, duration) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 禁言群成员：[${data.group_id}] ${user_id} ${duration}秒`)
+    return data.bot.sendApi("set_group_ban", {
+      group_id: data.group_id,
+      user_id,
+      duration,
+    })
+  }
+
   downloadFile(data, url, thread_count, headers) {
     return data.bot.sendApi("download_file", {
       url,
@@ -482,6 +491,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       ...i,
       getInfo: () => this.getMemberInfo(i),
       poke: () => this.sendGroupMsg(i, segment.poke(user_id)),
+      mute: duration => this.muteMember(i, i.user_id, duration),
     }
   }
 
@@ -536,6 +546,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       setAdmin: (user_id, enable) => this.setGroupAdmin(i, user_id, enable),
       setCard: (user_id, card) => this.setGroupCard(i, user_id, card),
       setTitle: (user_id, special_title, duration) => this.setGroupTitle(i, user_id, special_title, duration),
+      muteMember: (user_id, duration) => this.muteMember(i, user_id, duration),
       fs: this.getGroupFs(i),
     }
   }
