@@ -341,6 +341,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
+  kickMember(data, user_id, reject_add_request) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 踢出群成员：[${data.group_id}] ${user_id} ${reject_add_request ? "拒绝再次加群" : ""}`)
+    return data.bot.sendApi("set_group_kick", {
+      group_id: data.group_id,
+      user_id,
+      reject_add_request,
+    })
+  }
+
   downloadFile(data, url, thread_count, headers) {
     return data.bot.sendApi("download_file", {
       url,
@@ -547,6 +556,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       setCard: (user_id, card) => this.setGroupCard(i, user_id, card),
       setTitle: (user_id, special_title, duration) => this.setGroupTitle(i, user_id, special_title, duration),
       muteMember: (user_id, duration) => this.muteMember(i, user_id, duration),
+      kickMember: (user_id, reject_add_request) => this.kickMember(i, user_id, reject_add_request),
       fs: this.getGroupFs(i),
     }
   }
