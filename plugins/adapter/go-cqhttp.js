@@ -332,6 +332,13 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
+  sign(data) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} 群打卡：[${data.group_id}]`)
+    return data.bot.sendApi("send_group_sign", {
+      group_id: data.group_id,
+    })
+  }
+
   muteMember(data, user_id, duration) {
     logger.info(`${logger.blue(`[${data.self_id}]`)} 禁言群成员：[${data.group_id}] ${user_id} ${duration}秒`)
     return data.bot.sendApi("set_group_ban", {
@@ -509,6 +516,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getInfo: () => this.getMemberInfo(i),
       poke: () => this.sendGroupMsg(i, segment.poke(user_id)),
       mute: duration => this.muteMember(i, i.user_id, duration),
+      kick: reject_add_request => this.kickMember(i, i.user_id, reject_add_request),
     }
   }
 
@@ -563,6 +571,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       setAdmin: (user_id, enable) => this.setGroupAdmin(i, user_id, enable),
       setCard: (user_id, card) => this.setGroupCard(i, user_id, card),
       setTitle: (user_id, special_title, duration) => this.setGroupTitle(i, user_id, special_title, duration),
+      sign: () => this.sign(i),
       muteMember: (user_id, duration) => this.muteMember(i, user_id, duration),
       muteAll: enable => this.muteAll(i, enable),
       kickMember: (user_id, reject_add_request) => this.kickMember(i, user_id, reject_add_request),
