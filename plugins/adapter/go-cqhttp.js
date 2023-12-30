@@ -341,6 +341,14 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
+  muteAll(data, enable) {
+    logger.info(`${logger.blue(`[${data.self_id}]`)} ${enable ? "开启" : "关闭"}全员禁言：[${data.group_id}]`)
+    return data.bot.sendApi("set_group_whole_ban", {
+      group_id: data.group_id,
+      enable,
+    })
+  }
+
   kickMember(data, user_id, reject_add_request) {
     logger.info(`${logger.blue(`[${data.self_id}]`)} 踢出群成员：[${data.group_id}] ${user_id} ${reject_add_request ? "拒绝再次加群" : ""}`)
     return data.bot.sendApi("set_group_kick", {
@@ -556,6 +564,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       setCard: (user_id, card) => this.setGroupCard(i, user_id, card),
       setTitle: (user_id, special_title, duration) => this.setGroupTitle(i, user_id, special_title, duration),
       muteMember: (user_id, duration) => this.muteMember(i, user_id, duration),
+      muteAll: enable => this.muteAll(i, enable),
       kickMember: (user_id, reject_add_request) => this.kickMember(i, user_id, reject_add_request),
       fs: this.getGroupFs(i),
     }
