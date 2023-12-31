@@ -164,7 +164,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGroupArray(data) {
     const array = (await data.bot.sendApi("get_group_list")).data
-    for (const guild of (await this.getGuildArray(data)))
+    try { for (const guild of (await this.getGuildArray(data)))
       for (const channel of (await this.getGuildChannelArray({
         ...data,
         guild_id: guild.guild_id,
@@ -175,6 +175,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
           group_id: `${guild.guild_id}-${channel.channel_id}`,
           group_name: `${guild.guild_name}-${channel.channel_name}`,
         })
+    } catch (err) {
+      logger.error(`获取频道列表错误：${logger.red(err)}`)
+    }
     return array
   }
 
@@ -332,7 +335,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  sign(data) {
+  signGroup(data) {
     logger.info(`${logger.blue(`[${data.self_id}]`)} 群打卡：[${data.group_id}]`)
     return data.bot.sendApi("send_group_sign", {
       group_id: data.group_id,
@@ -571,7 +574,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       setAdmin: (user_id, enable) => this.setGroupAdmin(i, user_id, enable),
       setCard: (user_id, card) => this.setGroupCard(i, user_id, card),
       setTitle: (user_id, special_title, duration) => this.setGroupTitle(i, user_id, special_title, duration),
-      sign: () => this.sign(i),
+      sign: () => this.signGroup(i),
       muteMember: (user_id, duration) => this.muteMember(i, user_id, duration),
       muteAll: enable => this.muteAll(i, enable),
       kickMember: (user_id, reject_add_request) => this.kickMember(i, user_id, reject_add_request),
