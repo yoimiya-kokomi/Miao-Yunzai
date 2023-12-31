@@ -14,6 +14,10 @@ update_time: 1440
 restart_time: 0
 # 上线推送通知的冷却时间
 online_msg_exp: 1440
+# 文件保存时间
+file_to_url_time: 1
+# 文件访问次数
+file_to_url_times:
 
 # chromium其他路径
 chromium_path:
