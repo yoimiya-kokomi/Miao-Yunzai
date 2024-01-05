@@ -91,9 +91,11 @@ export default class ExportLog extends base {
 
     this.e.reply(`导出成功：${this.uid}.json，共${list.length}条 \n请接收文件`)
 
-    await this.e.friend.sendFile(saveFile).catch((err) => {
-      logger.error(`${this.e.logFnc} 发送文件失败 ${JSON.stringify(err)}`)
-    })
+    if (this.e.group?.sendFile)
+      await this.e.group.sendFile(saveFile)
+    else if (this.e.friend?.sendFile)
+      await this.e.friend.sendFile(saveFile)
+    else this.e.reply('导出失败：暂不支持发送文件')
 
     /** 删除文件 */
     fs.unlink(saveFile, () => { })
