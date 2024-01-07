@@ -20,7 +20,10 @@ export class botOperate extends plugin {
   }
 
   Verify() {
-    const data = { msg: this.e.msg.replace(/^#(Bot|机器人)验证/, "").trim().split(":") }
+    const data = {
+      msg: this.e.msg.replace(/^#(Bot|机器人)验证/, "").trim().split(":"),
+      reply: msg => this.reply(msg, true),
+    }
     data.self_id = data.msg.shift()
     data.msg = data.msg.join(":")
     Bot.em(`verify.${data.self_id}`, data)
