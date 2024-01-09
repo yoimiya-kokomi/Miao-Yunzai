@@ -20,7 +20,7 @@
     "chalk": "^5.3.0",
     "chokidar": "^3.5.3",
     "express": "^4.18.2",
-    "file-type": "^18.7.0",
+    "file-type": "^19.0.0",
     "https-proxy-agent": "7.0.2",
     "image-size": "^1.1.1",
     "lodash": "^4.17.21",
@@ -42,7 +42,7 @@
     "eslint": "^8.56.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.1",
+    "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1"
   },
   "imports": {
