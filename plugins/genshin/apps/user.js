@@ -54,7 +54,7 @@ export class user extends plugin {
           fnc: 'checkCkStatus'
         },
         {
-          reg: '^#(接受)?绑定(主|子)?(用户|账户|账号)(\\[\\w+\\]){0,2}$',
+          reg: '^#(接受)?绑定(主|子)?(用户|账户|账号)(\\[[a-zA-Z0-9_\\-:\\]+\\]){0,2}$',
           fnc: 'bindNoteUser'
         },
         {

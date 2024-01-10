@@ -137,17 +137,17 @@ export default class User extends base {
         '【#面板】【#更新面板】面板信息'
       )
       button.push([
-        { text: "#uid", callback: "#uid" },
-        { text: "#我的ck", callback: "#我的ck" },
-        { text: "#删除ck", callback: "#删除ck" },
-      ],[
-        { text: "#体力", callback: "#体力" },
-        { text: "#原石", callback: "#原石" },
-        { text: "#原石统计", callback: "#原石统计" },
-      ],[
-        { text: "#练度统计", callback: "#练度统计" },
-        { text: "#面板", callback: "#面板" },
-        { text: "#更新面板", callback: "#更新面板" },
+        { text: '#uid', callback: '#uid' },
+        { text: '#我的ck', callback: '#我的ck' },
+        { text: '#删除ck', callback: '#删除ck' }
+      ], [
+        { text: '#体力', callback: '#体力' },
+        { text: '#原石', callback: '#原石' },
+        { text: '#原石统计', callback: '#原石统计' }
+      ], [
+        { text: '#练度统计', callback: '#练度统计' },
+        { text: '#面板', callback: '#面板' },
+        { text: '#更新面板', callback: '#更新面板' }
       ])
     }
     if (mys.hasGame('sr')) {
@@ -159,12 +159,12 @@ export default class User extends base {
         '【*面板】【*更新面板】面板信息'
       )
       button.push([
-        { text: "*uid", callback: "*uid" },
-        { text: "*删除ck", callback: "*删除ck" },
-        { text: "*体力", callback: "*体力" },
-      ],[
-        { text: "*面板", callback: "*面板" },
-        { text: "*更新面板", callback: "*更新面板" },
+        { text: '*uid', callback: '*uid' },
+        { text: '*删除ck', callback: '*删除ck' },
+        { text: '*体力', callback: '*体力' }
+      ], [
+        { text: '*面板', callback: '*面板' },
+        { text: '*更新面板', callback: '*更新面板' }
       ])
     }
     msg = await common.makeForwardMsg(this.e, [[msg.join('\n'), segment.button(...button)]], '绑定成功：使用命令说明')
@@ -173,16 +173,16 @@ export default class User extends base {
 
   /** 删除绑定ck */
   async delCk () {
-    let game;
+    let game
     if (this.e.game) {
-      game = this.e.game;
+      game = this.e.game
     } else {
-      game = 'gs';
+      game = 'gs'
     }
-    //判断是原神还是星铁
+    // 判断是原神还是星铁
     let user = await this.user()
     // 获取当前uid
-    let uidData = user.getUidData('' , game=game, this.e)
+    let uidData = user.getUidData('', game = game, this.e)
     if (!uidData || uidData.type !== 'ck' || !uidData.ltuid) {
       return `删除失败：当前的UID${uidData?.uid}无CK信息`
     }
@@ -211,15 +211,15 @@ export default class User extends base {
     let uidList = user.getUidList(game)
     if (index > uidList.length) {
       return await this.e.reply(['uid序号输入错误', segment.button([
-      { text: "删除uid", input: "#删除uid" },
-    ])])
+        { text: '删除uid', input: '#删除uid' }
+      ])])
     }
     index = Number(index) - 1
     let uidObj = uidList[index]
     if (uidObj.type === 'ck') {
       return await this.e.reply(['CK对应UID无法直接删除，请通过【#删除ck】命令来删除', segment.button([
-      { text: "删除ck", callback: "#删除ck" },
-    ])])
+        { text: '删除ck', callback: '#删除ck' }
+      ])])
     }
     await user.delRegUid(uidObj.uid, game)
     return await this.showUid()
@@ -274,25 +274,25 @@ export default class User extends base {
         }
       })
     })
-    return this.e.reply([await this.e.runtime.render('genshin', 'html/user/uid-list', { uids }, { retType: "base64" }), segment.button([
-      { text: "绑定UID", input: "#绑定uid" },
-      { text: "切换UID", input: "#uid" },
-      { text: "删除UID", input: "#删除uid" },
-    ],[
-      { text: "角色", callback: "#角色" },
-      { text: "探索", callback: "#探索" },
-      { text: "武器", callback: "#武器" },
-      { text: "深渊", callback: "#深渊" },
-    ],[
-      { text: "统计", callback: "#练度统计" },
-      { text: "面板", callback: "#面板" },
-      { text: "体力", callback: "#体力" },
-      { text: "原石", callback: "#原石" },
-    ],[
-      { text: "留影", callback: "#留影叙佳期" },
-      { text: "七圣", callback: "#七圣召唤查询牌组" },
-      { text: "抽卡", callback: "#抽卡记录" },
-      { text: "充值", callback: "#充值记录" },
+    return this.e.reply([await this.e.runtime.render('genshin', 'html/user/uid-list', { uids }, { retType: 'base64' }), segment.button([
+      { text: '绑定UID', input: '#绑定uid' },
+      { text: '切换UID', input: '#uid' },
+      { text: '删除UID', input: '#删除uid' }
+    ], [
+      { text: '角色', callback: '#角色' },
+      { text: '探索', callback: '#探索' },
+      { text: '武器', callback: '#武器' },
+      { text: '深渊', callback: '#深渊' }
+    ], [
+      { text: '统计', callback: '#练度统计' },
+      { text: '面板', callback: '#面板' },
+      { text: '体力', callback: '#体力' },
+      { text: '原石', callback: '#原石' }
+    ], [
+      { text: '留影', callback: '#留影叙佳期' },
+      { text: '七圣', callback: '#七圣召唤查询牌组' },
+      { text: '抽卡', callback: '#抽卡记录' },
+      { text: '充值', callback: '#充值记录' }
     ])])
   }
 
@@ -303,7 +303,7 @@ export default class User extends base {
     let uidList = user.getUidList(game)
     if (index > uidList.length) {
       return await this.e.reply(['uid序号输入错误', segment.button([
-        { text: "切换uid", input: "#uid" },
+        { text: '切换uid', input: '#uid' }
       ])])
     }
     index = Number(index) - 1
@@ -500,7 +500,7 @@ export default class User extends base {
     let user = await this.user()
     if (!user.hasCk) {
       this.e.reply(['当前尚未绑定Cookie', segment.button([
-        { text: "帮助", input: "#Cookie帮助" },
+        { text: '帮助', input: '#Cookie帮助' }
       ])])
     }
     let mys = user.getMysUser(this.e)
@@ -540,9 +540,9 @@ export default class User extends base {
     }
 
     await this.e.reply([cks.join('\n----\n'), segment.button([
-      { text: "绑定UID", input: "#绑定uid" },
-      { text: "切换UID", input: "#uid" },
-      { text: "删除UID", input: "#删除uid" },
+      { text: '绑定UID', input: '#绑定uid' },
+      { text: '切换UID', input: '#uid' },
+      { text: '删除UID', input: '#删除uid' }
     ])], false, { at: true })
   }
 
@@ -591,13 +591,13 @@ export default class User extends base {
           e.reply(`已删除${count}个子用户...`)
           await redis.del(`Yz:NoteUser:subIds:${id}`)
         } else {
-          e.reply(`当前用户没有子用户，通过【#绑定用户】可绑定子用户...`)
+          e.reply('当前用户没有子用户，通过【#绑定用户】可绑定子用户...')
         }
       }
       return true
     }
     msg = msg.replace(/^#\s*(接受)?绑定(主|子)?(用户|账户|账号)/, '')
-    let idRet = /^\[(\w{5,})](?:\[(\w+)])?$/.exec(msg)
+    let idRet = /^\[([a-zA-Z0-9-]{5,})](?:\[([a-zA-Z0-9-]+)])?$/.exec(msg)
     if (idRet && idRet[1]) {
       let mainId = idRet[1]
       let currId = id.toString()
