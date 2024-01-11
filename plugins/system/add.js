@@ -40,7 +40,7 @@ export class add extends plugin {
   }
 
   async init() {
-    common.mkdirs(this.path)
+    Bot.mkdir(this.path)
   }
 
   /** 群号key */
@@ -198,7 +198,7 @@ export class add extends plugin {
       if (!file.name) file.name = `${Date.now()}-${path.basename(data.file || data.url)}`
       file.name = `${this.group_id}/${data.type}/${file.name}`
       file.path = `${this.path}${file.name}`
-      common.mkdirs(path.dirname(file.path))
+      Bot.mkdir(path.dirname(file.path))
       fs.writeFileSync(file.path, file.buffer)
       return file.name
     }
