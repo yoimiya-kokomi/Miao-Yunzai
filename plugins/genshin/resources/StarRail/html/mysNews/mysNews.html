@@ -4,6 +4,7 @@
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <link rel="shortcut icon" href="#" />
     <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/mysNews/mysNews.css"/>
+    <link rel="preload" href="{{pluResPath}}script/qrcode.min.js" as="script"/>
   </head>
   <body>
     <svg style="display: none">
@@ -122,7 +123,7 @@
       <!-- <div class="logo">Created By Miao-Yunzai</div> -->
     </div>
   </body>
-  <script type="text/javascript" src="{{pluResPath}}html/mysNews/qrcode.min.js"></script>
+  <script type="text/javascript" src="{{pluResPath}}script/qrcode.min.js"></script>
   <script type="text/javascript">
     var qrcode = new QRCode(document.getElementById("qrcode"), {
       text: "https://bbs.mihoyo.com/ys/article/{{data.post.post_id}}", // 内容可以是文字，链接，邮箱
