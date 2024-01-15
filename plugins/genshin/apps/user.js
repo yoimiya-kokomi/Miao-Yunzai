@@ -95,7 +95,7 @@ export class user extends plugin {
   /** 绑定uid */
   saveUid () {
     if (!this.e.msg) return
-    let uid = this.e.msg.match(/[1|2|5-9][0-9]{8}/g)
+    let uid = this.e.msg.match(/[1|2|3|5-9][0-9]{8}/g)
     if (!uid) {
       this.reply('uid输入错误', false, { at: true })
       return
