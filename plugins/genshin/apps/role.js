@@ -76,7 +76,6 @@ export class role extends plugin {
   /** 深渊 */
   async abyss() {
     let data = await new Abyss(this.e).getAbyss()
-    console.log('abyss', data)
     if (!data) return
 
     this.reply([await this.renderImg('genshin', 'html/abyss/abyss', data, { retType: "base64" }), this.button])
