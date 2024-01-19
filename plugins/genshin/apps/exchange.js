@@ -16,7 +16,7 @@ export class exchange extends plugin {
           fnc: 'getCode'
         },
         {
-          reg: '^#(兑换码使用|cdk-u) .+',
+          reg: '^#(兑换码使用|cdk-u).+',
           fnc: 'useCode'
         }
       ]
@@ -126,8 +126,8 @@ export class exchange extends plugin {
   }
   // 兑换码使用
   async useCode() {
-    let cdkCode = this.e.message[0].text.split(/#(兑换码使用|cdk-u) /, 3)[2];
-    let res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
+    const cdkCode = this.e.msg.replace(/#(兑换码使用|cdk-u)/, "").trim()
+    const res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
     if (res) {
       this.e.reply(`${res.data.msg}`)
     }

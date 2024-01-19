@@ -118,7 +118,7 @@ export default class MysInfo {
 
     if (e.noTips !== true) e.reply(['请先#绑定uid', segment.button([
       { text: "绑定UID", input: "#绑定uid" },
-    ])], false, { at })
+    ])], false, { at: at || true })
 
     return false
   }
@@ -315,7 +315,7 @@ export default class MysInfo {
     if (!this.uid) {
       this.e.reply(['请先#绑定uid', segment.button([
         { text: "绑定UID", input: "#绑定uid" },
-      ])])
+      ])], false, { at: true })
     }
 
     if (!this.ckInfo.ck) {
