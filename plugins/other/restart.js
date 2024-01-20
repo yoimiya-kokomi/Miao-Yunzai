@@ -1,9 +1,5 @@
-import plugin from "../../lib/plugins/plugin.js"
 import cfg from "../../lib/config/config.js"
-import { createRequire } from "module"
-
-const require = createRequire(import.meta.url)
-const { exec } = require("child_process")
+import { exec } from "child_process"
 
 export class Restart extends plugin {
   constructor (e = "") {
@@ -12,15 +8,18 @@ export class Restart extends plugin {
       dsc: "#重启",
       event: "message",
       priority: 10,
-      rule: [{
-        reg: "^#重启$",
-        fnc: "restart",
-        permission: "master"
-      }, {
-        reg: "^#(停机|关机)$",
-        fnc: "stop",
-        permission: "master"
-      }]
+      rule: [
+        {
+          reg: "^#重启$",
+          fnc: "restart",
+          permission: "master"
+        },
+        {
+          reg: "^#(停机|关机)$",
+          fnc: "stop",
+          permission: "master"
+        }
+      ]
     })
 
     if (e) this.e = e
@@ -41,69 +40,62 @@ export class Restart extends plugin {
 
   async restartMsg() {
     let restart = await redis.get(this.key)
-    if (restart) {
-      restart = JSON.parse(restart)
-      const time = (Date.now() - (restart.time || Date.now()))/1000
-      const msg = `重启成功：耗时${time}秒`
+    if (!restart) return
+    restart = JSON.parse(restart)
+    const time = (Date.now() - (restart.time || Date.now()))/1000
+    const msg = []
+    if (restart.msg_id)
+      msg.push(segment.reply(restart.msg_id))
+    if (restart.isStop)
+      msg.push(`开机成功，距离上次关机${time}秒`)
+    else
+      msg.push(`重启成功，用时${time}秒`)
 
-      if (restart.id) {
-        if (restart.isGroup)
-          Bot.sendGroupMsg(restart.bot_id, restart.id, msg)
-        else
-          Bot.sendFriendMsg(restart.bot_id, restart.id, msg)
-      } else {
-        Bot.sendMasterMsg(msg)
-      }
-      redis.del(this.key)
+    if (restart.id) {
+      if (restart.isGroup)
+        Bot.sendGroupMsg(restart.bot_id, restart.id, msg)
+      else
+        Bot.sendFriendMsg(restart.bot_id, restart.id, msg)
+    } else {
+      Bot.sendMasterMsg(msg)
     }
+    redis.del(this.key)
   }
 
   async restart() {
-    await this.e.reply("开始执行重启，请稍等...")
-    logger.mark(`${this.e.logFnc} 开始执行重启，请稍等...`)
+    await this.e.reply("开始重启，请稍等……")
+    logger.mark(`${this.e.logFnc} 开始重启`)
 
-    let data = JSON.stringify({
+    await redis.set(this.key, JSON.stringify({
       isGroup: !!this.e.isGroup,
       id: this.e.isGroup ? this.e.group_id : this.e.user_id,
       bot_id: this.e.self_id,
-      time: Date.now()
-    })
-
-    let npm = await this.checkPnpm()
+      msg_id: this.e.message_id,
+      time: Date.now(),
+    }))
 
     try {
-      await redis.set(this.key, data, { EX: 120 })
-      let cm = `${npm} start`
-      if (process.argv[1].includes("pm2")) {
-        cm = `${npm} run restart`
-      }
+      let cm = "pnpm start"
+      if (process.argv[1].includes("pm2"))
+        cm = "pnpm run restart"
 
-      exec(cm, { windowsHide: true }, (error, stdout, stderr) => {
-        if (error) {
-          redis.del(this.key)
-          this.e.reply(`操作失败！\n${error.stack}`)
-          logger.error(`重启失败\n${error.stack}`)
-        } else if (stdout) {
-          logger.mark("重启成功，运行已由前台转为后台")
-          logger.mark(`查看日志请用命令：${npm} run log`)
-          logger.mark(`停止后台运行命令：${npm} stop`)
-          process.exit()
-        }
-      })
+      const ret = await this.execSync(cm)
+      if (ret.error) {
+        redis.del(this.key)
+        await this.e.reply(`重启错误\n${ret.error}`)
+        logger.error("重启错误", ret)
+      } else {
+        logger.mark("重启成功，运行已由前台转为后台")
+        logger.mark("查看日志请用命令：pnpm run log")
+        logger.mark("停止后台运行命令：pnpm stop")
+        process.exit()
+      }
     } catch (error) {
       redis.del(this.key)
-      let e = error.stack ?? error
-      this.e.reply(`操作失败！\n${e}`)
+      await this.e.reply(`重启错误\n${error}`)
+      logger.error("重启错误", error)
     }
-
     return true
-  }
-
-  async checkPnpm() {
-    let npm = "npm"
-    let ret = await this.execSync("pnpm -v")
-    if (ret.stdout) npm = "pnpm"
-    return npm
   }
 
   async execSync(cmd) {
@@ -115,21 +107,23 @@ export class Restart extends plugin {
   }
 
   async stop() {
-    if (!process.argv[1].includes("pm2")) {
-      logger.mark("关机成功，已停止运行")
-      await this.e.reply("关机成功，已停止运行")
-      process.exit()
-    }
+    await redis.set(this.key, JSON.stringify({
+      isStop: true,
+      isGroup: !!this.e.isGroup,
+      id: this.e.isGroup ? this.e.group_id : this.e.user_id,
+      bot_id: this.e.self_id,
+      msg_id: this.e.message_id,
+      time: Date.now(),
+    }))
 
-    logger.mark("关机成功，已停止运行")
     await this.e.reply("关机成功，已停止运行")
+    logger.mark("关机成功")
 
-    let npm = await this.checkPnpm()
-    exec(`${npm} stop`, { windowsHide: true }, (error, stdout, stderr) => {
-      if (error) {
-        this.e.reply(`操作失败！\n${error.stack}`)
-        logger.error(`关机失败\n${error.stack}`)
-      }
-    })
+    if (!process.argv[1].includes("pm2"))
+      process.exit()
+
+    const ret = await this.execSync("pnpm stop")
+    await this.e.reply(`关机错误\n${ret.error}\n${ret.stdout}\n${ret.stderr}`)
+    logger.error("关机错误", ret)
   }
 }
