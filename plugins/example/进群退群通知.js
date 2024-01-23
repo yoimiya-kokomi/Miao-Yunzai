@@ -1,4 +1,3 @@
-import plugin from '../../lib/plugins/plugin.js'
 export class newcomer extends plugin {
   constructor() {
     super({

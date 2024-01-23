@@ -61,7 +61,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return data.bot.sendApi("upload_file", opts)
   }
 
-  async makeMsg(data, msg) {
+  async makeMsg(data, msg, send) {
     if (!Array.isArray(msg))
       msg = [msg]
     const msgs = []
@@ -93,6 +93,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
         case "reply":
         case "button":
           continue
+        case "node":
+          await Bot.sendForwardMsg(send, i.data)
+          continue
         default:
           i = { type: "text", data: { text: JSON.stringify(i) }}
       }
@@ -102,10 +105,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async sendFriendMsg(data, msg) {
-    if (msg?.type == "node")
-      return Bot.sendForwardMsg(msg => this.sendFriendMsg(data, msg), msg.data)
-
-    const message = await this.makeMsg(data, msg)
+    const message = await this.makeMsg(data, msg, msg => this.sendFriendMsg(data, msg))
     logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(message)}`)
     return data.bot.sendApi("send_message", {
       detail_type: "private",
@@ -115,10 +115,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async sendGroupMsg(data, msg) {
-    if (msg?.type == "node")
-      return Bot.sendForwardMsg(msg => this.sendGroupMsg(data, msg), msg.data)
-
-    const message = await this.makeMsg(data, msg)
+    const message = await this.makeMsg(data, msg, msg => this.sendGroupMsg(data, msg))
     logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(message)}`)
     return data.bot.sendApi("send_message", {
       detail_type: "group",
