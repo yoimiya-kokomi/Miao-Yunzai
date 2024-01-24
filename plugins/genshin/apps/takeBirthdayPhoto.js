@@ -1,9 +1,9 @@
 import plugin from '../../../lib/plugins/plugin.js'
-import gsCfg from '../model/gsCfg.js'
+import MysInfo from '../model/mys/mysInfo.js'
 import fetch from 'node-fetch'
 
 export class takeBirthdayPhoto extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '留影叙佳期',
       dsc: '留影叙佳期',
@@ -21,27 +21,27 @@ export class takeBirthdayPhoto extends plugin {
     ])
   }
 
-  async birthdaystar (e) {
-    const { user_id } = e
-
-    const userInfo = await this.getCookie(user_id)
-    if (!userInfo) {
+  async birthdaystar(e) {
+    let uid = await MysInfo.getUid(this.e)
+    if (!uid) return false
+    let ck = await MysInfo.checkUidBing(uid, this.e)
+    if (!ck) {
       e.reply(['请先绑定ck再使用本功能哦~', segment.button([
         { text: "Cookie帮助", callback: "#Cookie帮助" },
       ])], true)
       return true
     }
 
-    this.region = await this.getServer(userInfo.uid)
+    this.region = await this.getServer(uid)
     this.game_biz = this.region.includes('cn') ? 'hk4e_cn' : 'hk4e_global'
 
-    const e_hk4e_token = await this.getEHK4EToken(userInfo.ck, userInfo.uid)
+    const e_hk4e_token = await this.getEHK4EToken(ck.ck, uid)
     if (!e_hk4e_token) {
       e.reply(['获取e-hk4e_token失败，请刷新ck后再试~', this.button], true)
       return true
     }
 
-    const birthday_star_list = await this.getBirthdayStar(userInfo.uid, e_hk4e_token, userInfo.ck)
+    const birthday_star_list = await this.getBirthdayStar(uid, e_hk4e_token, ck.ck)
     if (!birthday_star_list) {
       e.reply(['获取生日角色失败，请稍后再试~', this.button], true)
       return true
@@ -56,7 +56,7 @@ export class takeBirthdayPhoto extends plugin {
       for (const role of birthday_star_list) {
         await e.reply(`正在获取${role.name}的图片，请稍等~`, true)
         await e.reply(segment.image(role.take_picture))
-        const message = await this.getBirthdayStarImg(userInfo.uid, e_hk4e_token, userInfo.ck, role.role_id)
+        const message = await this.getBirthdayStarImg(uid, e_hk4e_token, ck.ck, role.role_id)
         if (message != 'success') {
           await e.reply([message, this.button])
           return true
@@ -72,12 +72,7 @@ export class takeBirthdayPhoto extends plugin {
     return true
   }
 
-  async getCookie (user_id) {
-    const userInfo = ((await gsCfg.getBingCk()).ckQQ)[user_id]
-    return userInfo
-  }
-
-  async getEHK4EToken (ck, uid) {
+  async getEHK4EToken(ck, uid) {
     const url = this.region.includes('cn') ? 'https://api-takumi.mihoyo.com/common/badge/v1/login/account' : 'https://api-os-takumi.mihoyo.com/common/badge/v1/login/account'
     const headers = {
       Cookie: ck,
@@ -100,7 +95,7 @@ export class takeBirthdayPhoto extends plugin {
     return e_hk4e_token
   }
 
-  async getServer (uid) {
+  async getServer(uid) {
     switch (String(uid)[0]) {
       case '1':
       case '2':
@@ -119,7 +114,7 @@ export class takeBirthdayPhoto extends plugin {
     return 'cn_gf01'
   }
 
-  async getBirthdayStar (uid, e_hk4e_token, ck) {
+  async getBirthdayStar(uid, e_hk4e_token, ck) {
     const headers = { Cookie: `e_hk4e_token=${e_hk4e_token};${ck}` }
     const url = `https://hk4e-api.mihoyo.com/event/birthdaystar/account/index?lang=zh-cn&badge_uid=${uid}&badge_region=${this.region}&game_biz=${this.game_biz}&activity_id=20220301153521`
     let res = await fetch(url, { headers })
@@ -127,7 +122,7 @@ export class takeBirthdayPhoto extends plugin {
     return res.data.role
   }
 
-  async getBirthdayStarImg (uid, e_hk4e_token, ck, role_id) {
+  async getBirthdayStarImg(uid, e_hk4e_token, ck, role_id) {
     const headers = { Cookie: `e_hk4e_token=${e_hk4e_token};${ck}` }
     const url = `https://hk4e-api.mihoyo.com/event/birthdaystar/account/post_my_draw?lang=zh-cn&badge_uid=${uid}&badge_region=${this.region}&game_biz=${this.game_biz}&activity_id=20220301153521`
     const body = JSON.stringify({ role_id: Number(role_id) })
