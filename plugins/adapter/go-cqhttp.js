@@ -40,7 +40,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         case "button":
           continue
         case "node":
-          await sendForwardMsg(data, i.data)
+          await sendForwardMsg(i.data)
           continue
       }
 
