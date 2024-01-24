@@ -1,22 +1,23 @@
 import fs from 'node:fs'
 import _ from 'lodash'
+import cfg from '../../../lib/config/config.js'
 import { Common, Version } from '#miao'
 import { Character } from '#miao.models'
 
 export default class base {
-  constructor (e = {}) {
+  constructor(e = {}) {
     this.e = e
     this.userId = e?.user_id
     this.model = 'genshin'
     this._path = process.cwd().replace(/\\/g, '/')
   }
 
-  get prefix () {
+  get prefix() {
     return `Yz:genshin:${this.model}:`
   }
 
   // 统一封装渲染
-  async renderImg (tpl, data, cfg = {}) {
+  async renderImg(tpl, data, cfg = {}) {
     return Common.render('genshin', `html/${tpl}`, data, {
       ...cfg,
       e: this.e
@@ -29,12 +30,23 @@ export default class base {
    * @param tplFile 模板html路径
    * @param pluResPath 插件资源路径
    */
-  get screenData () {
+  get screenData() {
     const layoutPath = process.cwd() + '/plugins/genshin/resources/html/layout/'
+    let yunzaiName = cfg.package.name
+    if (yunzaiName == 'miao-yunzai') {
+      yunzaiName = 'Miao-Yunzai'
+    } else if (yunzaiName == 'yunzai') {
+      yunzaiName = 'Yunzai-Bot'
+    } else if (yunzaiName == 'trss-yunzai') {
+      yunzaiName = 'TRSS-Yunzai'
+    } else {
+      yunzaiName = _.capitalize(yunzaiName)
+    }
     let data = {
       saveId: this.userId,
       cwd: this._path,
       yzVersion: `v${Version.yunzai}`,
+      yzName: yunzaiName,
       genshinLayout: layoutPath + 'genshin.html',
       defaultLayout: layoutPath + 'default.html'
     }
