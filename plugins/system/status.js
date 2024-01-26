@@ -19,29 +19,28 @@ export class status extends plugin {
   }
 
   async status() {
-    if (!this.e.isMaster) {
+    if (!this.e.isMaster)
       return this.reply(await this.getCount({
         "用户": this.e.user_id,
         "群": this.e.group_id,
       }))
-    }
-    let runTime = moment().diff(moment.unix(this.e.bot.stat.start_time), "seconds")
-    const Day = Math.floor(runTime / 3600 / 24)
-    const Hour = Math.floor((runTime / 3600) % 24)
-    const Min = Math.floor((runTime / 60) % 60)
-    if (Day == 0)
-      runTime = `${Hour}小时${Min}分钟`
-    else
-      runTime = `${Day}天${Hour}小时${Min}分钟`
 
     const msg =
       `—— TRSS Yunzai v${cfg.package.version} ——\n`+
-      `运行时间：${runTime}\n`+
+      `运行时间：${Bot.getTimeDiff()}\n`+
       `内存使用：${(process.memoryUsage().rss/1024/1024).toFixed(2)}MB\n`+
       `系统版本：${process.platform} ${process.arch} ${process.version}`+
-      await this.count()
+      this.botTime() + await this.count()
 
     return this.reply(msg)
+  }
+
+  botTime() {
+    let msg = "\n\n账号在线时长"
+    for (const i of Bot.uin)
+      if (Bot[i]?.stat?.start_time)
+        msg += `\n${Bot.getTimeDiff(Bot[i].stat.start_time)} ${i}`
+    return msg
   }
 
   count() {

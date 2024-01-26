@@ -63,8 +63,8 @@ export class Restart extends plugin {
   }
 
   async restart() {
-    await this.e.reply("开始重启，请稍等……")
-    logger.mark(`${this.e.logFnc} 开始重启`)
+    await this.e.reply(`开始重启，本次运行时长：${Bot.getTimeDiff()}`)
+    logger.mark(`${this.e.logFnc} 开始重启，本次运行时长：${Bot.getTimeDiff()}`)
 
     await redis.set(this.key, JSON.stringify({
       isGroup: !!this.e.isGroup,
@@ -116,8 +116,7 @@ export class Restart extends plugin {
       time: Date.now(),
     }))
 
-    await this.e.reply("关机成功，已停止运行")
-    logger.mark("关机成功")
+    await this.e.reply(`关机成功，本次运行时长：${Bot.getTimeDiff()}`)
 
     if (!process.argv[1].includes("pm2"))
       process.exit()
