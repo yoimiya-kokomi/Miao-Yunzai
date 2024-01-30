@@ -93,6 +93,9 @@ export default class MysNews extends base {
       case 'searchPosts':
         host = 'https://bbs-api.miyoushe.com/post/wapi/searchPosts?'
         break
+      case 'userInstantSearchPosts':
+        host = 'https://bbs-api.miyoushe.com/painter/api/user_instant/search/list?'
+        break
       // 帖子详情
       case 'getPostFull':
         host += 'post/wapi/getPostFull?'
@@ -243,21 +246,14 @@ export default class MysNews extends base {
     return this.replyMsg(img, `${param.data.post.subject}`)
   }
 
-  async ysEstimate() {
-    let msg = '版本原石盘点'
-    let res = await this.postData('searchPosts', { gids: 2, size: 20, keyword: msg })
-    if (res?.data?.posts.length <= 0) {
+  async mysEstimate(keyword, uid) {
+    let res = await this.postData('userInstantSearchPosts', { keyword, uid, size: 20, offset: 0, sort_type: 2 })
+    let postList = res?.data?.list
+    if (postList.length <= 0) {
       await this.e.reply('暂无数据')
       return false
     }
-    let postId = ''
-    for (let post of res.data.posts) {
-      if (post.user.uid == '218945821') {
-        postId = post.post.post_id
-        break
-      }
-    }
-
+    let postId = postList[0].post.post.post_id
     if (!postId) {
       await this.e.reply('暂无数据')
       return false

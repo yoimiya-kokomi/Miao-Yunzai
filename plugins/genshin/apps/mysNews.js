@@ -27,8 +27,8 @@ export class mysNews extends plugin {
           fnc: 'mysUrl'
         },
         {
-          reg: '^#*原(石|神)(预估|盘点)$',
-          fnc: 'ysEstimate'
+          reg: '^#*原(石|神)|星(琼|铁)(预估|盘点)$',
+          fnc: 'mysEstimate'
         },
         {
           reg: '^#*(星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?(开启|关闭)(公告|资讯)推送$',
@@ -84,8 +84,11 @@ export class mysNews extends plugin {
     await this.reply(data)
   }
 
-  async ysEstimate() {
-    let data = await new MysNews(this.e).ysEstimate()
+  async mysEstimate() {
+    let args = ['版本原石', 218945821]
+    if (/星(琼|铁)/.test(this.e.msg))
+      args = ['可获取星琼', 73779489]
+    let data = await new MysNews(this.e).mysEstimate(...args)
     if (!data) return
     await this.reply(data)
   }

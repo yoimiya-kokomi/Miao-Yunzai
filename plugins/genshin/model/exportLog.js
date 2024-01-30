@@ -63,14 +63,23 @@ export default class ExportLog extends base {
     if (!this.uid) return false
 
     let list = this.getAllList().list
-
+    let yunzaiName = cfg.package.name
+    if (yunzaiName == 'miao-yunzai') {
+      yunzaiName = 'Miao-Yunzai'
+    } else if (yunzaiName == 'yunzai') {
+      yunzaiName = 'Yunzai-Bot'
+    } else if (yunzaiName == 'trss-yunzai') {
+      yunzaiName = 'TRSS-Yunzai'
+    } else {
+      yunzaiName = _.capitalize(yunzaiName)
+    }
     let data = {
       info: {
         uid: this.uid,
         lang: list[0].lang,
         export_time: moment().format('YYYY-MM-DD HH:mm:ss'),
         export_timestamp: moment().format('X'),
-        export_app: 'Miao-Yunzai',
+        export_app: yunzaiName,
         export_app_version: cfg.package.version,
       },
       list
