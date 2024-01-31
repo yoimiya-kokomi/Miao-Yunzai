@@ -1,23 +1,29 @@
-import Renderer from '../../../lib/renderer/Renderer.js'
-import os from 'node:os'
-import lodash from 'lodash'
-import puppeteer from 'puppeteer'
+import Renderer from "../../../lib/renderer/Renderer.js"
+import os from "node:os"
+import lodash from "lodash"
+import puppeteer from "puppeteer"
 // 暂时保留对原config的兼容
-import cfg from '../../../lib/config/config.js'
-import { Data } from '#miao'
+import cfg from "../../../lib/config/config.js"
+
+let Data
+try {
+  Data = (await import("#miao")).Data
+} catch (err) {
+  console.error(err)
+}
 
 const _path = process.cwd()
 // mac地址
-let mac = ''
+let mac = ""
 // 超时计时器
 let overtimeList = []
 
 export default class Puppeteer extends Renderer {
   constructor (config) {
     super({
-      id: 'puppeteer',
-      type: 'image',
-      render: 'screenshot'
+      id: "puppeteer",
+      type: "image",
+      render: "screenshot"
     })
     this.browser = false
     this.lock = false
@@ -27,12 +33,12 @@ export default class Puppeteer extends Renderer {
     /** 截图次数 */
     this.renderNum = 0
     this.config = {
-      headless: Data.def(config.headless, 'new'),
+      headless: Data.def(config.headless, "new"),
       args: Data.def(config.args, [
-        '--disable-gpu',
-        '--disable-setuid-sandbox',
-        '--no-sandbox',
-        '--no-zygote'
+        "--disable-gpu",
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+        "--no-zygote"
       ])
     }
     if (config.chromiumPath || cfg?.bot?.chromium_path) {
@@ -55,7 +61,7 @@ export default class Puppeteer extends Renderer {
     if (this.lock) return false
     this.lock = true
 
-    logger.info('puppeteer Chromium 启动中...')
+    logger.info("puppeteer Chromium 启动中...")
 
     let connectFlag = false
     try {
@@ -69,7 +75,7 @@ export default class Puppeteer extends Renderer {
       if (browserUrl) {
         logger.info(`puppeteer Chromium from ${browserUrl}`)
         const browserWSEndpoint = await puppeteer.connect({ browserWSEndpoint: browserUrl }).catch(() => {
-          logger.error('puppeteer Chromium 缓存的实例已关闭')
+          logger.error("puppeteer Chromium 缓存的实例已关闭")
           redis.del(this.browserMacKey)
         })
         // 如果有实例，直接使用
@@ -81,21 +87,21 @@ export default class Puppeteer extends Renderer {
         }
       }
     } catch (e) {
-      logger.info('puppeteer Chromium 不存在已有实例')
+      logger.info("puppeteer Chromium 不存在已有实例")
     }
 
     if (!this.browser || !connectFlag) {
       // 如果没有实例，初始化puppeteer
       this.browser = await puppeteer.launch(this.config).catch((err, trace) => {
-        let errMsg = err.toString() + (trace ? trace.toString() : '')
-        if (typeof err == 'object') {
+        let errMsg = err.toString() + (trace ? trace.toString() : "")
+        if (typeof err == "object") {
           logger.error(JSON.stringify(err))
         } else {
           logger.error(err.toString())
-          if (errMsg.includes('Could not find Chromium')) {
-            logger.error('没有正确安装 Chromium，可以尝试执行安装命令：node node_modules/puppeteer/install.js')
-          } else if (errMsg.includes('cannot open shared object file')) {
-            logger.error('没有正确安装 Chromium 运行库')
+          if (errMsg.includes("Could not find Chromium")) {
+            logger.error("没有正确安装 Chromium，可以尝试执行安装命令：node node_modules/puppeteer/install.js")
+          } else if (errMsg.includes("cannot open shared object file")) {
+            logger.error("没有正确安装 Chromium 运行库")
           }
         }
         logger.error(err, trace)
@@ -105,11 +111,11 @@ export default class Puppeteer extends Renderer {
     this.lock = false
 
     if (!this.browser) {
-      logger.error('puppeteer Chromium 启动失败')
+      logger.error("puppeteer Chromium 启动失败")
       return false
     }
     if (connectFlag) {
-      logger.info('puppeteer Chromium 已连接启动的实例')
+      logger.info("puppeteer Chromium 已连接启动的实例")
     } else {
       logger.info(`[Chromium] ${this.browser.wsEndpoint()}`)
       if (process.env.pm_id && this.browserMacKey) {
@@ -117,12 +123,12 @@ export default class Puppeteer extends Renderer {
         const expireTime = 60 * 60 * 24 * 30
         await redis.set(this.browserMacKey, this.browser.wsEndpoint(), { EX: expireTime })
       }
-      logger.info('puppeteer Chromium 启动成功')
+      logger.info("puppeteer Chromium 启动成功")
     }
 
     /** 监听Chromium实例是否断开 */
-    this.browser.on('disconnected', () => {
-      logger.error('Chromium 实例关闭或崩溃！')
+    this.browser.on("disconnected", () => {
+      logger.error("Chromium 实例关闭或崩溃！")
       this.browser = false
     })
 
@@ -131,7 +137,7 @@ export default class Puppeteer extends Renderer {
 
   // 获取Mac地址
   getMac () {
-    let mac = '00:00:00:00:00:00'
+    let mac = "00:00:00:00:00:00"
     try {
       const network = os.networkInterfaces()
       let macFlag = false
@@ -149,7 +155,7 @@ export default class Puppeteer extends Renderer {
       }
     } catch (e) {
     }
-    mac = mac.replace(/:/g, '')
+    mac = mac.replace(/:/g, "")
     return mac
   }
 
@@ -179,7 +185,7 @@ export default class Puppeteer extends Renderer {
       return false
     }
 
-    let buff = ''
+    let buff = ""
     let start = Date.now()
 
     let ret = []
@@ -192,7 +198,7 @@ export default class Puppeteer extends Renderer {
       // TODO 截图超时处理
       overtime = setTimeout(() => {
         if (!overtimeFlag) {
-          logger.error(`[图片生成][${name}] 截图超时，当前等待队列：${this.shoting.join(',')}`)
+          logger.error(`[图片生成][${name}] 截图超时，当前等待队列：${this.shoting.join(",")}`)
           this.restart(true)
           this.shoting = []
           overtimeList.forEach(item => {
@@ -205,8 +211,8 @@ export default class Puppeteer extends Renderer {
     try {
       const page = await this.browser.newPage()
       let pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
-      await page.goto(`file://${_path}${lodash.trim(savePath, '.')}`, pageGotoParams)
-      let body = await page.$('#container') || await page.$('body')
+      await page.goto(`file://${_path}${lodash.trim(savePath, ".")}`, pageGotoParams)
+      let body = await page.$("#container") || await page.$("body")
 
       // 计算页面高度
       const boundingBox = await body.boundingBox()
@@ -214,25 +220,25 @@ export default class Puppeteer extends Renderer {
       let num = 1
 
       let randData = {
-        type: data.imgType || 'jpeg',
+        type: data.imgType || "jpeg",
         omitBackground: data.omitBackground || false,
         quality: data.quality || 90,
-        path: data.path || ''
+        path: data.path || ""
       }
 
       if (data.multiPage) {
-        randData.type = 'jpeg'
+        randData.type = "jpeg"
         num = Math.round(boundingBox.height / pageHeight) || 1
       }
 
-      if (data.imgType === 'png') {
+      if (data.imgType === "png") {
         delete randData.quality
       }
 
       if (!data.multiPage) {
         buff = await body.screenshot(randData)
         /** 计算图片大小 */
-        const kb = (buff.length / 1024).toFixed(2) + 'KB'
+        const kb = (buff.length / 1024).toFixed(2) + "KB"
         logger.mark(`[图片生成][${name}][${this.renderNum}次] ${kb} ${logger.green(`${Date.now() - start}ms`)}`)
         this.renderNum++
         ret.push(buff)
@@ -265,7 +271,7 @@ export default class Puppeteer extends Renderer {
           this.renderNum++
 
           /** 计算图片大小 */
-          const kb = (buff.length / 1024).toFixed(2) + 'KB'
+          const kb = (buff.length / 1024).toFixed(2) + "KB"
           logger.mark(`[图片生成][${name}][${i}/${num}] ${kb}`)
           ret.push(buff)
         }
@@ -313,7 +319,7 @@ export default class Puppeteer extends Renderer {
             await this.browser.close().catch((err) => logger.error(err))
           }
           this.browser = false
-          logger.info(`puppeteer Chromium ${force ? '强制' : ''}关闭重启...`)
+          logger.info(`puppeteer Chromium ${force ? "强制" : ""}关闭重启...`)
         }, 100)
       }
     }
