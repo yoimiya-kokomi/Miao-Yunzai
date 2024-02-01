@@ -26,7 +26,11 @@ export default class RoleIndex extends base {
       层岩巨渊: 6,
       层岩地下: 7,
       须弥: 8,
-      枫丹: 9
+      枫丹: 9,
+      沉玉谷: 10,
+      来歆山: 11,
+      沉玉谷·南陵: 12,
+      沉玉谷·上谷: 13
     }
 
     this.all_chest = 0
@@ -548,7 +552,7 @@ export default class RoleIndex extends base {
 
     let explor = []
     for (let val of resIndex.world_explorations) {
-      if (val.id == 7) continue
+      if ([7, 11, 12, 13].includes(val.id)) continue
 
       val.name = this.areaName[val.id] ? this.areaName[val.id] : lodash.truncate(val.name, { length: 6 })
 
@@ -562,23 +566,29 @@ export default class RoleIndex extends base {
         ]
       }
 
+      if (val.id == 10) tmp.line = []
+
       if (['蒙德', '璃月', '稻妻', '须弥', '枫丹'].includes(val.name)) {
         tmp.line.push({ name: '声望', text: `${val.level}级` })
       }
 
-      if (val.id == 6) {
-        let underground = lodash.find(resIndex.world_explorations, function (o) {
-          return o.id == 7
-        })
-        if (underground) {
-          tmp.line.push({
-            name: this.areaName[underground.id],
-            text: `${underground.exploration_percentage / 10}%`
+      if ([6, 10].includes(val.id)) {
+        let oidArr = [7]
+        if (val.id == 10) oidArr = [13, 12, 11]
+        for (let oid of oidArr) {
+          let underground = lodash.find(resIndex.world_explorations, function (o) {
+            return o.id == oid
           })
+          if (underground) {
+            tmp.line.push({
+              name: this.areaName[underground.id],
+              text: `${underground.exploration_percentage / 10}%`
+            })
+          }
         }
       }
 
-      if (['雪山', '稻妻', '层岩巨渊', '须弥', '枫丹'].includes(val.name)) {
+      if (['雪山', '稻妻', '层岩巨渊', '须弥', '枫丹', '沉玉谷'].includes(val.name)) {
         if (val.offerings[0].name.includes('流明石')) {
           val.offerings[0].name = '流明石'
         }
@@ -587,7 +597,7 @@ export default class RoleIndex extends base {
           val.offerings[0].name = '露景泉'
         }
 
-        if (val.offerings[0].name == '恒那兰那的梦之树') {
+        if (val.offerings[0].name == '桓那兰那的梦之树') {
           val.offerings[0].name = '梦之树'
         }
 

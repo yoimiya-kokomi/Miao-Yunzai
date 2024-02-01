@@ -168,7 +168,7 @@ body {
 }
 .explor_box .num {
   font-family: tttgbnumber;
-  font-size: 16px;
+  font-size: 12px;
 }
 .lable {
   font-size: 14px;
@@ -178,7 +178,7 @@ body {
 }
 .explor_box {
   position: relative;
-  font-size: 16px;
+  font-size: 12px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
