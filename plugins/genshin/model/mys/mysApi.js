@@ -13,7 +13,7 @@ export default class MysApi {
    * @param isSr 是否星铁
    * @param device 设备device_id
    */
-  constructor (uid, cookie, option = {}, isSr = false, device = '') {
+  constructor(uid, cookie, option = {}, isSr = false, device = '') {
     this.uid = uid
     this.cookie = cookie
     this.isSr = isSr
@@ -30,12 +30,12 @@ export default class MysApi {
   }
 
   /* eslint-disable quotes */
-  get device () {
+  get device() {
     if (!this._device) this._device = `Yz-${md5(this.uid).substring(0, 5)}`
     return this._device
   }
 
-  getUrl (type, data = {}) {
+  getUrl(type, data = {}) {
     let urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
 
@@ -49,9 +49,14 @@ export default class MysApi {
     return { url, headers, body }
   }
 
-  getServer () {
-    let uid = this.uid
-    switch (String(uid)[0]) {
+  getServer() {
+    let uidPrefix = this.uid.toString()
+    if (uidPrefix.length == 10) {
+      uidPrefix = uidPrefix.slice(0, 2)
+    } else {
+      uidPrefix = uidPrefix.slice(0, 1)
+    }
+    switch (uidPrefix) {
       case '1':
       case '2':
         return this.isSr ? 'prod_gf_cn' : 'cn_gf01' // 官服
@@ -62,6 +67,7 @@ export default class MysApi {
       case '7':
         return this.isSr ? 'prod_official_euro' : 'os_euro' // 欧服
       case '8':
+      case '18':
         return this.isSr ? 'prod_official_asia' : 'os_asia' // 亚服
       case '9':
         return this.isSr ? 'prod_official_cht' : 'os_cht' // 港澳台服
@@ -69,7 +75,7 @@ export default class MysApi {
     return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
   }
 
-  async getData (type, data = {}, cached = false) {
+  async getData(type, data = {}, cached = false) {
     if (!this._device_fp && !data?.Getfp) {
       this._device_fp = await this.getData('getFp', {
         seed_id: this.generateSeed(16),
@@ -137,7 +143,7 @@ export default class MysApi {
     return res
   }
 
-  getHeaders (query = '', body = '') {
+  getHeaders(query = '', body = '') {
     const cn = {
       app_version: '2.40.1',
       User_Agent: `Mozilla/5.0 (Linux; Android 12; ${this.device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.73 Mobile Safari/537.36 miHoYoBBS/2.40.1`,
@@ -169,7 +175,7 @@ export default class MysApi {
     }
   }
 
-  getDs (q = '', b = '') {
+  getDs(q = '', b = '') {
     let n = ''
     if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
       n = 'xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs'
@@ -182,24 +188,24 @@ export default class MysApi {
     return `${t},${r},${DS}`
   }
 
-  getGuid () {
-    function S4 () {
+  getGuid() {
+    function S4() {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
     }
 
     return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
   }
 
-  cacheKey (type, data) {
+  cacheKey(type, data) {
     return 'Yz:genshin:mys:cache:' + md5(this.uid + type + JSON.stringify(data))
   }
 
-  async cache (res, cacheKey) {
+  async cache(res, cacheKey) {
     if (!res || res.retcode !== 0) return
     redis.setEx(cacheKey, this.cacheCd, JSON.stringify(res))
   }
 
-  async getAgent () {
+  async getAgent() {
     let proxyAddress = cfg.bot.proxyAddress
     if (!proxyAddress) return null
     if (proxyAddress === 'http://0.0.0.0:0') return null
@@ -221,7 +227,7 @@ export default class MysApi {
     return null
   }
 
-  generateSeed (length = 16) {
+  generateSeed(length = 16) {
     const characters = '0123456789abcdef'
     let result = ''
     for (let i = 0; i < length; i++) {
