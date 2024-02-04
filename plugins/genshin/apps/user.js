@@ -4,7 +4,7 @@ import gsCfg from '../model/gsCfg.js'
 import User from '../model/user.js'
 
 export class user extends plugin {
-  constructor (e) {
+  constructor(e) {
     super({
       name: '用户绑定',
       dsc: '米游社ck绑定，游戏uid绑定',
@@ -42,7 +42,7 @@ export class user extends plugin {
           fnc: 'delUid'
         },
         {
-          reg: '^#(原神|星铁)?绑定(uid|UID)?\\s*[1-9][0-9]{8}$',
+          reg: '^#(原神|星铁)?绑定(uid|UID)?\\s*([1-9]|18)[0-9]{8}$',
           fnc: 'bingUid'
         },
         {
@@ -66,13 +66,13 @@ export class user extends plugin {
     this.User = new User(e)
   }
 
-  async init () {
+  async init() {
     /** 加载旧的绑定ck json */
     await this.loadOldData()
   }
 
   /** 接受到消息都会执行一次 */
-  accept () {
+  accept() {
     if (!this.e.msg) return
     // 由于手机端米游社网页可能获取不到ltuid 可以尝试在通行证页面获取login_uid
     if (/(ltoken|ltoken_v2)/.test(this.e.msg) && /(ltuid|login_uid|ltmid_v2)/.test(this.e.msg)) {
@@ -93,9 +93,9 @@ export class user extends plugin {
   }
 
   /** 绑定uid */
-  saveUid () {
+  saveUid() {
     if (!this.e.msg) return
-    let uid = this.e.msg.match(/[1|2|3|5-9][0-9]{8}/g)
+    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
     if (!uid) {
       this.reply('uid输入错误', false, { at: true })
       return
@@ -106,23 +106,23 @@ export class user extends plugin {
   }
 
   /** 未登录ck */
-  async noLogin () {
+  async noLogin() {
     this.reply('绑定Cookie失败\n请先【登录米游社】或【登录通行证】再获取Cookie')
   }
 
   /** #ck代码 */
-  async ckCode () {
+  async ckCode() {
     await this.reply('javascript:(()=>{prompt(\'\',document.cookie)})();')
   }
 
   /** ck帮助 */
-  async ckHelp () {
+  async ckHelp() {
     let set = gsCfg.getConfig('mys', 'set')
     await this.reply(`Cookie绑定配置教程：${set.cookieDoc}\n获取Cookie后【私聊发送】进行绑定`)
   }
 
   /** 绑定ck */
-  async bingCk () {
+  async bingCk() {
     let set = gsCfg.getConfig('mys', 'set')
 
     if (!this.e.ck) {
@@ -134,18 +134,18 @@ export class user extends plugin {
   }
 
   /** 删除ck */
-  async delCk () {
+  async delCk() {
     let msg = await this.User.delCk()
     await this.reply(msg)
   }
 
   /** 绑定uid */
-  async bingUid () {
+  async bingUid() {
     await this.User.bingUid()
   }
 
   /** #uid */
-  async showUid () {
+  async showUid() {
     let index = this.e.msg.match(/[0-9]{1,2}/g)
     if (index && index[0]) {
       await this.User.toggleUid(index[0])
@@ -154,7 +154,7 @@ export class user extends plugin {
     }
   }
 
-  async delUid () {
+  async delUid() {
     let index = this.e.msg.match(/[0-9]{1,2}$/g)
     let uidIdx = index && index[0]
     let game = this.e
@@ -164,7 +164,7 @@ export class user extends plugin {
   }
 
   /** 我的ck */
-  async myCk () {
+  async myCk() {
     if (this.e.isGroup) {
       await this.reply('请私聊查看')
       return
@@ -173,18 +173,18 @@ export class user extends plugin {
   }
 
   /** 加载旧的绑定ck json */
-  async loadOldData () {
+  async loadOldData() {
     await this.User.loadOldDataV2()
     await this.User.loadOldDataV3()
     await this.User.loadOldUid()
   }
 
   /** 检查用户CK状态 **/
-  async checkCkStatus () {
+  async checkCkStatus() {
     await this.User.checkCkStatus()
   }
 
-  async bindNoteUser () {
+  async bindNoteUser() {
     await this.User.bindNoteUser()
   }
 }

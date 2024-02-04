@@ -13,7 +13,7 @@ import { Player } from '#miao.models'
 import { UserGameDB, sequelize } from './db/index.js'
 
 export default class User extends base {
-  constructor (e) {
+  constructor(e) {
     super(e)
     this.model = 'bingCk'
     /** 绑定的uid */
@@ -28,17 +28,17 @@ export default class User extends base {
   }
 
   // 获取当前user实例
-  async user () {
+  async user() {
     return await NoteUser.create(this.e)
   }
 
-  async resetCk () {
+  async resetCk() {
     let user = await this.user()
     await user.initCache()
   }
 
   /** 绑定ck */
-  async bing () {
+  async bing() {
     let user = await this.user()
     let set = gsCfg.getConfig('mys', 'set')
 
@@ -172,7 +172,7 @@ export default class User extends base {
   }
 
   /** 删除绑定ck */
-  async delCk () {
+  async delCk() {
     let game
     if (this.e.game) {
       game = this.e.game
@@ -196,8 +196,8 @@ export default class User extends base {
   }
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
-  async bingUid () {
-    let uid = this.e.msg.match(/[1|2|3|5-9][0-9]{8}/g)
+  async bingUid() {
+    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
     if (!uid) return
     uid = uid[0]
     let user = await this.user()
@@ -205,7 +205,7 @@ export default class User extends base {
     return await this.showUid()
   }
 
-  async delUid (index) {
+  async delUid(index) {
     let user = await this.user()
     let game = this.e
     let uidList = user.getUidList(game)
@@ -226,7 +226,7 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid_bak () {
+  async showUid_bak() {
     let user = await this.user()
     let msg = []
     let typeMap = { ck: 'CK Uid', reg: '绑定 Uid' }
@@ -251,7 +251,7 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid () {
+  async showUid() {
     let user = await this.user()
     let uids = [{
       key: 'gs',
@@ -297,7 +297,7 @@ export default class User extends base {
   }
 
   /** 切换uid */
-  async toggleUid (index) {
+  async toggleUid(index) {
     let user = await this.user()
     let game = this.e
     let uidList = user.getUidList(game)
@@ -313,7 +313,7 @@ export default class User extends base {
   }
 
   /** 加载V2ck */
-  async loadOldDataV2 () {
+  async loadOldDataV2() {
     let file = [
       './data/MysCookie/NoteCookie.json',
       './data/NoteCookie/NoteCookie.json',
@@ -363,7 +363,7 @@ export default class User extends base {
   }
 
   /** 加载V3ck */
-  async loadOldDataV3 () {
+  async loadOldDataV3() {
     let dir = './data/MysCookie/'
     if (!fs.existsSync(dir)) {
       return false
@@ -395,7 +395,7 @@ export default class User extends base {
     }
   }
 
-  async loadOldUid () {
+  async loadOldUid() {
     // 从DB中导入
     await sequelize.query('delete from UserGames where userId is null or data is null', {})
     let games = await UserGameDB.findAll()
@@ -437,7 +437,7 @@ export default class User extends base {
     console.log('load Uid Data Done...')
   }
 
-  async loadOldData (data) {
+  async loadOldData(data) {
     let count = 0
     if (!lodash.isPlainObject(data)) {
       return
@@ -496,7 +496,7 @@ export default class User extends base {
   }
 
   /** 我的ck */
-  async myCk () {
+  async myCk() {
     let user = await this.user()
     if (!user.hasCk) {
       this.e.reply(['当前尚未绑定Cookie', segment.button([
@@ -510,7 +510,7 @@ export default class User extends base {
     }
   }
 
-  async checkCkStatus () {
+  async checkCkStatus() {
     let user = await this.user()
     if (!user.hasCk) {
       await this.e.reply(`\n未绑定CK，当前绑定uid：${user.uid || '无'}`, false, { at: true })
@@ -546,7 +546,7 @@ export default class User extends base {
     ])], false, { at: true })
   }
 
-  async userAdmin () {
+  async userAdmin() {
     this.model = 'userAdmin'
     await MysInfo.initCache()
     let stat = await MysUser.getStatData()
@@ -558,7 +558,7 @@ export default class User extends base {
     }
   }
 
-  async bindNoteUser () {
+  async bindNoteUser() {
     let user = await this.user()
     let id = user.qq
     let { e } = this
@@ -616,7 +616,7 @@ export default class User extends base {
         e.reply([`此账号将作为子用户，绑定至主用户:${mainId}`,
           '成功绑定后，此用户输入的命令，将视作主用户命令，使用主用户的CK与UID等信息',
           '如需继续绑定，请在5分钟内，使用主账户发送以下命令：', '',
-          `#接受绑定子用户[${mainId}][${verify}]`
+        `#接受绑定子用户[${mainId}][${verify}]`
         ].join('\n'))
         return true
       } else {

@@ -8,7 +8,7 @@ import { Character, Weapon } from '#miao.models'
 
 /** 配置文件 */
 class GsCfg {
-  constructor () {
+  constructor() {
     this.isSr = false
     /** 默认设置 */
     this.defSetPath = './plugins/genshin/defSet/'
@@ -24,7 +24,7 @@ class GsCfg {
     this.ignore = ['mys.pubCk', 'gacha.set', 'bot.help', 'role.name']
   }
 
-  get element () {
+  get element() {
     return { ...this.getdefSet('element', 'role'), ...this.getdefSet('element', 'weapon') }
   }
 
@@ -32,12 +32,12 @@ class GsCfg {
    * @param app  功能
    * @param name 配置文件名称
    */
-  getdefSet (app, name) {
+  getdefSet(app, name) {
     return this.getYaml(app, name, 'defSet')
   }
 
   /** 用户配置 */
-  getConfig (app, name) {
+  getConfig(app, name) {
     if (this.ignore.includes(`${app}.${name}`)) {
       return this.getYaml(app, name, 'config')
     }
@@ -51,7 +51,7 @@ class GsCfg {
    * @param name 名称
    * @param type 默认跑配置-defSet，用户配置-config
    */
-  getYaml (app, name, type) {
+  getYaml(app, name, type) {
     let file = this.getFilePath(app, name, type)
     let key = `${app}.${name}`
 
@@ -71,7 +71,7 @@ class GsCfg {
     return this[type][key]
   }
 
-  getFilePath (app, name, type) {
+  getFilePath(app, name, type) {
     if (type == 'defSet') {
       return `${this.defSetPath}${app}/${name}.yaml`
     } else {
@@ -80,7 +80,7 @@ class GsCfg {
   }
 
   /** 监听配置文件 */
-  watch (file, app, name, type = 'defSet') {
+  watch(file, app, name, type = 'defSet') {
     let key = `${app}.${name}`
 
     if (this.watcher[type][key]) return
@@ -98,7 +98,7 @@ class GsCfg {
   }
 
   /** 读取所有用户绑定的ck */
-  async getBingCk (game = 'gs') {
+  async getBingCk(game = 'gs') {
     let ck = {}
     let ckQQ = {}
     let noteCk = {}
@@ -126,13 +126,13 @@ class GsCfg {
   /**
    * 原神角色id转换角色名字
    */
-  roleIdToName (id) {
+  roleIdToName(id) {
     let char = Character.get(id)
     return char?.name || ''
   }
 
   /** 原神角色别名转id */
-  roleNameToID (keyword, isSr) {
+  roleNameToID(keyword, isSr) {
     let char = Character.get(keyword, isSr ? 'sr' : 'gs')
     return char?.id || false
   }
@@ -143,18 +143,18 @@ class GsCfg {
    * @param name 名称
    * @param isWeapon 是否武器
    */
-  shortName (name, isWeapon = false) {
+  shortName(name, isWeapon = false) {
     let obj = (isWeapon ? Weapon : Character).get(name)
     return obj.abbr || obj.name || ''
   }
 
   /** 公共配置ck文件修改hook */
-  async change_myspubCk () {
+  async change_myspubCk() {
     await MysInfo.initCache()
     await MysInfo.initPubCk()
   }
 
-  getGachaSet (groupId = '') {
+  getGachaSet(groupId = '') {
     let config = this.getYaml('gacha', 'set', 'config')
     let def = config.default
     if (config[groupId]) {
@@ -163,8 +163,8 @@ class GsCfg {
     return def
   }
 
-  getMsgUid (msg) {
-    let ret = /[1|2|5-9][0-9]{8}/g.exec(msg)
+  getMsgUid(msg) {
+    let ret = /([1-9]|18)[0-9]{8}/g.exec(msg)
     if (!ret) return false
     return ret[0]
   }
@@ -178,8 +178,8 @@ class GsCfg {
    * @return alias 当前别名
    * @return uid 游戏uid
    */
-  getRole (msg, filterMsg = '', isSr = false) {
-    let alias = msg.replace(/#|老婆|老公|[1|2|3|5-9][0-9]{8}/g, '').trim()
+  getRole(msg, filterMsg = '', isSr = false) {
+    let alias = msg.replace(/#|老婆|老公|([1-9]|18)[0-9]{8}/g, '').trim()
     if (filterMsg) {
       alias = alias.replace(new RegExp(filterMsg, 'g'), '').trim()
     }
@@ -204,7 +204,7 @@ class GsCfg {
   }
 
 
-  cpCfg (app, name) {
+  cpCfg(app, name) {
     if (!fs.existsSync('./plugins/genshin/config')) {
       fs.mkdirSync('./plugins/genshin/config')
     }
@@ -216,7 +216,7 @@ class GsCfg {
   }
 
   // 仅供内部调用
-  _getAbbr () {
+  _getAbbr() {
     if (this[this.isSr ? 'sr_nameID' : 'nameID']) return
 
     this.nameID = new Map()
@@ -250,7 +250,7 @@ class GsCfg {
 
 
   // 仅供内部调用
-  _roleNameToID (keyword, isSr) {
+  _roleNameToID(keyword, isSr) {
     if (isSr) this.isSr = isSr
     if (!isNaN(keyword)) keyword = Number(keyword)
     this._getAbbr()
@@ -259,8 +259,8 @@ class GsCfg {
   }
 
   // 仅供内部调用
-  _getRole (msg, filterMsg = '', isSr = false) {
-    let alias = msg.replace(/#|老婆|老公|[1|2|3|5-9][0-9]{8}/g, '').trim()
+  _getRole(msg, filterMsg = '', isSr = false) {
+    let alias = msg.replace(/#|老婆|老公|([1-9]|18)[0-9]{8}/g, '').trim()
     if (filterMsg) {
       alias = alias.replace(new RegExp(filterMsg, 'g'), '').trim()
     }
@@ -279,46 +279,46 @@ class GsCfg {
     }
   }
 
-  getWeaponDataByWeaponHash (hash) {
+  getWeaponDataByWeaponHash(hash) {
     console.log('gsCfg.getWeaponDataByWeaponHash() 已废弃')
     return {}
   }
 
-  getAllAbbr () {
+  getAllAbbr() {
     console.log('gsCfg.getAllAbbr() 已废弃')
     return {}
   }
 
-  getBingCkSingle (userId) {
+  getBingCkSingle(userId) {
     console.log('gsCfg.getBingCkSingle() 已废弃')
     return {}
   }
 
-  saveBingCk (userId, data) {
+  saveBingCk(userId, data) {
     console.log('gsCfg.saveBingCk() 已废弃')
   }
 
-  getElementByRoleName (roleName) {
+  getElementByRoleName(roleName) {
     console.log('gsCfg.getElementByRoleName() 已废弃')
     return ''
   }
 
-  getSkillDataByskillId (skillId, roleName) {
+  getSkillDataByskillId(skillId, roleName) {
     console.log('gsCfg.getSkillDataByskillId() 已废弃')
     return {}
   }
 
-  fightPropIdToName (propId) {
+  fightPropIdToName(propId) {
     console.log('gsCfg.fightPropIdToName() 已废弃')
     return ''
   }
 
-  getRoleTalentByTalentId (talentId) {
+  getRoleTalentByTalentId(talentId) {
     console.log('gsCfg.getRoleTalentByTalentId 已废弃')
     return {}
   }
 
-  getAbbr () {
+  getAbbr() {
     console.log('gsCfg.getAbbr() 已经废弃')
   }
 

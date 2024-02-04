@@ -46,19 +46,21 @@ export class gcLog extends plugin {
     })
 
     this.androidUrl = "https://docs.qq.com/doc/DUWpYaXlvSklmVXlX"
-    Object.defineProperty(this, "button", { get() {
-      this.prefix = this.e?.isSr ? "*" : "#"
-      return segment.button([
-        { text: "角色记录", callback: `${this.prefix}角色记录` },
-        { text: "角色统计", callback: `${this.prefix}角色统计` },
-      ],[
-        { text: "武器记录", callback: `${this.prefix}武器记录` },
-        { text: "武器统计", callback: `${this.prefix}武器统计` },
-      ],[
-        { text: "常驻记录", callback: `${this.prefix}常驻记录` },
-        { text: "常驻统计", callback: `${this.prefix}常驻统计` },
-      ])
-    }})
+    Object.defineProperty(this, "button", {
+      get() {
+        this.prefix = this.e?.isSr ? "*" : "#"
+        return segment.button([
+          { text: "角色记录", callback: `${this.prefix}角色记录` },
+          { text: "角色统计", callback: `${this.prefix}角色统计` },
+        ], [
+          { text: "武器记录", callback: `${this.prefix}武器记录` },
+          { text: "武器统计", callback: `${this.prefix}武器统计` },
+        ], [
+          { text: "常驻记录", callback: `${this.prefix}常驻记录` },
+          { text: "常驻统计", callback: `${this.prefix}常驻统计` },
+        ])
+      }
+    })
   }
 
   async init() {
@@ -73,7 +75,7 @@ export class gcLog extends plugin {
   accept() {
     if (this.e.file) {
       let name = this.e.file?.name
-      if (/(.*)[1-9][0-9]{8}(.*).json/ig.test(name)) {
+      if (/(.*)([1-9]|18)[0-9]{8}(.*).json/ig.test(name)) {
         this.e.msg = "#json文件导入记录"
         return true
       }

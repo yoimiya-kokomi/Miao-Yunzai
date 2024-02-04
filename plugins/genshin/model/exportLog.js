@@ -182,7 +182,7 @@ export default class ExportLog extends base {
 
   /** json导入抽卡记录 */
   async logJson() {
-    let uid = /[1-9][0-9]{8}/g.exec(this.e.file.name)[0]
+    let uid = /([1-9]|18)[0-9]{8}/g.exec(this.e.file.name)[0]
     let textPath = `${this.path}${this.e.file.name}`
     /** 获取文件下载链接 */
     let fileUrl = await this.e.friend.getFileUrl(this.e.file.fid)
