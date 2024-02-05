@@ -50,13 +50,7 @@ export default class MysApi {
   }
 
   getServer() {
-    let uidPrefix = this.uid.toString()
-    if (uidPrefix.length == 10) {
-      uidPrefix = uidPrefix.slice(0, 2)
-    } else {
-      uidPrefix = uidPrefix.slice(0, 1)
-    }
-    switch (uidPrefix) {
+    switch (String(this.uid).slice(0, -8)) {
       case '1':
       case '2':
         return this.isSr ? 'prod_gf_cn' : 'cn_gf01' // 官服
