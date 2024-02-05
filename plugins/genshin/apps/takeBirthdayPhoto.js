@@ -96,13 +96,7 @@ export class takeBirthdayPhoto extends plugin {
   }
 
   async getServer(uid) {
-    let uidPrefix = uid.toString()
-    if (uidPrefix.length == 10) {
-      uidPrefix = uidPrefix.slice(0, 2)
-    } else {
-      uidPrefix = uidPrefix.slice(0, 1)
-    }
-    switch (uidPrefix) {
+    switch (String(uid).slice(0, -8)) {
       case '1':
       case '2':
         return 'cn_gf01'

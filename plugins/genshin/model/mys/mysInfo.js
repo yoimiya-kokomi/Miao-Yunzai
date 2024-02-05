@@ -55,18 +55,11 @@ export default class MysInfo {
       return false
     }
 
-    let uidPrefix = mysInfo.uid.toString()
-    if (uidPrefix.length == 10) {
-      uidPrefix = uidPrefix.slice(0, 2)
-    } else {
-      uidPrefix = uidPrefix.slice(0, 1)
-    }
-
-    if (!['1', '2', '3', '5', '6', '7', '8', '18', '9'].includes(uidPrefix)) {
+    if (!['1', '2', '3', '5', '6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8))) {
       // e.reply('只支持查询国服uid')
       return false
     }
-    if (!['6', '7', '8', '18', '9'].includes(uidPrefix) && api === 'useCdk') {
+    if (!['6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8)) && api === 'useCdk') {
       e.reply('兑换码使用只支持国际服uid')
       return false
     }

@@ -8,22 +8,22 @@ avatar: 79
 level: 60
 
 # 奇馈宝箱
-magic_chest: 221
+magic_chest: 241
 
 # 华丽宝箱
-luxurious_chest: 242
+luxurious_chest: 259
 
 # 珍贵宝箱
-precious_chest: 632
+precious_chest: 682
 
 # 精致宝箱
-exquisite_chest: 2082
+exquisite_chest: 2219
 
 # 普通宝箱
-common_chest: 2867
+common_chest: 2980
 
 # 传送点
-way_point: 400
+way_point: 431
 
 # 秘境
 domain: 56
