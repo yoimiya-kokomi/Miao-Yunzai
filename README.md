@@ -13,7 +13,7 @@ Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、G
 
 </div>
 
-- 基于 [Miao-Yunzai](../../../../yoimiya-kokomi/Miao-Yunzai) 改造，需要同时安装 [miao-plugin](../../../../yoimiya-kokomi/miao-plugin)
+- 基于 [Miao-Yunzai](../../../../yoimiya-kokomi/Miao-Yunzai)
 - 开发文档：[docs 分支](../../tree/docs)
 
 ## TRSS-Yunzai 后续计划
@@ -42,7 +42,7 @@ Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、G
 
 请根据网络情况选择使用 GitHub 或 Gitee 安装
 
-```
+```sh
 git clone --depth 1 https://github.com/TimeRainStarSky/Yunzai
 cd Yunzai
 git clone --depth 1 https://github.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
@@ -50,7 +50,7 @@ git clone --depth 1 https://github.com/yoimiya-kokomi/miao-plugin plugins/miao-p
 git clone --depth 1 https://github.com/TimeRainStarSky/TRSS-Plugin plugins/TRSS-Plugin
 ```
 
-```
+```sh
 git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai
 cd Yunzai
 git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
@@ -60,19 +60,19 @@ git clone --depth 1 https://Yunzai.TRSS.me plugins/TRSS-Plugin
 
 2.安装 [pnpm](https://pnpm.io/zh/installation)
 
-```
+```sh
 npm install -g pnpm
 ```
 
 3.安装依赖
 
-```
+```sh
 pnpm i
 ```
 
 4.运行
 
-```
+```sh
 node app
 ```
 
@@ -82,7 +82,7 @@ node app
 
 下载运行 [go-cqhttp](https://docs.go-cqhttp.org)，选择反向 WebSocket，修改 `config.yml`，以下为必改项：
 
-```
+```yaml
 uin: 账号
 password: '密码'
 post-format: array
@@ -95,7 +95,7 @@ universal: ws://localhost:2536/go-cqhttp
 
 下载运行 [ComWeChat](https://justundertaker.github.io/ComWeChatBotClient)，修改 `.env`，以下为必改项：
 
-```
+```python
 websocekt_type = "Backward"
 websocket_url = ["ws://localhost:2536/ComWeChat"]
 ```

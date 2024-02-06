@@ -18,6 +18,8 @@ online_msg_exp: 1440
 file_to_url_time: 1
 # 文件访问次数
 file_to_url_times:
+# 消息类型统计
+msg_type_count: false
 
 # chromium其他路径
 chromium_path:
