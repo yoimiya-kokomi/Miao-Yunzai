@@ -1,6 +1,3 @@
-import { exec, execSync } from "child_process"
-import plugin from "../../lib/plugins/plugin.js"
-import fs from "node:fs"
 import { Restart } from "./restart.js"
 
 let insing = false
@@ -54,7 +51,7 @@ export class install extends plugin {
     if (name == "插件") {
       let msg = "\n"
       for (const name in list)
-        if (!fs.existsSync(`plugins/${name}`))
+        if (!await Bot.fsStat(`plugins/${name}`))
           msg += `${name}\n`
 
       if (msg == "\n")
@@ -67,20 +64,12 @@ export class install extends plugin {
     }
 
     const path = `plugins/${name}`
-    if (fs.existsSync(path)) {
+    if (await Bot.fsStat(path)) {
       await this.reply(`${name} 插件已安装`)
       return false
     }
     await this.runInstall(name, list[name], path)
     this.restart()
-  }
-
-  async execSync(cmd) {
-    return new Promise(resolve => {
-      exec(cmd, (error, stdout, stderr) => {
-        resolve({ error, stdout, stderr })
-      })
-    })
   }
 
   async runInstall(name, url, path) {
@@ -89,9 +78,9 @@ export class install extends plugin {
 
     const cm = `git clone --depth 1 --single-branch "${url}" "${path}"`
     insing = true
-    const ret = await this.execSync(cm)
-    if (fs.existsSync(`${path}/package.json`))
-      await this.execSync("pnpm install")
+    const ret = await Bot.exec(cm)
+    if (await Bot.fsStat(`${path}/package.json`))
+      await Bot.exec("pnpm install")
     insing = false
 
     if (ret.error) {

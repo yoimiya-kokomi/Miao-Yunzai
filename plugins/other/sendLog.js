@@ -1,6 +1,4 @@
-import plugin from "../../lib/plugins/plugin.js"
-import common from "../../lib/common/common.js"
-import fs from "node:fs"
+import fs from "node:fs/promises"
 import lodash from "lodash"
 import moment from "moment"
 
@@ -43,16 +41,16 @@ export class sendLog extends plugin {
 
     if (this.keyWord) type = this.keyWord
 
-    const log = this.getLog(logFile)
+    const log = await this.getLog(logFile)
 
     if (lodash.isEmpty(log))
       return this.reply(`暂无相关日志：${type}`)
 
-    return this.reply(await common.makeForwardMsg(this.e, [log.join("\n")], `最近${log.length}条${type}日志`))
+    return this.reply(await Bot.makeForwardArray([`最近${log.length}条${type}日志`, log.join("\n")]))
   }
 
-  getLog(logFile) {
-    let log = fs.readFileSync(logFile, { encoding: "utf-8" })
+  async getLog(logFile) {
+    let log = await fs.readFile(logFile, "utf-8")
     log = log.split("\n")
 
     if (this.keyWord) {

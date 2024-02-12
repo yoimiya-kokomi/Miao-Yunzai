@@ -124,12 +124,6 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
-<details><summary>QQ频道</summary>
-
-[TRSS-Yunzai QQGuild Plugin](../../../Yunzai-QQGuild-Plugin)
-
-</details>
-
 <details><summary>微信</summary>
 
 [TRSS-Yunzai WeChat Plugin](../../../Yunzai-WeChat-Plugin)

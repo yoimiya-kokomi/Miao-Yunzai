@@ -1,7 +1,5 @@
 import cfg from "../../lib/config/config.js"
-import plugin from "../../lib/plugins/plugin.js"
-import common from "../../lib/common/common.js"
-import fs from "node:fs"
+import fs from "node:fs/promises"
 import path from "node:path"
 import lodash from "lodash"
 import fetch from "node-fetch"
@@ -40,7 +38,7 @@ export class add extends plugin {
   }
 
   async init() {
-    Bot.mkdir(this.path)
+    await Bot.mkdir(this.path)
   }
 
   /** 群号key */
@@ -58,7 +56,7 @@ export class add extends plugin {
       return
     }
 
-    this.initMessageMap()
+    await this.initMessageMap()
 
     if (!this.checkAuth()) return false
     /** 获取关键词 */
@@ -184,16 +182,16 @@ export class add extends plugin {
     if (message.length > 1)
       this.keyWord += String(message.length)
 
-    this.saveJson()
+    await this.saveJson()
     return this.reply(`添加成功：${this.keyWord}`)
   }
 
-  saveJson() {
+  async saveJson() {
     let obj = {}
     for (let [k, v] of messageMap[this.group_id])
       obj[k] = v
 
-    fs.writeFileSync(`${this.path}${this.group_id}.json`, JSON.stringify(obj, "", "\t"))
+    await fs.writeFile(`${this.path}${this.group_id}.json`, JSON.stringify(obj, "", "\t"))
   }
 
   async saveFile(data) {
@@ -202,8 +200,8 @@ export class add extends plugin {
       if (!file.name) file.name = `${Date.now()}-${path.basename(data.file || data.url)}`
       file.name = `${this.group_id}/${data.type}/${file.name}`
       file.path = `${this.path}${file.name}`
-      Bot.mkdir(path.dirname(file.path))
-      fs.writeFileSync(file.path, file.buffer)
+      await Bot.mkdir(path.dirname(file.path))
+      await fs.writeFile(file.path, file.buffer)
       return file.name
     }
     return data.url
@@ -216,8 +214,8 @@ export class add extends plugin {
     await this.getGroupId()
     if (!this.group_id) return false
 
-    this.initMessageMap()
-    this.initGlobalMessageMap()
+    await this.initMessageMap()
+    await this.initGlobalMessageMap()
 
     this.keyWord = this.trimAlias(this.e.raw_message.trim())
     let keyWord = this.keyWord
@@ -243,8 +241,8 @@ export class add extends plugin {
 
     msg = [...msg[num]]
     for (const i in msg)
-      if (msg[i].file && fs.existsSync(`${this.path}${msg[i].file}`))
-        msg[i] = { ...msg[i], file: fs.readFileSync(`${this.path}${msg[i].file}`) }
+      if (msg[i].file && await Bot.fsStat(`${this.path}${msg[i].file}`))
+        msg[i] = { ...msg[i], file: `${this.path}${msg[i].file}` }
 
     logger.mark(`[发送消息]${this.e.logText} ${this.keyWord}`)
     const groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
@@ -255,15 +253,15 @@ export class add extends plugin {
   }
 
   /** 初始化已添加内容 */
-  initMessageMap() {
+  async initMessageMap() {
     if (messageMap[this.group_id]) return
     messageMap[this.group_id] = new Map()
 
     const path = `${this.path}${this.group_id}.json`
-    if (!fs.existsSync(path)) return
+    if (!await Bot.fsStat(path)) return
 
     try {
-      const message = JSON.parse(fs.readFileSync(path, "utf8"))
+      const message = JSON.parse(await fs.readFile(path, "utf8"))
       for (const i in message)
         messageMap[this.group_id].set(i, message[i])
     } catch (err) {
@@ -272,15 +270,15 @@ export class add extends plugin {
   }
 
   /** 初始化全局已添加内容 */
-  initGlobalMessageMap() {
+  async initGlobalMessageMap() {
     if (messageMap.global) return
     messageMap.global = new Map()
 
     const globalPath = `${this.path}global.json`
-    if (!fs.existsSync(globalPath)) return
+    if (!await Bot.fsStat(globalPath)) return
 
     try {
-      const message = JSON.parse(fs.readFileSync(globalPath, "utf8"))
+      const message = JSON.parse(await fs.readFile(globalPath, "utf8"))
       for (const i in message)
         messageMap.global.set(i, message[i])
     } catch (err) {
@@ -293,7 +291,7 @@ export class add extends plugin {
     await this.getGroupId()
     if (!(this.group_id && this.checkAuth())) return false
 
-    this.initMessageMap()
+    await this.initMessageMap()
 
     this.getKeyWord()
     if (!this.keyWord) {
@@ -353,7 +351,7 @@ export class add extends plugin {
       }
     }
 
-    this.saveJson()
+    await this.saveJson()
     return this.reply(`删除成功：${this.keyWord}`)
   }
 
@@ -367,7 +365,7 @@ export class add extends plugin {
     await this.getGroupId()
     if (!this.group_id) return false
 
-    this.initMessageMap()
+    await this.initMessageMap()
 
     const search = this.e.msg.replace(/^#(全局)?(消息|词条)/, "").trim()
     if (search.match(/^列表/))

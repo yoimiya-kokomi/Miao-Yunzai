@@ -1,5 +1,4 @@
 import cfg from "../../lib/config/config.js"
-import { exec } from "child_process"
 
 export class Restart extends plugin {
   constructor (e = "") {
@@ -79,7 +78,7 @@ export class Restart extends plugin {
       if (process.argv[1].includes("pm2"))
         cm = "pnpm run restart"
 
-      const ret = await this.execSync(cm)
+      const ret = await Bot.exec(cm)
       if (ret.error) {
         redis.del(this.key)
         await this.e.reply(`重启错误\n${ret.error}`)
@@ -98,14 +97,6 @@ export class Restart extends plugin {
     return true
   }
 
-  async execSync(cmd) {
-    return new Promise((resolve, reject) => {
-      exec(cmd, { windowsHide: true }, (error, stdout, stderr) => {
-        resolve({ error, stdout, stderr })
-      })
-    })
-  }
-
   async stop() {
     await redis.set(this.key, JSON.stringify({
       isStop: true,
@@ -121,7 +112,7 @@ export class Restart extends plugin {
     if (!process.argv[1].includes("pm2"))
       process.exit()
 
-    const ret = await this.execSync("pnpm stop")
+    const ret = await Bot.exec("pnpm stop")
     await this.e.reply(`关机错误\n${ret.error}\n${ret.stdout}\n${ret.stderr}`)
     logger.error("关机错误", ret)
   }

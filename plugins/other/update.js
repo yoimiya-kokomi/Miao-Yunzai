@@ -1,13 +1,7 @@
-import plugin from '../../lib/plugins/plugin.js'
 import cfg from '../../lib/config/config.js'
-import { createRequire } from 'module'
 import lodash from 'lodash'
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 import { Restart } from './restart.js'
-import common from '../../lib/common/common.js'
-
-const require = createRequire(import.meta.url)
-const { exec, execSync } = require('child_process')
 
 let uping = false
 
@@ -64,17 +58,15 @@ export class update extends plugin {
     if (/详细|详情|面板|面版/.test(this.e.msg)) return false
 
     /** 获取插件 */
-    let plugin = this.getPlugin()
+    let plugin = await this.getPlugin()
     if (plugin === false) return false
 
     /** 执行更新 */
     if (plugin === '') {
       await this.runUpdate('')
-      await common.sleep(1000)
-      plugin = this.getPlugin('genshin')
+      plugin = await this.getPlugin('genshin')
       await this.runUpdate(plugin)
-      await common.sleep(1000)
-      plugin = this.getPlugin('miao-plugin')
+      plugin = await this.getPlugin('miao-plugin')
       await this.runUpdate(plugin)
     } else {
       await this.runUpdate(plugin)
@@ -87,13 +79,13 @@ export class update extends plugin {
     }
   }
 
-  getPlugin(plugin = '') {
+  async getPlugin(plugin = '') {
     if (!plugin) {
       plugin = this.e.msg.replace(/#(强制)?更新(日志)?/, '')
       if (!plugin) return ''
     }
 
-    if (!fs.existsSync(`plugins/${plugin}/.git`)) return false
+    if (!await Bot.fsStat(`plugins/${plugin}/.git`)) return false
 
     this.typeName = plugin
     return plugin
@@ -120,9 +112,10 @@ export class update extends plugin {
     const ret = await Bot.exec(cm)
     uping = false
 
+    ret.stdout = String(ret.stdout)
     if (ret.error) {
       logger.mark(`${this.e.logFnc} 更新失败：${this.typeName}`)
-      this.gitErr(ret.error, ret.stdout)
+      this.gitErr(Bot.String(ret.error), ret.stdout)
       return false
     }
 
@@ -143,62 +136,49 @@ export class update extends plugin {
   async getcommitId(plugin = '') {
     let cm = 'git rev-parse --short HEAD'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
-
-    const commitId = await execSync(cm, { encoding: 'utf-8' })
-    return lodash.trim(commitId)
+    cm = await Bot.exec(cm)
+    return lodash.trim(String(cm.stdout))
   }
 
   async getTime(plugin = '') {
     let cm = 'git log -1 --pretty=%cd --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
-
-    let time = ''
-    try {
-      time = await execSync(cm, { encoding: 'utf-8' })
-      time = lodash.trim(time)
-    } catch (error) {
-      logger.error(error.toString())
-      time = '获取时间失败'
-    }
-
-    return time
+    cm = await Bot.exec(cm)
+    return lodash.trim(String(cm.stdout))
   }
 
-  async gitErr(err, stdout) {
+  async gitErr(error, stdout) {
     const msg = '更新失败！'
-    const errMsg = err.toString()
-    stdout = stdout.toString()
 
-    if (errMsg.includes('Timed out')) {
-      const remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, '')
+    if (error.includes('Timed out')) {
+      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, '')
       return this.reply(`${msg}\n连接超时：${remote}`)
     }
 
-    if (/Failed to connect|unable to access/g.test(errMsg)) {
-      const remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, '')
+    if (/Failed to connect|unable to access/g.test(error)) {
+      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, '')
       return this.reply(`${msg}\n连接失败：${remote}`)
     }
 
-    if (errMsg.includes('be overwritten by merge')) {
-      return this.reply(`${msg}\n存在冲突：\n${errMsg}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
+    if (error.includes('be overwritten by merge')) {
+      return this.reply(`${msg}\n存在冲突：\n${error}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
     }
 
     if (stdout.includes('CONFLICT')) {
-      return this.reply(`${msg}\n存在冲突：\n${errMsg}${stdout}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
+      return this.reply(`${msg}\n存在冲突：\n${error}${stdout}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
     }
 
-    return this.reply([errMsg, stdout])
+    return this.reply([error, stdout])
   }
 
   async updateAll() {
-    const dirs = fs.readdirSync('./plugins/')
+    const dirs = await fs.readdir('./plugins/')
 
     await this.runUpdate()
 
     for (let plu of dirs) {
-      plu = this.getPlugin(plu)
+      plu = await this.getPlugin(plu)
       if (plu === false) continue
-      await common.sleep(1500)
       await this.runUpdate(plu)
     }
 
@@ -216,17 +196,14 @@ export class update extends plugin {
     let cm = 'git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
-    let logAll
-    try {
-      logAll = await execSync(cm, { encoding: 'utf-8' })
-    } catch (error) {
-      logger.error(error.toString())
-      await this.reply(error.toString())
+    cm = await Bot.exec(cm)
+    if (cm.error) {
+      logger.error(cm.error)
+      await this.reply(String(cm.error))
     }
+    const logAll = String(cm.stdout).trim().split('\n')
 
-    if (!logAll) return false
-
-    logAll = logAll.trim().split('\n')
+    if (!logAll.length) return false
 
     let log = []
     for (let str of logAll) {
@@ -240,22 +217,20 @@ export class update extends plugin {
 
     if (log.length <= 0) return ''
 
-    let end = ''
-    try {
-      cm = 'git config -l'
-      if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
-      end = await execSync(cm, { encoding: 'utf-8' })
-      end = end.match(/remote\..*\.url=.+/g).join('\n\n').replace(/remote\..*\.url=/g, '').replace(/\/\/([^@]+)@/, '//')
-    } catch (error) {
-      logger.error(error.toString())
-      await this.reply(error.toString())
+    cm = 'git config -l'
+    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
+    cm = await Bot.exec(cm)
+    const end = String(cm.stdout).match(/remote\..*\.url=.+/g).join('\n\n').replace(/remote\..*\.url=/g, '').replace(/\/\/([^@]+)@/, '//')
+    if (cm.error) {
+      logger.error(cm.error)
+      await this.reply(String(cm.error))
     }
 
-    return common.makeForwardMsg(this.e, [log, end], `${plugin || 'TRSS-Yunzai'} 更新日志，共${line}条`)
+    return Bot.makeForwardArray([`${plugin || 'TRSS-Yunzai'} 更新日志，共${line}条`, log, end])
   }
 
   async updateLog() {
-    const plugin = this.getPlugin()
+    const plugin = await this.getPlugin()
     if (plugin === false) return false
     return this.reply(await this.getLog(plugin))
   }

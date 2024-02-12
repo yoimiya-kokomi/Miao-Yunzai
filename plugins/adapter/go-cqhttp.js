@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto"
 import path from "node:path"
-import fs from "node:fs"
 
 Bot.adapter.push(new class gocqhttpAdapter {
   constructor() {
@@ -26,6 +25,13 @@ Bot.adapter.push(new class gocqhttpAdapter {
     return data.bot.sendApi("set_qq_profile", profile)
   }
 
+  async makeFile(file) {
+    file = await Bot.Buffer(file, { http: true })
+    if (Buffer.isBuffer(file))
+      file = `base64://${file.toString("base64")}`
+    return file
+  }
+
   async makeMsg(msg, sendForwardMsg) {
     if (!Array.isArray(msg))
       msg = [msg]
@@ -44,8 +50,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
           continue
       }
 
-      if (Buffer.isBuffer(i.data.file))
-        i.data.file = `base64://${i.data.file.toString("base64")}`
+      if (i.data.file)
+        i.data.file = await this.makeFile(i.data.file)
 
       msgs.push(i)
     }
@@ -293,11 +299,12 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  setGroupAvatar(data, file) {
+  async setGroupAvatar(data, file) {
     logger.info(`${logger.blue(`[${data.self_id}]`)} 设置群头像：[${data.group_id}] ${file}`)
+    file = await Bot.Buffer(file, { http: true })
     return data.bot.sendApi("set_group_portrait", {
       group_id: data.group_id,
-      file: segment.image(file).file,
+      file,
     })
   }
 
@@ -370,28 +377,22 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  async makeFile(data, file, name = path.basename(file)) {
-    if (file.match(/^https?:\/\//))
-      file = (await this.downloadFile(data, file)).file
-    else if (fs.existsSync(file))
-      file = path.resolve(file)
-    return { file, name }
-  }
-
-  async sendFriendFile(data, file, name) {
+  async sendFriendFile(data, file, name = path.basename(file)) {
     logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友文件：${name}(${file})`)
     return data.bot.sendApi("upload_private_file", {
       user_id: data.user_id,
-      ...await this.makeFile(data, file, name),
+      file: await this.makeFile(file),
+      name,
     })
   }
 
-  async sendGroupFile(data, file, folder, name) {
+  async sendGroupFile(data, file, folder, name = path.basename(file)) {
     logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群文件：[${data.group_id}] ${folder||""}/${name}(${file})`)
     return data.bot.sendApi("upload_group_file", {
       group_id: data.group_id,
       folder,
-      ...await this.makeFile(data, file, name),
+      file: await this.makeFile(file),
+      name,
     })
   }
 
@@ -511,7 +512,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       ...this.pickFriend(i, user_id),
       ...i,
       getInfo: () => this.getMemberInfo(i),
-      poke: () => this.sendGroupMsg(i, segment.poke(user_id)),
+      poke: () => this.sendGroupMsg(i, { type: "poke", qq: user_id }),
       mute: duration => this.muteMember(i, i.user_id, duration),
       kick: reject_add_request => this.kickMember(i, i.user_id, reject_add_request),
     }
@@ -562,7 +563,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getMemberList: () => this.getMemberList(i),
       getMemberMap: () => this.getMemberMap(i),
       pickMember: user_id => this.pickMember(i, group_id, user_id),
-      pokeMember: user_id => this.sendGroupMsg(i, segment.poke(user_id)),
+      pokeMember: qq => this.sendGroupMsg(i, { type: "poke", qq }),
       setName: group_name => this.setGroupName(i, group_name),
       setAvatar: file => this.setGroupAvatar(i, file),
       setAdmin: (user_id, enable) => this.setGroupAdmin(i, user_id, enable),

@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto"
 import path from "node:path"
-import fs from "node:fs"
 import { fileTypeFromBuffer } from "file-type"
 
 Bot.adapter.push(new class ComWeChatAdapter {
@@ -24,9 +23,8 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async fileName(file) {
     try {
-      const buffer = Bot.Buffer(file, { http: true })
       if (Buffer.isBuffer(file)) {
-        const type = await fileTypeFromBuffer(buffer)
+        const type = await fileTypeFromBuffer(file)
         return `${Date.now()}.${type.ext}`
       } else {
         return `${Date.now()}-${path.basename(file)}`
@@ -38,6 +36,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async uploadFile(data, file, name) {
+    file = await Bot.Buffer(file, { http: true })
     const opts = { name: name || await this.fileName(file) }
 
     if (Buffer.isBuffer(file)) {
@@ -46,12 +45,6 @@ Bot.adapter.push(new class ComWeChatAdapter {
     } else if (file.match(/^https?:\/\//)) {
       opts.type = "url"
       opts.url = file
-    } else if (file.match(/^base64:\/\//)) {
-      opts.type = "data"
-      opts.data = file.replace(/^base64:\/\//, "")
-    } else if (fs.existsSync(file)) {
-      opts.type = "data"
-      opts.data = fs.readFileSync(file).toString("base64")
     } else {
       opts.type = "path"
       opts.path = file

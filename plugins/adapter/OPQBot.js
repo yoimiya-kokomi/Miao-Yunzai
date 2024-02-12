@@ -1,6 +1,3 @@
-import path from "node:path"
-import fs from "node:fs"
-
 Bot.adapter.push(new class OPQBotAdapter {
   constructor() {
     this.id = "QQ"
@@ -28,10 +25,9 @@ Bot.adapter.push(new class OPQBotAdapter {
   async uploadFile(id, type, file) {
     const opts = { CommandId: this.CommandId[type] }
 
+    file = await Bot.Buffer(file, { http: true })
     if (Buffer.isBuffer(file))
       opts.Base64Buf = file.toString("base64")
-    else if (file.match(/^base64:\/\//))
-      opts.Base64Buf = file.replace(/^base64:\/\//, "")
     else if (file.match(/^https?:\/\//))
       opts.FileUrl = file
     else

@@ -1,7 +1,3 @@
-import { randomUUID } from "node:crypto"
-import path from "node:path"
-import fs from "node:fs"
-
 Bot.adapter.push(new class GSUIDCoreAdapter {
   constructor() {
     this.id = "GSUIDCore"
@@ -57,15 +53,19 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return msgs
   }
 
-  makeMsg(msg) {
+  async makeMsg(msg) {
     if (!Array.isArray(msg))
       msg = [msg]
     const msgs = []
     for (let i of msg) {
       if (typeof i != "object")
         i = { type: "text", text: i }
-      if (Buffer.isBuffer(i.file))
-        i.file = `base64://${i.file.toString("base64")}`
+
+      if (i.file) {
+        i.file = await Bot.Buffer(i.file, { http: true })
+        if (Buffer.isBuffer(i.file))
+          i.file = `base64://${i.file.toString("base64")}`
+      }
 
       switch (i.type) {
         case "text":
@@ -97,7 +97,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         case "node": {
           const array = []
           for (const { message } of i.data)
-            array.push(...this.makeMsg(message))
+            array.push(...await this.makeMsg(message))
           i.data = array
           break
         } default:
@@ -108,8 +108,8 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return msgs
   }
 
-  sendFriendMsg(data, msg) {
-    const content = this.makeMsg(msg)
+  async sendFriendMsg(data, msg) {
+    const content = await this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(content)}`)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,
@@ -121,9 +121,9 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return { message_id: Date.now() }
   }
 
-  sendGroupMsg(data, msg) {
+  async sendGroupMsg(data, msg) {
     const target = data.group_id.split("-")
-    const content = this.makeMsg(msg)
+    const content = await this.makeMsg(msg)
     logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(content)}`)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,

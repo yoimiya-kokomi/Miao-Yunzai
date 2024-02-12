@@ -1,9 +1,9 @@
-import fs from "node:fs"
+import fs from "node:fs/promises"
 import { randomUUID } from "node:crypto"
 let code = {}
 let file = "config/config/other.yaml"
 export class master extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: "设置主人",
       dsc: "设置主人",
@@ -17,8 +17,8 @@ export class master extends plugin {
     })
   }
 
-  edit (file, key, value) {
-    let data = fs.readFileSync(file, "utf8")
+  async edit(file, key, value) {
+    let data = await fs.readFile(file, "utf8")
     if (data.match(RegExp(`- "?${value}"?`)))
       return
     value = `${key}:\n  - "${value}"`
@@ -26,10 +26,10 @@ export class master extends plugin {
       data = data.replace(RegExp(`${key}:`), value)
     else
       data = `${data}\n${value}`
-    fs.writeFileSync(file, data, "utf8")
+    return fs.writeFile(file, data, "utf8")
   }
 
-  async master () {
+  async master() {
     if (this.e.isMaster) {
       await this.reply(`账号：${this.e.user_id} 已经为主人`, true)
       return false
@@ -41,11 +41,11 @@ export class master extends plugin {
     await this.reply(`账号：${this.e.user_id} 请输入验证码`, true)
   }
 
-  async verify () {
+  async verify() {
     this.finish("verify")
     if (this.e.msg.trim() == code[this.e.user_id]) {
-      this.edit(file, "masterQQ", this.e.user_id)
-      this.edit(file, "master", `${this.e.self_id}:${this.e.user_id}`)
+      await this.edit(file, "masterQQ", this.e.user_id)
+      await this.edit(file, "master", `${this.e.self_id}:${this.e.user_id}`)
       await this.reply(`账号：${this.e.user_id} 设置主人成功`, true)
     } else {
       await this.reply("验证码错误", true)
