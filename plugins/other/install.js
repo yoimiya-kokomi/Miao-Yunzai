@@ -12,7 +12,6 @@ const list = {
   "useless-plugin":"https://gitee.com/SmallK111407/useless-plugin",
   "StarRail-plugin"   :"https://gitee.com/hewang1an/StarRail-plugin",
   "xiaoyao-cvs-plugin":"https://gitee.com/Ctrlcvs/xiaoyao-cvs-plugin",
-  "Jinmaocuicuisha-plugin":"https://gitee.com/JMCCS/jinmaocuicuisha",
   "trss-xianxin-plugin"   :"https://gitee.com/snowtafir/xianxin-plugin",
   "mysVilla-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-mysVilla-Plugin",
   "Telegram-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-Telegram-Plugin",
