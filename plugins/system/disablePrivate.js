@@ -1,5 +1,4 @@
 import cfg from '../../lib/config/config.js'
-import plugin from '../../lib/plugins/plugin.js'
 
 export class disPri extends plugin {
   constructor () {

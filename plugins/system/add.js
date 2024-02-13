@@ -2,7 +2,6 @@ import cfg from "../../lib/config/config.js"
 import fs from "node:fs/promises"
 import path from "node:path"
 import lodash from "lodash"
-import fetch from "node-fetch"
 
 let messageMap = {}
 
@@ -407,16 +406,17 @@ export class add extends plugin {
       msg.push(`${i.num}. ${keyWord}(${i.val.length})`)
       num++
     }
-    msg = [msg.join("\n")]
-
-    if (type == "list" && count > 100)
-      msg.push(`更多内容请翻页查看\n如：#消息列表${Number(page)+1}`)
 
     let title = `消息列表：第${page}页，共${count}条`
     if (type == "search")
       title = `消息${search}：共${count}条`
 
-    return this.reply(await common.makeForwardMsg(this.e, msg, title))
+    msg = [title, msg.join("\n")]
+
+    if (type == "list" && count > 100)
+      msg.push(`更多内容请翻页查看\n如：#消息列表${Number(page)+1}`)
+
+    return this.reply(await Bot.makeForwardArray(msg))
   }
 
   /** 分页 */

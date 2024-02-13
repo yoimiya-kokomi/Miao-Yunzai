@@ -1,11 +1,9 @@
-import cfg from '../../lib/config/config.js'
-
 export class invite extends plugin {
   constructor () {
     super({
-      name: 'invite',
-      dsc: '主人邀请自动进群',
-      event: 'request.group.invite'
+      name: "invite",
+      dsc: "主人邀请自动进群",
+      event: "request.group.invite"
     })
   }
 
