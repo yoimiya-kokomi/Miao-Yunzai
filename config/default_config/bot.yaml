@@ -1,7 +1,7 @@
 # 日志等级 trace,debug,info,warn,fatal,mark,error,off
 log_level: info
 # 单条日志长度
-log_length: 1000
+log_length: 10000
 
 # 服务器地址
 url: http://localhost:2536
