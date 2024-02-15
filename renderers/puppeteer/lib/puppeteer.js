@@ -5,13 +5,6 @@ import puppeteer from "puppeteer"
 // 暂时保留对原config的兼容
 import cfg from "../../../lib/config/config.js"
 
-let Data
-try {
-  Data = (await import("#miao")).Data
-} catch (err) {
-  console.error(err)
-}
-
 const _path = process.cwd()
 // mac地址
 let mac = ""
@@ -19,7 +12,7 @@ let mac = ""
 let overtimeList = []
 
 export default class Puppeteer extends Renderer {
-  constructor (config) {
+  constructor(config) {
     super({
       id: "puppeteer",
       type: "image",
@@ -33,13 +26,13 @@ export default class Puppeteer extends Renderer {
     /** 截图次数 */
     this.renderNum = 0
     this.config = {
-      headless: Data.def(config.headless, "new"),
-      args: Data.def(config.args, [
+      headless: config.headless || "new",
+      args: config.args || [
         "--disable-gpu",
         "--disable-setuid-sandbox",
         "--no-sandbox",
         "--no-zygote"
-      ])
+      ]
     }
     if (config.chromiumPath || cfg?.bot?.chromium_path) {
       /** chromium其他路径 */
@@ -56,7 +49,7 @@ export default class Puppeteer extends Renderer {
   /**
    * 初始化chromium
    */
-  async browserInit () {
+  async browserInit() {
     if (this.browser) return this.browser
     if (this.lock) return false
     this.lock = true
@@ -136,7 +129,7 @@ export default class Puppeteer extends Renderer {
   }
 
   // 获取Mac地址
-  getMac () {
+  getMac() {
     let mac = "00:00:00:00:00:00"
     try {
       const network = os.networkInterfaces()
@@ -174,7 +167,7 @@ export default class Puppeteer extends Renderer {
    * @param data.pageGotoParams 页面goto时的参数
    * @return img 不做segment包裹
    */
-  async screenshot (name, data = {}) {
+  async screenshot(name, data = {}) {
     if (!await this.browserInit()) {
       return false
     }
@@ -266,7 +259,7 @@ export default class Puppeteer extends Renderer {
             buff = await page.screenshot(randData)
           }
           if (num > 2) {
-            await Data.sleep(200)
+            await Bot.sleep(200)
           }
           this.renderNum++
 
@@ -310,7 +303,7 @@ export default class Puppeteer extends Renderer {
   }
 
   /** 重启 */
-  restart (force = false) {
+  restart(force = false) {
     /** 截图超过重启数时，自动关闭重启浏览器，避免生成速度越来越慢 */
     if (this.renderNum % this.restartNum === 0 || force) {
       if (this.shoting.length <= 0 || force) {

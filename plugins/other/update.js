@@ -61,16 +61,7 @@ export class update extends plugin {
     let plugin = await this.getPlugin()
     if (plugin === false) return false
 
-    /** 执行更新 */
-    if (plugin === '') {
-      await this.runUpdate('')
-      plugin = await this.getPlugin('genshin')
-      await this.runUpdate(plugin)
-      plugin = await this.getPlugin('miao-plugin')
-      await this.runUpdate(plugin)
-    } else {
-      await this.runUpdate(plugin)
-    }
+    await this.runUpdate(plugin)
 
     /** 是否需要重启 */
     if (this.isUp) {
