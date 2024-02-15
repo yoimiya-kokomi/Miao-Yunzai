@@ -85,9 +85,15 @@ export class user extends plugin {
       return true
     }
 
-    if (this.e.msg == '#绑定uid') {
-      this.setContext('saveUid')
-      this.reply('请发送绑定的uid', false, { at: true })
+    if (this.e.msg == "#绑定uid" || this.e.msg == "#绑定UID") {
+      this.setContext("saveUid")
+      this.reply("请发送绑定的原神uid", false, { at: true })
+      return true
+    }
+
+    if (this.e.msg == "#星铁绑定uid" || this.e.msg == "#星铁绑定UID") {
+      this.setContext("saveSrUid")
+      this.reply("请发送绑定的星铁uid", false, { at: true })
       return true
     }
   }
@@ -97,12 +103,27 @@ export class user extends plugin {
     if (!this.e.msg) return
     let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
     if (!uid) {
-      this.reply('uid输入错误', false, { at: true })
+      this.reply("原神UID输入错误", false, { at: true })
       return
     }
-    this.e.msg = '#绑定' + this.e.msg
+    this.e.msg = "#绑定" + this.e.msg
     this.bingUid()
-    this.finish('saveUid')
+    this.finish("saveUid")
+  }
+
+  /** 绑定星铁uid */
+  saveSrUid() {
+    if (!this.e.msg) return
+    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
+    if (!uid) {
+      this.reply("星铁UID输入错误", false, { at: true })
+      return
+    }
+    this.e.msg = "#星铁绑定" + this.e.msg
+    this.e.isSr = true
+    this.e.game = 'sr'
+    this.bingUid()
+    this.finish("saveSrUid")
   }
 
   /** 未登录ck */
