@@ -1,11 +1,9 @@
 export class newcomer extends plugin {
   constructor() {
     super({
-      name: '欢迎新人',
-      dsc: '新人入群欢迎',
-      /** https://oicqjs.github.io/oicq/#events */
-      event: 'notice.group.increase',
-      priority: 5000
+      name: "欢迎新人",
+      dsc: "新人入群欢迎",
+      event: "notice.group.increase",
     })
   }
 
@@ -14,14 +12,14 @@ export class newcomer extends plugin {
     if (this.e.user_id == this.e.self_id) return
 
     /** 定义入群欢迎内容 */
-    let msg = '欢迎新人！'
+    let msg = "欢迎新人！"
     /** 冷却cd 30s */
     let cd = 30
 
     /** cd */
     let key = `Yz:newcomers:${this.e.group_id}`
     if (await redis.get(key)) return
-    redis.set(key, '1', { EX: cd })
+    redis.set(key, "1", { EX: cd })
 
     /** 回复 */
     await this.reply([
@@ -35,13 +33,13 @@ export class newcomer extends plugin {
 export class outNotice extends plugin {
   constructor() {
     super({
-      name: '退群通知',
-      dsc: 'xx退群了',
-      event: 'notice.group.decrease'
+      name: "退群通知",
+      dsc: "xx退群了",
+      event: "notice.group.decrease"
     })
 
     /** 退群提示词 */
-    this.tips = '退群了'
+    this.tips = "退群了"
   }
 
   async accept() {
