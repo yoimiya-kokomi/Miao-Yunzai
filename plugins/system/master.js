@@ -31,14 +31,14 @@ export class master extends plugin {
 
   async master() {
     if (this.e.isMaster) {
-      await this.reply(`账号：${this.e.user_id} 已经为主人`, true)
+      await this.reply(`[${this.e.user_id}] 已经为主人`, true)
       return false
     }
 
     code[this.e.user_id] = randomUUID()
     logger.mark(`${logger.cyan(`[${this.e.user_id}]`)} 设置主人验证码：${logger.green(code[this.e.user_id])}`)
     this.setContext("verify")
-    await this.reply(`账号：${this.e.user_id} 请输入验证码`, true)
+    await this.reply(`[${this.e.user_id}] 请输入验证码`, true)
   }
 
   async verify() {
@@ -46,7 +46,7 @@ export class master extends plugin {
     if (this.e.msg.trim() == code[this.e.user_id]) {
       await this.edit(file, "masterQQ", this.e.user_id)
       await this.edit(file, "master", `${this.e.self_id}:${this.e.user_id}`)
-      await this.reply(`账号：${this.e.user_id} 设置主人成功`, true)
+      await this.reply(`[${this.e.user_id}] 设置主人成功`, true)
     } else {
       await this.reply("验证码错误", true)
       return false
