@@ -194,9 +194,8 @@ export class add extends plugin {
   }
 
   async saveFile(data) {
-    const file = await Bot.fileType(data)
+    const file = await Bot.fileType({ ...data, file: data.url })
     if (Buffer.isBuffer(file.buffer)) {
-      if (!file.name) file.name = `${Date.now()}-${path.basename(data.file || data.url)}`
       file.name = `${this.group_id}/${data.type}/${file.name}`
       file.path = `${this.path}${file.name}`
       await Bot.mkdir(path.dirname(file.path))
