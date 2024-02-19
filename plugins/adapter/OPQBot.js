@@ -80,7 +80,7 @@ Bot.adapter.push(new class OPQBotAdapter {
   }
 
   sendFriendMsg(data, msg, event) {
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送好友消息：[${data.user_id}] ${this.makeLog(msg)}`)
+    Bot.makeLog("info", `发送好友消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.user_id}`)
     return this.sendMsg(
       msg => this.sendApi(data.self_id,
       "MessageSvc.PbSendMsg", {
@@ -94,7 +94,7 @@ Bot.adapter.push(new class OPQBotAdapter {
   }
 
   sendMemberMsg(data, msg, event) {
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群员消息：[${data.group_id}, ${data.user_id}] ${this.makeLog(msg)}`)
+    Bot.makeLog("info", `发送群员消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}, ${data.user_id}`)
     return this.sendMsg(
       msg => this.sendApi(data.self_id,
       "MessageSvc.PbSendMsg", {
@@ -109,7 +109,7 @@ Bot.adapter.push(new class OPQBotAdapter {
   }
   
   sendGroupMsg(data, msg) {
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 发送群消息：[${data.group_id}] ${this.makeLog(msg)}`)
+    Bot.makeLog("info", `发送群消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}`)
     let ReplyTo
     if (data.message_id && data.seq && data.time)
       ReplyTo = {
@@ -229,7 +229,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     data = this.makeMessage(id, data)
     data.message_type = "private"
 
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息：[${data.sender.nickname}(${data.user_id})] ${data.raw_message}`)
+    Bot.makeLog("info", `好友消息：[${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
     Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
 
@@ -242,7 +242,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     data.group_name = data.event.MsgHead.GroupInfo.GroupName
 
     data.reply = msg => this.sendGroupMsg(data, msg)
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_name}(${data.group_id}), ${data.sender.nickname}(${data.user_id})] ${data.raw_message}`)
+    Bot.makeLog("info", `群消息：[${data.group_name}, ${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
     Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
 
@@ -255,7 +255,7 @@ Bot.adapter.push(new class OPQBotAdapter {
         this.makeGroupMessage(id, data.EventData)
         break
       default:
-        logger.warn(`${logger.blue(`[${id}]`)} 未知事件：${logger.magenta(data.raw)}`)
+        Bot.makeLog("warn", `未知事件：${logger.magenta(data.raw)}`, id)
     }
   }
 
@@ -288,7 +288,7 @@ Bot.adapter.push(new class OPQBotAdapter {
       gml: new Map,
     }
 
-    logger.mark(`${logger.blue(`[${id}]`)} ${this.name}(${this.id}) ${this.version} 已连接`)
+    Bot.makeLog("mark", `${this.name}(${this.id}) ${this.version} 已连接`, id)
     Bot.em(`connect.${id}`, { self_id: id })
   }
 
@@ -298,7 +298,7 @@ Bot.adapter.push(new class OPQBotAdapter {
       data = JSON.parse(data)
       data.raw = raw
     } catch (err) {
-      return logger.error(`解码数据失败：${logger.red(err)}`)
+      return Bot.makeLog("error", ["解码数据失败", data, err])
     }
 
     const id = data.CurrentQQ
@@ -312,7 +312,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     } else if (data.ReqId) {
       Bot.emit(data.ReqId, data)
     } else {
-      logger.warn(`${logger.blue(`[${id}]`)} 未知消息：${logger.magenta(data.raw)}`)
+      Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, id)
     }
   }
 

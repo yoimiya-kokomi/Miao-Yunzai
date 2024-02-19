@@ -110,7 +110,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
   async sendFriendMsg(data, msg) {
     const content = await this.makeMsg(msg)
-    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(content)}`)
+    Bot.makeLog("info", `发送好友消息：${this.makeLog(content)}`, `${data.self_id} => ${data.user_id}`)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
@@ -124,7 +124,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   async sendGroupMsg(data, msg) {
     const target = data.group_id.split("-")
     const content = await this.makeMsg(msg)
-    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(content)}`)
+    Bot.makeLog("info", `发送群消息：${this.makeLog(content)}`, `${data.self_id} => ${data.group_id}`)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
@@ -198,7 +198,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       gml: new Map,
     }
 
-    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) 已连接`)
+    Bot.makeLog("mark", `${this.name}(${this.id}) 已连接`, data.self_id)
     Bot.em(`connect.${data.self_id}`, data)
   }
 
@@ -208,7 +208,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       data = JSON.parse(data)
       data.raw = raw
     } catch (err) {
-      return logger.error(`解码数据失败：${logger.red(err)}`)
+      return Bot.makeLog("error", ["解码数据失败", data, err])
     }
 
     data.self_id = data.bot_self_id
@@ -265,13 +265,13 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
     if (data.user_type == "direct") {
       data.message_type = "private"
-      logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息：[${data.user_id}] ${data.raw_message}`)
+      Bot.makeLog("info", `好友消息：${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
     } else {
       data.message_type = "group"
       data.group_id = `${data.user_type}-${data.group_id}`
       if (!data.bot.gl.has(data.group_id))
         data.bot.gl.set(data.group_id, { group_id: data.group_id })
-      logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.user_id}] ${data.raw_message}`)
+      Bot.makeLog("info", `群消息：${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
     }
 
     Bot.em(`${data.post_type}.${data.message_type}`, data)

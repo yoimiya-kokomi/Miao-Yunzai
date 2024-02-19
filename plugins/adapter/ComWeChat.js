@@ -21,36 +21,22 @@ Bot.adapter.push(new class ComWeChatAdapter {
         resolve({ ...data, ...data.data })))
   }
 
-  async fileName(file) {
-    try {
-      if (Buffer.isBuffer(file)) {
-        const type = await fileTypeFromBuffer(file)
-        return `${Date.now()}.${type.ext}`
-      } else {
-        return `${Date.now()}-${path.basename(file)}`
-      }
-    } catch (err) {
-      logger.error(`文件类型检测错误：${logger.red(err)}`)
-    }
-    return String(Date.now())
-  }
+  async uploadFile(data, file) {
+    file = await Bot.fileType(file, { http: true })
+    const opts = { name: file.name }
 
-  async uploadFile(data, file, name) {
-    file = await Bot.Buffer(file, { http: true })
-    const opts = { name: name || await this.fileName(file) }
-
-    if (Buffer.isBuffer(file)) {
+    if (Buffer.isBuffer(file.buffer)) {
       opts.type = "data"
-      opts.data = file.toString("base64")
-    } else if (file.match(/^https?:\/\//)) {
+      opts.data = file.buffer.toString("base64")
+    } else if (file.buffer.match(/^https?:\/\//)) {
       opts.type = "url"
-      opts.url = file
+      opts.url = file.buffer
     } else {
       opts.type = "path"
-      opts.path = file
+      opts.path = file.buffer
     }
 
-    logger.info(`${logger.blue(`[${data.self_id}]`)} 上传文件：${this.makeLog(opts)}`)
+    Bot.makeLog("info", `上传文件：${this.makeLog(opts)}`, data.self_id)
     return data.bot.sendApi("upload_file", opts)
   }
 
@@ -64,7 +50,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       else if (!i.data)
         i = { type: i.type, data: { ...i, type: undefined }}
       if (i.data.file)
-        i.data = { file_id: (await this.uploadFile(data, i.data.file, i.data.name)).file_id }
+        i.data = { file_id: (await this.uploadFile(data, i.data)).file_id }
 
       switch (i.type) {
         case "text":
@@ -99,7 +85,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async sendFriendMsg(data, msg) {
     const message = await this.makeMsg(data, msg, msg => this.sendFriendMsg(data, msg))
-    logger.info(`${logger.blue(`[${data.self_id} => ${data.user_id}]`)} 发送好友消息：${this.makeLog(message)}`)
+    Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`)
     return data.bot.sendApi("send_message", {
       detail_type: "private",
       user_id: data.user_id,
@@ -109,7 +95,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async sendGroupMsg(data, msg) {
     const message = await this.makeMsg(data, msg, msg => this.sendGroupMsg(data, msg))
-    logger.info(`${logger.blue(`[${data.self_id} => ${data.group_id}]`)} 发送群消息：${this.makeLog(message)}`)
+    Bot.makeLog("info", `发送群消息：${this.makeLog(message)}`, `${data.self_id} => ${data.group_id}`)
     return data.bot.sendApi("send_message", {
       detail_type: "group",
       group_id: data.group_id,
@@ -290,7 +276,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     data.bot.getFriendMap()
     data.bot.getGroupMap()
 
-    logger.mark(`${logger.blue(`[${data.self_id}]`)} ${this.name}(${this.id}) ${data.bot.version.impl}-${data.bot.version.version} 已连接`)
+    Bot.makeLog("mark", `${this.name}(${this.id}) ${data.bot.version.impl}-${data.bot.version.version} 已连接`, data.self_id)
     Bot.em(`connect.${data.self_id}`, data)
   }
 
@@ -326,13 +312,13 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     switch (data.message_type) {
       case "private":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息：[${data.user_id}] ${data.raw_message}`)
+        Bot.makeLog("info", `好友消息：${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
         break
       case "group":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息：[${data.group_id}, ${data.user_id}] ${data.raw_message}`)
+        Bot.makeLog("info", `群消息：${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
+        Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
     }
 
     Bot.em(`${data.post_type}.${data.message_type}`, data)
@@ -347,43 +333,43 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     switch (data.detail_type) {
       case "private_message_delete":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友消息撤回：[${data.user_id}] ${data.message_id}`)
+        Bot.makeLog("info", `好友消息撤回：${data.message_id}`, `${data.self_id} <= ${data.user_id}`)
         data.sub_type = "recall"
         break
       case "group_message_delete":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 群消息撤回：[${data.group_id}, ${data.operator_id}=>${data.user_id}] ${data.message_id}`)
+        Bot.makeLog("info", `群消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`)
         data.sub_type = "recall"
         break
       case "wx.get_private_file":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 私聊文件：[${data.user_id}] ${data.file_name} ${data.file_length} ${data.md5}`)
+        Bot.makeLog("info", `私聊文件：${data.file_name} ${data.file_length} ${data.md5}`, `${data.self_id} <= ${data.user_id}`)
         break
       case "wx.get_group_file":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 群文件：[${data.group_id}, ${data.user_id}] ${data.file_name} ${data.file_length} ${data.md5}`)
+        Bot.makeLog("info", `群文件：${data.file_name} ${data.file_length} ${data.md5}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         break
       case "wx.get_private_redbag":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友红包：[${data.user_id}]`)
+        Bot.makeLog("info", `好友红包`, `${data.self_id} <= ${data.user_id}`)
         break
       case "wx.get_group_redbag":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 群红包：[${data.group_id}, ${data.user_id}]`)
+        Bot.makeLog("info", `群红包`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         break
       case "wx.get_private_poke":
         data.operator_id = data.from_user_id
         data.target_id = data.user_id
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友拍一拍：[${data.operator_id}=>${data.target_id}]`)
+        Bot.makeLog("info", `好友拍一拍：${data.operator_id} => ${data.target_id}`, data.self_id)
         break
       case "wx.get_group_poke":
         data.operator_id = data.from_user_id
         data.target_id = data.user_id
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 群拍一拍：[${data.group_id}, ${data.operator_id}=>${data.target_id}]`)
+        Bot.makeLog("info", `群拍一拍：${data.operator_id} => ${data.target_id}`, `${data.self_id} <= ${data.group_id}`)
         break
       case "wx.get_private_card":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 好友用户名片：[${data.user_id}] ${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`)
+        Bot.makeLog("info", `好友用户名片：${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`, `${data.self_id} <= ${data.user_id}`)
         break
       case "wx.get_group_card":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 群用户名片：[${data.group_id}, ${data.user_id}] ${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`)
+        Bot.makeLog("info", `群用户名片：${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知通知：${logger.magenta(data.raw)}`)
+        Bot.makeLog("warn", `未知通知：${logger.magenta(data.raw)}`, data.self_id)
     }
     if (!data.sub_type)
       data.sub_type = data.detail_type.split("_").pop()
@@ -400,11 +386,11 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     switch (data.detail_type) {
       case "wx.friend_request":
-        logger.info(`${logger.blue(`[${data.self_id}]`)} 加好友请求：[${data.user_id}] ${data.v3} ${data.v4} ${data.nickname} ${data.content} ${data.province} ${data.city}`)
+        Bot.makeLog("info", `加好友请求：${data.v3} ${data.v4} ${data.nickname} ${data.content} ${data.province} ${data.city}`, `${data.self_id} <= ${data.user_id}`)
         data.sub_type = "add"
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知请求：${logger.magenta(data.raw)}`)
+        Bot.makeLog("warn", `未知请求：${logger.magenta(data.raw)}`, data.self_id)
     }
     if (!data.sub_type)
       data.sub_type = data.detail_type.split("_").pop()
@@ -422,7 +408,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
         this.connect(data, ws)
         break
       default:
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
+        Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
     }
   }
 
@@ -432,7 +418,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       data = JSON.parse(data)
       data.raw = raw
     } catch (err) {
-      return logger.error(`解码数据失败：${logger.red(err)}`)
+      return Bot.makeLog("error", ["解码数据失败", data, err])
     }
 
     if (data.self?.user_id) {
@@ -443,7 +429,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     if (data.type) {
       if (data.type != "meta" && !Bot.uin.includes(data.self_id)) {
-        logger.warn(`${logger.blue(`[${data.self_id}]`)} 找不到对应Bot，忽略消息：${logger.magenta(data.raw)}`)
+        Bot.makeLog("warn", `找不到对应Bot，忽略消息：${logger.magenta(data.raw)}`, data.self_id)
         return false
       }
       data.bot = Bot[data.self_id]
@@ -462,12 +448,12 @@ Bot.adapter.push(new class ComWeChatAdapter {
           this.makeRequest(data)
           break
         default:
-          logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
+          Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
       }
     } else if (data.echo) {
       Bot.emit(data.echo, data)
     } else {
-      logger.warn(`${logger.blue(`[${data.self_id}]`)} 未知消息：${logger.magenta(data.raw)}`)
+      Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
     }
   }
 
