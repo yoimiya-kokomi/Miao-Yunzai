@@ -411,6 +411,7 @@ export default class MysInfo {
         if (!isTask) this.e.reply(['米游社账号异常，暂时无法查询', this.mysButton])
         break
       case 1034:
+      case 10035:
         let handler = this.e.runtime?.handler || {}
 
         // 如果有注册的mys.req.err，调用
