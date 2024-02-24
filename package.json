@@ -31,7 +31,7 @@
     "node-schedule": "^2.1.1",
     "oicq": "link:lib/modules/oicq",
     "pm2": "^5.3.1",
-    "puppeteer": "^22.1.0",
+    "puppeteer": "^22.2.0",
     "redis": "^4.6.13",
     "sequelize": "^6.37.1",
     "sqlite3": "5.1.6",
@@ -39,7 +39,7 @@
     "yaml": "^2.3.4"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",

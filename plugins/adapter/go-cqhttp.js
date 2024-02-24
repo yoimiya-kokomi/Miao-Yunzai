@@ -15,9 +15,9 @@ Bot.adapter.push(new class gocqhttpAdapter {
   sendApi(ws, action, params) {
     const echo = randomUUID()
     ws.sendMsg({ action, params, echo })
-    return new Promise(resolve =>
-      Bot.once(echo, data =>
-        resolve({ ...data, ...data.data })))
+    return new Promise(resolve => Bot.once(echo, data =>
+      resolve({ ...data, ...data.data })
+    ))
   }
 
   setProfile(data, profile) {
