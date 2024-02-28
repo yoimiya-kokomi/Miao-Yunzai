@@ -23,6 +23,7 @@
     "file-type": "^19.0.0",
     "https-proxy-agent": "7.0.4",
     "image-size": "^1.1.1",
+    "level": "^8.0.1",
     "lodash": "^4.17.21",
     "log4js": "^6.9.1",
     "md5": "^2.3.0",
