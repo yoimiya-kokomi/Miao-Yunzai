@@ -63,11 +63,10 @@ export class update extends plugin {
 
     await this.runUpdate(plugin)
 
-    /** 是否需要重启 */
-    if (this.isUp) {
-      // await this.reply('即将执行重启，以应用更新')
-      setTimeout(() => this.restart(), 2000)
-    }
+    if (this.isPkgUp)
+      await Bot.exec("pnpm install")
+    if (this.isUp)
+      this.restart()
   }
 
   async getPlugin(plugin = '') {
@@ -111,12 +110,13 @@ export class update extends plugin {
     }
 
     const time = await this.getTime(plugin)
-
     if (/Already up|已经是最新/g.test(ret.stdout)) {
       await this.reply(`${this.typeName} 已是最新\n最后更新时间：${time}`)
     } else {
-      await this.reply(`${this.typeName} 更新成功\n更新时间：${time}`)
       this.isUp = true
+      if (/package\.json/.test(ret.stdout))
+        this.isPkgUp = true
+      await this.reply(`${this.typeName} 更新成功\n更新时间：${time}`)
       await this.reply(await this.getLog(plugin))
     }
 
@@ -173,10 +173,10 @@ export class update extends plugin {
       await this.runUpdate(plu)
     }
 
-    if (this.isUp) {
-      // await this.reply('即将执行重启，以应用更新')
-      setTimeout(() => this.restart(), 2000)
-    }
+    if (this.isPkgUp)
+      await Bot.exec("pnpm install")
+    if (this.isUp)
+      this.restart()
   }
 
   restart() {
