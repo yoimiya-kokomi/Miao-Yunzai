@@ -31,12 +31,12 @@
     "node-schedule": "^2.1.1",
     "oicq": "link:lib/modules/oicq",
     "pm2": "^5.3.1",
-    "puppeteer": "^22.2.0",
+    "puppeteer": "^22.3.0",
     "redis": "^4.6.13",
     "sequelize": "^6.37.1",
     "sqlite3": "5.1.6",
     "ws": "^8.16.0",
-    "yaml": "^2.3.4"
+    "yaml": "^2.4.0"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
