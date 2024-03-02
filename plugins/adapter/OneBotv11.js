@@ -4,7 +4,7 @@ import path from "node:path"
 Bot.adapter.push(new class gocqhttpAdapter {
   constructor() {
     this.id = "QQ"
-    this.name = "go-cqhttp"
+    this.name = "OneBotv11"
     this.path = this.name
   }
 
@@ -145,13 +145,13 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getFriendList(data) {
     const array = []
-    for (const { user_id } of (await this.getFriendArray(data)))
+    for (const { user_id } of await this.getFriendArray(data))
       array.push(user_id)
     return array
   }
 
   async getFriendMap(data) {
-    for (const i of (await this.getFriendArray(data)))
+    for (const i of await this.getFriendArray(data))
       data.bot.fl.set(i.user_id, i)
     return data.bot.fl
   }
@@ -164,11 +164,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGroupArray(data) {
     const array = (await data.bot.sendApi("get_group_list")).data
-    try { for (const guild of (await this.getGuildArray(data)))
-      for (const channel of (await this.getGuildChannelArray({
+    try { for (const guild of await this.getGuildArray(data) || [])
+      for (const channel of await this.getGuildChannelArray({
         ...data,
         guild_id: guild.guild_id,
-      })))
+      }) || [])
         array.push({
           guild,
           channel,
@@ -183,13 +183,13 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGroupList(data) {
     const array = []
-    for (const { group_id } of (await this.getGroupArray(data)))
+    for (const { group_id } of await this.getGroupArray(data))
       array.push(group_id)
     return array
   }
 
   async getGroupMap(data) {
-    for (const i of (await this.getGroupArray(data)))
+    for (const i of await this.getGroupArray(data))
       data.bot.gl.set(i.group_id, i)
     return data.bot.gl
   }
@@ -208,14 +208,14 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getMemberList(data) {
     const array = []
-    for (const { user_id } of (await this.getMemberArray(data)))
+    for (const { user_id } of await this.getMemberArray(data))
       array.push(user_id)
     return array
   }
 
   async getMemberMap(data) {
     const map = new Map
-    for (const i of (await this.getMemberArray(data)))
+    for (const i of await this.getMemberArray(data))
       map.set(i.user_id, i)
     return map
   }
@@ -245,7 +245,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGuildChannelMap(data) {
     const map = new Map
-    for (const i of (await this.getGuildChannelArray(data)))
+    for (const i of await this.getGuildChannelArray(data))
       map.set(i.channel_id, i)
     return map
   }
@@ -272,14 +272,14 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGuildMemberList(data) {
     const array = []
-    for (const { user_id } of (await this.getGuildMemberArray(data)))
+    for (const { user_id } of await this.getGuildMemberArray(data))
       array.push(user_id)
     return array.push
   }
 
   async getGuildMemberMap(data) {
     const map = new Map
-    for (const i of (await this.getGuildMemberArray(data)))
+    for (const i of await this.getGuildMemberArray(data))
       map.set(i.user_id, i)
     return map
   }
@@ -288,6 +288,14 @@ Bot.adapter.push(new class gocqhttpAdapter {
     return data.bot.sendApi("get_guild_member_profile", {
       guild_id: data.guild_id,
       user_id: data.user_id,
+    })
+  }
+
+  sendLike(data, times) {
+    Bot.makeLog("info", `点赞：${times}次`, `${data.self_id} => ${data.user_id}`)
+    return data.bot.sendApi("send_like", {
+      user_id: data.user_id,
+      times,
     })
   }
 
@@ -482,6 +490,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       sendFile: (file, name) => this.sendFriendFile(i, file, name),
       getInfo: () => this.getFriendInfo(i),
       getAvatarUrl: () => `https://q1.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
+      thumbUp: times => this.sendLike(i, times),
     }
   }
 
@@ -630,12 +639,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
       ...(await data.bot.sendApi("get_version_info")).data,
       id: this.id,
       name: this.name,
+      get version() {
+        return this.app_full_name || `${this.app_name} v${this.app_version}`
+      },
     }
 
     data.bot.getFriendMap()
     data.bot.getGroupMap()
 
-    Bot.makeLog("mark", `${this.name}(${this.id}) ${data.bot.version.app_full_name} 已连接`, data.self_id)
+    Bot.makeLog("mark", `${this.name}(${this.id}) ${data.bot.version.version} 已连接`, data.self_id)
     Bot.em(`connect.${data.self_id}`, data)
   }
 
@@ -864,10 +876,12 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   load() {
-    if (!Array.isArray(Bot.wsf[this.path]))
-      Bot.wsf[this.path] = []
-    Bot.wsf[this.path].push((ws, ...args) =>
-      ws.on("message", data => this.message(data, ws, ...args))
-    )
+    for (const i of [this.path, "go-cqhttp"]) {
+      if (!Array.isArray(Bot.wsf[i]))
+        Bot.wsf[i] = []
+      Bot.wsf[i].push((ws, ...args) =>
+        ws.on("message", data => this.message(data, ws, ...args))
+      )
+    }
   }
 })

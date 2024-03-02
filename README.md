@@ -2,7 +2,7 @@
 
 # TRSS-Yunzai
 
-Yunzai 应用端，支持多账号，支持协议端：go-cqhttp、ComWeChat、GSUIDCore、ICQQ、QQBot、QQ频道、微信、KOOK、Telegram、Discord、OPQBot
+Yunzai 应用端，支持多账号，支持协议端：OneBotv11、ComWeChat、GSUIDCore、ICQQ、QQBot、QQ频道、微信、KOOK、Telegram、Discord、OPQBot
 
 [![访问量](https://visitor-badge.glitch.me/badge?page_id=TimeRainStarSky.Yunzai&right_color=red&left_text=访%20问%20量)](https://github.com/TimeRainStarSky/Yunzai)
 [![Stars](https://img.shields.io/github/stars/TimeRainStarSky/Yunzai?color=yellow&label=收藏)](../../stargazers)
@@ -86,7 +86,27 @@ node app
 uin: 账号
 password: '密码'
 post-format: array
-universal: ws://localhost:2536/go-cqhttp
+universal: ws://localhost:2536/OneBotv11
+```
+
+</details>
+
+<details><summary>LLOneBot</summary>
+
+下载安装 [LLOneBot](https://github.com/LLOneBot/LLOneBot)，启用反向 WebSocket，添加地址：
+
+```
+ws://localhost:2536/OneBotv11
+```
+
+</details>
+
+<details><summary>Shamrock</summary>
+
+下载安装 [Shamrock](https://whitechi73.github.io/OpenShamrock)，启用被动 WebSocket，添加地址：
+
+```
+ws://localhost:2536/OneBotv11
 ```
 
 </details>
