@@ -78,6 +78,8 @@ node app
 
 5.启动协议端：
 
+<details><summary>OneBotv11</summary>
+
 <details><summary>go-cqhttp</summary>
 
 下载运行 [go-cqhttp](https://docs.go-cqhttp.org)，选择反向 WebSocket，修改 `config.yml`，以下为必改项：
@@ -108,6 +110,26 @@ ws://localhost:2536/OneBotv11
 ```
 ws://localhost:2536/OneBotv11
 ```
+
+</details>
+
+<details><summary>Lagrange</summary>
+
+下载运行 [Lagrange.OneBot](https://lagrangedev.github.io/Lagrange.Doc/Lagrange.OneBot)，修改 `appsettings.json` 中 `Implementations`：
+
+```json
+{
+  "Type": "ReverseWebSocket",
+  "Host": "localhost",
+  "Port": 2536,
+  "Suffix": "/OneBotv11",
+  "ReconnectInterval": 5000,
+  "HeartBeatInterval": 5000,
+  "AccessToken": ""
+}
+```
+
+</details>
 
 </details>
 

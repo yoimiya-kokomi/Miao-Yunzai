@@ -43,6 +43,12 @@ Bot.adapter.push(new class gocqhttpAdapter {
         i = { type: i.type, data: { ...i, type: undefined }}
 
       switch (i.type) {
+        case "at":
+          i.data.qq = String(i.data.qq)
+          break
+        case "reply":
+          i.data.id = String(i.data.id)
+          break
         case "button":
           continue
         case "node":
@@ -140,7 +146,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async getFriendArray(data) {
-    return (await data.bot.sendApi("get_friend_list")).data
+    return (await data.bot.sendApi("get_friend_list")).data || []
   }
 
   async getFriendList(data) {
@@ -151,9 +157,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async getFriendMap(data) {
+    const map = new Map
     for (const i of await this.getFriendArray(data))
-      data.bot.fl.set(i.user_id, i)
-    return data.bot.fl
+      map.set(i.user_id, i)
+    data.bot.fl = map
+    return map
   }
 
   getFriendInfo(data) {
@@ -164,11 +172,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
   async getGroupArray(data) {
     const array = (await data.bot.sendApi("get_group_list")).data
-    try { for (const guild of await this.getGuildArray(data) || [])
+    try { for (const guild of await this.getGuildArray(data))
       for (const channel of await this.getGuildChannelArray({
         ...data,
         guild_id: guild.guild_id,
-      }) || [])
+      }))
         array.push({
           guild,
           channel,
@@ -189,9 +197,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async getGroupMap(data) {
+    const map = new Map
     for (const i of await this.getGroupArray(data))
-      data.bot.gl.set(i.group_id, i)
-    return data.bot.gl
+      map.set(i.group_id, i)
+    data.bot.gl = map
+    return map
   }
 
   getGroupInfo(data) {
@@ -203,7 +213,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   async getMemberArray(data) {
     return (await data.bot.sendApi("get_group_member_list", {
       group_id: data.group_id,
-    })).data
+    })).data || []
   }
 
   async getMemberList(data) {
@@ -217,7 +227,15 @@ Bot.adapter.push(new class gocqhttpAdapter {
     const map = new Map
     for (const i of await this.getMemberArray(data))
       map.set(i.user_id, i)
+    data.bot.gml.set(data.group_id, map)
     return map
+  }
+
+  async getGroupMemberMap(data) {
+    for (const [group_id, group] of await this.getGroupMap(data)) {
+      if (group.guild) continue
+      await this.getMemberMap({ ...data, group_id })
+    }
   }
 
   getMemberInfo(data) {
@@ -228,7 +246,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   }
 
   async getGuildArray(data) {
-    return (await data.bot.sendApi("get_guild_list")).data
+    return (await data.bot.sendApi("get_guild_list")).data || []
   }
 
   getGuildInfo(data) {
@@ -240,7 +258,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
   async getGuildChannelArray(data) {
     return (await data.bot.sendApi("get_guild_channel_list", {
       guild_id: data.guild_id,
-    })).data
+    })).data || []
   }
 
   async getGuildChannelMap(data) {
@@ -258,6 +276,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         guild_id: data.guild_id,
         next_token,
       })).data
+      if (!list) break
 
       for (const i of list.members)
         array.push({
@@ -281,6 +300,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     const map = new Map
     for (const i of await this.getGuildMemberArray(data))
       map.set(i.user_id, i)
+    data.bot.gml.set(data.group_id, map)
     return map
   }
 
@@ -614,6 +634,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
       getGroupArray: () => this.getGroupArray(data),
       getGroupList: () => this.getGroupList(data),
       getGroupMap: () => this.getGroupMap(data),
+      getGroupMemberMap: () => this.getGroupMemberMap(data),
       gl: new Map,
       gml: new Map,
 
@@ -645,7 +666,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     }
 
     data.bot.getFriendMap()
-    data.bot.getGroupMap()
+    data.bot.getGroupMemberMap()
 
     Bot.makeLog("mark", `${this.name}(${this.id}) ${data.bot.version.version} 已连接`, data.self_id)
     Bot.em(`connect.${data.self_id}`, data)
@@ -658,13 +679,20 @@ Bot.adapter.push(new class gocqhttpAdapter {
     data.message = message
 
     switch (data.message_type) {
-      case "private":
-        Bot.makeLog("info", `好友消息：[${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
+      case "private": {
+        const name = data.sender.card || data.sender.nickname || data.bot.fl.get(data.user_id)?.nickname
+        Bot.makeLog("info", `好友消息：${name ? `[${name}] ` : ""}${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
         break
-      case "group":
-        Bot.makeLog("info", `群消息：[${data.sender.card||data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+      } case "group": {
+        const group_name = data.group_name || data.bot.gl.get(data.group_id)?.group_name
+        let user_name = data.sender.card || data.sender.nickname
+        if (!user_name) {
+          const user = data.bot.gml.get(data.group_id)?.get(data.user_id) || data.bot.fl.get(data.user_id)
+          if (user) user_name = user?.card || user?.nickname
+        }
+        Bot.makeLog("info", `群消息：${user_name ? `[${group_name ? `${group_name}, ` : ""}${user_name}] ` : ""}${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         break
-      case "guild":
+      } case "guild":
         data.message_type = "group"
         data.group_id = `${data.guild_id}-${data.channel_id}`
         Bot.makeLog("info", `频道消息：[${data.sender.nickname}] ${JSON.stringify(data.message)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
@@ -688,12 +716,16 @@ Bot.adapter.push(new class gocqhttpAdapter {
       case "group_increase":
         Bot.makeLog("info", `群成员增加：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`)
         if (data.user_id == data.self_id)
-          data.bot.getGroupMap()
+          data.bot.getGroupMemberMap()
+        else
+          data.bot.pickGroup(data.group_id).getMemberMap()
         break
       case "group_decrease":
         Bot.makeLog("info", `群成员减少：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`)
         if (data.user_id == data.self_id)
-          data.bot.getGroupMap()
+          data.bot.getGroupMemberMap()
+        else
+          data.bot.pickGroup(data.group_id).getMemberMap()
         break
       case "group_admin":
         Bot.makeLog("info", `群管理员变动：${data.sub_type}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
