@@ -15,15 +15,14 @@ export class quit extends plugin {
     const other = cfg.other
     if (!other.autoQuit) return false
 
-    /** 判断主人，主人邀请不退群 */
-    if (this.e.group.getMemberMap) {
-      const gl = await this.e.group.getMemberMap()
-      for (const qq of cfg.masterQQ) {
-        if (gl.has(Number(qq) || String(qq))) {
+    /** 判断主人邀请不退群 */
+    if (this.e.bot.gml instanceof Map) {
+      const gml = this.e.bot.gml.get(this.e.group_id)
+      if (gml instanceof Map) for (const qq of cfg.masterQQ)
+        if (gml.has(Number(qq) || String(qq))) {
           logger.mark(`[主人拉群] ${this.e.group_id}`)
           return false
         }
-      }
     }
 
     /** 自动退群 */

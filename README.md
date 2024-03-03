@@ -36,37 +36,36 @@ Yunzai 应用端，支持多账号，支持协议端：OneBotv11、ComWeChat、G
 
 ### 手动安装
 
-> 环境准备： Windows or Linux，Node.js（ [版本至少 v18 以上](http://nodejs.cn/download) ）， [Redis](https://redis.io/docs/getting-started/installation)
+> 环境准备： Windows or Linux，[Node.js(>=v18)](http://nodejs.cn/download)，[Redis](https://redis.io/docs/getting-started/installation)
 
-1.克隆项目并安装 genshin miao-plugin TRSS-Plugin(可选)
+1. Git Clone 项目
 
 请根据网络情况选择使用 GitHub 或 Gitee 安装
 
 ```sh
 git clone --depth 1 https://github.com/TimeRainStarSky/Yunzai
+git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai
 cd Yunzai
+```
+
+2. 推荐安装插件(可选)
+
+```sh
 git clone --depth 1 https://github.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
 git clone --depth 1 https://github.com/yoimiya-kokomi/miao-plugin plugins/miao-plugin
 git clone --depth 1 https://github.com/TimeRainStarSky/TRSS-Plugin plugins/TRSS-Plugin
 ```
 
 ```sh
-git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai
-cd Yunzai
 git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
 git clone --depth 1 https://gitee.com/yoimiya-kokomi/miao-plugin plugins/miao-plugin
 git clone --depth 1 https://Yunzai.TRSS.me plugins/TRSS-Plugin
 ```
 
-2.安装 [pnpm](https://pnpm.io/zh/installation)
+3. 安装 [pnpm](https://pnpm.io/zh/installation) 和依赖
 
 ```sh
-npm install -g pnpm
-```
-
-3.安装依赖
-
-```sh
+npm i -g pnpm
 pnpm i
 ```
 
@@ -77,6 +76,8 @@ node app
 ```
 
 5.启动协议端：
+
+<details><summary>WebSocket</summary>
 
 <details><summary>OneBotv11</summary>
 
@@ -154,48 +155,6 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
-<details><summary>ICQQ</summary>
-
-[TRSS-Yunzai ICQQ Plugin](../../../Yunzai-ICQQ-Plugin)
-
-</details>
-
-<details><summary>QQBot</summary>
-
-[TRSS-Yunzai QQBot Plugin](../../../Yunzai-QQBot-Plugin)
-
-</details>
-
-<details><summary>微信</summary>
-
-[TRSS-Yunzai WeChat Plugin](../../../Yunzai-WeChat-Plugin)
-
-</details>
-
-<details><summary>米游社大别野</summary>
-
-[TRSS-Yunzai mysVilla Plugin](../../../Yunzai-mysVilla-Plugin)
-
-</details>
-
-<details><summary>KOOK</summary>
-
-[TRSS-Yunzai KOOK Plugin](../../../Yunzai-KOOK-Plugin)
-
-</details>
-
-<details><summary>Telegram</summary>
-
-[TRSS-Yunzai Telegram Plugin](../../../Yunzai-Telegram-Plugin)
-
-</details>
-
-<details><summary>Discord</summary>
-
-[TRSS-Yunzai Discord Plugin](../../../Yunzai-Discord-Plugin)
-
-</details>
-
 <details><summary>OPQBot</summary>
 
 下载运行 [OPQBot](https://opqbot.com)，启动参数添加：
@@ -206,9 +165,17 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
-<details><summary>路由</summary>
+</details>
 
-[TRSS-Yunzai Route Plugin](../../../Yunzai-Route-Plugin)
+<details><summary>插件</summary>
+
+- [ICQQ](../../../Yunzai-ICQQ-Plugin)
+- [QQBot](../../../Yunzai-QQBot-Plugin)
+- [WeChat](../../../Yunzai-WeChat-Plugin)
+- [KOOK](../../../Yunzai-KOOK-Plugin)
+- [Telegram](../../../Yunzai-Telegram-Plugin)
+- [Discord](../../../Yunzai-Discord-Plugin)
+- [Route](../../../Yunzai-Route-Plugin)
 
 </details>
 
