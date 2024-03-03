@@ -1,0 +1,7 @@
+apps:
+  - name: TRSS-Yunzai
+    script: ./app.js
+    max_memory_restart: 512M
+    restart_delay: 60000
+    env:
+      app_type: pm2

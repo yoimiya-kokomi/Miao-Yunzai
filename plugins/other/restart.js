@@ -1,4 +1,5 @@
 import cfg from "../../lib/config/config.js"
+import { spawn } from "child_process"
 
 export class Restart extends plugin {
   constructor (e = "") {
@@ -63,8 +64,6 @@ export class Restart extends plugin {
 
   async restart() {
     await this.e.reply(`开始重启，本次运行时长：${Bot.getTimeDiff()}`)
-    logger.mark(`${this.e.logFnc} 开始重启，本次运行时长：${Bot.getTimeDiff()}`)
-
     await redis.set(this.key, JSON.stringify({
       isGroup: !!this.e.isGroup,
       id: this.e.isGroup ? this.e.group_id : this.e.user_id,
@@ -73,31 +72,17 @@ export class Restart extends plugin {
       time: Date.now(),
     }))
 
-    try {
-      let cm = "pnpm start"
-      if (process.argv[1].includes("pm2"))
-        cm = "pnpm run restart"
-
-      const ret = await Bot.exec(cm)
-      if (ret.error) {
-        redis.del(this.key)
-        await this.e.reply(`重启错误\n${ret.error}`)
-        logger.error("重启错误", ret)
-      } else {
-        logger.mark("重启成功，运行已由前台转为后台")
-        logger.mark("查看日志请用命令：pnpm run log")
-        logger.mark("停止后台运行命令：pnpm stop")
-        process.exit()
-      }
-    } catch (error) {
-      redis.del(this.key)
-      await this.e.reply(`重启错误\n${error}`)
-      logger.error("重启错误", error)
+    if (process.env.app_type == "pm2") {
+      const ret = await Bot.exec("pnpm run restart")
+      if (!ret.error) process.exit()
+      await this.e.reply(`重启错误\n${ret.error}`)
+      Bot.makeLog("error", ["重启错误", ret])
     }
-    return true
+    process.exit()
   }
 
   async stop() {
+    await this.e.reply(`开始关机，本次运行时长：${Bot.getTimeDiff()}`)
     await redis.set(this.key, JSON.stringify({
       isStop: true,
       isGroup: !!this.e.isGroup,
@@ -107,13 +92,11 @@ export class Restart extends plugin {
       time: Date.now(),
     }))
 
-    await this.e.reply(`关机成功，本次运行时长：${Bot.getTimeDiff()}`)
-
-    if (!process.argv[1].includes("pm2"))
-      process.exit()
-
-    const ret = await Bot.exec("pnpm stop")
-    await this.e.reply(`关机错误\n${ret.error}\n${ret.stdout}\n${ret.stderr}`)
-    logger.error("关机错误", ret)
+    if (process.env.app_type == "pm2") {
+      const ret = await Bot.exec("pnpm stop")
+      await this.e.reply(`关机错误\n${ret.error}\n${ret.stdout}\n${ret.stderr}`)
+      Bot.makeLog("error", ["关机错误", ret])
+    }
+    process.exit(1)
   }
 }
