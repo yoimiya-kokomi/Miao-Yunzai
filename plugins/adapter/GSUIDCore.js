@@ -151,6 +151,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   pickMember(id, group_id, user_id) {
     const i = {
       ...Bot[id].fl.get(user_id),
+      ...Bot[id].gml.get(group_id)?.get(user_id),
       self_id: id,
       bot: Bot[id],
       group_id: group_id,
@@ -182,8 +183,8 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       ws: ws,
       get sendApi() { return this.ws.sendMsg },
       uin: data.self_id,
-      bot_id: data.bot_id,
-      bot_self_id: data.bot_self_id,
+      bot_id: data.raw.bot_id,
+      bot_self_id: data.raw.bot_self_id,
       stat: { start_time: Date.now()/1000 },
       version: {
         id: this.id,
@@ -197,21 +198,33 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       gl: new Map,
       gml: new Map,
     }
+    data.bot = Bot[data.self_id]
 
     Bot.makeLog("mark", `${this.name}(${this.id}) 已连接`, data.self_id)
     Bot.em(`connect.${data.self_id}`, data)
   }
 
-  message(data, ws) {
+  message(raw, ws) {
     try {
-      const raw = Bot.String(data)
-      data = JSON.parse(data)
-      data.raw = raw
+      raw = JSON.parse(Bot.String(data))
     } catch (err) {
       return Bot.makeLog("error", ["解码数据失败", data, err])
     }
 
-    data.self_id = data.bot_self_id
+    const data = {
+      raw,
+      self_id: raw.bot_self_id,
+      post_type: "message",
+      message_id: raw.msg_id,
+      get user_id() { return this.sender.user_id },
+      sender: {
+        user_id: raw.user_id,
+        user_pm: raw.user_pm,
+      },
+      message: [],
+      raw_message: "",
+    }
+
     if (Bot[data.self_id]) {
       data.bot = Bot[data.self_id]
       data.bot.ws = ws
@@ -219,18 +232,9 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       this.makeBot(data, ws)
     }
 
-    data.post_type = "message"
-    data.message_id = data.msg_id
-    data.user_id = data.user_id
-    data.sender = {
-      user_id: data.user_id,
-      user_pm: data.user_pm,
-    }
     if (!data.bot.fl.has(data.user_id))
       data.bot.fl.set(data.user_id, data.sender)
 
-    data.message = []
-    data.raw_message = ""
     for (const i of data.content) {
       switch (i.type) {
         case "text":
@@ -269,8 +273,17 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     } else {
       data.message_type = "group"
       data.group_id = `${data.user_type}-${data.group_id}`
+
       if (!data.bot.gl.has(data.group_id))
         data.bot.gl.set(data.group_id, { group_id: data.group_id })
+      let gml = data.bot.gml.get(data.group_id)
+      if (!gml) {
+        gml = new Map
+        data.bot.gml.set(data.group_id, gml)
+      }
+      if (!gml.has(data.user_id))
+        gml.set(data.user_id, data.sender)
+
       Bot.makeLog("info", `群消息：${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
     }
 
