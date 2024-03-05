@@ -6,7 +6,7 @@ switch (process.env.app_type || process.argv[2]) {
     break
   } case "stop": {
     const cfg = (await import("./lib/config/config.js")).default
-    const fetch = (await "node-fetch").default
+    const fetch = (await import("node-fetch")).default
     try {
       await fetch(`http://localhost:${cfg.bot.port}/exit`)
     } catch (err) {}

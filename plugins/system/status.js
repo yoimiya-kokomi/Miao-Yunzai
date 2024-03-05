@@ -14,8 +14,6 @@ export class status extends plugin {
         }
       ]
     })
-
-    this.key = "Yz:count:"
   }
 
   async status() {
@@ -115,10 +113,12 @@ export class status extends plugin {
     if (cmd["群"])
       array.push({ text: "群", key: `group`, id: cmd["群"] })
     if (!array.length) {
-      array.push({ text: msg, key: "total" })
+      array.push(
+        { text: msg, key: "total" },
+        { type: "keys", text: "用户量", key: "user:*" },
+        { type: "keys", text: "群量", key: "group:*" },
+      )
       msg = ""
-      array.push({ type: "keys", text: "用户量", key: "user:*" })
-      array.push({ type: "keys", text: "群量", key: "group:*" })
       if (this.e.self_id)
         array.push({ text: "机器人", key: `bot`, id: this.e.self_id })
       if (this.e.user_id)
@@ -150,12 +150,22 @@ export class status extends plugin {
   async redis(type, key) {
     const ret = {}
     for (const i of ["receive", "send"]) {
-      const k = `${this.key}${i}${key}`
+      const k = `Yz:count:${i}${key}`
       if (type == "keys")
-        ret[i] = (await redis.keys(k)).length || 0
+        ret[i] = await this.redisKeysLength(k) || 0
       else
         ret[i] = await redis.get(k) || 0
     }
     return ret
+  }
+
+  async redisKeysLength(MATCH) {
+    let cursor = 0, length = 0
+    do {
+      const reply = await redis.scan(cursor, { MATCH, COUNT: 10000 })
+      cursor = reply.cursor
+      length += reply.keys.length
+    } while (cursor != 0)
+    return length
   }
 }

@@ -76,7 +76,7 @@ pnpm i
 | 启动 | node . |
 | 停止 | node . stop |
 
-5. 启动协议端：
+5. 启动协议端
 
 <details><summary>WebSocket</summary>
 
@@ -180,7 +180,7 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
-6. 设置主人：发送 `#设置主人`，后台日志获取验证码并发送
+6. 设置主人：发送 `#设置主人`，日志获取验证码并发送
 
 7. 使用 [pm2](https://pm2.keymetrics.io) 后台运行
 
