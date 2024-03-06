@@ -9,14 +9,12 @@ export class quit extends plugin {
   }
 
   async accept() {
-    if (this.e.user_id != this.e.self_id) return false
-    if (!this.e.group?.quit) return false
+    if (this.e.user_id != this.e.self_id || !this.e.group?.quit || !this.e.group.getMemberMap) return false
 
     const other = cfg.other
     if (!other.autoQuit) return false
 
-    if (!this.e.bot.gml instanceof Map) return false
-    const gml = this.e.bot.gml.get(this.e.group_id)
+    const gml = await this.e.group.getMemberMap()
     if (!gml instanceof Map) return false
 
     /** 判断主人邀请不退群 */
