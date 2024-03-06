@@ -78,64 +78,64 @@ pnpm i
 
 5. 启动协议端
 
-<details><summary>WebSocket</summary>
+<details><summary>WebSocket</summary><blockquote>
 
-<details><summary>OneBotv11</summary>
+<details><summary>OneBotv11</summary><blockquote>
 
-<details><summary>go-cqhttp</summary>
+<details><summary>go-cqhttp</summary><blockquote>
 
-下载运行 [go-cqhttp](https://docs.go-cqhttp.org)，选择反向 WebSocket，修改 `config.yml`，以下为必改项：
+  下载运行 [go-cqhttp](https://docs.go-cqhttp.org)，选择反向 WebSocket，修改 `config.yml`，以下为必改项：
 
-```yaml
-uin: 账号
-password: '密码'
-post-format: array
-universal: ws://localhost:2536/OneBotv11
-```
+  ```yaml
+  uin: 账号
+  password: '密码'
+  post-format: array
+  universal: ws://localhost:2536/OneBotv11
+  ```
 
-</details>
+</blockquote></details>
 
-<details><summary>LLOneBot</summary>
+<details><summary>LLOneBot</summary><blockquote>
 
-下载安装 [LLOneBot](https://github.com/LLOneBot/LLOneBot)，启用反向 WebSocket，添加地址：
+  下载安装 [LLOneBot](https://github.com/LLOneBot/LLOneBot)，启用反向 WebSocket，添加地址：
 
-```
-ws://localhost:2536/OneBotv11
-```
+  ```
+  ws://localhost:2536/OneBotv11
+  ```
 
-</details>
+</blockquote></details>
 
-<details><summary>Shamrock</summary>
+<details><summary>Shamrock</summary><blockquote>
 
-下载安装 [Shamrock](https://whitechi73.github.io/OpenShamrock)，启用被动 WebSocket，添加地址：
+  下载安装 [Shamrock](https://whitechi73.github.io/OpenShamrock)，启用被动 WebSocket，添加地址：
 
-```
-ws://localhost:2536/OneBotv11
-```
+  ```
+  ws://localhost:2536/OneBotv11
+  ```
 
-</details>
+</blockquote></details>
 
-<details><summary>Lagrange</summary>
+<details><summary>Lagrange</summary><blockquote>
 
-下载运行 [Lagrange.OneBot](https://lagrangedev.github.io/Lagrange.Doc/Lagrange.OneBot)，修改 `appsettings.json` 中 `Implementations`：
+  下载运行 [Lagrange.OneBot](https://lagrangedev.github.io/Lagrange.Doc/Lagrange.OneBot)，修改 `appsettings.json` 中 `Implementations`：
 
-```json
-{
-  "Type": "ReverseWebSocket",
-  "Host": "localhost",
-  "Port": 2536,
-  "Suffix": "/OneBotv11",
-  "ReconnectInterval": 5000,
-  "HeartBeatInterval": 5000,
-  "AccessToken": ""
-}
-```
+  ```json
+  {
+    "Type": "ReverseWebSocket",
+    "Host": "localhost",
+    "Port": 2536,
+    "Suffix": "/OneBotv11",
+    "ReconnectInterval": 5000,
+    "HeartBeatInterval": 5000,
+    "AccessToken": ""
+  }
+  ```
 
-</details>
+</blockquote></details>
 
-</details>
+</blockquote></details>
 
-<details><summary>ComWeChat</summary>
+<details><summary>ComWeChat</summary><blockquote>
 
 下载运行 [ComWeChat](https://justundertaker.github.io/ComWeChatBotClient)，修改 `.env`，以下为必改项：
 
@@ -144,9 +144,9 @@ websocekt_type = "Backward"
 websocket_url = ["ws://localhost:2536/ComWeChat"]
 ```
 
-</details>
+<blockquote></details>
 
-<details><summary>GSUIDCore</summary>
+<details><summary>GSUIDCore</summary><blockquote>
 
 下载运行 [GenshinUID 插件](http://docs.gsuid.gbots.work/#/AdapterList)，GSUIDCore 连接地址 修改为：
 
@@ -154,9 +154,9 @@ websocket_url = ["ws://localhost:2536/ComWeChat"]
 ws://localhost:2536/GSUIDCore
 ```
 
-</details>
+<blockquote></details>
 
-<details><summary>OPQBot</summary>
+<details><summary>OPQBot</summary><blockquote>
 
 下载运行 [OPQBot](https://opqbot.com)，启动参数添加：
 
@@ -164,9 +164,9 @@ ws://localhost:2536/GSUIDCore
 -wsserver ws://localhost:2536/OPQBot
 ```
 
-</details>
+</blockquote></details>
 
-</details>
+</blockquote></details>
 
 <details><summary>插件</summary>
 
