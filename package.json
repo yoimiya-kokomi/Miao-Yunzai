@@ -37,7 +37,7 @@
     "sequelize": "^6.37.1",
     "sqlite3": "5.1.6",
     "ws": "^8.16.0",
-    "yaml": "^2.4.0"
+    "yaml": "^2.4.1"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
