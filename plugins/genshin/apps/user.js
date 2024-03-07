@@ -42,7 +42,7 @@ export class user extends plugin {
           fnc: 'delUid'
         },
         {
-          reg: '^#(原神|星铁)?绑定(uid|UID)?\\s*([1-9]|18)[0-9]{8}$',
+          reg: '^#(原神|星铁)?绑定(uid|UID)?(\\s|\\+)*([1-9]|18)[0-9]{8}$',
           fnc: 'bingUid'
         },
         {
