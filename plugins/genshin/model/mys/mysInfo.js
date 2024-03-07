@@ -355,7 +355,7 @@ export default class MysInfo {
 
   async checkCode(res, type, mysApi = {}, data = {}, isTask = false) {
     if (!res) {
-      if (!isTask) this.e.reply(['米游社接口请求失败，暂时无法查询', this.mysButton])
+      if (!isTask) this.e.reply([`UID:${this.uid}，米游社接口请求失败，暂时无法查询`, this.mysButton])
       return false
     }
 
@@ -380,27 +380,27 @@ export default class MysInfo {
             if (!isTask) this.e.reply([`UID:${this.ckInfo.uid}，米游社Cookie已失效`, this.mysButton])
           } else {
             logger.mark(`[公共ck失效][ltuid:${this.ckInfo.ltuid}]`)
-            if (!isTask) this.e.reply(['米游社查询失败，请稍后再试', this.mysButton])
+            if (!isTask) this.e.reply([`UID:${this.uid}，米游社查询失败，请稍后再试`, this.mysButton])
           }
           if (!isTask) await this.delCk()
         } else {
-          if (!isTask) this.e.reply([`米游社接口报错，暂时无法查询：${res.message}`, this.mysButton])
+          if (!isTask) this.e.reply([`UID:${this.uid}，米游社接口报错，暂时无法查询：${res.message}`, this.mysButton])
         }
         break
       case 1008:
-        if (!isTask) this.e.reply(['请先去米游社绑定角色', this.mysButton], false, { at: this.userId })
+        if (!isTask) this.e.reply([`UID:${this.uid}，请先去米游社绑定角色`, this.mysButton], false, { at: this.userId })
         break
       case 10101:
         if (!isTask) {
           await this.disableToday()
-          this.e.reply(['查询已达今日上限', this.mysButton])
+          this.e.reply([`UID:${this.uid}，查询已达今日上限`, this.mysButton])
         }
         break
       case 10102:
         if (res.message === 'Data is not public for the user') {
           if (!isTask) this.e.reply([`\nUID:${this.uid}，米游社数据未公开`, this.mysButton], false, { at: this.userId })
         } else {
-          if (!isTask) this.e.reply([`uid:${this.uid}，请先去米游社绑定角色`, this.mysButton])
+          if (!isTask) this.e.reply([`UID:${this.uid}，请先去米游社绑定角色`, this.mysButton])
         }
         break
       // 伙伴不存在~
@@ -408,7 +408,7 @@ export default class MysInfo {
         if (res.api === 'detail') res.retcode = 0
         break
       case 5003:
-        if (!isTask) this.e.reply(['米游社账号异常，暂时无法查询', this.mysButton])
+        if (!isTask) this.e.reply([`UID:${this.uid}，米游社账号异常，暂时无法查询`, this.mysButton])
         break
       case 1034:
         let handler = this.e.runtime?.handler || {}
@@ -421,14 +421,14 @@ export default class MysInfo {
 
         if (!res || res?.retcode == 1034) {
           logger.mark(`[米游社查询失败][uid:${this.uid}][qq:${this.userId}] 遇到验证码`)
-          if (!isTask) this.e.reply(['米游社查询遇到验证码，请稍后再试', this.mysButton])
+          if (!isTask) this.e.reply([`UID:${this.uid}，米游社查询遇到验证码，请稍后再试`, this.mysButton])
         }
         break
       case 10307:
-        if (!isTask) this.e.reply(['版本更新期间，数据维护中', this.mysButton])
+        if (!isTask) this.e.reply([`UID:${this.uid}，版本更新期间，数据维护中`, this.mysButton])
         break
       default:
-        if (!isTask) this.e.reply([`米游社接口报错，暂时无法查询：${res.message || 'error'}`, this.mysButton])
+        if (!isTask) this.e.reply([`UID:${this.uid}，米游社接口报错，暂时无法查询：${res.message || 'error'}`, this.mysButton])
         break
     }
     if (res.retcode !== 0) {

@@ -42,7 +42,7 @@ export class user extends plugin {
           fnc: 'delUid'
         },
         {
-          reg: '^#(原神|星铁)?绑定(uid|UID)?\\s*([1-9]|18)[0-9]{8}$',
+          reg: '^#(原神|星铁)?绑定(uid|UID)?(\\s|\\+)*([1-9]|18)[0-9]{8}$',
           fnc: 'bingUid'
         },
         {
@@ -85,13 +85,13 @@ export class user extends plugin {
       return true
     }
 
-    if (this.e.msg == "#绑定uid" || this.e.msg == "#绑定UID") {
+    if (/^#?(原神)?绑定uid$/i.test(this.e.msg)) {
       this.setContext("saveUid")
       this.reply("请发送绑定的原神uid", false, { at: true })
       return true
     }
 
-    if (this.e.msg == "#星铁绑定uid" || this.e.msg == "#星铁绑定UID") {
+    if (/^#?星铁绑定uid$/i.test(this.e.msg)) {
       this.setContext("saveSrUid")
       this.reply("请发送绑定的星铁uid", false, { at: true })
       return true
