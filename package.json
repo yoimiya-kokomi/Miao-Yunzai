@@ -32,7 +32,7 @@
     "node-schedule": "^2.1.1",
     "oicq": "*",
     "pm2": "^5.3.1",
-    "puppeteer": "*",
+    "puppeteer": "21.11.0",
     "redis": "^4.6.13",
     "sequelize": "^6.37.1",
     "sqlite3": "5.1.6",
