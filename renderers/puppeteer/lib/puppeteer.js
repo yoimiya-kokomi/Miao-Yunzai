@@ -110,15 +110,7 @@ export default class Puppeteer extends Renderer {
     }
 
     /** 监听Chromium实例是否断开 */
-    this.browser.on("disconnected", async () => {
-      logger.info("puppeteer Chromium 实例关闭")
-      try {
-        await this.browser.close()
-      } catch (err) {
-        logger.error("puppeteer Chromium 关闭错误", err)
-      }
-      this.browser = false
-    })
+    this.browser.on("disconnected", () => this.restart(true))
 
     return this.browser
   }
@@ -286,16 +278,19 @@ export default class Puppeteer extends Renderer {
   /** 重启 */
   restart(force = false) {
     /** 截图超过重启数时，自动关闭重启浏览器，避免生成速度越来越慢 */
-    if (!this.browser) return
+    if (!this.browser?.close || this.lock) return
     if (!force) if (this.renderNum % this.restartNum !== 0 || this.shoting.length > 0) return
-    setTimeout(async () => {
-      logger.info(`puppeteer Chromium ${force ? "强制" : ""}关闭重启...`)
-      try {
-        await this.browser.close()
-      } catch (err) {
-        logger.error("puppeteer Chromium 关闭错误", err)
-      }
-      this.browser = false
-    }, 100)
+    logger.info(`puppeteer Chromium ${force ? "强制" : ""}关闭重启...`)
+    this.stop(this.browser)
+    this.browser = false
+    return this.browserInit()
+  }
+
+  async stop(browser) {
+    try {
+      await browser.close()
+    } catch (err) {
+      logger.error("puppeteer Chromium 关闭错误", err)
+    }
   }
 }
