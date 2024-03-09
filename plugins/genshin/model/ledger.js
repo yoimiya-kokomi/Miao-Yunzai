@@ -133,7 +133,7 @@ export default class Ledger extends base {
     ledgerInfo.color = JSON.stringify(ledgerInfo.color)
 
     let icon = ''
-    if(this.e.isSr)
+    if (this.e.isSr)
       icon = lodash.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/StarRail/img/role`).filter(file => file.endsWith('.webp')))
 
     let week = [
@@ -149,7 +149,7 @@ export default class Ledger extends base {
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
-      day, icon, 
+      day, icon,
       srday: `${week[moment().day()]}`,
       nowDay: moment(new Date()).format('YYYY年MM月DD日'),
       ...ledgerInfo,
@@ -247,7 +247,9 @@ export default class Ledger extends base {
 
     for (let uid of uids) {
       let ck = cks[uid]
-      this.e.user_id = ck.qq
+      let newObj = Object.create(this.e)
+      newObj.user_id = ck.qq
+      this.e = newObj
 
       await this.saveLedger(uid, ck, true)
       await common.sleep(500)
