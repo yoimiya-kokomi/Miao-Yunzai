@@ -218,6 +218,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       message_id: raw.msg_id,
       get user_id() { return this.sender.user_id },
       sender: {
+        ...raw.sender,
         user_id: raw.user_id,
         user_pm: raw.user_pm,
       },
@@ -235,7 +236,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     if (!data.bot.fl.has(data.user_id))
       data.bot.fl.set(data.user_id, data.sender)
 
-    for (const i of data.content) {
+    for (const i of raw.content) {
       switch (i.type) {
         case "text":
           data.message.push({ type: "text", text: i.data })
@@ -267,12 +268,12 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       }
     }
 
-    if (data.user_type == "direct") {
+    if (raw.user_type == "direct") {
       data.message_type = "private"
       Bot.makeLog("info", `好友消息：${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
     } else {
       data.message_type = "group"
-      data.group_id = `${data.user_type}-${data.group_id}`
+      data.group_id = `${raw.user_type}-${raw.group_id}`
 
       if (!data.bot.gl.has(data.group_id))
         data.bot.gl.set(data.group_id, { group_id: data.group_id })
