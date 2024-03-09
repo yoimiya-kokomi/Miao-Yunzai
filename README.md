@@ -198,9 +198,15 @@ pnpm pm2 save
 pnpm pm2 startup
 ```
 
+## 班级群(¿
+
+1. [用户(897643592)](https://qm.qq.com/q/7NxbviGbj)
+2. [开发者(833565573)](https://qm.qq.com/q/oFJR8VVECA)
+3. [机器人(907431599)](https://qm.qq.com/q/oCBOrfE29U)
+
 ## 致谢
 
-|                           Nickname                            | Contribution         |
-| :-----------------------------------------------------------: | -------------------- |
-|         [Yunzai-Bot](../../../../Le-niao/Yunzai-Bot)          | 乐神的 Yunzai-Bot    |
-|     [Miao-Yunzai](../../../../yoimiya-kokomi/Miao-Yunzai)     | 喵喵的 Miao-Yunzai   |
+| Nickname | Contribution |
+| -------- | ------------ |
+| [Yunzai-Bot](../../../../Le-niao/Yunzai-Bot) | 乐神的 Yunzai-Bot |
+| [Miao-Yunzai](../../../../yoimiya-kokomi/Miao-Yunzai) | 喵喵的 Miao-Yunzai |
