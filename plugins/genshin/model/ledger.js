@@ -245,9 +245,8 @@ export default class Ledger extends base {
       await this.e.reply(`${this.e?.isSr ? '开拓月历' : '札记'}ck：${uids.length}个\n预计需要：${this.countTime(uids.length)}\n完成时间：${finishTime}`)
     }
 
-    for (let uid of uids) {
-      let ck = cks[uid]
-      this.e.user_id = ck.qq
+    for (const uid of uids) {
+      const ck = cks[uid]
 
       await this.saveLedger(uid, ck, true)
       await common.sleep(500)
