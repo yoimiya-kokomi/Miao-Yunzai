@@ -162,9 +162,7 @@ export class abbrSet extends plugin {
       msg.push(`${num}.${list[i]}`)
     }
 
-    let title = `${role.name}别名，${list.length}个`
-
-    msg = await common.makeForwardMsg(this.e, [title, msg.join("\n")], title)
+    msg = await common.makeForwardMsg(this.e, [msg.join("\n")], `${role.name}别名，${list.length}个`)
 
     await this.e.reply(msg)
   }

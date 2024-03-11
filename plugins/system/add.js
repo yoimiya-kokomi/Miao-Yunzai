@@ -32,11 +32,15 @@ export class add extends plugin {
           log: false
         },
         {
+          reg: '^#+(全局)?(?:查看|查询)(?:表情|词条)(.+)$',
+          fnc: 'faceDetail'
+        },
+        {
           reg: '#(全局)?(表情|词条)(.*)',
           fnc: 'list'
-        }
-      ]
-    })
+        },
+      ],
+    });
 
     this.path = './data/textJson/'
     this.facePath = './data/face/'
@@ -85,6 +89,10 @@ export class add extends plugin {
 
     if (!this.keyWord) {
       this.e.reply('添加错误：没有关键词')
+      return
+    }
+    if (/uid/i.test(this.keyWord)) {
+      this.e.reply('请勿添加特殊关键词')
       return
     }
 
@@ -242,16 +250,23 @@ export class add extends plugin {
     this.finish('addContext')
 
     for (let i in message) {
-      if (message[i].type == 'at') {
+      if (message[i].type == "at") {
         if (message[i].qq == this.e.bot.uin) {
-          this.e.reply('添加内容不能@机器人！')
-          return
+          this.e.reply("添加内容不能@机器人！");
+          return;
         }
       }
-      if (message[i].type == 'file') {
-        this.e.reply('添加错误：禁止添加文件')
-        return
+      if (message[i].type == "file") {
+        this.e.reply("添加错误：禁止添加文件");
+        return;
       }
+
+      // 保存用户信息用于追溯添加者
+      message[i].from_user = {
+        card: this.e.sender.card,
+        nickname: this.e.sender.nickname,
+        user_id: this.e.sender.user_id,
+      };
     }
 
     if (message.length == 1 && message[0].type == 'image') {
@@ -408,8 +423,8 @@ export class add extends plugin {
     if (lodash.isEmpty(msg) && lodash.isEmpty(globalMsg)) return false
 
     msg = [...msg, ...globalMsg]
-
-    if (num >= 0 && num < msg.length) {
+    /** 如果只有一个则不随机 */
+    if (num >= 0 && msg.length === 1) {
       msg = msg[num]
     } else {
       /** 随机获取一个 */
@@ -705,37 +720,44 @@ export class add extends plugin {
       return
     }
 
-    let msg = []
-    let num = 0
+    let msg = [], result = [], num = 0
     for (let i in arr) {
       if (num >= page * pageSize) break
 
       let keyWord = await this.keyWordTran(arr[i].key)
       if (!keyWord) continue
-      let result = []
       if (Array.isArray(keyWord)) {
         keyWord.unshift(`${num + 1}、`)
-        keyWord.push('\n')
-        result.push(...keyWord)
+       // keyWord.push('\n')
+        keyWord.push(v => msg.push(v))
       } else if (keyWord.type) {
-        result.push(`\n${num + 1}、`, keyWord, '\n\n')
+        msg.push(`\n${num + 1}、`, keyWord)
       } else {
-        result.push(`${num + 1}、${keyWord}\n`)
+        msg.push(`${num + 1}、`, keyWord)
       }
-      msg.push(result)
       num++
     }
-
-    if (type == 'list' && count > 100) {
-      msg.push(`更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`)
+    /** 数组分段 */
+    for (const i in msg) {
+      result.push([msg[i]])
+    }
+    /** 计算页数 */
+    let book = count / pageSize;
+  if (book % 1 === 0) {
+     book = result;
+  } else {
+    book = Math.floor(book) + 1;
+  }
+    if (type == 'list' && msg.length >= pageSize) {
+      result.push(`更多内容请翻页查看\n如：#表情列表${Number(page) + 1}`)
     }
 
-    let title = `表情列表，第${page}页，共${count}条`
+    let title = `表情列表，第${page}页，共${count}条，共${book}页`
     if (type == 'search') {
       title = `表情${search}，${count}条`
     }
 
-    let forwardMsg = await common.makeForwardMsg(this.e, [title, ...msg], title)
+    let forwardMsg = await common.makeForwardMsg(this.e, [title, ...result], title)
 
     this.e.reply(forwardMsg)
   }
@@ -778,5 +800,90 @@ export class add extends plugin {
     }
 
     return msg
+  }
+
+  async faceDetail () {
+    if (!this.e.message) return false
+    this.isGlobal = false
+    await this.getGroupId()
+    if (!this.group_id) return false
+    let faceDetailReg = /^#+(全局)?(?:查看|查询)(?:表情|词条)(.+)$/
+    let regGroup = faceDetailReg.exec(this.e.msg)
+    let keyWord
+    if (regGroup[1]) {
+      this.isGlobal = true
+    }
+    keyWord = regGroup[2].trim()
+
+    if (keyWord === '') return
+
+    this.initTextArr()
+    this.initGlobalTextArr()
+
+    let faces = textArr[this.group_id].get(keyWord) || []
+    let globalfaces = textArr[this.e.bot.uin].get(keyWord) || []
+    faces = [...faces, ...globalfaces]
+    /**
+     * faces example:
+     * [
+        [
+            {
+                "type": "text",
+                "text": "口了",
+                "from_user": {
+                  "card": 123,
+                  "nickname": "test",
+                  "user_id": 456
+                }
+            }
+        ],
+        [
+            {
+                "type": "text",
+                "text": "口"
+            }
+        ]
+    ]
+     */
+
+    if (lodash.isEmpty(faces)) {
+      await this.e.reply(`表情${keyWord}不存在`)
+      return
+    }
+
+
+    // process faces into replyArr in type:
+    let replyArr = []
+    for (let i = 0; i < faces.length; i++) {
+      let face = faces[i]
+      let faceItem = face[0]
+      let fromUser = faceItem?.from_user
+      if (fromUser) {
+        fromUser = `添加者: ${fromUser.card}(${fromUser.nickname})[${fromUser.user_id}]`
+      } else {
+        fromUser = '未知'
+      }
+      let faceContent
+      console.log(faceItem)
+      if (faceItem.type === 'image') {
+        // face is an image
+        let tmp = segment.image(faceItem.local)
+        tmp.asface = faceItem.asface
+        faceContent = tmp
+        replyArr.push(`${i + 1}、${fromUser}`)
+        replyArr.push(faceContent)
+      } else {
+        faceContent = `${faceItem.text}`
+        replyArr.push(`${i + 1}、${fromUser}: ` + faceContent)
+      }
+    }
+
+    if (lodash.isEmpty(replyArr)) {
+      return
+    }
+
+    let forwardMsg = await common.makeForwardMsg(this.e, replyArr, `表情${keyWord}详情`)
+
+    this.e.reply(forwardMsg)
   }
 }

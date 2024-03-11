@@ -1,98 +1,76 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-    <link rel="shortcut icon" href="#" />
-    <link rel="stylesheet" type="text/css" href="{{pluResPath}}html/abyss/abyss.css" />
-    <link rel="preload" href="{{resPath}}/font/tttgbnumber.ttf" as="font">
-    <link rel="preload" href="{{pluResPath}}img/other/bg5.png" as="image">
-    <link rel="preload" href="{{pluResPath}}img/other/bg4.png" as="image">
-    <link rel="preload" href="{{pluResPath}}img/other/bg105.png" as="image">
-    <link rel="preload" href="{{pluResPath}}img/abyss/bg.png" as="image">
-  </head>
-  <body>
-    <div class="container" id="container">
-      <div class="row">
-        <div class="item">
-          <div>ID：{{uid}}</div>
-          <div>时间：{{time}}</div>
-        </div>
-        <div class="item">
-          <div>最深抵达：{{max_floor}}</div>
-          <div>星数：{{total_star}}</div>
-        </div>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+  <link rel="shortcut icon" href="#"/>
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}html/abyss/abyss.css"/>
+  <link rel="preload" href="{{_miao_path}}/font/tttgbnumber.ttf" as="font">
+  <link rel="preload" href="{{_res_path}}img/other/bg5.png" as="image">
+  <link rel="preload" href="{{_res_path}}img/other/bg4.png" as="image">
+  <link rel="preload" href="{{_res_path}}img/other/bg105.png" as="image">
+  <link rel="preload" href="{{_res_path}}img/abyss/bg.png" as="image">
+</head>
+<body>
+<div class="container" id="container">
+  <div class="row">
+    <div class="item">
+      <div>ID：{{uid}}</div>
+      <div>时间：{{time}}</div>
+    </div>
+    <div class="item">
+      <div>最深抵达：{{max_floor}}</div>
+      <div>星数：{{total_star}}</div>
+    </div>
+  </div>
+  <div class="role">
+    <div class="title">出战角色</div>
+    <div class="list">
+      {{each list val}}
+      <div class="item">
+        {{ if val.life>0}}
+        <span class="life life{{val.life}}">{{val.life}}命</span>
+        {{/if}}
+        <img
+          class="role_img bg{{val.rarity}}"
+          src="{{_miao_path}}{{val.icon}}"
+          onerror="whenError(this,'role')"
+        />
+        <div class="desc">{{val.value}}次</div>
+        <img class="fill_img" src="{{_res_path}}img/other/fill.png"/>
       </div>
-      <div class="role">
-        <div class="title">出战角色</div>
-        <div class="list">
-          {{each list val}}
-          <div class="item">
-            {{ if val.life>0}}
-            <span class="life life{{val.life}}">{{val.life}}命</span>
-            {{/if}}
-            <img
-              class="role_img bg{{val.rarity}}"
-              src="{{pluResPath}}img/role/{{val.name}}.png"
-              onerror="whenError(this,'role')"
-            />
-            <div class="desc">{{val.value}}次</div>
-            <img class="fill_img" src="{{pluResPath}}img/other/fill.png" />
-          </div>
-          {{/each}}
-        </div>
-      </div>
-      <div class="detail">
-        <div class="title">战斗数据</div>
-        <div class="row">
-          <div class="item">战斗次数：{{total_battle_times}}次</div>
-          <div class="item">
-            最多击破：{{defeat.num}}
-            <img
-              src="{{pluResPath}}img/side/{{defeat.name}}.png"
-              class="line-icon two_img"
-              onerror="whenError(this,'side')"
-            />
-          </div>
-        </div>
-        <div class="row two">
-          <div class="item">
-            承受伤害：{{take_damage.num}}<img
-              src="{{pluResPath}}img/side/{{take_damage.name}}.png"
-              class="line-icon"
-              onerror="whenError(this,'side')"
-            />
-          </div>
-          <div class="item">
-            元素战技：{{normal_skill.num}}<img
-              src="{{pluResPath}}img/side/{{normal_skill.name}}.png"
-              class="line-icon two_img"
-              onerror="whenError(this,'side')"
-            />
-          </div>
-        </div>
-        <div class="row">
-          <div class="item">
-            最强一击：{{damage.num}}<img
-              src="{{pluResPath}}img/side/{{damage.name}}.png"
-              class="line-icon"
-              onerror="whenError(this,'side')"
-            />
-          </div>
-          <div class="item">
-            元素爆发：{{energy_skill.num}}<img
-              src="{{pluResPath}}img/side/{{energy_skill.name}}.png"
-              class="line-icon two_img"
-              onerror="whenError(this,'side')"
-            />
-          </div>
-        </div>
+      {{/each}}
+    </div>
+  </div>
+  <div class="detail">
+    <div class="title">战斗数据</div>
+    <div class="row">
+      <div class="item">战斗次数：{{total_battle_times}}次</div>
+      <div class="item">
+        最多击破：{{defeat.num}}
+        <span class="line-icon" style="background-image:url({{_miao_path}}{{defeat.icon}})"></span>
       </div>
     </div>
-  </body>
-  <script type="text/javascript">
-    function whenError(a, type) {
-      // a.onerror = null;
-      // a.src = "{{pluResPath}}img/" + type + "/荧.png";
-    }
-  </script>
+    <div class="row two">
+      <div class="item">
+        承受伤害：{{take_damage.num}}
+        <span class="line-icon" style="background-image:url({{_miao_path}}{{take_damage.icon}})"></span>
+      </div>
+      <div class="item">
+        元素战技：{{normal_skill.num}}
+        <span class="line-icon" style="background-image:url({{_miao_path}}{{normal_skill.icon}})"></span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="item">
+        最强一击：{{damage.num}}
+        <span class="line-icon" style="background-image:url({{_miao_path}}{{damage.icon}})"></span>
+      </div>
+      <div class="item">
+        元素爆发：{{energy_skill.num}}
+        <span class="line-icon" style="background-image:url({{_miao_path}}{{energy_skill.icon}})"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
 </html>

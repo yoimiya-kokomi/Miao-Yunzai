@@ -3,9 +3,7 @@ import gsCfg from './gsCfg.js'
 import lodash from 'lodash'
 import moment from 'moment'
 import fetch from 'node-fetch'
-import fs from 'node:fs'
-
-let imgFile = {}
+import { Character, Weapon } from '#miao.models'
 
 export default class GachaData extends base {
   /**
@@ -34,7 +32,6 @@ export default class GachaData extends base {
 
   static async init (e) {
     let gacha = new GachaData(e)
-    gacha.initFile()
     /** 抽卡类型 */
     gacha.getTpye()
     /** 用户抽卡数据 */
@@ -43,6 +40,16 @@ export default class GachaData extends base {
     await gacha.getPool()
 
     return gacha
+  }
+
+  static getImg (name, type = 'role') {
+    if (type === 'role' || type === '角色') {
+      let char = Character.get(name)
+      return char?.imgs?.gacha || ''
+    } else if (type === 'weapon' || type === '武器') {
+      let weapon = Weapon.get(name)
+      return weapon?.imgs?.gacha || ''
+    }
   }
 
   /** 抽卡 */
@@ -290,7 +297,7 @@ export default class GachaData extends base {
       isBigUP,
       isBing,
       have,
-      imgFile: imgFile[tmpName] || `${tmpName}.png`,
+      imgFile: GachaData.getImg(tmpName, type),
       rand: lodash.random(1, 7)
     })
 
@@ -361,7 +368,7 @@ export default class GachaData extends base {
       type,
       element: this.ele[tmpName] || '',
       index: this.index,
-      imgFile: imgFile[tmpName] || `${tmpName}.png`,
+      imgFile: GachaData.getImg(tmpName, type),
       have
     })
 
@@ -377,7 +384,7 @@ export default class GachaData extends base {
       type: 'weapon',
       element: this.ele[tmpName] || '',
       index: this.index,
-      imgFile: imgFile[tmpName] || `${tmpName}.png`
+      imgFile: GachaData.getImg(tmpName, 'weapon')
     })
 
     return true
@@ -396,10 +403,10 @@ export default class GachaData extends base {
       if (this.user[this.type].num5 >= 90) {
         tmpChance5 = 10000
       } else if (this.user[this.type].num5 >= 74) {
-      /** 74抽之后逐渐增加概率 */
+        /** 74抽之后逐渐增加概率 */
         tmpChance5 = 590 + (this.user[this.type].num5 - 74) * 530
       } else if (this.user[this.type].num5 >= 60) {
-      /** 60抽之后逐渐增加概率 */
+        /** 60抽之后逐渐增加概率 */
         tmpChance5 = this.def.chance5 + (this.user[this.type].num5 - 50) * 40
       }
     }
@@ -449,9 +456,11 @@ export default class GachaData extends base {
       if (v.star == 5) {
         nowFive++
         if (v.type == 'role') {
-          info = gsCfg.shortName(v.name)
+          let char = Character.get(v.name)
+          info = char?.abbr || ''
         } else {
-          info = gsCfg.shortName(v.name, true)
+          let weapon = Weapon.get(v.name)
+          info = weapon.abbr || ''
         }
         info += `「${v.num}抽」`
         if (v.isBigUP) info += '大保底'
@@ -485,16 +494,6 @@ export default class GachaData extends base {
     await redis.setEx(this.key, 3600 * 24 * 14, JSON.stringify(this.user))
   }
 
-  static async getStr () {
-    global.strr = ''
-    let res = await fetch('https://gist.githubusercontent.com/Le-niao/10f061fb9fe8fcfc316c10b422ed06d1/raw/Yunzai-Bot').catch(() => {})
-    if (res && res.text) {
-      let strr = await res.text() || ''
-      if (strr.includes('html')) strr = ''
-      global.strr = strr
-    }
-  }
-
   getNow () {
     return moment().format('X')
   }
@@ -512,20 +511,5 @@ export default class GachaData extends base {
 
   getWeekEnd () {
     return Number(moment().day(7).endOf('day').format('X'))
-  }
-
-  initFile () {
-    if (imgFile['刻晴']) return imgFile
-    let path = './plugins/genshin/resources/img/gacha/'
-    let character = fs.readdirSync(path + 'character/')
-    let weapon = fs.readdirSync(path + 'weapon/')
-
-    let nameSet = (v) => {
-      let name = v.split('.')
-      imgFile[name[0]] = v
-    }
-    character.forEach(v => nameSet(v))
-    weapon.forEach(v => nameSet(v))
-    return imgFile
   }
 }

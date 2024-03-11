@@ -1,0 +1,35 @@
+root = true
+
+[*]
+charset = utf-8
+indent_size = 2
+indent_style = space
+tab_width = 2
+insert_final_newline = true
+end_of_line = lf
+trim_trailing_whitespace = true
+max_line_length = off
+ij_any_space_before_colon = true
+ij_any_space_after_colon = true
+ij_any_keep_indents_on_empty_lines = false
+
+[{*.cjs,*.js}]
+ij_javascript_align_imports = false
+ij_javascript_use_semicolon_after_statement = false
+ij_javascript_use_double_quotes = false
+ij_javascript_enforce_trailing_comma = keep
+ij_javascript_space_before_method_parentheses = true
+ij_javascript_spaces_within_object_literal_braces = true
+ij_javascript_indent_chained_calls = true
+ij_javascript_if_brace_force = if_multiline
+
+[{*.json,*.json5}]
+ij_json_keep_trailing_comma = false
+ij_json_keep_blank_lines_in_code = 0
+ij_json_keep_indents_on_empty_lines = false
+ij_json_space_after_colon = true
+ij_json_space_after_comma = true
+ij_json_space_before_colon = false
+ij_json_space_before_comma = false
+ij_json_spaces_within_braces = false
+ij_json_spaces_within_brackets = false

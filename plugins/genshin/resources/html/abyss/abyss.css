@@ -1,6 +1,6 @@
 @font-face {
   font-family: "tttgbnumber";
-  src: url("../../../../../resources/font/tttgbnumber.ttf");
+  src: url("../../font/tttgbnumber.ttf");
   font-weight: normal;
   font-style: normal;
 }
@@ -64,7 +64,7 @@ body {
   position: relative;
   /*border: 2px solid #d3bc8d;*/
   /*background: #e9e5dc;*/
-  box-shadow: 0 2px 6px 0 rgb(132 93 90 / 30%);
+  box-shadow: 0 2px 6px 0 rgba(132, 93, 90, 0.3);
   margin: 0 13px;
 }
 .role .list .item .role_img {
@@ -127,10 +127,15 @@ body {
   background: none;
 }
 .line-icon {
-  width: 30px;
   position: absolute;
-  top: -12px;
+  top: -4px;
   right: 36px;
+  display: inline-block;
+  background-size: auto 100%;
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  vertical-align: middle;
 }
 .two_img {
   right: 46px;
@@ -166,3 +171,4 @@ body {
   border-radius: 3px;
   font-family: "tttgbnumber";
 }
+/*# sourceMappingURL=abyss.css.map */

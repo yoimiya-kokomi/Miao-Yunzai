@@ -30,6 +30,14 @@ export class ledger extends plugin {
         }
       ]
     })
+
+    Object.defineProperty(this, "button", { get() {
+      this.prefix = this.e?.isSr ? "*星琼" : "#原石"
+      return segment.button([
+        { text: "记录", callback: this.prefix },
+        { text: "统计", callback: `${this.prefix}统计` },
+      ])
+    }})
   }
 
   async init() {
@@ -47,8 +55,7 @@ export class ledger extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(`${data.srtempFile}ledger`, data)
-    if (img) await this.reply(img)
+    this.reply([await this.renderImg('genshin', `html/ledger/ledger-${data.game}`, data, { retType: "base64" }), this.button])
   }
 
   /** 原石任务 */
@@ -62,8 +69,7 @@ export class ledger extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(`${data.srtempFile}ledgerCount`, data)
-    if (img) await this.reply(img)
+    this.reply([await this.renderImg('genshin', `html/ledger/ledger-count-${data.game}`, data, { retType: "base64" }), this.button])
   }
 
   async ledgerCountHistory() {
@@ -71,7 +77,6 @@ export class ledger extends plugin {
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(`${data.srtempFile}ledgerCount`, data)
-    if (img) await this.reply(img)
+    this.reply([await this.renderImg('genshin', `html/ledger/ledger-count-${data.game}`, data, { retType: "base64" }), this.button])
   }
 }

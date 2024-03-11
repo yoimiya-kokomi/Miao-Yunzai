@@ -25,7 +25,7 @@ export default class MysNews extends base {
       typeName = '活动'
     }
 
-    const res = await this.postData('getNewsList', { gids: gid, page_size: 20, type })
+    const res = await this.postData('getNewsList', { gids: gid, page_size: this.e.msg.includes('列表') ? 5 : 20, type })
     if (!res) return
 
     const data = res.data.list
@@ -33,19 +33,36 @@ export default class MysNews extends base {
       return true
     }
 
-    const page = this.e.msg.replace(/#|＃|官方|星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿|公告|资讯|活动/g, '').trim() || 1
-    if (page > data.length) {
-      await this.e.reply('目前只查前20条最新的公告，请输入1-20之间的整数。')
-      return true
+    let param = {}
+    let game = this.game(gid)
+    if (this.e.msg.includes('列表')) {
+      this.model = 'mysNews-list'
+      data.forEach(element => {
+        element.post.created_at = new Date(element.post.created_at * 1000).toLocaleString()
+      })
+
+      param = {
+        ...this.screenData,
+        saveId: this.e.user_id,
+        data,
+        game,
+        typeName
+      }
+
+    } else {
+      const page = this.e.msg.replace(/#|＃|官方|星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿|公告|资讯|活动/g, '').trim() || 1
+      if (page > data.length) {
+        await this.e.reply('目前只查前20条最新的公告，请输入1-20之间的整数。')
+        return true
+      }
+
+      const postId = data[page - 1].post.post_id
+
+      param = await this.newsDetail(postId, gid)
     }
 
-    const postId = data[page - 1].post.post_id
-
-    const param = await this.newsDetail(postId, gid)
-
     const img = await this.render(param)
-    let game = this.game()
-    return this.replyMsg(img, `${game}${typeName}：${param.data.post.subject}`)
+    return this.replyMsg(img, `${game}${typeName}：${param?.data?.post?.subject || `米游社${game}${typeName}列表`}`)
   }
 
   render(param) {
@@ -75,6 +92,9 @@ export default class MysNews extends base {
       // 搜索
       case 'searchPosts':
         host = 'https://bbs-api.miyoushe.com/post/wapi/searchPosts?'
+        break
+      case 'userInstantSearchPosts':
+        host = 'https://bbs-api.miyoushe.com/painter/api/user_instant/search/list?'
         break
       // 帖子详情
       case 'getPostFull':
@@ -226,21 +246,14 @@ export default class MysNews extends base {
     return this.replyMsg(img, `${param.data.post.subject}`)
   }
 
-  async ysEstimate() {
-    let msg = '版本原石盘点'
-    let res = await this.postData('searchPosts', { gids: 2, size: 20, keyword: msg })
-    if (res?.data?.posts.length <= 0) {
+  async mysEstimate(keyword, uid) {
+    let res = await this.postData('userInstantSearchPosts', { keyword, uid, size: 20, offset: 0, sort_type: 2 })
+    let postList = res?.data?.list
+    if (postList.length <= 0) {
       await this.e.reply('暂无数据')
       return false
     }
-    let postId = ''
-    for (let post of res.data.posts) {
-      if (post.user.uid == '218945821') {
-        postId = post.post.post_id
-        break
-      }
-    }
-
+    let postId = postList[0].post.post.post_id
     if (!postId) {
       await this.e.reply('暂无数据')
       return false
@@ -259,11 +272,9 @@ export default class MysNews extends base {
 
   replyMsg(img, title) {
     if (!img || img.length <= 0) return false
-    if (img.length == 1) {
-      if (title) return [title, ...img]
-      return img
-    }
-    return common.makeForwardMsg(this.e, img, title)
+    if (title) img = [title, ...img]
+    if (img.length <= 2) return img
+    return common.makeForwardMsg(this.e, [img])
   }
 
   async mysNewsTask() {

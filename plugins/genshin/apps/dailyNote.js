@@ -6,7 +6,7 @@ import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 gsCfg.cpCfg('mys', 'set')
 
 export class dailyNote extends plugin {
-  constructor() {
+  constructor () {
     super({
       name: '体力查询',
       dsc: '体力查询',
@@ -22,14 +22,11 @@ export class dailyNote extends plugin {
   }
 
   /** #体力 */
-  async note() {
+  async note () {
     let data = await Note.get(this.e)
     if (!data) return
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot(`${data.srtempFile}dailyNote`, data)
-    if (img) await this.reply(img)
+    this.renderImg('genshin', `html/player/daily-note-${data.game}`, data)
   }
-
-
 }

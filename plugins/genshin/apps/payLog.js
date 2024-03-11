@@ -22,7 +22,7 @@ export class payLog extends plugin {
           fnc: 'payLog'
         },
         {
-          reg: '^#?更新(充值|消费)(记录|统计)',
+          reg: '^#?更新(充值|消费)(记录|统计)$',
           fnc: 'updatePayLog'
         },
         {
@@ -31,7 +31,7 @@ export class payLog extends plugin {
           fnc: 'getAuthKey'
         },
         {
-          reg: '^#?(充值|消费)(记录|统计)帮助',
+          reg: '^#?(充值|消费)(记录|统计)帮助$',
           fnc: 'payLogHelp'
         }
       ]
@@ -138,10 +138,16 @@ export class payLog extends plugin {
         }
         return true
       } else {
-        this.reply('请私聊发送米游社链接，可以发送【#充值统计帮助】查看链接教程', false)
+        this.reply(['请私聊发送米游社链接，可以发送【#充值统计帮助】查看链接教程',
+        segment.button([
+          { text: "充值帮助", callback: "#充值统计帮助" },
+        ])])
       }
     } else {
-      this.reply('请私聊发送米游社链接，可以发送【#充值统计帮助】查看链接教程', false)
+      this.reply(['请私聊发送米游社链接，可以发送【#充值统计帮助】查看链接教程',
+      segment.button([
+        { text: "充值帮助", callback: "#充值统计帮助" },
+      ])])
     }
     return true
   }

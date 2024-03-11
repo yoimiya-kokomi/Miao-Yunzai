@@ -15,6 +15,7 @@
 * **移除了签到功能：** 与原Yunzai独立的仓库，去除了较为敏感的签到功能，以尝试恢复[Github](https://github.com/yoimiya-kokomi/Miao-Yunzai.git)
   环境。附加[Gitee](https://gitee.com/yoimiya-kokomi/Miao-Yunzai.git)
 * **默认启用喵版的功能：** 【#角色】【#深渊】【#帮助】等功能默认启用喵版，原版的逻辑会屏蔽，以便于后续逐步精简资源
+* **一键迁移 TRSS-Yunzai：** 若无法登录QQ，可尝试 `node trss` 迁移，迁移后可登录其他协议端 [TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
 ## Miao-Yunzai后续计划
 
@@ -111,6 +112,15 @@ linux环境，其他环境请自行探索
 ```sh
     yum groupinstall fonts -y
 ```
+
+### centos7 监听事件错误 "CXXABI_1.3.8" not found 解决办法
+下载 [libstdc++.so.6.0.29.zip](https://baiyin1314.lanzouq.com/i8Nr21ig8hyf) 将 **解压缩后** 的文件放在/usr/lib64/中
+```
+cd /usr/lib64/
+sudo mv libstdc++.so.6 libstdc++.so.6.bak
+sudo ln -s libstdc++.so.6.0.29 libstdc++.so.6
+```
+
 
 ## 致谢
 

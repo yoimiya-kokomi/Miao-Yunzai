@@ -2,6 +2,7 @@ import moment from 'moment'
 import lodash from 'lodash'
 import base from './base.js'
 import MysInfo from './mys/mysInfo.js'
+import { Character } from '#miao.models'
 
 export default class Note extends base {
   constructor (e) {
@@ -16,15 +17,10 @@ export default class Note extends base {
   }
 
   async getData () {
-    let seed_id = lodash.sample('abcdefghijklmnopqrstuvwxyz0123456789', 16).replace(/,/g, '')
-    let device_fp = await MysInfo.get(this.e, 'getFp', {
-      seed_id
-    })
-    let res = await MysInfo.get(this.e, 'dailyNote', {
-      headers: {
-        'x-rpc-device_fp': device_fp?.data?.device_fp
-      }
-    })
+    let device_fp = await MysInfo.get(this.e, 'getFp')
+    let headers = { 'x-rpc-device_fp': device_fp?.data?.device_fp }
+
+    let res = await MysInfo.get(this.e, 'dailyNote', { headers })
     let resUser
     if (!res || res.retcode !== 0) return false
 
@@ -33,7 +29,7 @@ export default class Note extends base {
 
     let screenData = this.screenData
     if (this.e.isSr) {
-      resUser = await MysInfo.get(this.e, 'UserGame')
+      resUser = await MysInfo.get(this.e, 'UserGame', { headers })
       resUser.data?.list?.forEach(v => this.e.uid.includes(v.game_biz))
       if (!resUser || resUser.retcode !== 0) return false
     }
@@ -41,7 +37,8 @@ export default class Note extends base {
       name: this.e.sender.card,
       quality: 80,
       ...screenData,
-      ...data, ...resUser?.data?.list[0]
+      ...data,
+      ...resUser?.data?.list[0]
     }
   }
 
@@ -58,7 +55,7 @@ export default class Note extends base {
       let minutes = d.minutes()
       let seconds = d.seconds()
       resinMaxTime = hours + '小时' + minutes + '分钟' + seconds + '秒'
-      //精确到秒。。。。
+      // 精确到秒。。。。
       if (day > 0) {
         resinMaxTime = day + '天' + hours + '小时' + minutes + '分钟' + seconds + '秒'
       } else if (hours > 0) {
@@ -69,17 +66,17 @@ export default class Note extends base {
         resinMaxTime = seconds + '秒'
       }
       if ((day > 0) || (hours > 0) || (seconds > 0)) {
-      let total_seconds = 3600*hours + 60*minutes + seconds
-      const now = new Date()
-      const dateTimes = now.getTime() + total_seconds * 1000
-      const date = new Date(dateTimes)
-      const dayDiff = date.getDate() - now.getDate()
-      const str = dayDiff === 0 ? '今日' : '明日'
-      const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date
-              .getMinutes()
-              .toString()
-              .padStart(2, '0')}`
-      let recoverTimeStr = ` | [${str}]${timeStr}`
+        let total_seconds = 3600 * hours + 60 * minutes + seconds
+        const now = new Date()
+        const dateTimes = now.getTime() + total_seconds * 1000
+        const date = new Date(dateTimes)
+        const dayDiff = date.getDate() - now.getDate()
+        const str = dayDiff === 0 ? '今日' : '明日'
+        const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date
+          .getMinutes()
+          .toString()
+          .padStart(2, '0')}`
+        let recoverTimeStr = ` | [${str}]${timeStr}`
         resinMaxTime += recoverTimeStr
       }
     }
@@ -97,7 +94,8 @@ export default class Note extends base {
       }
     }
     // 标识属性图标~
-    let icon = lodash.sample(['希儿', '白露', '艾丝妲', '布洛妮娅', '姬子', '卡芙卡', '克拉拉', '停云', '佩拉', '黑塔', '希露瓦', '银狼'])
+    let iconChar = lodash.sample(['希儿', '白露', '艾丝妲', '布洛妮娅', '姬子', '卡芙卡', '克拉拉', '停云', '佩拉', '黑塔', '希露瓦', '银狼'])
+    let char = Character.get(iconChar, 'gs')
     let week = [
       '星期日',
       '星期一',
@@ -110,8 +108,11 @@ export default class Note extends base {
     let day = `${week[moment().day()]}`
     return {
       uid: this.e.uid,
-      saveId: this.e.uid, icon, day,
-      resinMaxTime, nowDay: moment(new Date()).format('YYYY年MM月DD日'),
+      saveId: this.e.uid,
+      icon: char.imgs?.face,
+      day,
+      resinMaxTime,
+      nowDay: moment(new Date()).format('YYYY年MM月DD日'),
       ...data
     }
   }

@@ -3,7 +3,7 @@ import plugin from '../../../lib/plugins/plugin.js'
 import GachaData from '../model/gachaData.js'
 import fs from 'node:fs'
 import lodash from 'lodash'
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
+
 export class gacha extends plugin {
   constructor () {
     super({
@@ -33,18 +33,9 @@ export class gacha extends plugin {
     let data = await this.GachaData.run()
 
     /** 生成图片 */
-    let img = await puppeteer.screenshot('gacha', data)
-    if (!img) return
-
-    /** 撤回消息 */
-    let recallMsg = this.GachaData.set.delMsg
-
-    /** 出货了不撤回 */
-    if (data.nowFive >= 1 || data.nowFour >= 4) {
-      recallMsg = 0
-    }
-
-    await this.reply(img, false, { recallMsg })
+    await this.renderImg('genshin', 'html/gacha/gacha-trial', data, {
+      recallMsg: data.nowFive >= 1 || data.nowFour >= 4 ? false : this.GachaData.set.delMsg
+    })
   }
 
   /** 检查限制 */
@@ -119,8 +110,6 @@ export class gacha extends plugin {
 
   /** 初始化创建配置文件 */
   async init () {
-    GachaData.getStr()
-
     let file = './plugins/genshin/config/gacha.set.yaml'
 
     if (fs.existsSync(file)) return

@@ -14,7 +14,7 @@ export class material extends plugin {
       priority: 500,
       rule: [
         {
-          reg: '#*(.*)(突破|材料|素材)$',
+          reg: '^#*(.*)(突破|材料|素材)$',
           fnc: 'material'
         }
       ]

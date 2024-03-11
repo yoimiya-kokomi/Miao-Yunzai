@@ -120,7 +120,7 @@ export default class Ledger extends base {
 
     ledgerInfo.color = []
     ledgerInfo.month_data.group_by.forEach((item) => {
-      if (this.e.isSr){
+      if (this.e.isSr) {
         item.color = this.color[this.action[item.action]]
         item.action_name = item.action_name.slice(0, 4)
       } else {
@@ -132,8 +132,9 @@ export default class Ledger extends base {
     ledgerInfo.group_by = JSON.stringify(ledgerInfo.month_data.group_by)
     ledgerInfo.color = JSON.stringify(ledgerInfo.color)
 
-    let files = fs.readdirSync('./plugins/genshin/resources/StarRail/img/role').filter(file => file.endsWith('.webp'))
-    let icon = lodash.sample(files)
+    let icon = ''
+    if(this.e.isSr)
+      icon = lodash.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/StarRail/img/role`).filter(file => file.endsWith('.webp')))
 
     let week = [
       '星期日',
@@ -144,12 +145,12 @@ export default class Ledger extends base {
       '星期五',
       '星期六'
     ]
-    let srday = `${week[moment().day()]}`
 
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
-      day, icon, srday,
+      day, icon, 
+      srday: `${week[moment().day()]}`,
       nowDay: moment(new Date()).format('YYYY年MM月DD日'),
       ...ledgerInfo,
       ...this.screenData
@@ -244,9 +245,8 @@ export default class Ledger extends base {
       await this.e.reply(`${this.e?.isSr ? '开拓月历' : '札记'}ck：${uids.length}个\n预计需要：${this.countTime(uids.length)}\n完成时间：${finishTime}`)
     }
 
-    for (let uid of uids) {
-      let ck = cks[uid]
-      this.e.user_id = ck.qq
+    for (const uid of uids) {
+      const ck = cks[uid]
 
       await this.saveLedger(uid, ck, true)
       await common.sleep(500)
@@ -309,7 +309,11 @@ export default class Ledger extends base {
     }
     // console.log(NoteData)
     if (!NoteData || lodash.isEmpty(NoteData)) {
-      this.e.reply(`${this.e?.isSr ? '暂无星琼数据，请先发送 *星琼' : '暂无原石数据，请先发送 #原石'}`, false, { at: true })
+      this.e.reply(this.e?.isSr ? ['暂无星琼数据，请先发送 *星琼', segment.button([
+        { text: "星琼", input: "*星琼" },
+      ])] : ['暂无原石数据，请先发送 #原石', segment.button([
+        { text: "原石", input: "#原石" },
+      ])], false, { at: true })
       return false
     }
     NoteData = NoteData[nowYear]

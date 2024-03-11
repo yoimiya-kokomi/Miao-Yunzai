@@ -1,31 +1,47 @@
-const os = require("os");
-const { existsSync } = require("fs");
-const arch = os.arch();
-let skipDownload = false;
-let executablePath;
+const os = require('os')
+const { existsSync } = require('fs')
+const { execSync } = require('child_process')
+const arch = os.arch()
 
-// win32 存在 Edge 优先选择
-if (process.platform == "win32") {
-  if (existsSync("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")) {
-    skipDownload = true;
-    executablePath = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
-  }
-} else if (process.platform == "linux") {
-  // 如果 arm64 架构且存在 Chromium，跳过下载
-  if ((arch == "arm64" || arch == "aarch64") && existsSync("/usr/bin/chromium")) {
-    skipDownload = true;
-    executablePath = "/usr/bin/chromium";
-  } else if (existsSync("/usr/bin/chromium")) {
-    // 不论什么架构，如果存在 Chromium，跳过下载且配置路径
-    skipDownload = true;
-    executablePath = "/usr/bin/chromium";
-  }
+let skipDownload = false
+let executablePath
+
+if (process.platform === 'linux' || process.platform === 'android')
+  for (const item of [
+    "chromium",
+    "chromium-browser",
+    "chrome",
+  ]) try {
+    const chromiumPath = execSync(`command -v ${item}`).toString().trim()
+    if (chromiumPath && existsSync(chromiumPath)) {
+      executablePath = chromiumPath
+      break
+    }
+  } catch (err) {}
+
+// macOS
+if (process.platform === 'darwin') for (const item of [
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+]) if (existsSync(item)) {
+  executablePath = item
+  break
 }
 
-/**
- * @type {import("puppeteer").Configuration}
- */
-module.exports = {
-  skipDownload,
-  executablePath,
-};
+if (!executablePath) for (const item of [
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/chrome',
+  'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+]) if (existsSync(item)) {
+  executablePath = item
+  break
+}
+
+if (executablePath || arch === 'arm64' || arch === 'aarch64') {
+  (typeof logger == 'object' ? logger : console).info(`[Chromium] ${executablePath}`)
+  skipDownload = true
+}
+
+module.exports = { skipDownload, executablePath }

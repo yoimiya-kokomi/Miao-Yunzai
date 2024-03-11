@@ -5,24 +5,31 @@ log_level: info
 ignore_self: true
 # 被风控时是否尝试用分片发送
 resend: false
+# 发送消息错误时是否通知主人
+sendmsg_error: false
 # ffmpeg
-ffmpeg_path: 
-ffprobe_path: 
+ffmpeg_path:
+ffprobe_path:
 
 # chromium其他路径
-chromium_path: 
+chromium_path:
 # puppeteer接口地址
-puppeteer_ws: 
-  
+puppeteer_ws:
+# puppeteer截图超时时间
+puppeteer_timeout:
+
 # 米游社接口代理地址，国际服用
-proxyAddress: 
+proxyAddress:
 
 # 上线时给首个主人QQ推送帮助
 online_msg: true
 # 上线推送通知的冷却时间
 online_msg_exp: 86400
 
+# 是否跳过登录ICQQ
+skip_login: false
+
 # 签名API地址(如:http://127.0.0.1:8080/sign?key=114514)
-sign_api_addr: 
+sign_api_addr:
 # 传入的QQ版本(如:8.9.63、8.9.68)
-ver: 
+ver:

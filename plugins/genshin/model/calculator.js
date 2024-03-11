@@ -5,13 +5,13 @@ import lodash from 'lodash'
 import gsCfg from './gsCfg.js'
 
 export default class Calculator extends base {
-  constructor(e) {
+  constructor (e) {
     super(e)
     this.model = 'calculator'
     this.checkMsg = `设置角色、武器、技能等级有误\n指令：${e.isSr ? '*克拉拉养成\n示例：*克拉拉养成75 80 6 9 9 9\n参数为角色、武器、普攻、战技、终结技、天赋' : '#刻晴养成\n示例：#刻晴养成81 90 9 9 9\n参数为角色、武器、技能等级'}`
   }
 
-  async get(role) {
+  async get (role) {
     this.role = role
     /** 获取绑定uid */
     let uid = await MysInfo.getUid(this.e)
@@ -26,17 +26,14 @@ export default class Calculator extends base {
 
     this.mysApi = new MysApi(uid, ck.ck, { log: true })
 
-    let seed_id = lodash.sample('abcdefghijklmnopqrstuvwxyz0123456789', 16).replace(/,/g, '')
-    let device_fp = await MysInfo.get(this.e, 'getFp', {
-      seed_id
-    })
+    let device_fp = await MysInfo.get(this.e, 'getFp')
     this.headers = {
       'x-rpc-device_fp': device_fp?.data?.device_fp
     }
 
     /** 获取角色数据 */
     let character = await MysInfo.get(this.e, this.e.isSr ? 'avatarInfo' : 'character', {
-      headers: this.headers,
+      headers: this.headers
     })
     if (!character || character.retcode !== 0) return false
     character = character.data
@@ -66,7 +63,7 @@ export default class Calculator extends base {
     }
   }
 
-  async getSet() {
+  async getSet () {
     let defSetSkill = this.e.isSr ? '80,80,6,10,10,10'.split(',') : '90,90,10,10,10'.split(',')
 
     let set = this.e.msg.replace(/#|＃|星铁|养成|计算/g, '').trim()
@@ -104,7 +101,7 @@ export default class Calculator extends base {
     this.setSkill = setSkill
   }
 
-  async getBody() {
+  async getBody () {
     // 技能
     let skillList = []
     if (this.dataCharacter) {
@@ -156,7 +153,7 @@ export default class Calculator extends base {
         avatar: {
           item_id: Number(this.role.roleId),
           cur_level: Number(this.dataCharacter.level),
-          target_level: Number(this.setSkill[0]),
+          target_level: Number(this.setSkill[0])
         },
         skill_list: []
       }
@@ -168,7 +165,6 @@ export default class Calculator extends base {
         }
         if (Number(this.setSkill[0]) >= data.min_level_limit) body.skill_list.push(skill)
       }
-
     } else {
       skillList = skillList.filter((item) => item.max_level != 1)
 
@@ -197,7 +193,7 @@ export default class Calculator extends base {
     }
 
     if (this.mysApi.getServer().startsWith('os')) {
-      body.lang = "zh-cn"
+      body.lang = 'zh-cn'
     }
 
     if (this.e.isSr) {
@@ -219,7 +215,6 @@ export default class Calculator extends base {
           level_current: Number(this.dataCharacter.weapon.level),
           level_target: Number(this.setSkill[1])
         }
-
       }
     }
 
@@ -228,7 +223,7 @@ export default class Calculator extends base {
     return body
   }
 
-  async getSkillId(roleId) {
+  async getSkillId (roleId) {
     let avatarSkill = await MysInfo.get(this.e, 'avatarSkill', {
       headers: this.headers,
       avatar_id: roleId
@@ -242,8 +237,11 @@ export default class Calculator extends base {
     return avatarSkill.list
   }
 
-  async computes(body) {
-    let computes = await MysInfo.get(this.e, 'compute', body)
+  async computes (body) {
+    let computes = await MysInfo.get(this.e, 'compute', {
+      body,
+      headers: this.headers
+    })
     if (!computes || computes.retcode !== 0) return false
     computes = computes.data
 
