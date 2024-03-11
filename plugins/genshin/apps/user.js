@@ -20,7 +20,7 @@ export class user extends plugin {
           fnc: 'ckCode'
         },
         {
-          reg: '^#绑定[Cc](oo)?[Kk](ie)?$',
+          reg: /^#绑定c(oo)?k(ie)?$/i,
           fnc: 'bingCk'
         },
         {
@@ -29,28 +29,28 @@ export class user extends plugin {
           fnc: 'noLogin'
         },
         {
-          reg: '^#?(原神|星铁)?我的[Cc](oo)?[Kk](ie)?$',
+          reg: /^#?(原神|星铁)?我的c(oo)?k(ie)?$/i,
           event: 'message',
           fnc: 'myCk'
         },
         {
-          reg: '^#?(原神|星铁)?删除[Cc](oo)?[Kk](ie)?$',
+          reg: /^#?(原神|星铁)?删除c(oo)?k(ie)?$/i,
           fnc: 'delCk'
         },
         {
-          reg: '^#?(原神|星铁)?(删除|解绑)(uid|UID)\\s*([0-9]{1,2})?$',
+          reg: /^#?(原神|星铁)?(删除|解绑)uid(\s|\+)*([0-9]{1,2})?$/i,
           fnc: 'delUid'
         },
         {
-          reg: '^#(原神|星铁)?绑定(uid|UID)?(\\s|\\+)*([1-9]|18)[0-9]{8}$',
+          reg: /^#(原神|星铁)?绑定(uid)?(\s|\+)*([1-9]|18)[0-9]{8}$/i,
           fnc: 'bingUid'
         },
         {
-          reg: '^#(原神|星铁)?(我的)?(uid|UID)[0-9]{0,2}$',
+          reg: /^#(原神|星铁)?(我的)?(uid)[0-9]{0,2}$/i,
           fnc: 'showUid'
         },
         {
-          reg: '^#\\s*(检查|我的)*[Cc](oo)?[Kk](ie)?(状态)*$',
+          reg: /^#\\s*(检查|我的)*c(oo)?k(ie)?(状态)*$/i,
           fnc: 'checkCkStatus'
         },
         {

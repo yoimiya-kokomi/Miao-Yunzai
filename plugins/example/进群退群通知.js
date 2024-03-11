@@ -2,9 +2,12 @@ import plugin from '../../lib/plugins/plugin.js'
 export class newcomer extends plugin {
   constructor () {
     super({
+		/** 插件名字 */
       name: '欢迎新人',
+	  /** 插件描述 */
       dsc: '新人入群欢迎',
       /** https://oicqjs.github.io/oicq/#events */
+	  /** 插件触发事件 */
       event: 'notice.group.increase',
       priority: 5000
     })

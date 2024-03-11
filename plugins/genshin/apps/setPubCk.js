@@ -15,7 +15,7 @@ export class setPubCk extends plugin {
       priority: 700,
       rule: [
         {
-          reg: "^#配置(ck|cookie)$|^#*配置公共查询ck$",
+          reg: /^#配置c(oo)?k(ie)?$|^#*配置公共查询c(oo)?k(ie)?$/i,
           fnc: "setPubCk",
           permission: "master"
         },
