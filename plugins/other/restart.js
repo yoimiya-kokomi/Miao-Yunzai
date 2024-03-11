@@ -23,7 +23,6 @@ export class Restart extends plugin {
     })
 
     if (e) this.e = e
-
     this.key = "Yz:restart"
   }
 
