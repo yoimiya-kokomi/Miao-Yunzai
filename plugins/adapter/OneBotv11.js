@@ -32,10 +32,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
     return file
   }
 
-  async makeMsg(msg, sendForwardMsg) {
+  async makeMsg(msg) {
     if (!Array.isArray(msg))
       msg = [msg]
     const msgs = []
+    const forward = []
     for (let i of msg) {
       if (typeof i != "object")
         i = { type: "text", data: { text: i }}
@@ -52,7 +53,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
         case "button":
           continue
         case "node":
-          await sendForwardMsg(i.data)
+          forward.push(...i.data)
           continue
       }
 
@@ -61,35 +62,60 @@ Bot.adapter.push(new class gocqhttpAdapter {
 
       msgs.push(i)
     }
-    return msgs
+    return [msgs, forward]
   }
 
-  async sendFriendMsg(data, msg) {
-    const message = await this.makeMsg(msg, msg => this.sendFriendForwardMsg(data, msg))
-    Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`)
-    return data.bot.sendApi("send_msg", {
-      user_id: data.user_id,
-      message,
-    })
+  async sendMsg(msg, send, sendForwardMsg) {
+    const [message, forward] = await this.makeMsg(msg)
+    const ret = []
+
+    if (forward.length) {
+      const data = await sendForwardMsg(forward)
+      if (Array.isArray(data))
+        ret.push(...data)
+      else
+        ret.push(data)
+    }
+
+    if (message.length)
+      ret.push(await send(message))
+    if (ret.length == 1) return ret[0]
+
+    const message_id = []
+    for (const i of ret) if (i?.message_id)
+      message_id.push(i.message_id)
+    return { data: ret, message_id }
   }
 
-  async sendGroupMsg(data, msg) {
-    const message = await this.makeMsg(msg, msg => this.sendGroupForwardMsg(data, msg))
-    Bot.makeLog("info", `发送群消息：${this.makeLog(message)}`, `${data.self_id} => ${data.group_id}`)
-    return data.bot.sendApi("send_msg", {
-      group_id: data.group_id,
-      message,
-    })
+  sendFriendMsg(data, msg) {
+    return this.sendMsg(msg, message => {
+      Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`)
+      data.bot.sendApi("send_msg", {
+        user_id: data.user_id,
+        message,
+      })
+    }, msg => this.sendFriendForwardMsg(data, msg))
   }
 
-  async sendGuildMsg(data, msg) {
-    const message = await this.makeMsg(msg, msg => Bot.sendForwardMsg(msg => this.sendGuildMsg(data, msg), msg))
-    Bot.makeLog("info", `发送频道消息：${this.makeLog(message)}`, `${data.self_id}] => ${data.guild_id}-${data.channel_id}`)
-    return data.bot.sendApi("send_guild_channel_msg", {
-      guild_id: data.guild_id,
-      channel_id: data.channel_id,
-      message,
-    })
+  sendGroupMsg(data, msg) {
+    return this.sendMsg(msg, message => {
+      Bot.makeLog("info", `发送群消息：${this.makeLog(message)}`, `${data.self_id} => ${data.group_id}`)
+      return data.bot.sendApi("send_msg", {
+        group_id: data.group_id,
+        message,
+      })
+    }, msg => this.sendGroupForwardMsg(data, msg))
+  }
+
+  sendGuildMsg(data, msg) {
+    return this.sendMsg(msg, message => {
+      Bot.makeLog("info", `发送频道消息：${this.makeLog(message)}`, `${data.self_id}] => ${data.guild_id}-${data.channel_id}`)
+      return data.bot.sendApi("send_guild_channel_msg", {
+        guild_id: data.guild_id,
+        channel_id: data.channel_id,
+        message,
+      })
+    }, msg => Bot.sendForwardMsg(msg => this.sendGuildMsg(data, msg), msg))
   }
 
   async getMsg(data, message_id) {
@@ -105,35 +131,42 @@ Bot.adapter.push(new class gocqhttpAdapter {
     return msg
   }
 
-  recallMsg(data, message_id) {
+  async recallMsg(data, message_id) {
     Bot.makeLog("info", `撤回消息：${message_id}`, data.self_id)
-    return data.bot.sendApi("delete_msg", { message_id })
+    if (!Array.isArray(message_id))
+      message_id = [message_id]
+    const msgs = []
+    for (const i of message_id)
+      msgs.push(await data.bot.sendApi("delete_msg", { message_id: i }))
+    return msgs
   }
 
   getForwardMsg(data, message_id) {
     return data.bot.sendApi("get_forward_msg", { message_id })
   }
 
-  async makeForwardMsg(msg, sendForwardMsg) {
+  async makeForwardMsg(msg) {
     const messages = []
-    for (const i of msg)
-      messages.push({
-        type: "node",
-        data: {
+    for (const i of msg) {
+      const [content, forward] = await this.makeMsg(i.message)
+      if (forward.length)
+        messages.push(...await this.makeForwardMsg(forward))
+      if (content.length)
+        messages.push({ type: "node", data: {
           name: i.nickname || "匿名消息",
-          uin: Number(i.user_id) || 80000000,
-          content: await this.makeMsg(i.message, sendForwardMsg),
+          uin: String(Number(i.user_id) || 80000000),
+          content,
           time: i.time,
-        },
-      })
+        }})
+    }
     return messages
   }
 
   async sendFriendForwardMsg(data, msg) {
     Bot.makeLog("info", `发送好友转发消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.user_id}`)
-    return await data.bot.sendApi("send_private_forward_msg", {
+    return data.bot.sendApi("send_private_forward_msg", {
       user_id: data.user_id,
-      messages: await this.makeForwardMsg(msg, msg => this.sendFriendForwardMsg(data, msg)),
+      messages: await this.makeForwardMsg(msg),
     })
   }
 
@@ -141,7 +174,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     Bot.makeLog("info", `发送群转发消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}`)
     return data.bot.sendApi("send_group_forward_msg", {
       group_id: data.group_id,
-      messages: await this.makeForwardMsg(msg, msg => this.sendGroupForwardMsg(data, msg)),
+      messages: await this.makeForwardMsg(msg),
     })
   }
 
