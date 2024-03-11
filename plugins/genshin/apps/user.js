@@ -38,7 +38,7 @@ export class user extends plugin {
           fnc: 'delCk'
         },
         {
-          reg: '^#?(原神|星铁)?(删除|解绑)(uid|UID)\\s*[0-9]{1,2}$',
+          reg: '^#?(原神|星铁)?(删除|解绑)(uid|UID)\\s*([0-9]{1,2})?$',
           fnc: 'delUid'
         },
         {
@@ -177,6 +177,10 @@ export class user extends plugin {
 
   async delUid() {
     let index = this.e.msg.match(/[0-9]{1,2}$/g)
+    if(!index) {
+        this.e.reply(`删除uid请带上序号\n例如：#删除uid1\n发送【#uid】可查看绑定的uid以及对应的序号`)
+        return true;
+    }
     let uidIdx = index && index[0]
     let game = this.e
     if (uidIdx) {
