@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 import MysInfo from '../model/mys/mysInfo.js'
 
 export class exchange extends plugin {
-  constructor() {
+  constructor () {
     super({
       name: '兑换码',
       dsc: '前瞻直播兑换码',
@@ -23,7 +23,7 @@ export class exchange extends plugin {
     })
   }
 
-  async getCode() {
+  async getCode () {
     let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3)?(直播|前瞻)?兑换码$/)
     this.uid = '75276550'
     if (reg[1] == '*' || ["星铁", "崩铁"].includes(reg[2])) {
@@ -42,7 +42,9 @@ export class exchange extends plugin {
 
     /** index info */
     let index = await this.getData('index')
-    if (!index || !index.data) { return true }
+    if (!index || !index.data) {
+      return true
+    }
     if (index.data === null) {
       return await this.reply(`错误：\n${index.message}`)
     }
@@ -74,7 +76,7 @@ export class exchange extends plugin {
     await this.reply(msg)
   }
 
-  async getData(type) {
+  async getData (type) {
     let url = {
       index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
       code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${this.now}`,
@@ -103,14 +105,20 @@ export class exchange extends plugin {
   }
 
   // 获取 "act_id"
-  async getActId() {
-    let ret = await this.getData('actId')
+  async getActId () {
+    let ret = await this.getData('actId');
     if (ret.error || ret.retcode !== 0) {
       return "";
     }
 
     for (const p of ret.data.list) {
-      const post = p.post.post;
+      let post;
+      try {
+        post = p.post.post;
+      } catch (e) {
+        logger.error("活动数据获取异常");
+        logger.error(e);
+      }
       if (!post) {
         continue;
       }
@@ -124,6 +132,7 @@ export class exchange extends plugin {
       }
     }
   }
+
   // 兑换码使用
   async useCode() {
     const cdkCode = this.e.msg.replace(/#(兑换码使用|cdk-u)/, "").trim()
