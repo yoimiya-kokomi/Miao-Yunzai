@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 import MysInfo from '../model/mys/mysInfo.js'
 
 export class exchange extends plugin {
-  constructor() {
+  constructor () {
     super({
       name: '兑换码',
       dsc: '前瞻直播兑换码',
@@ -23,13 +23,13 @@ export class exchange extends plugin {
     })
   }
 
-  async getCode() {
+  async getCode () {
     let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3)?(直播|前瞻)?兑换码$/)
     this.uid = '75276550'
-    if (reg[1] == '*' || ["星铁", "崩铁"].includes(reg[2])) {
+    if (reg[1] == '*' || ['星铁', '崩铁'].includes(reg[2])) {
       this.uid = '80823548'
     }
-    if (reg[3] == ["崩三", "崩坏三", "崩坏3"].includes(reg[4])) {
+    if (reg[3] == ['崩三', '崩坏三', '崩坏3'].includes(reg[4])) {
       this.uid = '73565430'
     }
     this.now = parseInt(Date.now() / 1000)
@@ -42,14 +42,16 @@ export class exchange extends plugin {
 
     /** index info */
     let index = await this.getData('index')
-    if (!index || !index.data) { return true }
+    if (!index || !index.data) {
+      return true
+    }
     if (index.data === null) {
       return await this.reply(`错误：\n${index.message}`)
     }
 
-    let index_data = index.data.live;
-    let title = index_data['title'];
-    this.code_ver = index_data['code_ver'];
+    let index_data = index.data.live
+    let title = index_data['title']
+    this.code_ver = index_data['code_ver']
     if (index_data.remain > 0) {
       return await this.reply(`暂无${title}直播兑换码`, true)
     }
@@ -59,12 +61,12 @@ export class exchange extends plugin {
       logger.info('[兑换码] 未获取到兑换码')
       return true
     }
-    let codes = [];
+    let codes = []
 
     for (let val of code.data.code_list) {
       if (val.code) {
         codes.push([val.code, segment.button([
-          { text: "兑换", callback: `#兑换码使用${val.code}` },
+          { text: '兑换', callback: `#兑换码使用${val.code}` },
         ])])
       }
     }
@@ -74,7 +76,7 @@ export class exchange extends plugin {
     await this.reply(msg)
   }
 
-  async getData(type) {
+  async getData (type) {
     let url = {
       index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
       code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${this.now}`,
@@ -103,16 +105,22 @@ export class exchange extends plugin {
   }
 
   // 获取 "act_id"
-  async getActId() {
+  async getActId () {
     let ret = await this.getData('actId')
     if (ret.error || ret.retcode !== 0) {
-      return "";
+      return ''
     }
 
     for (const p of ret.data.list) {
-      const post = p.post.post;
+      let post
+      try {
+        post = p.post.post
+      } catch (e) {
+        logger.error('活动数据获取异常')
+        logger.error(e)
+      }
       if (!post) {
-        continue;
+        continue
       }
       let date = new Date(post.created_at * 1000)
       date.setDate(date.getDate() + 1)
@@ -124,9 +132,10 @@ export class exchange extends plugin {
       }
     }
   }
+
   // 兑换码使用
-  async useCode() {
-    const cdkCode = this.e.msg.replace(/#(兑换码使用|cdk-u)/, "").trim()
+  async useCode () {
+    const cdkCode = this.e.msg.replace(/#(兑换码使用|cdk-u)/, '').trim()
     const res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
     if (res) {
       this.e.reply(`${res.data.msg}`)
