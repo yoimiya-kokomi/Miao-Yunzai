@@ -2,7 +2,7 @@
 
 # TRSS-Yunzai
 
-Yunzai 应用端，支持多账号，支持协议端：OneBotv11、ComWeChat、GSUIDCore、ICQQ、QQBot、QQ频道、微信、KOOK、Telegram、Discord、OPQBot
+Yunzai 应用端，支持多账号，支持协议端：OneBotv11、ComWeChat、GSUIDCore、ICQQ、QQBot、QQ频道、微信、KOOK、Telegram、Discord、OPQBot、Lagrange
 
 [![访问量](https://visitor-badge.glitch.me/badge?page_id=TimeRainStarSky.Yunzai&right_color=red&left_text=访%20问%20量)](https://github.com/TimeRainStarSky/Yunzai)
 [![Stars](https://img.shields.io/github/stars/TimeRainStarSky/Yunzai?color=yellow&label=收藏)](../../stargazers)
@@ -177,6 +177,7 @@ ws://localhost:2536/GSUIDCore
 - [Telegram](../../../Yunzai-Telegram-Plugin)
 - [Discord](../../../Yunzai-Discord-Plugin)
 - [Route](../../../Yunzai-Route-Plugin)
+- [Lagrange](../../../Yunzai-Lagrange-Plugin)
 
 </details>
 

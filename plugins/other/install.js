@@ -3,8 +3,10 @@ import { Restart } from "./restart.js"
 let insing = false
 const list = {
   "Atlas":"https://gitee.com/Nwflower/atlas",
+  "genshin"  :"https://gitee.com/TimeRainStarSky/Yunzai-genshin",
   "ws-plugin":"https://gitee.com/xiaoye12123/ws-plugin",
   "TRSS-Plugin"   :"https://Yunzai.TRSS.me",
+  "miao-plugin"   :"https://gitee.com/yoimiya-kokomi/miao-plugin",
   "yenai-plugin"  :"https://gitee.com/yeyang52/yenai-plugin",
   "flower-plugin" :"https://gitee.com/Nwflower/flower-plugin",
   "xianyu-plugin" :"https://gitee.com/suancaixianyu/xianyu-plugin",
@@ -13,10 +15,9 @@ const list = {
   "StarRail-plugin"   :"https://gitee.com/hewang1an/StarRail-plugin",
   "xiaoyao-cvs-plugin":"https://gitee.com/Ctrlcvs/xiaoyao-cvs-plugin",
   "trss-xianxin-plugin"   :"https://gitee.com/snowtafir/xianxin-plugin",
-  "mysVilla-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-mysVilla-Plugin",
+  "Lagrange-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-Lagrange-Plugin",
   "Telegram-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-Telegram-Plugin",
   "Discord-Plugin":"https://gitee.com/TimeRainStarSky/Yunzai-Discord-Plugin",
-  "QQGuild-Plugin":"https://gitee.com/TimeRainStarSky/Yunzai-QQGuild-Plugin",
   "WeChat-Plugin" :"https://gitee.com/TimeRainStarSky/Yunzai-WeChat-Plugin",
   "QQBot-Plugin":"https://gitee.com/TimeRainStarSky/Yunzai-QQBot-Plugin",
   "Route-Plugin"  :"https://gitee.com/TimeRainStarSky/Yunzai-Route-Plugin",
