@@ -21,6 +21,7 @@ export default class GachaLog extends base {
     const gsPool = [
       { type: 301, typeName: "角色" },
       { type: 302, typeName: "武器" },
+      { type: 500, typeName: "集录" },
       { type: 200, typeName: "常驻" }
     ]
 
@@ -396,7 +397,7 @@ export default class GachaLog extends base {
 
   async getAllGcLogData() {
     this.model = "gachaAllLog"
-    const poolList = ["角色", this.e?.isSr ? "光锥" : "武器", "常驻"]
+    const poolList = ["角色", "集录", this.e?.isSr ? "光锥" : "武器", "常驻"]
     const logData = []
     let fiveMaxNum = 0
     const originalMsg = this.e.msg
@@ -464,6 +465,10 @@ export default class GachaLog extends base {
       case "武器":
         type = this.e.isSr ? 12 : 302
         typeName = this.e.isSr ? "光锥" : "武器"
+        break
+      case "集录":
+        type = 500
+        typeName = "集录"
         break
       case "光锥":
         type = 12
@@ -790,6 +795,22 @@ export default class GachaLog extends base {
     }
     // 武器池
     if ([302, 12].includes(type)) {
+      line = [[
+        { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
+        { lable: "五星", num: data.fiveNum, unit: "个" },
+        { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
+        { lable: `四星${weapon}`, num: data.weaponFourNum, unit: "个" },
+        { lable: "最非", num: maxValue, unit: "抽" }
+      ], [
+        { lable: "未出四星", num: data.noFourNum, unit: "抽" },
+        { lable: "四星", num: data.fourNum, unit: "个" },
+        { lable: "四星平均", num: data.fourAvg, unit: "抽" },
+        { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
+        { lable: "最欧", num: minValue, unit: "抽" }
+      ]]
+    }
+// 集录池
+    if ([500].includes(type)) {
       line = [[
         { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
         { lable: "五星", num: data.fiveNum, unit: "个" },
