@@ -39,7 +39,7 @@ export class gcLog extends plugin {
           fnc: "helpPort"
         },
         {
-          reg: "^#?(原神|星铁)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*统计$",
+          reg: "^#?(原神|星铁)?(抽卡|抽奖|角色|武器|集录|常驻|up|新手|光锥)池*统计$",
           fnc: "logCount"
         }
       ]

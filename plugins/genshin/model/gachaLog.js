@@ -397,7 +397,7 @@ export default class GachaLog extends base {
 
   async getAllGcLogData() {
     this.model = "gachaAllLog"
-    const poolList = ["角色", "集录", this.e?.isSr ? "光锥" : "武器", "常驻"]
+    const poolList = ["角色", this.e?.isSr ? "光锥" : "武器", "集录", "常驻"]
     const logData = []
     let fiveMaxNum = 0
     const originalMsg = this.e.msg
