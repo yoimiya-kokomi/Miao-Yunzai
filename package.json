@@ -9,7 +9,6 @@
     "app": "node .",
     "dev": "node . dev",
     "web": "node lib/tools/web.js",
-    "test": "node lib/tools/test.js",
     "start": "pm2 start config/pm2.yaml",
     "stop": "pm2 stop config/pm2.yaml",
     "restart": "pm2 restart config/pm2.yaml",
