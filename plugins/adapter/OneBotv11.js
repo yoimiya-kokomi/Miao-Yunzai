@@ -397,14 +397,14 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  signGroup(data) {
+  sendGroupSign(data) {
     Bot.makeLog("info", "群打卡", `${data.self_id} => ${data.group_id}`)
     return data.bot.sendApi("send_group_sign", {
       group_id: data.group_id,
     })
   }
 
-  muteMember(data, user_id, duration) {
+  setGroupBan(data, user_id, duration) {
     Bot.makeLog("info", `禁言群成员：${duration}秒`, `${data.self_id} => ${data.group_id}, ${user_id}`)
     return data.bot.sendApi("set_group_ban", {
       group_id: data.group_id,
@@ -413,7 +413,7 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  muteAll(data, enable) {
+  setGroupWholeKick(data, enable) {
     Bot.makeLog("info", `${enable ? "开启" : "关闭"}全员禁言`, `${data.self_id} => ${data.group_id}`)
     return data.bot.sendApi("set_group_whole_ban", {
       group_id: data.group_id,
@@ -421,12 +421,20 @@ Bot.adapter.push(new class gocqhttpAdapter {
     })
   }
 
-  kickMember(data, user_id, reject_add_request) {
+  setGroupKick(data, user_id, reject_add_request) {
     Bot.makeLog("info", `踢出群成员${reject_add_request ? "拒绝再次加群" : ""}`, `${data.self_id} => ${data.group_id}, ${user_id}`)
     return data.bot.sendApi("set_group_kick", {
       group_id: data.group_id,
       user_id,
       reject_add_request,
+    })
+  }
+
+  setGroupLeave(data, is_dismiss) {
+    Bot.makeLog("info", is_dismiss ? "解散" : "退群", `${data.self_id} => ${data.group_id}`)
+    return data.bot.sendApi("set_group_leave", {
+      group_id: data.group_id,
+      is_dismiss,
     })
   }
 
@@ -575,8 +583,8 @@ Bot.adapter.push(new class gocqhttpAdapter {
       ...i,
       getInfo: () => this.getMemberInfo(i),
       poke: () => this.sendGroupMsg(i, { type: "poke", qq: user_id }),
-      mute: duration => this.muteMember(i, i.user_id, duration),
-      kick: reject_add_request => this.kickMember(i, i.user_id, reject_add_request),
+      mute: duration => this.setGroupBan(i, i.user_id, duration),
+      kick: reject_add_request => this.setGroupKick(i, i.user_id, reject_add_request),
     }
   }
 
@@ -631,10 +639,11 @@ Bot.adapter.push(new class gocqhttpAdapter {
       setAdmin: (user_id, enable) => this.setGroupAdmin(i, user_id, enable),
       setCard: (user_id, card) => this.setGroupCard(i, user_id, card),
       setTitle: (user_id, special_title, duration) => this.setGroupTitle(i, user_id, special_title, duration),
-      sign: () => this.signGroup(i),
-      muteMember: (user_id, duration) => this.muteMember(i, user_id, duration),
-      muteAll: enable => this.muteAll(i, enable),
-      kickMember: (user_id, reject_add_request) => this.kickMember(i, user_id, reject_add_request),
+      sign: () => this.sendGroupSign(i),
+      muteMember: (user_id, duration) => this.setGroupBan(i, user_id, duration),
+      muteAll: enable => this.setGroupWholeKick(i, enable),
+      kickMember: (user_id, reject_add_request) => this.setGroupKick(i, user_id, reject_add_request),
+      quit: is_dismiss => this.setGroupLeave(i, is_dismiss),
       fs: this.getGroupFs(i),
     }
   }

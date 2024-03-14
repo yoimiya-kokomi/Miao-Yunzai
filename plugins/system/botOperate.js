@@ -1,7 +1,7 @@
 export class botOperate extends plugin {
-  constructor () {
+  constructor() {
     super({
-      name: "Bot 操作",
+      name: "botOperate",
       dsc: "Bot 操作",
       event: "message",
       rule: [

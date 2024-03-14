@@ -145,7 +145,7 @@ export class add extends plugin {
 
   /** 添加内容 */
   async addContext() {
-    const context = this.getContext()?.addContext
+    const context = this.getContext("addContext")
     this.isGlobal = context.isGlobal
     await this.getGroupId()
     /** 关键词 */
