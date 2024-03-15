@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto"
 import path from "node:path"
 
-Bot.adapter.push(new class gocqhttpAdapter {
+Bot.adapter.push(new class OneBotv11Adapter {
   constructor() {
     this.id = "QQ"
     this.name = "OneBotv11"

@@ -1,0 +1,5 @@
+{
+  "name": "node-fetch",
+  "type": "module",
+  "main": "index.js"
+}
