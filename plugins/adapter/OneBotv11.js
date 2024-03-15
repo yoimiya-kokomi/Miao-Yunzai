@@ -574,6 +574,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
     const i = {
       ...data.bot.fl.get(user_id),
+      ...data.bot.gml.get(group_id)?.get(user_id),
       ...data,
       group_id,
       user_id,
@@ -585,6 +586,9 @@ Bot.adapter.push(new class OneBotv11Adapter {
       poke: () => this.sendGroupMsg(i, { type: "poke", qq: user_id }),
       mute: duration => this.setGroupBan(i, i.user_id, duration),
       kick: reject_add_request => this.setGroupKick(i, i.user_id, reject_add_request),
+      get is_friend() { return data.bot.fl.has(user_id) },
+      get is_owner() { return i.role == "owner" },
+      get is_admin() { return i.role == "admin" },
     }
   }
 
@@ -645,6 +649,8 @@ Bot.adapter.push(new class OneBotv11Adapter {
       kickMember: (user_id, reject_add_request) => this.setGroupKick(i, user_id, reject_add_request),
       quit: is_dismiss => this.setGroupLeave(i, is_dismiss),
       fs: this.getGroupFs(i),
+      get is_owner() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role == "owner" },
+      get is_admin() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role == "admin" },
     }
   }
 
