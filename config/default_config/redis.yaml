@@ -1,5 +1,5 @@
 # redis地址
-host: localhost
+host: 127.0.0.1
 # redis端口
 port: 6379
 # redis用户名，可以为空
