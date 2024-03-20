@@ -914,9 +914,10 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
   message(data, ws) {
     try {
-      const raw = Bot.String(data)
-      data = JSON.parse(data)
-      data.raw = raw
+      data = {
+        ...JSON.parse(data),
+        raw: Bot.String(data),
+      }
     } catch (err) {
       return Bot.makeLog("error", ["解码数据失败", data, err])
     }
