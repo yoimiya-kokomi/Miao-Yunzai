@@ -118,19 +118,6 @@ Bot.adapter.push(new class OneBotv11Adapter {
     }, msg => Bot.sendForwardMsg(msg => this.sendGuildMsg(data, msg), msg))
   }
 
-  async getMsg(data, message_id) {
-    const msg = (await data.bot.sendApi("get_msg", { message_id })).data
-
-    if (msg?.message) {
-      const message = []
-      for (const i of msg.message)
-        message.push({ ...i.data, type: i.type })
-      msg.message = message
-    }
-
-    return msg
-  }
-
   async recallMsg(data, message_id) {
     Bot.makeLog("info", `撤回消息：${message_id}`, data.self_id)
     if (!Array.isArray(message_id))
@@ -141,25 +128,62 @@ Bot.adapter.push(new class OneBotv11Adapter {
     return msgs
   }
 
-  getForwardMsg(data, message_id) {
-    return data.bot.sendApi("get_forward_msg", { message_id })
+  parseMsg(msg) {
+    const array = []
+    for (const i of Array.isArray(msg) ? msg : [msg])
+      if (typeof i == "object")
+        array.push({ ...i.data, type: i.type })
+      else
+        array.push({ type: "text", text: String(i) })
+    return array
+  }
+
+  async getMsg(data, message_id) {
+    const msg = (await data.bot.sendApi("get_msg", { message_id })).data
+    if (msg?.message)
+      msg.message = this.parseMsg(msg.message)
+    return msg
+  }
+
+  async getGroupMsgHistory(data, message_seq, count) {
+    const msgs = (await data.bot.sendApi("get_group_msg_history", {
+      group_id: data.group_id,
+      message_seq,
+      count,
+    })).data?.messages
+
+    for (const i of Array.isArray(msgs) ? msgs : [msgs])
+      if (i?.message)
+        i.message = this.parseMsg(i.message)
+    return msgs
+  }
+
+  async getForwardMsg(data, message_id) {
+    const msgs = (await data.bot.sendApi("get_forward_msg", {
+      message_id,
+    })).data?.messages
+
+    for (const i of Array.isArray(msgs) ? msgs : [msgs])
+      if (i?.message)
+        i.message = this.parseMsg(i.message || i.content)
+    return msgs
   }
 
   async makeForwardMsg(msg) {
-    const messages = []
+    const msgs = []
     for (const i of msg) {
       const [content, forward] = await this.makeMsg(i.message)
       if (forward.length)
-        messages.push(...await this.makeForwardMsg(forward))
+        msgs.push(...await this.makeForwardMsg(forward))
       if (content.length)
-        messages.push({ type: "node", data: {
+        msgs.push({ type: "node", data: {
           name: i.nickname || "匿名消息",
           uin: String(Number(i.user_id) || 80000000),
           content,
           time: i.time,
         }})
     }
-    return messages
+    return msgs
   }
 
   async sendFriendForwardMsg(data, msg) {
@@ -633,6 +657,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       sendFile: (file, name) => this.sendGroupFile(i, file, undefined, name),
       getInfo: () => this.getGroupInfo(i),
       getAvatarUrl: () => `https://p.qlogo.cn/gh/${group_id}/${group_id}/0`,
+      getChatHistory: (seq, cnt) => this.getGroupMsgHistory(i, seq, cnt),
       getMemberArray: () => this.getMemberArray(i),
       getMemberList: () => this.getMemberList(i),
       getMemberMap: () => this.getMemberMap(i),
@@ -721,11 +746,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   makeMessage(data) {
-    const message = []
-    for (const i of data.message)
-      message.push({ ...i.data, type: i.type })
-    data.message = message
-
+    data.message = this.parseMsg(data.message)
     switch (data.message_type) {
       case "private": {
         const name = data.sender.card || data.sender.nickname || data.bot.fl.get(data.user_id)?.nickname
