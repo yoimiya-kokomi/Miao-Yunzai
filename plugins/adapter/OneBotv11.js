@@ -684,7 +684,16 @@ Bot.adapter.push(new class OneBotv11Adapter {
       adapter: this,
       ws: ws,
       sendApi: (action, params) => this.sendApi(ws, action, params),
-      stat: { start_time: data.time },
+      stat: {
+        start_time: data.time,
+        stat: {},
+        get lost_pkt_cnt() { return this.stat.packet_lost },
+        get lost_times() { return this.stat.lost_times },
+        get recv_msg_cnt() { return this.stat.message_received },
+        get recv_pkt_cnt() { return this.stat.packet_received },
+        get sent_msg_cnt() { return this.stat.message_sent },
+        get sent_pkt_cnt() { return this.stat.packet_sent },
+      },
       model: "TRSS Yunzai ",
 
       info: {},
@@ -907,17 +916,8 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   heartbeat(data) {
-    if (data.status?.stat)
-      data.bot.stat = {
-        ...data.status,
-        lost_pkt_cnt: data.status.stat.packet_lost,
-        lost_times: data.status.stat.lost_times,
-        recv_msg_cnt: data.status.stat.message_received,
-        recv_pkt_cnt: data.status.stat.packet_received,
-        sent_msg_cnt: data.status.stat.message_sent,
-        sent_pkt_cnt: data.status.stat.packet_sent,
-        start_time: data.bot.stat.start_time,
-      }
+    if (data.status)
+      Object.assign(data.bot.stat, data.status)
   }
 
   makeMeta(data, ws) {
