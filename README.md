@@ -36,7 +36,8 @@ Yunzai 应用端，支持多账号，支持协议端：OneBotv11、ComWeChat、G
 
 ### 手动安装
 
-> 环境准备： Windows or Linux，[Node.js(>=v21)](http://nodejs.cn/download)，[Redis](https://redis.io/docs/getting-started/installation)
+> 环境准备：Windows/Linux/MacOS/Android  
+> [Node.js(>=v21)](https://nodejs.org), [Redis](https://redis.io), [Git](https://git-scm.com), [Chrome(可选)](https://google.cn/chrome)
 
 1. Git Clone 项目
 
