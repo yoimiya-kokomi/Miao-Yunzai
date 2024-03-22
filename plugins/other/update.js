@@ -1,35 +1,38 @@
-import cfg from '../../lib/config/config.js'
-import lodash from 'lodash'
-import fs from 'node:fs/promises'
-import { Restart } from './restart.js'
+import cfg from "../../lib/config/config.js"
+import lodash from "lodash"
+import fs from "node:fs/promises"
+import { Restart } from "./restart.js"
 
 let uping = false
 
 export class update extends plugin {
   constructor() {
     super({
-      name: '更新',
-      dsc: '#更新 #强制更新',
-      event: 'message',
+      name: "更新",
+      dsc: "#更新 #强制更新",
+      event: "message",
       priority: 4000,
       rule: [
         {
-          reg: '^#更新日志',
-          fnc: 'updateLog'
+          reg: "^#更新日志",
+          fnc: "updateLog"
         },
         {
-          reg: '^#(强制)?更新',
-          fnc: 'update'
+          reg: "^#(安?静)?(强制)?更新",
+          fnc: "update"
         },
         {
-          reg: '^#全部(强制)?更新$',
-          fnc: 'updateAll',
-          permission: 'master'
+          reg: "^#全部(安?静)?(强制)?更新$",
+          fnc: "updateAll",
+          permission: "master"
         }
       ]
     })
+    this.typeName = "TRSS-Yunzai"
+  }
 
-    this.typeName = 'TRSS-Yunzai'
+  get quiet() {
+    return /^#(全部)?(安?静)/.test(this.e.msg)
   }
 
   init() {
@@ -37,7 +40,7 @@ export class update extends plugin {
       this.e = {
         isMaster: true,
         logFnc: "[自动更新]",
-        msg: "#全部更新",
+        msg: "#全部静更新",
         reply: msg => Bot.sendMasterMsg(msg),
       }
       this.autoUpdate()
@@ -53,42 +56,39 @@ export class update extends plugin {
 
   async update() {
     if (!this.e.isMaster) return false
-    if (uping) return this.reply('已有命令更新中..请勿重复操作')
-
-    if (/详细|详情|面板|面版/.test(this.e.msg)) return false
+    if (uping) {
+      await this.reply("正在更新，请稍候再试")
+      return false
+    }
 
     /** 获取插件 */
-    let plugin = await this.getPlugin()
+    const plugin = await this.getPlugin()
     if (plugin === false) return false
 
+    uping = true
     await this.runUpdate(plugin)
 
     if (this.isPkgUp)
       await Bot.exec("pnpm install")
     if (this.isUp)
       this.restart()
+    uping = false
   }
 
-  async getPlugin(plugin = '') {
-    if (!plugin) {
-      plugin = this.e.msg.replace(/#(强制)?更新(日志)?/, '')
-      if (!plugin) return ''
-    }
-
-    if (!await Bot.fsStat(`plugins/${plugin}/.git`)) return false
-
+  async getPlugin(plugin = this.e.msg.replace(/#(安?静)?(强制)?更新(日志)?/, "")) {
+    if (!plugin) return ""
+    if (!await Bot.fsStat(`plugins/${plugin}/.git`))
+      return false
     this.typeName = plugin
     return plugin
   }
 
-  async runUpdate(plugin = '') {
-    this.isNowUp = false
+  async runUpdate(plugin = "") {
+    let cm = "git pull --no-rebase"
+    let type = "更新"
 
-    let cm = 'git pull --no-rebase'
-
-    let type = '更新'
-    if (this.e.msg.includes('强制')) {
-      type = '强制更新'
+    if (this.e.msg.includes("强制")) {
+      type = "强制更新"
       cm = `git reset --hard && git pull --rebase --allow-unrelated-histories`
     }
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
@@ -96,11 +96,9 @@ export class update extends plugin {
     this.oldCommitId = await this.getcommitId(plugin)
 
     logger.mark(`${this.e.logFnc} 开始${type}：${this.typeName}`)
-
-    await this.reply(`开始${type} ${this.typeName}`)
-    uping = true
+    if (!this.quiet)
+      await this.reply(`开始${type} ${this.typeName}`)
     const ret = await Bot.exec(cm)
-    uping = false
 
     ret.stdout = String(ret.stdout)
     if (ret.error) {
@@ -111,7 +109,8 @@ export class update extends plugin {
 
     const time = await this.getTime(plugin)
     if (/Already up|已经是最新/g.test(ret.stdout)) {
-      await this.reply(`${this.typeName} 已是最新\n最后更新时间：${time}`)
+      if (!this.quiet)
+        await this.reply(`${this.typeName} 已是最新\n最后更新时间：${time}`)
     } else {
       this.isUp = true
       if (/package\.json/.test(ret.stdout))
@@ -124,14 +123,14 @@ export class update extends plugin {
     return true
   }
 
-  async getcommitId(plugin = '') {
-    let cm = 'git rev-parse --short HEAD'
+  async getcommitId(plugin = "") {
+    let cm = "git rev-parse --short HEAD"
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
     cm = await Bot.exec(cm)
     return lodash.trim(String(cm.stdout))
   }
 
-  async getTime(plugin = '') {
+  async getTime(plugin = "") {
     let cm = 'git log -1 --pretty=%cd --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
     cm = await Bot.exec(cm)
@@ -139,23 +138,23 @@ export class update extends plugin {
   }
 
   async gitErr(error, stdout) {
-    const msg = '更新失败！'
+    const msg = "更新失败！"
 
-    if (error.includes('Timed out')) {
-      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, '')
+    if (error.includes("Timed out")) {
+      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, "")
       return this.reply(`${msg}\n连接超时：${remote}`)
     }
 
     if (/Failed to connect|unable to access/g.test(error)) {
-      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, '')
+      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, "")
       return this.reply(`${msg}\n连接失败：${remote}`)
     }
 
-    if (error.includes('be overwritten by merge')) {
+    if (error.includes("be overwritten by merge")) {
       return this.reply(`${msg}\n存在冲突：\n${error}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
     }
 
-    if (stdout.includes('CONFLICT')) {
+    if (stdout.includes("CONFLICT")) {
       return this.reply(`${msg}\n存在冲突：\n${error}${stdout}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
     }
 
@@ -163,11 +162,14 @@ export class update extends plugin {
   }
 
   async updateAll() {
-    const dirs = await fs.readdir('./plugins/')
+    if (uping) {
+      await this.reply("正在更新，请稍候再试")
+      return false
+    }
 
+    uping = true
     await this.runUpdate()
-
-    for (let plu of dirs) {
+    for (let plu of await fs.readdir("plugins")) {
       plu = await this.getPlugin(plu)
       if (plu === false) continue
       await this.runUpdate(plu)
@@ -177,13 +179,14 @@ export class update extends plugin {
       await Bot.exec("pnpm install")
     if (this.isUp)
       this.restart()
+    uping = false
   }
 
   restart() {
     new Restart(this.e).restart()
   }
 
-  async getLog(plugin = '') {
+  async getLog(plugin = "") {
     let cm = 'git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"'
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
 
@@ -192,32 +195,32 @@ export class update extends plugin {
       logger.error(cm.error)
       await this.reply(String(cm.error))
     }
-    const logAll = String(cm.stdout).trim().split('\n')
+    const logAll = String(cm.stdout).trim().split("\n")
 
     if (!logAll.length) return false
 
     let log = []
     for (let str of logAll) {
-      str = str.split('||')
+      str = str.split("||")
       if (str[0] == this.oldCommitId) break
-      if (str[1].includes('Merge branch')) continue
+      if (str[1].includes("Merge branch")) continue
       log.push(str[1])
     }
     let line = log.length
-    log = log.join('\n\n')
+    log = log.join("\n\n")
 
-    if (log.length <= 0) return ''
+    if (log.length <= 0) return ""
 
-    cm = 'git config -l'
+    cm = "git config -l"
     if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
     cm = await Bot.exec(cm)
-    const end = String(cm.stdout).match(/remote\..*\.url=.+/g).join('\n\n').replace(/remote\..*\.url=/g, '').replace(/\/\/([^@]+)@/, '//')
+    const end = String(cm.stdout).match(/remote\..*\.url=.+/g).join("\n\n").replace(/remote\..*\.url=/g, "").replace(/\/\/([^@]+)@/, "//")
     if (cm.error) {
       logger.error(cm.error)
       await this.reply(String(cm.error))
     }
 
-    return Bot.makeForwardArray([`${plugin || 'TRSS-Yunzai'} 更新日志，共${line}条`, log, end])
+    return Bot.makeForwardArray([`${plugin || "TRSS-Yunzai"} 更新日志，共${line}条`, log, end])
   }
 
   async updateLog() {
