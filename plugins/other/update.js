@@ -77,10 +77,12 @@ export class update extends plugin {
 
   async getPlugin(plugin = this.e.msg.replace(/#(安?静)?(强制)?更新(日志)?/, "")) {
     if (!plugin) return ""
-    if (!await Bot.fsStat(`plugins/${plugin}/.git`))
-      return false
-    this.typeName = plugin
-    return plugin
+    for (const i of [plugin, `${plugin}-Plugin`, `${plugin}-plugin`])
+      if (await Bot.fsStat(`plugins/${i}/.git`)) {
+        this.typeName = i
+        return i
+      }
+    return false
   }
 
   async runUpdate(plugin = "") {
@@ -169,10 +171,10 @@ export class update extends plugin {
 
     uping = true
     await this.runUpdate()
-    for (let plu of await fs.readdir("plugins")) {
-      plu = await this.getPlugin(plu)
-      if (plu === false) continue
-      await this.runUpdate(plu)
+    for (let plugin of await fs.readdir("plugins")) {
+      plugin = await this.getPlugin(plugin)
+      if (plugin === false) continue
+      await this.runUpdate(plugin)
     }
 
     if (this.isPkgUp)
