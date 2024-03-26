@@ -92,7 +92,7 @@ export default class MysApi {
       headers = { ...headers, ...data.headers }
     }
 
-    if (type !== 'getFp' && !headers['x-rpc-device_fp'] && this._device_fp.data.device_fp) {
+    if (type !== 'getFp' && !headers['x-rpc-device_fp'] && this._device_fp.data?.device_fp) {
       headers['x-rpc-device_fp'] = this._device_fp.data.device_fp
     }
 
