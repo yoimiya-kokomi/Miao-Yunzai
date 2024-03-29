@@ -14,9 +14,11 @@ disableMsg: "私聊功能已禁用，仅支持发送cookie，抽卡记录链接�
 # 私聊通行字符串
 disableAdopt:
   - stoken
+
 #白名单群，配置后只在该群生效
 whiteGroup:
-
+#白名单qq
+whiteQQ:
 #黑名单群
 blackGroup:
   - 213938015

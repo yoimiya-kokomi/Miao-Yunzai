@@ -70,7 +70,7 @@ export default class MysApi {
   }
 
   async getData(type, data = {}, cached = false) {
-    if (!this._device_fp && !data?.Getfp) {
+    if (!this._device_fp && !data?.Getfp && !data?.headers?.['x-rpc-device_fp']) {
       this._device_fp = await this.getData('getFp', {
         seed_id: this.generateSeed(16),
         Getfp: true
@@ -92,8 +92,8 @@ export default class MysApi {
       headers = { ...headers, ...data.headers }
     }
 
-    if (type !== 'getFp' && !headers['x-rpc-device_fp']) {
-      headers['x-rpc-device_fp'] = this._device_fp.data?.device_fp
+    if (type !== 'getFp' && !headers['x-rpc-device_fp'] && this._device_fp.data?.device_fp) {
+      headers['x-rpc-device_fp'] = this._device_fp.data.device_fp
     }
 
     let param = {

@@ -23,7 +23,7 @@ export class gcLog extends plugin {
           fnc: "logJson"
         },
         {
-          reg: "^#?(原神|星铁)?(全部)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥|全部)池*(记录|祈愿|分析)$",
+          reg: "^#?(原神|星铁)?(全部)?(抽卡|抽奖|角色|武器|集录|常驻|up|新手|光锥|全部)池*(记录|祈愿|分析)$",
           fnc: "getLog"
         },
         {
@@ -39,7 +39,7 @@ export class gcLog extends plugin {
           fnc: "helpPort"
         },
         {
-          reg: "^#?(原神|星铁)?(抽卡|抽奖|角色|武器|常驻|up|新手|光锥)池*统计$",
+          reg: "^#?(原神|星铁)?(抽卡|抽奖|角色|武器|集录|常驻|up|新手|光锥)池*统计$",
           fnc: "logCount"
         }
       ]
@@ -55,6 +55,9 @@ export class gcLog extends plugin {
         ], [
           { text: "武器记录", callback: `${this.prefix}武器记录` },
           { text: "武器统计", callback: `${this.prefix}武器统计` },
+        ], [
+          { text: "集录记录", callback: `${this.prefix}集录记录` },
+          { text: "集录统计", callback: `${this.prefix}集录统计` },
         ], [
           { text: "常驻记录", callback: `${this.prefix}常驻记录` },
           { text: "常驻统计", callback: `${this.prefix}常驻统计` },
