@@ -157,14 +157,15 @@ export default class Calculator extends base {
         },
         skill_list: []
       }
-      for (let data of skillList) {
-        let skill = {
-          item_id: data.point_id,
-          cur_level: data.cur_level,
-          target_level: data.target_level
-        }
-        if (Number(this.setSkill[0]) >= data.min_level_limit) body.skill_list.push(skill)
-      }
+
+      let srSkills = this.setSkill.slice(2)
+      skillList.forEach((v, k) => {
+        body.skill_list.push({
+          item_id: v.point_id,
+          cur_level: v.cur_level,
+          target_level: Number(srSkills[k]) || v.target_level
+        })
+      })
     } else {
       skillList = skillList.filter((item) => item.max_level != 1)
 
