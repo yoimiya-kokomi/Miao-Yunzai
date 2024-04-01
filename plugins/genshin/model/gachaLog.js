@@ -864,8 +864,7 @@ export default class GachaLog extends base {
   }
 
   getServer() {
-    let uid = this.uid
-    switch (String(uid)[0]) {
+    switch (String(this.uid).slice(0, -8)) {
       case "1":
       case "2":
         return this.e.isSr ? "prod_gf_cn" : "cn_gf01" // 官服
@@ -876,6 +875,7 @@ export default class GachaLog extends base {
       case "7":
         return this.e.isSr ? "prod_official_euro" : "os_euro" // 欧服
       case "8":
+      case "18":
         return this.e.isSr ? "prod_official_asia" : "os_asia" // 亚服
       case "9":
         return this.e.isSr ? "prod_official_cht" : "os_cht" // 港澳台服
