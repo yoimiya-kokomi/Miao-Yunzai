@@ -13,25 +13,22 @@ function exec(cmd) { try {
   return false
 }}
 
-function rmdir(dir) { try {
-  if (!fs.existsSync(dir)) return true
-  for (const i of fs.readdirSync(dir))
-    rm(`${dir}/${i}`)
-  fs.rmdirSync(dir)
-  return true
+function rm(file) { try {
+  if (!fs.existsSync(file)) return true
+  return process.platform == "win32" ?
+    exec(`rd /s /q "${file.replace(/\//g, "\\")}"`) :
+    exec(`rm -rf "${file}"`)
 } catch (err) {
-  console.error("删除", dir, "错误", err)
+  console.error("删除", file, "错误", err)
   return false
 }}
 
-function rm(file) { try {
-  if (!fs.existsSync(file)) return true
-  if (fs.statSync(file).isDirectory())
-    return rmdir(file)
-  fs.unlinkSync(file)
-  return true
+function mv(file, target) { try {
+  if (!fs.existsSync(file)) return false
+  if (fs.existsSync(target)) rm(target)
+  return fs.renameSync(file, target)
 } catch (err) {
-  console.error("删除", file, "错误", err)
+  console.error("移动", file, target, "错误", err)
   return false
 }}
 
@@ -55,15 +52,58 @@ const qq = readYaml("config/config/qq.yaml")
 
 exec("git remote add trss https://gitee.com/TimeRainStarSky/Yunzai")
 exec("git fetch trss main")
-rm("config/config")
 exec("git reset --hard")
 exec("git clean -df")
+mv("config/config", "config/config_miao")
 exec("git checkout --track trss/main")
 rm("plugins/ICQQ-Plugin")
-exec("git clone https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin plugins/ICQQ-Plugin")
+exec("git clone --depth 1 --single-branch https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin plugins/ICQQ-Plugin")
 if (qq.qq) writeYaml("config/ICQQ.yaml", { bot, token: [`${qq.qq}:${qq.pwd}:${qq.platform}`] })
 rm("plugins/genshin")
-exec("git clone https://gitee.com/TimeRainStarSky/Yunzai-genshin plugins/genshin")
+exec("git clone --depth 1 --single-branch https://gitee.com/TimeRainStarSky/Yunzai-genshin plugins/genshin")
 exec("pnpm install --force")
 
-console.log("迁移完成，请查看教程 启动协议端\nhttps://gitee.com/TimeRainStarSky/Yunzai")
+console.log("迁移完成，请查看教程 启动协议端\nhttps://gitee.com/TimeRainStarSky/Yunzai\n输入 node miao 回 Miao-Yunzai")
+fs.writeFileSync("miao.js", `console.log("正迁移到 Miao-Yunzai")
+
+import fs from "node:fs"
+import { execSync } from "child_process"
+
+function exec(cmd) { try {
+  console.log(\`执行命令 [\${cmd}]\`)
+  console.log(execSync(cmd).toString())
+  return true
+} catch (err) {
+  console.error("执行", cmd, "失败", err)
+  return false
+}}
+
+function rm(file) { try {
+  if (!fs.existsSync(file)) return true
+  return process.platform == "win32" ?
+    exec(\`rd /s /q "\${file.replace(/\\//g, "\\\\")}"\`) :
+    exec(\`rm -rf "\${file}"\`)
+} catch (err) {
+  console.error("删除", file, "错误", err)
+  return false
+}}
+
+function mv(file, target) { try {
+  if (!fs.existsSync(file)) return false
+  if (fs.existsSync(target)) rm(target)
+  return fs.renameSync(file, target)
+} catch (err) {
+  console.error("移动", file, target, "错误", err)
+  return false
+}}
+
+mv("config/config_miao", "config/config")
+exec("git reset --hard")
+exec("git clean -df")
+rm("plugins/ICQQ-Plugin")
+rm("plugins/genshin")
+exec("git checkout master")
+exec("git branch -D main")
+exec("pnpm install --force")
+
+console.log("迁移完成")`, "utf-8")
