@@ -574,7 +574,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       sendForwardMsg: msg => this.sendFriendForwardMsg(i, msg),
       sendFile: (file, name) => this.sendFriendFile(i, file, name),
       getInfo: () => this.getFriendInfo(i),
-      getAvatarUrl: () => i.avatar || `https://q1.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
+      getAvatarUrl: () => i.avatar || `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
       thumbUp: times => this.sendLike(i, times),
     }
   }
@@ -607,7 +607,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       ...this.pickFriend(i, user_id),
       ...i,
       getInfo: () => this.getMemberInfo(i),
-      getAvatarUrl: () => i.avatar || `https://q1.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
+      getAvatarUrl: () => i.avatar || `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
       poke: () => this.sendGroupMsg(i, { type: "poke", qq: user_id }),
       mute: duration => this.setGroupBan(i, i.user_id, duration),
       kick: reject_add_request => this.setGroupKick(i, i.user_id, reject_add_request),
@@ -700,7 +700,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       info: {},
       get uin() { return this.info.user_id },
       get nickname() { return this.info.nickname },
-      get avatar() { return `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.uin}` },
+      get avatar() { return `https://q.qlogo.cn/g?b=qq&s=0&nk=${this.uin}` },
 
       setProfile: profile => this.setProfile(data, profile),
       setNickname: nickname => this.setProfile(data, { nickname }),

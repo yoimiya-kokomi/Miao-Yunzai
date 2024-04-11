@@ -141,7 +141,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     return {
       ...i,
       sendMsg: msg => this.sendFriendMsg(i, msg),
-      getAvatarUrl: () => `https://q1.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
+      getAvatarUrl: () => `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
     }
   }
 
@@ -267,7 +267,7 @@ Bot.adapter.push(new class OPQBotAdapter {
       uin: id,
       info: { id },
       get nickname() { return this.info.nickname },
-      get avatar() { return `https://q1.qlogo.cn/g?b=qq&s=0&nk=${this.uin}` },
+      get avatar() { return `https://q.qlogo.cn/g?b=qq&s=0&nk=${this.uin}` },
 
       version: {
         id: this.id,
