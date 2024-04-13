@@ -132,6 +132,11 @@ if [ -d $XIAOYAO_CVS_PATH"/.git" ]; then
     if [[ ! -f "$HOME/.ovo/xiaoyao.ok" ]]; then
         set -e
         echo -e "\n ================ \n ${Info} ${GreenBG} 更新 xiaoyao-cvs 插件运行依赖 ${Font} \n ================ \n"
+        cd $WORK_DIR
+        pnpm install <<EOF
+        y
+EOF
+        cd $XIAOYAO_CVS_PATH
         pnpm add promise-retry superagent -w
         touch ~/.ovo/xiaoyao.ok
         set +e
