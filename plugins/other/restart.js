@@ -1,8 +1,19 @@
 import plugin from '../../lib/plugins/plugin.js'
 import { createRequire } from 'module'
+import fetch from 'node-fetch'
+import net from 'net'
 
 const require = createRequire(import.meta.url)
 const { exec } = require('child_process')
+
+const isPortTaken = async (port) => {
+  return new Promise((resolve) => {
+    const tester = net.createServer()
+      .once('error', () => resolve(true))
+      .once('listening', () => tester.once('close', () => resolve(false)).close())
+      .listen(port);
+  });
+};
 
 export class Restart extends plugin {
   constructor (e = '') {
@@ -62,30 +73,44 @@ export class Restart extends plugin {
     })
 
     let npm = await this.checkPnpm()
-
-    try {
-      await redis.set(this.key, data, { EX: 120 })
-      let cm = `${npm} start`
-      if (process.argv[1].includes('pm2')) {
-        cm = `${npm} run restart`
-      }
-
-      exec(cm, { windowsHide: true }, (error, stdout, stderr) => {
-        if (error) {
+    await redis.set(this.key, data, { EX: 120 })
+    if(await isPortTaken(27881)) {
+      try {
+        let result = await fetch(`http://localhost:27881/restart`)
+        result = await result.text()
+        if(result !== `OK`) {
           redis.del(this.key)
-          this.e.reply(`操作失败！\n${error.stack}`)
-          logger.error(`重启失败\n${error.stack}`)
-        } else if (stdout) {
-          logger.mark('重启成功，运行已由前台转为后台')
-          logger.mark(`查看日志请用命令：${npm} run log`)
-          logger.mark(`停止后台运行命令：${npm} stop`)
-          process.exit()
+          this.e.reply(`操作失败！`)
+          logger.error(`重启失败`)
         }
-      })
-    } catch (error) {
-      redis.del(this.key)
-      let e = error.stack ?? error
-      this.e.reply(`操作失败！\n${e}`)
+      } catch(error) {
+        redis.del(this.key)
+        this.e.reply(`操作失败！\n${error}`)
+      }
+    } else {
+      try {
+        let cm = `${npm} start`
+        if (process.argv[1].includes('pm2')) {
+          cm = `${npm} run restart`
+        }
+  
+        exec(cm, { windowsHide: true }, (error, stdout, stderr) => {
+          if (error) {
+            redis.del(this.key)
+            this.e.reply(`操作失败！\n${error.stack}`)
+            logger.error(`重启失败\n${error.stack}`)
+          } else if (stdout) {
+            logger.mark('重启成功，运行已由前台转为后台')
+            logger.mark(`查看日志请用命令：${npm} run log`)
+            logger.mark(`停止后台运行命令：${npm} stop`)
+            process.exit()
+          }
+        })
+      } catch (error) {
+        redis.del(this.key)
+        let e = error.stack ?? error
+        this.e.reply(`操作失败！\n${e}`)
+      }
     }
 
     return true
@@ -107,6 +132,18 @@ export class Restart extends plugin {
   }
 
   async stop () {
+    if(await isPortTaken(27881)) {
+      try {
+        logger.mark('关机成功，已停止运行')
+        await this.e.reply(`关机成功，已停止运行`)
+        await fetch(`http://localhost:27881/exit`)
+        return
+      } catch(error) {
+        this.e.reply(`操作失败！\n${error}`)
+        logger.error(`关机失败\n${error}`)
+      }
+    }
+
     if (!process.argv[1].includes('pm2')) {
       logger.mark('关机成功，已停止运行')
       await this.e.reply('关机成功，已停止运行')
