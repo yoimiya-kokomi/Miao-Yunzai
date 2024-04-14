@@ -181,7 +181,8 @@ export class update extends plugin {
 
     const originalReply = this.reply
 
-    if (/^#静默全部(强制)?更新$/.test(this.e.msg)) {
+    const testReg = /^#静默全部(强制)?更新$/.test(this.e.msg)
+    if (testReg) {
       await this.reply(`开始执行静默全部更新,请稍等...`)
       this.reply = (message) => {
         this.messages.push(message)
@@ -197,7 +198,9 @@ export class update extends plugin {
       await this.runUpdate(plu)
     }
 
-    await this.reply(await common.makeForwardMsg(this.e, this.messages))
+    if (testReg) {
+      await this.reply(await common.makeForwardMsg(this.e, this.messages))
+    }
 
     if (this.isUp) {
       // await this.reply('即将执行重启，以应用更新')
