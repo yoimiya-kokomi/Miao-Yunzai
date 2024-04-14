@@ -2,6 +2,8 @@ import plugin from '../../lib/plugins/plugin.js'
 import { createRequire } from 'module'
 import fetch from 'node-fetch'
 import net from 'net'
+import fs from 'fs'
+import YAML from 'yaml'
 
 const require = createRequire(import.meta.url)
 const { exec } = require('child_process')
@@ -62,6 +64,11 @@ export class Restart extends plugin {
   }
 
   async restart () {
+    let restart_port
+    try {
+      restart_port = YAML.parse(fs.readFileSync(`./config/config/bot.yaml`, `utf-8`))
+      restart_port = restart_port.restart_port || 27881
+    } catch { }
     await this.e.reply('开始执行重启，请稍等...')
     logger.mark(`${this.e.logFnc} 开始执行重启，请稍等...`)
 
@@ -74,9 +81,9 @@ export class Restart extends plugin {
 
     let npm = await this.checkPnpm()
     await redis.set(this.key, data, { EX: 120 })
-    if(await isPortTaken(27881)) {
+    if(await isPortTaken(restart_port || 27881)) {
       try {
-        let result = await fetch(`http://localhost:27881/restart`)
+        let result = await fetch(`http://localhost:${restart_port || 27881}/restart`)
         result = await result.text()
         if(result !== `OK`) {
           redis.del(this.key)
@@ -132,11 +139,16 @@ export class Restart extends plugin {
   }
 
   async stop () {
-    if(await isPortTaken(27881)) {
+    let restart_port
+    try {
+      restart_port = YAML.parse(fs.readFileSync(`./config/config/bot.yaml`, `utf-8`))
+      restart_port = restart_port.restart_port || 27881
+    } catch { }
+    if(await isPortTaken(restart_port || 27881)) {
       try {
         logger.mark('关机成功，已停止运行')
         await this.e.reply(`关机成功，已停止运行`)
-        await fetch(`http://localhost:27881/exit`)
+        await fetch(`http://localhost:${restart_port || 27881}/exit`)
         return
       } catch(error) {
         this.e.reply(`操作失败！\n${error}`)

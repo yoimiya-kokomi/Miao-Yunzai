@@ -1,6 +1,8 @@
 import { spawn } from 'child_process';
 import log4js from 'log4js';
 import http from 'http'
+import YAML from 'yaml'
+import fs from 'fs'
 
 /* keep ssh run */
 
@@ -47,5 +49,11 @@ const serverHttpexit = http.createServer(async (req, res) => {
     res.end('Not Found\n');
   }
 })
+let restart_port
+try {
+  restart_port = YAML.parse(fs.readFileSync(`./config/config/bot.yaml`, `utf-8`))
+  restart_port = restart_port.restart_port || 27881
+} catch {}
 
-serverHttpexit.listen(27881, () => { });
+logger.info(`restart_api run on port ${restart_port || 27881}`)
+serverHttpexit.listen(restart_port || 27881, () => { });
