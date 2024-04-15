@@ -43,7 +43,7 @@ export class install extends plugin {
 
   async install() {
     if (insing) {
-      await this.reply("已有命令安装中..请勿重复操作")
+      await this.reply("正在安装，请稍候再试")
       return false
     }
 
@@ -73,7 +73,7 @@ export class install extends plugin {
   }
 
   async runInstall(name, url, path) {
-    logger.mark(`${this.e.logFnc} 开始安装：${name} 插件`)
+    logger.mark(`${this.e.logFnc} 开始安装 ${name} 插件`)
     await this.reply(`开始安装 ${name} 插件`)
 
     const cm = `git clone --depth 1 --single-branch "${url}" "${path}"`
@@ -84,7 +84,7 @@ export class install extends plugin {
     insing = false
 
     if (ret.error) {
-      logger.mark(`${this.e.logFnc} 插件安装失败：${name}`)
+      logger.mark(`${this.e.logFnc} 插件安装失败 ${name}`)
       this.gitErr(ret.error, ret.stdout)
       return false
     }

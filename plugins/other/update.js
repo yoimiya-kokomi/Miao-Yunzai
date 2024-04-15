@@ -97,14 +97,14 @@ export class update extends plugin {
 
     this.oldCommitId = await this.getcommitId(plugin)
 
-    logger.mark(`${this.e.logFnc} 开始${type}：${this.typeName}`)
+    logger.mark(`${this.e.logFnc} 开始${type} ${this.typeName}`)
     if (!this.quiet)
       await this.reply(`开始${type} ${this.typeName}`)
     const ret = await Bot.exec(cm)
 
     ret.stdout = String(ret.stdout)
     if (ret.error) {
-      logger.mark(`${this.e.logFnc} 更新失败：${this.typeName}`)
+      logger.mark(`${this.e.logFnc} 更新失败 ${this.typeName}`)
       this.gitErr(Bot.String(ret.error), ret.stdout)
       return false
     }
