@@ -7,6 +7,8 @@ ignore_self: true
 resend: false
 # 发送消息错误时是否通知主人
 sendmsg_error: false
+# 重启API端口 仅ksr.js生效
+restart_port: 27881
 # ffmpeg
 ffmpeg_path:
 ffprobe_path:
