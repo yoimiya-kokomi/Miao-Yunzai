@@ -4,6 +4,8 @@ import fs from 'node:fs'
 import lodash from 'lodash'
 import gsCfg from '../model/gsCfg.js'
 import YAML from 'yaml'
+import common from '../../../lib/common/common.js'
+import fetch from 'node-fetch'
 
 gsCfg.cpCfg('mys', 'pushNews')
 export class mysNews extends plugin {
@@ -38,6 +40,9 @@ export class mysNews extends plugin {
           reg: '^#(星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?推送(公告|资讯)$',
           permission: 'master',
           fnc: 'mysNewsTask'
+        },{
+          reg: '^#原神(开启|关闭)到期活动(预警)?(推送)?$',
+          fnc: 'setActivityPush'
         }
       ]
     })
@@ -68,9 +73,132 @@ export class mysNews extends plugin {
 
   async mysNewsTask() {
     let mysNews = new MysNews(this.e)
+    this.ActivityPush()
     await mysNews.mysNewsTask()
   }
+  async ActivityPush() {
+    let now = new Date()
+    now = now.getHours();
+    if(now < 10) return
+    let pushGroupList
+    try {
+      pushGroupList = YAML.parse(fs.readFileSync(this.file, `utf8`))
+    } catch (error) {
+      logger.error(`${this.logFnc} 原神活动到期预警推送失败：无法获取配置文件信息\n${error}`)
+      return
+    }
+    if(!pushGroupList.gsActivityPush || pushGroupList.gsActivityPush == {}) return
+    let BotidList = []
+    for (let item in pushGroupList.gsActivityPush) {
+      BotidList.push(item)
+    }
+    let ActivityList = await this.getGsActivity()
+    if(ActivityList.length === 0) return
+    for (let item of BotidList) {
+      let redisapgl = await redis.get(`Yz:apgl:${item}`)
+      let date = await this.getDate()
+      redisapgl = JSON.parse(redisapgl)
+      if(!redisapgl || redisapgl.date !== date) {
+        redisapgl = {
+          date,
+          GroupList: pushGroupList.gsActivityPush[item]
+        }
+      }
+      if(!Array.isArray(redisapgl.GroupList) || redisapgl.GroupList.length == 0) break
+      if(!Bot[item]) break
+      for (let a of ActivityList) {
+        let endDt = a.end_time
+        endDt = endDt.replace(/\s/, `T`)
+        let todayt = new Date()
+        endDt = new Date(endDt)
+        let sydate = await this.calculateRemainingTime(todayt, endDt)
+        let msgList = [
+          `【原神活动即将结束通知】`,
+          `\n活动:${a.subtitle}`,
+          segment.image(a.banner),
+          `描述:${a.title}`,
+          `\n活动剩余时间:${sydate.days}天${sydate.hours}小时${sydate.minutes}分钟${sydate.seconds}秒`,
+          `\n活动结束时间:${a.end_time}`
+        ]
+        await common.sleep(5000)
+        Bot[item].pickGroup(redisapgl.GroupList[0]).sendMsg(msgList)
+      }
+      redisapgl.GroupList.shift()
+      await redis.set(`Yz:apgl:${item}`, JSON.stringify(redisapgl))
+    }
+  }
+  async getDate() {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = currentDate.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`
+  }
+  async getGsActivity() {
+    let gshd
+    try {
+      gshd = await fetch(`https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnList?game=hk4e&game_biz=hk4e_cn&lang=zh-cn&bundle_id=hk4e_cn&platform=pc&region=cn_gf01&level=55&uid=100000000`)
+      gshd = await gshd.json()
+    } catch {
+      return []
+    }
+    let hdlist = []
+    let result = []
+    for (let item of gshd.data.list[1].list) {
+        if(item.tag_label.includes(`活动`) && !item.title.includes(`传说任务`) && !item.title.includes(`游戏公告`)) hdlist.push(item)
+    }
+    for (let item of hdlist) {
+      let endDt = item.end_time
+      endDt = endDt.replace(/\s/, `T`)
+      let todayt = new Date()
+      endDt = new Date(endDt)
+      let sydate = await this.calculateRemainingTime(todayt, endDt)
+      if(sydate.days <= 1) result.push(item)
+    }
+    return result
+  }
+  async calculateRemainingTime(startDate, endDate) {
+    const difference = endDate - startDate;
 
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+    return { days, hours, minutes, seconds };
+  }
+  async setActivityPush() {
+    if (!this.e.isGroup) {
+      await this.reply('推送请在群聊中设置')
+      return
+    }
+    if (!this.e.member?.is_admin && !this.e.isMaster) {
+      await this.reply('暂无权限，只有管理员才能操作', true)
+      return true
+    }
+    let cfg = gsCfg.getConfig('mys', 'pushNews')
+    if(!cfg.gsActivityPush) cfg.gsActivityPush = {}
+    if(!Array.isArray(cfg.gsActivityPush[this.e.self_id])) cfg.gsActivityPush[this.e.self_id] = []
+    let model
+    let msg = `原神活动到期预警推送已`
+    if(this.e.msg.includes('开启')) {
+      model = '开启'
+      cfg.gsActivityPush[this.e.self_id].push(this.e.group_id)
+      cfg.gsActivityPush[this.e.self_id] = lodash.uniq(cfg.gsActivityPush[this.e.self_id])
+      msg += `${model}\n如有即将到期的活动将自动推送至此`
+    } else {
+      model = '关闭'
+      msg += model
+      cfg.gsActivityPush[this.e.self_id] = lodash.difference(cfg.gsActivityPush[this.e.self_id], [this.e.group_id])
+      if (lodash.isEmpty(cfg.gsActivityPush[this.e.self_id]))
+      delete cfg.gsActivityPush[this.e.self_id]
+    }
+    let yaml = YAML.stringify(cfg)
+    fs.writeFileSync(this.file, yaml, 'utf8')
+
+    logger.mark(`${this.e.logFnc} ${model}原神活动到期预警：${this.e.group_id}`)
+    await this.reply(msg)
+  }
   async mysSearch() {
     if (/签到/g.test(this.e.msg)) return false
     let data = await new MysNews(this.e).mysSearch()

@@ -19,6 +19,9 @@ gsannounceGroup: {}
 #原神资讯推送群
 gsinfoGroup: {}
 
+#原神活动到期推送群
+ActivityPush: {}
+
 #崩坏星穹铁道公告推送群
 srannounceGroup: {}
 
