@@ -120,6 +120,7 @@ export class mysNews extends plugin {
           `\n活动剩余时间:${sydate.days}天${sydate.hours}小时${sydate.minutes}分钟${sydate.seconds}秒`,
           `\n活动结束时间:${a.end_time}`
         ]
+        logger.mark(`[米游社活动到期推送] ${a.subtitle}`)
         await common.sleep(5000)
         Bot[item].pickGroup(redisapgl.GroupList[0]).sendMsg(msgList)
       }
