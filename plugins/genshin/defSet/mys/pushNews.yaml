@@ -20,7 +20,7 @@ gsannounceGroup: {}
 gsinfoGroup: {}
 
 #原神活动到期推送群
-ActivityPush: {}
+gsActivityPush: {}
 
 #崩坏星穹铁道公告推送群
 srannounceGroup: {}
