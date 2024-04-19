@@ -40,8 +40,9 @@ export class mysNews extends plugin {
           reg: '^#(星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?推送(公告|资讯)$',
           permission: 'master',
           fnc: 'mysNewsTask'
-        },{
-          reg: '^#原神(开启|关闭)到期活动(预警)?(推送)?$',
+        },
+        {
+          reg: '^#(星铁|原神)(开启|关闭)到期活动(预警)?(推送)?$',
           fnc: 'setActivityPush'
         }
       ]
@@ -84,15 +85,24 @@ export class mysNews extends plugin {
     try {
       pushGroupList = YAML.parse(fs.readFileSync(this.file, `utf8`))
     } catch (error) {
-      logger.error(`[米游社活动到期推送] 原神活动到期预警推送失败：无法获取配置文件信息\n${error}`)
+      logger.error(`[米游社活动到期推送] 活动到期预警推送失败：无法获取配置文件信息\n${error}`)
       return
     }
-    if(!pushGroupList.gsActivityPush || pushGroupList.gsActivityPush == {}) return
+    if((!pushGroupList.gsActivityPush || pushGroupList.gsActivityPush == {}) && (!pushGroupList.srActivityPush || pushGroupList.srActivityPush == {})) return
     let BotidList = []
-    for (let item in pushGroupList.gsActivityPush) {
+    let ActivityPushYaml = {...pushGroupList.gsActivityPush, ...pushGroupList.srActivityPush}
+    for (let item in ActivityPushYaml) {
       BotidList.push(item)
     }
-    let ActivityList = await this.getGsActivity()
+    let gsActivityList = await this.getGsActivity()
+    let srActivityList = await this.getSrActivity()
+    let ActivityList = []
+    for (let item of srActivityList) {
+      ActivityList.push({ game: `sr`, subtitle: item.title, banner: item.img, title: item.title, end_time: item.end_time })
+    }
+    for (let item of gsActivityList) {
+      ActivityList.push({ game: 'gs', subtitle: item.subtitle, banner: item.banner, title: item.title, end_time: item.end_time})
+    }
     if(ActivityList.length === 0) return
     for (let item of BotidList) {
       let redisapgl = await redis.get(`Yz:apgl:${item}`)
@@ -101,19 +111,28 @@ export class mysNews extends plugin {
       if(!redisapgl || redisapgl.date !== date) {
         redisapgl = {
           date,
-          GroupList: pushGroupList.gsActivityPush[item]
+          GroupList: ActivityPushYaml[item]
         }
       }
-      if(!Array.isArray(redisapgl.GroupList) || redisapgl.GroupList.length == 0) break
-      if(!Bot[item]) break
+      if(!Array.isArray(redisapgl.GroupList) || redisapgl.GroupList.length == 0) continue
+      if(!Bot[item]) {
+        redisapgl.GroupList.shift()
+        await redis.set(`Yz:apgl:${item}`, JSON.stringify(redisapgl))
+        continue
+      }
       for (let a of ActivityList) {
+        if((!pushGroupList.srActivityPush || !pushGroupList.srActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `sr`) continue
+        if((!pushGroupList.gsActivityPush || !pushGroupList.gsActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `gs`) continue
+        let pushGame
+        if(a.game === `sr`) pushGame = `星铁`
+        if(a.game === `gs`) pushGame = `原神`
         let endDt = a.end_time
         endDt = endDt.replace(/\s/, `T`)
         let todayt = new Date()
         endDt = new Date(endDt)
         let sydate = await this.calculateRemainingTime(todayt, endDt)
         let msgList = [
-          `【原神活动即将结束通知】`,
+          `【${pushGame}活动即将结束通知】`,
           `\n活动:${a.subtitle}`,
           segment.image(a.banner),
           `描述:${a.title}`,
@@ -159,6 +178,29 @@ export class mysNews extends plugin {
     }
     return result
   }
+  async getSrActivity() {
+    let srhd
+    try {
+      srhd = await fetch(`https://hkrpg-api.mihoyo.com/common/hkrpg_cn/announcement/api/getAnnList?game=hkrpg&game_biz=hkrpg_cn&lang=zh-cn&auth_appid=announcement&authkey_ver=1&bundle_id=hkrpg_cn&channel_id=1&level=65&platform=pc&region=prod_gf_cn&sdk_presentation_style=fullscreen&sdk_screen_transparent=true&sign_type=2&uid=100000000`)
+      srhd = await srhd.json()
+    } catch {
+      return []
+    }
+    let hdlist = []
+    let result = []
+    for (let item of srhd.data.pic_list[0].type_list[0].list) {
+      if (item.title) hdlist.push(item)
+    }
+    for (let item of hdlist) {
+      let endDt = item.end_time
+      endDt = endDt.replace(/\s/, `T`)
+      let todayt = new Date()
+      endDt = new Date(endDt)
+      let sydate = await this.calculateRemainingTime(todayt, endDt)
+      if (sydate.days <= 1) result.push(item)
+    }
+    return result
+  }
   async calculateRemainingTime(startDate, endDate) {
     const difference = endDate - startDate;
 
@@ -178,27 +220,36 @@ export class mysNews extends plugin {
       await this.reply('暂无权限，只有管理员才能操作', true)
       return true
     }
+    let typeName
+    let pushGame
+    if(this.e.msg.includes('星铁')) {
+      typeName = `srActivityPush`
+      pushGame = `星铁`
+    } else {
+      typeName = `gsActivityPush`
+      pushGame = `原神`
+    }
     let cfg = gsCfg.getConfig('mys', 'pushNews')
-    if(!cfg.gsActivityPush) cfg.gsActivityPush = {}
-    if(!Array.isArray(cfg.gsActivityPush[this.e.self_id])) cfg.gsActivityPush[this.e.self_id] = []
+    if(!cfg[typeName]) cfg[typeName] = {}
+    if(!Array.isArray(cfg[typeName][this.e.self_id])) cfg[typeName][this.e.self_id] = []
     let model
-    let msg = `原神活动到期预警推送已`
+    let msg = `${pushGame}活动到期预警推送已`
     if(this.e.msg.includes('开启')) {
       model = '开启'
-      cfg.gsActivityPush[this.e.self_id].push(this.e.group_id)
-      cfg.gsActivityPush[this.e.self_id] = lodash.uniq(cfg.gsActivityPush[this.e.self_id])
+      cfg[typeName][this.e.self_id].push(this.e.group_id)
+      cfg[typeName][this.e.self_id] = lodash.uniq(cfg[typeName][this.e.self_id])
       msg += `${model}\n如有即将到期的活动将自动推送至此`
     } else {
       model = '关闭'
       msg += model
-      cfg.gsActivityPush[this.e.self_id] = lodash.difference(cfg.gsActivityPush[this.e.self_id], [this.e.group_id])
-      if (lodash.isEmpty(cfg.gsActivityPush[this.e.self_id]))
-      delete cfg.gsActivityPush[this.e.self_id]
+      cfg[typeName][this.e.self_id] = lodash.difference(cfg[typeName][this.e.self_id], [this.e.group_id])
+      if (lodash.isEmpty(cfg[typeName][this.e.self_id]))
+      delete cfg[typeName][this.e.self_id]
     }
     let yaml = YAML.stringify(cfg)
     fs.writeFileSync(this.file, yaml, 'utf8')
 
-    logger.mark(`${this.e.logFnc} ${model}原神活动到期预警：${this.e.group_id}`)
+    logger.mark(`${this.e.logFnc} ${model}${pushGame}活动到期预警：${this.e.group_id}`)
     await this.reply(msg)
   }
   async mysSearch() {
