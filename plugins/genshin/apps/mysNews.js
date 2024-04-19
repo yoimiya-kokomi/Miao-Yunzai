@@ -84,7 +84,7 @@ export class mysNews extends plugin {
     try {
       pushGroupList = YAML.parse(fs.readFileSync(this.file, `utf8`))
     } catch (error) {
-      logger.error(`${this.logFnc} 原神活动到期预警推送失败：无法获取配置文件信息\n${error}`)
+      logger.error(`[米游社活动到期推送] 原神活动到期预警推送失败：无法获取配置文件信息\n${error}`)
       return
     }
     if(!pushGroupList.gsActivityPush || pushGroupList.gsActivityPush == {}) return
@@ -120,9 +120,10 @@ export class mysNews extends plugin {
           `\n活动剩余时间:${sydate.days}天${sydate.hours}小时${sydate.minutes}分钟${sydate.seconds}秒`,
           `\n活动结束时间:${a.end_time}`
         ]
-        logger.mark(`[米游社活动到期推送] ${a.subtitle}`)
+        logger.mark(`[米游社活动到期推送] 开始推送 ${item}:${redisapgl.GroupList[0]} ${a.subtitle}`)
         await common.sleep(5000)
         Bot[item].pickGroup(redisapgl.GroupList[0]).sendMsg(msgList)
+          .then(() => {}).catch((err) => logger.error(`[米游社活动到期推送] ${item}:${redisapgl.GroupList[0]} 推送失败，错误信息${err}`))
       }
       redisapgl.GroupList.shift()
       await redis.set(`Yz:apgl:${item}`, JSON.stringify(redisapgl))
