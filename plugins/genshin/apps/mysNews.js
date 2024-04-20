@@ -121,8 +121,8 @@ export class mysNews extends plugin {
         continue
       }
       for (let a of ActivityList) {
-        if((!pushGroupList.srActivityPush || !pushGroupList.srActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `sr`) continue
-        if((!pushGroupList.gsActivityPush || !pushGroupList.gsActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `gs`) continue
+        if((!pushGroupList.srActivityPush || !pushGroupList.srActivityPush[item] || !pushGroupList.srActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `sr`) continue
+        if((!pushGroupList.gsActivityPush || !pushGroupList.gsActivityPush[item] || !pushGroupList.gsActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `gs`) continue
         let pushGame
         if(a.game === `sr`) pushGame = `星铁`
         if(a.game === `gs`) pushGame = `原神`
