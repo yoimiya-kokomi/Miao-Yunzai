@@ -20,11 +20,6 @@ Bot.adapter.push(new class OneBotv11Adapter {
     ))
   }
 
-  setProfile(data, profile) {
-    Bot.makeLog("info", `设置资料：${JSON.stringify(profile)}`, data.self_id)
-    return data.bot.sendApi("set_qq_profile", profile)
-  }
-
   async makeFile(file) {
     file = await Bot.Buffer(file, { http: true })
     if (Buffer.isBuffer(file))
@@ -368,6 +363,19 @@ Bot.adapter.push(new class OneBotv11Adapter {
     })
   }
 
+
+  setProfile(data, profile) {
+    Bot.makeLog("info", `设置资料：${JSON.stringify(profile)}`, data.self_id)
+    return data.bot.sendApi("set_qq_profile", profile)
+  }
+
+  async setAvatar(data, file) {
+    Bot.makeLog("info", `设置头像：${file}`, data.self_id)
+    return data.bot.sendApi("set_qq_avatar", {
+      file: await this.makeFile(file),
+    })
+  }
+
   sendLike(data, times) {
     Bot.makeLog("info", `点赞：${times}次`, `${data.self_id} => ${data.user_id}`)
     return data.bot.sendApi("send_like", {
@@ -386,10 +394,9 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
   async setGroupAvatar(data, file) {
     Bot.makeLog("info", `设置群头像：${file}`, `${data.self_id} => ${data.group_id}`)
-    file = await Bot.Buffer(file, { http: true })
     return data.bot.sendApi("set_group_portrait", {
       group_id: data.group_id,
-      file,
+      file: await this.makeFile(file),
     })
   }
 
@@ -704,6 +711,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
       setProfile: profile => this.setProfile(data, profile),
       setNickname: nickname => this.setProfile(data, { nickname }),
+      setAvatar: file => this.setAvatar(data, file),
 
       pickFriend: user_id => this.pickFriend(data, user_id),
       get pickUser() { return this.pickFriend },

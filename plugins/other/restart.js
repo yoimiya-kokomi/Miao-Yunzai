@@ -31,9 +31,9 @@ export class Restart extends plugin {
     if (cfg.bot.restart_time) {
       this.e = {
         logFnc: "[自动重启]" ,
-        reply: async msg => {
+        reply: msg => {
           Bot.sendMasterMsg(msg)
-          await Bot.sleep(5000)
+          return Bot.sleep(5000)
         },
       }
       setTimeout(() => this.restart(), cfg.bot.restart_time*60000)

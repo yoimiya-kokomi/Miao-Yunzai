@@ -41,7 +41,10 @@ export class update extends plugin {
         isMaster: true,
         logFnc: "[自动更新]",
         msg: "#全部静更新",
-        reply: msg => Bot.sendMasterMsg(msg),
+        reply: msg => {
+          Bot.sendMasterMsg(msg)
+          return Bot.sleep(5000)
+        },
       }
       this.autoUpdate()
     }
