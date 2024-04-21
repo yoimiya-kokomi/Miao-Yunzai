@@ -4,6 +4,8 @@ import lodash from 'lodash'
 import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 import common from '../../../lib/common/common.js'
 import gsCfg from '../model/gsCfg.js'
+import YAML from 'yaml'
+import fs from 'fs'
 
 let emoticon
 
@@ -324,6 +326,141 @@ export default class MysNews extends base {
     }
   }
 
+  async ActivityPush() {
+    let now = new Date()
+    now = now.getHours();
+    if(now < 10) return
+    let pushGroupList
+    try {
+      pushGroupList = YAML.parse(fs.readFileSync(`./plugins/genshin/config/mys.pushNews.yaml`, `utf8`))
+    } catch (error) {
+      logger.error(`[米游社活动到期推送] 活动到期预警推送失败：无法获取配置文件信息\n${error}`)
+      return
+    }
+    if((!pushGroupList.gsActivityPush || pushGroupList.gsActivityPush == {}) && (!pushGroupList.srActivityPush || pushGroupList.srActivityPush == {})) return
+    let BotidList = []
+    let ActivityPushYaml = {...pushGroupList.gsActivityPush, ...pushGroupList.srActivityPush}
+    for (let item in ActivityPushYaml) {
+      BotidList.push(item)
+    }
+    let gsActivityList = await this.getGsActivity()
+    let srActivityList = await this.getSrActivity()
+    let ActivityList = []
+    for (let item of srActivityList) {
+      ActivityList.push({ game: `sr`, subtitle: item.title, banner: item.img, title: item.title, end_time: item.end_time })
+    }
+    for (let item of gsActivityList) {
+      ActivityList.push({ game: 'gs', subtitle: item.subtitle, banner: item.banner, title: item.title, end_time: item.end_time})
+    }
+    if(ActivityList.length === 0) return
+    for (let item of BotidList) {
+      let redisapgl = await redis.get(`Yz:apgl:${item}`)
+      let date = await this.getDate()
+      redisapgl = JSON.parse(redisapgl)
+      if(!redisapgl || redisapgl.date !== date) {
+        redisapgl = {
+          date,
+          GroupList: ActivityPushYaml[item]
+        }
+      }
+      if(!Array.isArray(redisapgl.GroupList) || redisapgl.GroupList.length == 0) continue
+      if(!Bot[item]) {
+        redisapgl.GroupList.shift()
+        await redis.set(`Yz:apgl:${item}`, JSON.stringify(redisapgl))
+        continue
+      }
+      for (let a of ActivityList) {
+        if((!pushGroupList.srActivityPush || !pushGroupList.srActivityPush[item] || !pushGroupList.srActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `sr`) continue
+        if((!pushGroupList.gsActivityPush || !pushGroupList.gsActivityPush[item] || !pushGroupList.gsActivityPush[item].includes(redisapgl.GroupList[0])) && a.game === `gs`) continue
+        let pushGame
+        if(a.game === `sr`) pushGame = `星铁`
+        if(a.game === `gs`) pushGame = `原神`
+        let endDt = a.end_time
+        endDt = endDt.replace(/\s/, `T`)
+        let todayt = new Date()
+        endDt = new Date(endDt)
+        let sydate = await this.calculateRemainingTime(todayt, endDt)
+        let msgList = [
+          `【${pushGame}活动即将结束通知】`,
+          `\n活动:${a.subtitle}`,
+          segment.image(a.banner),
+          `描述:${a.title}`,
+          `\n活动剩余时间:${sydate.days}天${sydate.hours}小时${sydate.minutes}分钟${sydate.seconds}秒`,
+          `\n活动结束时间:${a.end_time}`
+        ]
+        logger.mark(`[米游社活动到期推送] 开始推送 ${item}:${redisapgl.GroupList[0]} ${a.subtitle}`)
+        await common.sleep(5000)
+        Bot[item].pickGroup(redisapgl.GroupList[0]).sendMsg(msgList)
+          .then(() => {}).catch((err) => logger.error(`[米游社活动到期推送] ${item}:${redisapgl.GroupList[0]} 推送失败，错误信息${err}`))
+      }
+      redisapgl.GroupList.shift()
+      await redis.set(`Yz:apgl:${item}`, JSON.stringify(redisapgl))
+    }
+    return
+  }
+  async getDate() {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = currentDate.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`
+  }
+  async getGsActivity() {
+    let gshd
+    try {
+      gshd = await fetch(`https://hk4e-api.mihoyo.com/common/hk4e_cn/announcement/api/getAnnList?game=hk4e&game_biz=hk4e_cn&lang=zh-cn&bundle_id=hk4e_cn&platform=pc&region=cn_gf01&level=55&uid=100000000`)
+      gshd = await gshd.json()
+    } catch {
+      return []
+    }
+    let hdlist = []
+    let result = []
+    for (let item of gshd.data.list[1].list) {
+        if(item.tag_label.includes(`活动`) && !item.title.includes(`传说任务`) && !item.title.includes(`游戏公告`)) hdlist.push(item)
+    }
+    for (let item of hdlist) {
+      let endDt = item.end_time
+      endDt = endDt.replace(/\s/, `T`)
+      let todayt = new Date()
+      endDt = new Date(endDt)
+      let sydate = await this.calculateRemainingTime(todayt, endDt)
+      if(sydate.days <= 1) result.push(item)
+    }
+    return result
+  }
+  async getSrActivity() {
+    let srhd
+    try {
+      srhd = await fetch(`https://hkrpg-api.mihoyo.com/common/hkrpg_cn/announcement/api/getAnnList?game=hkrpg&game_biz=hkrpg_cn&lang=zh-cn&auth_appid=announcement&authkey_ver=1&bundle_id=hkrpg_cn&channel_id=1&level=65&platform=pc&region=prod_gf_cn&sdk_presentation_style=fullscreen&sdk_screen_transparent=true&sign_type=2&uid=100000000`)
+      srhd = await srhd.json()
+    } catch {
+      return []
+    }
+    let hdlist = []
+    let result = []
+    for (let item of srhd.data.pic_list[0].type_list[0].list) {
+      if (item.title) hdlist.push(item)
+    }
+    for (let item of hdlist) {
+      let endDt = item.end_time
+      endDt = endDt.replace(/\s/, `T`)
+      let todayt = new Date()
+      endDt = new Date(endDt)
+      let sydate = await this.calculateRemainingTime(todayt, endDt)
+      if (sydate.days <= 1) result.push(item)
+    }
+    return result
+  }
+  async calculateRemainingTime(startDate, endDate) {
+    const difference = endDate - startDate;
+
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+    return { days, hours, minutes, seconds };
+  }
   async sendNews(botId, groupId, typeName, postId, gid) {
     if (!this.pushGroup[groupId]) this.pushGroup[groupId] = 0
     if (this.pushGroup[groupId] >= this.maxNum) return

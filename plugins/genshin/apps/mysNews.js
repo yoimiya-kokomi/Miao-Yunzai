@@ -4,6 +4,8 @@ import fs from 'node:fs'
 import lodash from 'lodash'
 import gsCfg from '../model/gsCfg.js'
 import YAML from 'yaml'
+import common from '../../../lib/common/common.js'
+import fetch from 'node-fetch'
 
 gsCfg.cpCfg('mys', 'pushNews')
 export class mysNews extends plugin {
@@ -38,6 +40,10 @@ export class mysNews extends plugin {
           reg: '^#(星铁|原神|崩坏三|崩三|绝区零|崩坏二|崩二|崩坏学园二|未定|未定事件簿)?推送(公告|资讯)$',
           permission: 'master',
           fnc: 'mysNewsTask'
+        },
+        {
+          reg: '^#(星铁|原神)(开启|关闭)到期活动(预警)?(推送)?$',
+          fnc: 'setActivityPush'
         }
       ]
     })
@@ -68,9 +74,50 @@ export class mysNews extends plugin {
 
   async mysNewsTask() {
     let mysNews = new MysNews(this.e)
+    await mysNews.ActivityPush()
     await mysNews.mysNewsTask()
   }
+  async setActivityPush() {
+    if (!this.e.isGroup) {
+      await this.reply('推送请在群聊中设置')
+      return
+    }
+    if (!this.e.member?.is_admin && !this.e.isMaster) {
+      await this.reply('暂无权限，只有管理员才能操作', true)
+      return true
+    }
+    let typeName
+    let pushGame
+    if(this.e.msg.includes('星铁')) {
+      typeName = `srActivityPush`
+      pushGame = `星铁`
+    } else {
+      typeName = `gsActivityPush`
+      pushGame = `原神`
+    }
+    let cfg = gsCfg.getConfig('mys', 'pushNews')
+    if(!cfg[typeName]) cfg[typeName] = {}
+    if(!Array.isArray(cfg[typeName][this.e.self_id])) cfg[typeName][this.e.self_id] = []
+    let model
+    let msg = `${pushGame}活动到期预警推送已`
+    if(this.e.msg.includes('开启')) {
+      model = '开启'
+      cfg[typeName][this.e.self_id].push(this.e.group_id)
+      cfg[typeName][this.e.self_id] = lodash.uniq(cfg[typeName][this.e.self_id])
+      msg += `${model}\n如有即将到期的活动将自动推送至此`
+    } else {
+      model = '关闭'
+      msg += model
+      cfg[typeName][this.e.self_id] = lodash.difference(cfg[typeName][this.e.self_id], [this.e.group_id])
+      if (lodash.isEmpty(cfg[typeName][this.e.self_id]))
+      delete cfg[typeName][this.e.self_id]
+    }
+    let yaml = YAML.stringify(cfg)
+    fs.writeFileSync(this.file, yaml, 'utf8')
 
+    logger.mark(`${this.e.logFnc} ${model}${pushGame}活动到期预警：${this.e.group_id}`)
+    await this.reply(msg)
+  }
   async mysSearch() {
     if (/签到/g.test(this.e.msg)) return false
     let data = await new MysNews(this.e).mysSearch()
