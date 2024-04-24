@@ -214,10 +214,10 @@ export default class GachaLog extends base {
 
   async logApi(param) {
     // 调用一次接口判断链接是否正确
-    let logUrl = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?"
+    let logUrl = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog?"
     /** 国际服 */
     if (!["cn_gf01", "cn_qd01"].includes(param.region)) {
-      logUrl = "https://hk4e-api-os.mihoyo.com/event/gacha_info/api/getGachaLog?"
+      logUrl = "https://hk4e-api-os.hoyoverse.com/gacha_info/api/getGachaLog?"
     }
 
     let logParam = new URLSearchParams({
@@ -809,7 +809,7 @@ export default class GachaLog extends base {
         { lable: "最欧", num: minValue, unit: "抽" }
       ]]
     }
-// 集录池
+    // 集录池
     if ([500].includes(type)) {
       line = [[
         { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
