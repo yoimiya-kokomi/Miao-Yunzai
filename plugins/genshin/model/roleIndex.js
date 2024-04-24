@@ -30,7 +30,8 @@ export default class RoleIndex extends base {
       沉玉谷: 10,
       来歆山: 11,
       沉玉谷·南陵: 12,
-      沉玉谷·上谷: 13
+      沉玉谷·上谷: 13,
+      旧日之海: 14
     }
 
     this.all_chest = 0
