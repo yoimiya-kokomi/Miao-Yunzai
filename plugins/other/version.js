@@ -3,7 +3,7 @@ try {
   App = (await import("#miao")).App
   Common = (await import("#miao")).Common
   Version = (await import("#miao")).Version
-} catch (err) {}
+} catch {}
 
 export let version = {}
 if (App) {

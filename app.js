@@ -9,7 +9,7 @@ switch (process.env.app_type || process.argv[2]) {
     const fetch = (await import("node-fetch")).default
     try {
       await fetch(`http://localhost:${cfg.bot.port}/exit`)
-    } catch (err) {}
+    } catch {}
     process.exit()
   } default: {
     const { spawnSync } = await import("node:child_process")

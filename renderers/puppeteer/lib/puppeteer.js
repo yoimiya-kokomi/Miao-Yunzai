@@ -74,7 +74,7 @@ export default class Puppeteer extends Renderer {
           await redis.del(this.browserMacKey)
         }
       }
-    } catch (err) {}
+    } catch {}
 
     if (!this.browser || !connectFlag) {
       // 如果没有实例，初始化puppeteer
