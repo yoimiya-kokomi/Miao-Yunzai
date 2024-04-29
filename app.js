@@ -8,6 +8,8 @@ switch (process.env.app_type || process.argv[2]) {
         for (const i of target.uin)
           if (target[i]?.[prop] !== undefined) {
             target.makeLog("trace", `因不存在 Bot.${prop} 而重定向到 Bot.${i}.${prop}`)
+            if (typeof target[i][prop]?.bind == "function")
+              return target[i][prop].bind(target[i])
             return target[i][prop]
           }
         target.makeLog("trace", `不存在 Bot.${prop}`)
