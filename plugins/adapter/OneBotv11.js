@@ -50,6 +50,9 @@ Bot.adapter.push(new class OneBotv11Adapter {
         case "node":
           forward.push(...i.data)
           continue
+        case "raw":
+          i = i.data
+          break
       }
 
       if (i.data.file)

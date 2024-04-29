@@ -74,6 +74,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
         case "node":
           await Bot.sendForwardMsg(send, i.data)
           continue
+        case "raw":
+          i = i.data
+          break
         default:
           i = { type: "text", data: { text: JSON.stringify(i) }}
       }

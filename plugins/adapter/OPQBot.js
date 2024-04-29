@@ -71,6 +71,10 @@ Bot.adapter.push(new class OPQBotAdapter {
         case "node":
           await Bot.sendForwardMsg(msg => this.sendMsg(send, upload, msg), i.data)
           continue
+        case "raw":
+          for (const i in i.data)
+            message[i] = i.data[i]
+          continue
         default:
           message.Content += JSON.stringify(i)
       }

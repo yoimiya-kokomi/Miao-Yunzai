@@ -100,7 +100,10 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
             array.push(...await this.makeMsg(message))
           i.data = array
           break
-        } default:
+        } case "raw":
+          i = i.data
+          break
+        default:
           i = { type: "text", data: JSON.stringify(i) }
       }
       msgs.push(i)
