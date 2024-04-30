@@ -29,7 +29,7 @@ export class exchange extends plugin {
     if (reg[1] == '*' || ['星铁', '崩铁'].includes(reg[2])) {
       this.uid = '80823548'
     }
-    if (reg[3] == ['崩三', '崩坏三', '崩坏3'].includes(reg[4])) {
+    if (['崩三', '崩坏三', '崩坏3'].includes(reg[2])) {
       this.uid = '73565430'
     }
     this.now = parseInt(Date.now() / 1000)
