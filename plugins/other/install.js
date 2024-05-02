@@ -4,6 +4,7 @@ let insing = false
 const list = {
   "Atlas":"https://gitee.com/Nwflower/atlas",
   "genshin"  :"https://gitee.com/TimeRainStarSky/Yunzai-genshin",
+  "DF-Plugin":"https://gitee.com/DenFengLai/DF-Plugin",
   "ws-plugin":"https://gitee.com/xiaoye12123/ws-plugin",
   "TRSS-Plugin"   :"https://Yunzai.TRSS.me",
   "miao-plugin"   :"https://gitee.com/yoimiya-kokomi/miao-plugin",
@@ -24,6 +25,9 @@ const list = {
   "ICQQ-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-ICQQ-Plugin",
   "KOOK-Plugin"   :"https://gitee.com/TimeRainStarSky/Yunzai-KOOK-Plugin",
 }
+const map = {}
+for (const i in list)
+  map[i.replace(/-[Pp]lugin$/, "")] = i
 
 export class install extends plugin {
   constructor() {
@@ -33,7 +37,7 @@ export class install extends plugin {
       event: "message",
       rule: [
         {
-          reg: `^#安装(插件|${Object.keys(list).join("|")})$`,
+          reg: `^#安装(插件|${Object.keys(map).join("|")})(-[Pp]lugin)?$`,
           fnc: "install",
           permission: "master"
         }
@@ -47,12 +51,14 @@ export class install extends plugin {
       return false
     }
 
-    const name = this.e.msg.replace(/^#安装/, "").trim()
+    let name = this.e.msg.replace(/^#安装(.+?)(-[Pp]lugin)?$/, "$1")
+    if (map[name]) name = map[name]
+
     if (name == "插件") {
       let msg = "\n"
-      for (const name in list)
-        if (!await Bot.fsStat(`plugins/${name}`))
-          msg += `${name}\n`
+      for (const i in list)
+        if (!await Bot.fsStat(`plugins/${i}`))
+          msg += `${i}\n`
 
       if (msg == "\n")
         msg = "暂无可安装插件"
