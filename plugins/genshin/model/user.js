@@ -133,7 +133,7 @@ export default class User extends base {
         '【#体力】查询当前树脂',
         '【#原石】查看原石札记',
         '【#原石统计】原石统计数据',
-        '【#练度统计】技能统计列表',
+        '【#练度统计】角色列表数据',
         '【#面板】【#更新面板】面板信息'
       )
       button.push([
@@ -155,13 +155,20 @@ export default class User extends base {
         '星穹铁道支持：',
         '【*uid】当前绑定ck uid列表',
         '【*删除ck】删除当前绑定ck',
-        '【*体力】体力信息',
+        '【*体力】查询当前开拓力',
+        '【*星琼】查看星琼月历',
+        '【*星琼统计】星琼统计数据',
+        '【*练度统计】角色列表数据',
         '【*面板】【*更新面板】面板信息'
       )
       button.push([
         { text: '*uid', callback: '*uid' },
         { text: '*删除ck', callback: '*删除ck' },
         { text: '*体力', callback: '*体力' }
+      ], [
+        { text: '*星琼', callback: '*星琼' },
+        { text: '*星琼统计', callback: '*星琼统计' },
+        { text: '*练度统计', callback: '*练度统计' }
       ], [
         { text: '*面板', callback: '*面板' },
         { text: '*更新面板', callback: '*更新面板' }

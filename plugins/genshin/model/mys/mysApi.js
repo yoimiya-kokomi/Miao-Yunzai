@@ -141,7 +141,7 @@ export default class MysApi {
     const cn = {
       app_version: '2.40.1',
       User_Agent: `Mozilla/5.0 (Linux; Android 12; ${this.device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.73 Mobile Safari/537.36 miHoYoBBS/2.40.1`,
-      client_type: 5,
+      client_type: '5',
       Origin: 'https://webstatic.mihoyo.com',
       X_Requested_With: 'com.mihoyo.hyperion',
       Referer: 'https://webstatic.mihoyo.com'
@@ -155,7 +155,7 @@ export default class MysApi {
       Referer: 'https://webstatic-sea.hoyolab.com'
     }
     let client
-    if (this.server.startsWith('os')) {
+    if (/os_|official/.test(this.server)) {
       client = os
     } else {
       client = cn
@@ -204,7 +204,7 @@ export default class MysApi {
     if (!proxyAddress) return null
     if (proxyAddress === 'http://0.0.0.0:0') return null
 
-    if (!this.server.startsWith('os')) return null
+    if (!/os_|official/.test(this.server)) return null
 
     if (HttpsProxyAgent === '') {
       HttpsProxyAgent = await import('https-proxy-agent').catch((err) => {
