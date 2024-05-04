@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 import MysInfo from '../model/mys/mysInfo.js'
 
 export class exchange extends plugin {
-  constructor () {
+  constructor() {
     super({
       name: '兑换码',
       dsc: '前瞻直播兑换码',
@@ -23,7 +23,7 @@ export class exchange extends plugin {
     })
   }
 
-  async getCode () {
+  async getCode() {
     let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3)?(直播|前瞻)?兑换码$/)
     this.uid = '75276550'
     if (reg[1] == '*' || ['星铁', '崩铁'].includes(reg[2])) {
@@ -76,7 +76,7 @@ export class exchange extends plugin {
     await this.reply(msg)
   }
 
-  async getData (type) {
+  async getData(type) {
     let url = {
       index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
       code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${this.now}`,
@@ -105,7 +105,7 @@ export class exchange extends plugin {
   }
 
   // 获取 "act_id"
-  async getActId () {
+  async getActId() {
     let ret = await this.getData('actId')
     if (ret.error || ret.retcode !== 0) {
       return ''
@@ -123,8 +123,16 @@ export class exchange extends plugin {
         continue
       }
       let date = new Date(post.created_at * 1000)
-      date.setDate(date.getDate() + 1)
-      this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
+      if (this.uid == '80823548') {
+        date.setDate(date.getDate() + 1)
+        this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`
+      } else if (this.uid == '73565430') {
+        date.setDate(date.getDate() + 5)
+        this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
+      } else {
+        date.setDate(date.getDate() + 3)
+        this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
+      }
       let structured_content = post.structured_content
       let result = structured_content.match(/{\"link\":\"https:\/\/webstatic.mihoyo.com\/bbs\/event\/live\/index.html\?act_id=(.*?)\\/)
       if (result) {
@@ -134,7 +142,7 @@ export class exchange extends plugin {
   }
 
   // 兑换码使用
-  async useCode () {
+  async useCode() {
     const cdkCode = this.e.msg.replace(/#(兑换码使用|cdk-u)/, '').trim()
     const res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
     if (res) {
