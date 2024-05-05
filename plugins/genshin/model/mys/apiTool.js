@@ -35,7 +35,7 @@ export default class apiTool {
     let urlMap = {
       genshin: {
         /** 体力接口fp参数用于避开验证码 */
-        ...(['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server) ? {
+        ...(['cn_gf01', 'cn_qd01'].includes(this.server) ? {
           getFp: {
             url: `${hostPublicData}device-fp/api/getFp`,
             body: {
@@ -138,7 +138,7 @@ export default class apiTool {
         }
       },
       honkaisr: {
-        ...(['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server) ? {
+        ...(['prod_gf_cn', 'prod_qd_cn'].includes(this.server) ? {
           UserGame: {
             url: `${host}binding/api/getUserGameRolesByCookie`,
             query: `game_biz=hkrpg_cn`
