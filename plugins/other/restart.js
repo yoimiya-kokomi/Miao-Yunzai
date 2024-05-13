@@ -2,7 +2,7 @@ import cfg from "../../lib/config/config.js"
 import { spawn } from "child_process"
 
 export class Restart extends plugin {
-  constructor (e = "") {
+  constructor(e = "") {
     super({
       name: "重启",
       dsc: "#重启",
@@ -29,13 +29,10 @@ export class Restart extends plugin {
   init() {
     Bot.once("online", () => this.restartMsg())
     if (cfg.bot.restart_time) {
-      this.e = {
-        logFnc: "[自动重启]" ,
-        reply: msg => {
-          Bot.sendMasterMsg(msg)
-          return Bot.sleep(5000)
-        },
-      }
+      this.e = { reply: msg => {
+        Bot.sendMasterMsg(msg)
+        return Bot.sleep(5000)
+      }}
       setTimeout(() => this.restart(), cfg.bot.restart_time*60000)
     }
   }
