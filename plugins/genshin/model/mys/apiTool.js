@@ -21,18 +21,47 @@ export default class apiTool {
     }
   }
 
-
   getUrlMap = (data = {}) => {
-    let host, hostRecord
+    let host, hostRecord, hostPublicData
     if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
       host = 'https://api-takumi.mihoyo.com/'
       hostRecord = 'https://api-takumi-record.mihoyo.com/'
-    } else if (['os_usa', 'os_euro', 'os_asia', 'os_cht'].includes(this.server)) {
-      host = 'https://api-os-takumi.mihoyo.com/'
-      hostRecord = 'https://bbs-api-os.mihoyo.com/'
+      hostPublicData = 'https://public-data-api.mihoyo.com/'
+    } else if (/os_|official/.test(this.server)) {
+      host = 'https://sg-public-api.hoyolab.com/'
+      hostRecord = 'https://bbs-api-os.hoyolab.com/'
+      hostPublicData = 'https://sg-public-data-api.hoyoverse.com/'
     }
     let urlMap = {
       genshin: {
+        /** 体力接口fp参数用于避开验证码 */
+        ...(['cn_gf01', 'cn_qd01'].includes(this.server) ? {
+          getFp: {
+            url: `${hostPublicData}device-fp/api/getFp`,
+            body: {
+              seed_id: data.seed_id,
+              device_id: data.deviceId.toUpperCase(),
+              platform: '1',
+              seed_time: new Date().getTime() + '',
+              ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
+              app_name: 'bbs_cn',
+              device_fp: '38d7ee834d1e9'
+            }
+          }
+        } : {
+          getFp: {
+            url: `${hostPublicData}device-fp/api/getFp`,
+            body: {
+              seed_id: data.seed_id,
+              device_id: data.deviceId.toUpperCase(),
+              platform: '1',
+              seed_time: new Date().getTime() + '',
+              ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
+              app_name: 'hk4e_global',
+              device_fp: '38d7ee834d1e9'
+            }
+          }
+        }),
         /** 首页宝箱 */
         index: {
           url: `${hostRecord}game_record/app/genshin/api/index`,
@@ -106,22 +135,46 @@ export default class apiTool {
         useCdk: {
           url: 'PLACE_HOLDER',
           query: null
-        },
-        /** 体力接口fp参数用于避开验证码 */
-        getFp: {
-          url: `https://public-data-api.mihoyo.com/device-fp/api/getFp`,
-          body: {
-            seed_id: data.seed_id,
-            device_id: data.deviceId.toUpperCase(),
-            platform: '1',
-            seed_time: new Date().getTime() + '',
-            ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
-            app_name: 'bbs_cn',
-            device_fp: '38d7ee834d1e9'
-          },
         }
       },
       honkaisr: {
+        ...(['prod_gf_cn', 'prod_qd_cn'].includes(this.server) ? {
+          UserGame: {
+            url: `${host}binding/api/getUserGameRolesByCookie`,
+            query: `game_biz=hkrpg_cn`
+          },
+          /** 体力接口fp参数用于避开验证码 */
+          getFp: {
+            url: `${hostPublicData}device-fp/api/getFp`,
+            body: {
+              seed_id: data.seed_id,
+              device_id: data.deviceId.toUpperCase(),
+              platform: '1',
+              seed_time: new Date().getTime() + '',
+              ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
+              app_name: 'bbs_cn',
+              device_fp: '38d7ee834d1e9'
+            }
+          }
+        } : {
+          UserGame: {
+            url: `${host}binding/api/getUserGameRolesByCookie`,
+            query: `game_biz=hkrpg_global`
+          },
+          /** 体力接口fp参数用于避开验证码 */
+          getFp: {
+            url: `${hostPublicData}device-fp/api/getFp`,
+            body: {
+              seed_id: data.seed_id,
+              device_id: data.deviceId.toUpperCase(),
+              platform: '1',
+              seed_time: new Date().getTime() + '',
+              ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
+              app_name: 'hkrpg_global',
+              device_fp: '38d7ee834d1e9'
+            }
+          }
+        }),
         /** 首页宝箱 */
         index: {
           url: `${hostRecord}game_record/app/hkrpg/api/index`,
@@ -130,10 +183,6 @@ export default class apiTool {
         basicInfo: {
           url: `${hostRecord}game_record/app/hkrpg/api/role/basicInfo`,
           query: `role_id=${this.uid}&server=${this.server}`
-        },
-        UserGame: {
-          url: `${host}binding/api/getUserGameRolesByCookie`,
-          query: `game_biz=hkrpg_cn`
         },
         /** 深渊 （混沌回忆） */
         spiralAbyss: {
@@ -144,25 +193,10 @@ export default class apiTool {
           url: `${hostRecord}game_record/app/hkrpg/api/avatar/info`,
           query: `need_wiki=true&role_id=${this.uid}&server=${this.server}`
         },
-        /** 体力接口fp参数用于避开验证码 */
-        getFp: {
-          url: `https://public-data-api.mihoyo.com/device-fp/api/getFp`,
-          body: {
-            seed_id: data.seed_id,
-            device_id: data.deviceId,
-            platform: '1',
-            seed_time: new Date().getTime() + '',
-            ext_fields: '{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"8F4E403B-4C28-4F7F-B740-2DD317948B8A","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}',
-            app_name: 'bbs_cn',
-            device_fp: '38d7ee834d1e9'
-          },
-        },
-        /**
-         * 开拓阅历接口
-         */
+        /** 开拓阅历接口 */
         ys_ledger: {
           url: `${host}event/srledger/month_info`,
-          query: `region=${this.server}&uid=${this.uid}&month=${data.month}`
+          query: `lang=zh-cn&region=${this.server}&uid=${this.uid}&month=${data.month}`
         },
         /** 角色详情 */
         character: {
@@ -198,7 +232,7 @@ export default class apiTool {
       urlMap.genshin.blueprint.query = `share_code=${data.share_code}&region=${this.server}&lang=zh-cn`
       urlMap.genshin.blueprintCompute.url = 'https://sg-public-api.hoyolab.com/event/calculateos/furniture/compute'
       urlMap.genshin.blueprintCompute.body = { lang: 'zh-cn', ...data.body }
-      urlMap.genshin.ys_ledger.url = 'https://hk4e-api-os.mihoyo.com/event/ysledgeros/month_info'// 支持了国际服札记
+      urlMap.genshin.ys_ledger.url = 'https://sg-hk4e-api.hoyolab.com/event/ysledgeros/month_info'// 支持了国际服札记
       urlMap.genshin.ys_ledger.query = `lang=zh-cn&month=${data.month}&uid=${this.uid}&region=${this.server}`
       urlMap.genshin.useCdk.url = 'https://sg-hk4e-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey'
       urlMap.genshin.useCdk.query = `uid=${this.uid}&region=${this.server}&lang=zh-cn&cdkey=${data.cdk}&game_biz=hk4e_global`

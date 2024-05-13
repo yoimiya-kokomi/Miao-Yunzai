@@ -348,7 +348,7 @@ export default class MysUser extends BaseModel {
     let ck = this.ck
     let url = {
       mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie',
-      hoyolab: 'https://api-os-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie'
+      hoyolab: 'https://sg-public-api.hoyolab.com/binding/api/getUserGameRolesByCookie'
     }
 
     let res = await fetch(url[serv], { method: 'get', headers: { Cookie: ck } })
@@ -373,7 +373,7 @@ export default class MysUser extends BaseModel {
         Connection: 'keep-alive',
         Host: 'bbs-api.mihoyo.com',
         Origin: 'https://m.bbs.mihoyo.com',
-        Referer: ' https://m.bbs.mihoyo.com/'
+        Referer: 'https://m.bbs.mihoyo.com/'
       }
     })
     if (!res.ok) return res
@@ -394,7 +394,6 @@ export default class MysUser extends BaseModel {
     }
     return cache[game]
   }
-
 
   // 初始化数据
   async initDB(db = false) {
