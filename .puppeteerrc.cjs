@@ -33,7 +33,7 @@ if (!executablePath) for (const item of [
 }
 
 if (executablePath || arch == "arm64" || arch == "aarch64") {
-  (typeof logger == "object" ? logger : console).info(`[Chromium] ${executablePath}`)
+  (typeof logger != "undefined" ? logger : console).info(`[Chromium] ${executablePath}`)
   skipDownload = true
 }
 
