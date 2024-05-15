@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto"
 import path from "node:path"
+import { ulid } from "ulid"
 
 Bot.adapter.push(new class ComWeChatAdapter {
   constructor() {
@@ -13,7 +13,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   sendApi(ws, action, params = {}) {
-    const echo = randomUUID()
+    const echo = ulid()
     ws.sendMsg({ action, params, echo })
     return new Promise(resolve => Bot.once(echo, data =>
       resolve({ ...data, ...data.data })

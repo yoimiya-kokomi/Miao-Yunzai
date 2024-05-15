@@ -1,5 +1,5 @@
 import fs from "node:fs/promises"
-import { randomUUID } from "node:crypto"
+import { ulid } from "ulid"
 let code = {}
 let file = "config/config/other.yaml"
 export class master extends plugin {
@@ -35,18 +35,18 @@ export class master extends plugin {
       return false
     }
 
-    code[this.e.user_id] = randomUUID()
-    logger.mark(`${logger.cyan(`[${this.e.user_id}]`)} 设置主人验证码：${logger.green(code[this.e.user_id])}`)
+    code[this.e.user_id] = ulid()
+    logger.mark(`${logger.cyan(`[${this.e.user_id}]`)} 设置主人验证码 ${logger.green(code[this.e.user_id])}`)
     this.setContext("verify")
     await this.reply(`[${this.e.user_id}] 请输入验证码`, true)
   }
 
   async verify() {
     this.finish("verify")
-    if (this.e.msg.trim() == code[this.e.user_id]) {
+    if (this.e.msg.trim().toUpperCase() == code[this.e.user_id]) {
       await this.edit(file, "masterQQ", this.e.user_id)
       await this.edit(file, "master", `${this.e.self_id}:${this.e.user_id}`)
-      await this.reply(`[${this.e.user_id}] 设置主人成功`, true)
+      await this.reply(`[${this.e.user_id}] 设置主人完成`, true)
     } else {
       await this.reply("验证码错误", true)
       return false
