@@ -15,9 +15,11 @@ Bot.adapter.push(new class ComWeChatAdapter {
   sendApi(ws, action, params = {}) {
     const echo = ulid()
     ws.sendMsg({ action, params, echo })
-    return new Promise(resolve => Bot.once(echo, data =>
-      resolve({ ...data, ...data.data })
-    ))
+    return new Promise(resolve => Bot.once(echo, data => resolve(
+      data.data ? new Proxy(data, {
+        get: (target, prop, receiver) => target.data[prop] ?? target[prop],
+      }) : data
+    )))
   }
 
   async uploadFile(data, file) {
