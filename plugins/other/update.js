@@ -91,14 +91,13 @@ export class update extends plugin {
   }
 
   async runUpdate(plugin = "") {
-    let cm = "git pull --no-rebase"
+    let cm = "git pull"
     let type = "更新"
-    const opts = {}
     if (!plugin) cm = `git checkout package.json && ${cm}`
 
     if (this.e.msg.includes("强制")) {
       type = "强制更新"
-      cm = `git reset --hard ${await this.getRemoteBranch(plugin)} && git pull --rebase --allow-unrelated-histories`
+      cm = `git reset --hard ${await this.getRemoteBranch(plugin)} && git pull --rebase`
     }
     this.oldCommitId = await this.getCommitId(plugin)
 
@@ -107,15 +106,14 @@ export class update extends plugin {
       await this.reply(`开始${type} ${this.typeName}`)
     const ret = await this.exec(cm, plugin)
 
-    ret.stdout = String(ret.stdout)
-    if (ret.error) {
+    ret.stdout = lodash.trim(String(ret.stdout))
+    if (ret.error && !await this.gitErr(plugin, ret.stdout, lodash.trim(Bot.String(ret.error)))) {
       logger.mark(`${this.e.logFnc} 更新失败 ${this.typeName}`)
-      this.gitErr(Bot.String(ret.error), ret.stdout)
       return false
     }
 
     const time = await this.getTime(plugin)
-    if (/Already up|已经是最新/g.test(ret.stdout)) {
+    if (/Already up|已经是最新/.test(ret.stdout)) {
       if (!this.quiet)
         await this.reply(`${this.typeName} 已是最新\n最后更新时间：${time}`)
     } else {
@@ -158,28 +156,19 @@ export class update extends plugin {
     return `${remote}/${branch}`
   }
 
-  async gitErr(error, stdout) {
-    const msg = "更新失败！"
-
-    if (error.includes("Timed out")) {
-      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, "")
-      return this.reply(`${msg}\n连接超时：${remote}`)
-    }
-
-    if (/Failed to connect|unable to access/g.test(error)) {
-      const remote = error.match(/'(.+?)'/g)[0].replace(/'/g, "")
-      return this.reply(`${msg}\n连接失败：${remote}`)
-    }
-
-    if (error.includes("be overwritten by merge")) {
-      return this.reply(`${msg}\n存在冲突：\n${error}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
-    }
-
-    if (stdout.includes("CONFLICT")) {
-      return this.reply(`${msg}\n存在冲突：\n${error}${stdout}\n请解决冲突后再更新，或者执行#强制更新，放弃本地修改`)
-    }
-
-    return this.reply([error, stdout])
+  async gitErr(plugin, stdout, error) {
+    if (/unable to access|无法访问/.test(error))
+      await this.reply(`远程仓库连接错误：${error.match(/'(.+?)'/g)[0].replace(/'(.+?)'/, "$1")}`)
+    else if (/Authentication failed|鉴权失败|not found|未找到/.test(error))
+      await this.reply(`远程仓库地址错误：${error.match(/'(.+?)'/g)[0].replace(/'(.+?)'/, "$1")}`)
+    else if (/be overwritten by merge|被合并操作覆盖/.test(error) || /Merge conflict|合并冲突/.test(stdout))
+      await this.reply(`${error}\n${stdout}\n若修改过文件请手动更新，否则发送 #强制更新${plugin}`)
+    else if (/divergent branches|偏离的分支/.test(error)) {
+      const ret = await this.exec("git pull --rebase")
+      if (!ret.error && /Successfully rebased|成功变基/.test(ret.stdout+ret.stderr))
+        return true
+      await this.reply(`${error}\n${stdout}\n若修改过文件请手动更新，否则发送 #强制更新${plugin}`)
+    } else await this.reply(`${error}\n${stdout}\n未知错误，可尝试发送 #强制更新${plugin}`)
   }
 
   async updateAll() {
