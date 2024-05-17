@@ -62,7 +62,7 @@ export class Restart extends plugin {
       user_id: this.e.user_id,
       bot_id: this.e.self_id,
       msg_id: this.e.message_id,
-      time: Date.now()/1000,
+      time: Date.now(),
     }))
   }
 

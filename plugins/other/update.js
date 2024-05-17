@@ -35,6 +35,11 @@ export class update extends plugin {
     return /^#(全部)?(安?静)/.test(this.e.msg)
   }
 
+  exec(cmd, plugin, opts = {}) {
+    if (plugin) opts.cwd = `plugins/${plugin}`
+    return Bot.exec(cmd, opts)
+  }
+
   init() {
     if (cfg.bot.update_time) {
       this.e = {
@@ -69,7 +74,7 @@ export class update extends plugin {
     await this.runUpdate(plugin)
 
     if (this.isPkgUp)
-      await Bot.exec("pnpm install")
+      await this.exec("pnpm install")
     if (this.isUp)
       this.restart()
     uping = false
@@ -88,19 +93,19 @@ export class update extends plugin {
   async runUpdate(plugin = "") {
     let cm = "git pull --no-rebase"
     let type = "更新"
+    const opts = {}
+    if (!plugin) cm = `git checkout package.json && ${cm}`
 
     if (this.e.msg.includes("强制")) {
       type = "强制更新"
-      cm = `git reset --hard && git pull --rebase --allow-unrelated-histories`
+      cm = `git reset --hard ${await this.getRemoteBranch(plugin)} && git pull --rebase --allow-unrelated-histories`
     }
-    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
-
-    this.oldCommitId = await this.getcommitId(plugin)
+    this.oldCommitId = await this.getCommitId(plugin)
 
     logger.mark(`${this.e.logFnc} 开始${type} ${this.typeName}`)
     if (!this.quiet)
       await this.reply(`开始${type} ${this.typeName}`)
-    const ret = await Bot.exec(cm)
+    const ret = await this.exec(cm, plugin)
 
     ret.stdout = String(ret.stdout)
     if (ret.error) {
@@ -125,18 +130,32 @@ export class update extends plugin {
     return true
   }
 
-  async getcommitId(plugin = "") {
-    let cm = "git rev-parse --short HEAD"
-    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
-    cm = await Bot.exec(cm)
+  async getCommitId(plugin) {
+    const cm = await this.exec("git rev-parse --short HEAD", plugin)
     return lodash.trim(String(cm.stdout))
   }
 
-  async getTime(plugin = "") {
-    let cm = 'git log -1 --pretty=%cd --date=format:"%F %T"'
-    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
-    cm = await Bot.exec(cm)
+  async getTime(plugin) {
+    const cm = await this.exec('git log -1 --pretty=%cd --date=format:"%F %T"', plugin)
     return lodash.trim(String(cm.stdout))
+  }
+
+  async getBranch(plugin) {
+    const cm = await this.exec("git branch --show-current", plugin)
+    return lodash.trim(String(cm.stdout))
+  }
+
+  async getRemote(branch, plugin) {
+    const cm = await this.exec(`git config branch.${branch}.remote`, plugin)
+    return lodash.trim(String(cm.stdout))
+  }
+
+  async getRemoteBranch(plugin) {
+    const branch = await this.getBranch(plugin)
+    if (!branch) return ""
+    const remote = await this.getRemote(branch, plugin)
+    if (!remote) return ""
+    return `${remote}/${branch}`
   }
 
   async gitErr(error, stdout) {
@@ -189,16 +208,10 @@ export class update extends plugin {
   }
 
   async getLog(plugin = "") {
-    let cm = 'git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"'
-    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
+    let cm = await this.exec('git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"', plugin)
+    if (cm.error) return this.reply(cm.error.stack)
 
-    cm = await Bot.exec(cm)
-    if (cm.error) {
-      logger.error(cm.error)
-      await this.reply(String(cm.error))
-    }
     const logAll = String(cm.stdout).trim().split("\n")
-
     if (!logAll.length) return false
 
     let log = []
@@ -213,9 +226,7 @@ export class update extends plugin {
 
     if (log.length <= 0) return ""
 
-    cm = "git config -l"
-    if (plugin) cm = `cd "plugins/${plugin}" && ${cm}`
-    cm = await Bot.exec(cm)
+    cm = await this.exec("git config -l", plugin)
     const end = String(cm.stdout).match(/remote\..*\.url=.+/g).join("\n\n").replace(/remote\..*\.url=/g, "").replace(/\/\/([^@]+)@/, "//")
     if (cm.error) {
       logger.error(cm.error)

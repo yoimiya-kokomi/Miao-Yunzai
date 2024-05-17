@@ -37,7 +37,7 @@ export class status extends plugin {
     let msg = "\n\n账号在线时长"
     for (const i of Bot.uin)
       if (Bot[i]?.stat?.start_time)
-        msg += `\n${Bot.getTimeDiff(Bot[i].stat.start_time)} ${i}`
+        msg += `\n${Bot.getTimeDiff(Bot[i].stat.start_time*1000)} ${i}`
     return msg
   }
 
