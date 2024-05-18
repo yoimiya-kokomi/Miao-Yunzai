@@ -1,5 +1,4 @@
 import cfg from "../../lib/config/config.js"
-import lodash from "lodash"
 import fs from "node:fs/promises"
 import { Restart } from "./restart.js"
 
@@ -74,7 +73,7 @@ export class update extends plugin {
     await this.runUpdate(plugin)
 
     if (this.isPkgUp)
-      await this.exec("pnpm install")
+      await this.exec("pnpm install --force")
     if (this.isUp)
       this.restart()
     uping = false
@@ -97,7 +96,7 @@ export class update extends plugin {
 
     if (this.e.msg.includes("强制")) {
       type = "强制更新"
-      cm = `git reset --hard ${await this.getRemoteBranch(plugin)} && git pull --rebase`
+      cm = `git reset --hard ${await this.getRemoteBranch(true, plugin)} && git pull --rebase`
     }
     this.oldCommitId = await this.getCommitId(plugin)
 
@@ -106,8 +105,7 @@ export class update extends plugin {
       await this.reply(`开始${type} ${this.typeName}`)
     const ret = await this.exec(cm, plugin)
 
-    ret.stdout = lodash.trim(String(ret.stdout))
-    if (ret.error && !await this.gitErr(plugin, ret.stdout, lodash.trim(Bot.String(ret.error)))) {
+    if (ret.error && !await this.gitErr(plugin, ret.stdout, Bot.String(ret.error).trim())) {
       logger.mark(`${this.e.logFnc} 更新失败 ${this.typeName}`)
       return false
     }
@@ -128,39 +126,55 @@ export class update extends plugin {
     return true
   }
 
-  async getCommitId(plugin) {
-    const cm = await this.exec("git rev-parse --short HEAD", plugin)
-    return lodash.trim(String(cm.stdout))
+  async getCommitId(...args) {
+    return (await this.exec("git rev-parse --short HEAD", ...args)).stdout
   }
 
-  async getTime(plugin) {
-    const cm = await this.exec('git log -1 --pretty=%cd --date=format:"%F %T"', plugin)
-    return lodash.trim(String(cm.stdout))
+  async getTime(...args) {
+    return (await this.exec('git log -1 --pretty=%cd --date=format:"%F %T"', ...args)).stdout
   }
 
-  async getBranch(plugin) {
-    const cm = await this.exec("git branch --show-current", plugin)
-    return lodash.trim(String(cm.stdout))
+  async getBranch(...args) {
+    return (await this.exec("git branch --show-current", ...args)).stdout
   }
 
-  async getRemote(branch, plugin) {
-    const cm = await this.exec(`git config branch.${branch}.remote`, plugin)
-    return lodash.trim(String(cm.stdout))
+  async getRemote(branch, ...args) {
+    return (await this.exec(`git config branch.${branch}.remote`, ...args)).stdout
   }
 
-  async getRemoteBranch(plugin) {
-    const branch = await this.getBranch(plugin)
-    if (!branch) return ""
-    const remote = await this.getRemote(branch, plugin)
-    if (!remote) return ""
-    return `${remote}/${branch}`
+  async getRemoteBranch(string, ...args) {
+    const branch = await this.getBranch(...args)
+    if (!branch && string) return ""
+    const remote = await this.getRemote(branch, ...args)
+    if (!remote && string) return ""
+    return string ? `${remote}/${branch}` : { remote, branch }
+  }
+
+  async getRemoteUrl(branch, hide, ...args) {
+    if (branch) {
+      const url = (await this.exec(`git config remote.${branch}.url`, ...args)).stdout
+      return hide ? url.replace(/\/\/([^@]+)@/, "//") : url
+    }
+
+    const ret = await this.exec("git config -l", ...args)
+    const urls = {}
+    for (const i of ret.stdout.match(/remote\..*?\.url=.+/g) || []) {
+      const branch = i.replace(/remote\.(.*?)\.url=.+/g, "$1")
+      const url = i.replace(/remote\..*?\.url=/g, "")
+      urls[branch] = (hide ? url.replace(/\/\/([^@]+)@/, "//") : url)
+    }
+    return urls
+  }
+
+  gitErrUrl(error) {
+    return error.match(/'(.+?)'/g)[0].replace(/'(.+?)'/, "$1")
   }
 
   async gitErr(plugin, stdout, error) {
     if (/unable to access|无法访问/.test(error))
-      await this.reply(`远程仓库连接错误：${error.match(/'(.+?)'/g)[0].replace(/'(.+?)'/, "$1")}`)
-    else if (/Authentication failed|鉴权失败|not found|未找到/.test(error))
-      await this.reply(`远程仓库地址错误：${error.match(/'(.+?)'/g)[0].replace(/'(.+?)'/, "$1")}`)
+      await this.reply(`远程仓库连接错误：${this.gitErrUrl(error)}`)
+    else if (/not found|未找到|does not (exist|appear)|不存在|Authentication failed|鉴权失败/.test(error))
+      await this.reply(`远程仓库地址错误：${this.gitErrUrl(error)}`)
     else if (/be overwritten by merge|被合并操作覆盖/.test(error) || /Merge conflict|合并冲突/.test(stdout))
       await this.reply(`${error}\n${stdout}\n若修改过文件请手动更新，否则发送 #强制更新${plugin}`)
     else if (/divergent branches|偏离的分支/.test(error)) {
@@ -186,7 +200,7 @@ export class update extends plugin {
     }
 
     if (this.isPkgUp)
-      await Bot.exec("pnpm install")
+      await Bot.exec("pnpm install --force")
     if (this.isUp)
       this.restart()
     uping = false
@@ -198,9 +212,9 @@ export class update extends plugin {
 
   async getLog(plugin = "") {
     let cm = await this.exec('git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"', plugin)
-    if (cm.error) return this.reply(cm.error.stack)
+    if (cm.error) return this.reply(Bot.String(cm.error))
 
-    const logAll = String(cm.stdout).trim().split("\n")
+    const logAll = cm.stdout.split("\n")
     if (!logAll.length) return false
 
     let log = []
@@ -210,19 +224,13 @@ export class update extends plugin {
       if (str[1].includes("Merge branch")) continue
       log.push(str[1])
     }
-    let line = log.length
-    log = log.join("\n\n")
-
     if (log.length <= 0) return ""
 
-    cm = await this.exec("git config -l", plugin)
-    const end = String(cm.stdout).match(/remote\..*\.url=.+/g).join("\n\n").replace(/remote\..*\.url=/g, "").replace(/\/\/([^@]+)@/, "//")
-    if (cm.error) {
-      logger.error(cm.error)
-      await this.reply(String(cm.error))
-    }
+    const msg = [`${plugin || "TRSS-Yunzai"} 更新日志，共${log.length}条`, log.join("\n\n")]
+    const end = await this.getRemoteUrl((await this.getRemoteBranch(false, plugin)).remote, true, plugin)
+    if (end) msg.push(end)
 
-    return Bot.makeForwardArray([`${plugin || "TRSS-Yunzai"} 更新日志，共${line}条`, log, end])
+    return Bot.makeForwardArray(msg)
   }
 
   async updateLog() {

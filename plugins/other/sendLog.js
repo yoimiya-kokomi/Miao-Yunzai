@@ -50,7 +50,7 @@ export class sendLog extends plugin {
   }
 
   async getLog(logFile) {
-    let log = await fs.readFile(logFile, "utf-8")
+    let log = await fs.readFile(logFile, "utf8")
     log = log.split("\n")
 
     if (this.keyWord) {

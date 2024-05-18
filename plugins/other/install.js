@@ -74,47 +74,40 @@ export class install extends plugin {
       await this.reply(`${name} 插件已安装`)
       return false
     }
-    await this.runInstall(name, list[name], path)
-    this.restart()
+    return this.runInstall(name, list[name], path)
   }
 
   async runInstall(name, url, path) {
     logger.mark(`${this.e.logFnc} 开始安装 ${name} 插件`)
     await this.reply(`开始安装 ${name} 插件`)
 
-    const cm = `git clone --depth 1 --single-branch "${url}" "${path}"`
     insing = true
-    const ret = await Bot.exec(cm)
+    const ret = await Bot.exec(`git clone --depth 1 --single-branch "${url}" "${path}"`)
     if (await Bot.fsStat(`${path}/package.json`))
-      await Bot.exec("pnpm install")
+      await Bot.exec("pnpm install --force")
     insing = false
 
     if (ret.error) {
-      logger.mark(`${this.e.logFnc} 插件安装失败 ${name}`)
-      this.gitErr(ret.error, ret.stdout)
+      logger.mark(`${this.e.logFnc} ${name} 插件安装错误`)
+      this.gitErr(name, Bot.String(ret.error).trim(), ret.stdout)
       return false
     }
+    return this.restart()
   }
 
-  async gitErr(err, stdout) {
-    let msg = "安装失败！"
-    let errMsg = err.toString()
-    stdout = stdout.toString()
+  gitErrUrl(error) {
+    return error.replace(/(Cloning into|正克隆到)\s*'.+?'/g, "").match(/'(.+?)'/g)[0].replace(/'(.+?)'/, "$1")
+  }
 
-    if (errMsg.includes('Timed out')) {
-      const remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, '')
-      return this.reply(`${msg}\n连接超时：${remote}`)
-    }
-
-    if (/Failed to connect|unable to access/g.test(errMsg)) {
-      const remote = errMsg.match(/'(.+?)'/g)[0].replace(/'/g, '')
-      return this.reply(`${msg}\n连接失败：${remote}`)
-    }
-
-    await this.reply([errMsg, stdout])
+  async gitErr(name, error, stdout) {
+    if (/unable to access|无法访问/.test(error))
+      await this.reply(`远程仓库连接错误：${this.gitErrUrl(error)}`)
+    else if (/not found|未找到|does not (exist|appear)|不存在|Authentication failed|鉴权失败/.test(error))
+      await this.reply(`远程仓库地址错误：${this.gitErrUrl(error)}`)
+    else await this.reply(`${name} 插件安装错误\n${error}\n${stdout}`)
   }
 
   restart() {
-    new Restart(this.e).restart()
+    return new Restart(this.e).restart()
   }
 }
