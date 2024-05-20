@@ -178,7 +178,7 @@ export class update extends plugin {
     else if (/be overwritten by merge|被合并操作覆盖/.test(error) || /Merge conflict|合并冲突/.test(stdout))
       await this.reply(`${error}\n${stdout}\n若修改过文件请手动更新，否则发送 #强制更新${plugin}`)
     else if (/divergent branches|偏离的分支/.test(error)) {
-      const ret = await this.exec("git pull --rebase")
+      const ret = await this.exec("git pull --rebase", plugin)
       if (!ret.error && /Successfully rebased|成功变基/.test(ret.stdout+ret.stderr))
         return true
       await this.reply(`${error}\n${stdout}\n若修改过文件请手动更新，否则发送 #强制更新${plugin}`)
