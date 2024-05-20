@@ -89,7 +89,7 @@ export class install extends plugin {
 
     if (ret.error) {
       logger.mark(`${this.e.logFnc} ${name} 插件安装错误`)
-      this.gitErr(name, Bot.String(ret.error).trim(), ret.stdout)
+      this.gitErr(name, ret.error.message, ret.stdout)
       return false
     }
     return this.restart()

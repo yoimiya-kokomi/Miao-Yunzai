@@ -72,10 +72,8 @@ export class update extends plugin {
     uping = true
     await this.runUpdate(plugin)
 
-    if (this.isPkgUp)
-      await this.exec("pnpm install --force")
-    if (this.isUp)
-      this.restart()
+    if (this.isPkgUp) await this.updatePackage()
+    if (this.isUp) this.restart()
     uping = false
   }
 
@@ -105,7 +103,7 @@ export class update extends plugin {
       await this.reply(`开始${type} ${this.typeName}`)
     const ret = await this.exec(cm, plugin)
 
-    if (ret.error && !await this.gitErr(plugin, ret.stdout, Bot.String(ret.error).trim())) {
+    if (ret.error && !await this.gitErr(plugin, ret.stdout, ret.error.message)) {
       logger.mark(`${this.e.logFnc} 更新失败 ${this.typeName}`)
       return false
     }
@@ -199,11 +197,17 @@ export class update extends plugin {
       await this.runUpdate(plugin)
     }
 
-    if (this.isPkgUp)
-      await Bot.exec("pnpm install --force")
-    if (this.isUp)
-      this.restart()
+    if (this.isPkgUp) await this.updatePackage()
+    if (this.isUp) this.restart()
     uping = false
+  }
+
+  async updatePackage() {
+    const cmd = "pnpm install --force"
+    if (process.platform == "win32")
+      return this.reply(`检测到依赖更新，请 #关机 后执行 ${cmd}`)
+    await this.reply("开始更新依赖")
+    return this.exec(cmd)
   }
 
   restart() {
@@ -212,7 +216,7 @@ export class update extends plugin {
 
   async getLog(plugin = "") {
     let cm = await this.exec('git log -100 --pretty="%h||[%cd] %s" --date=format:"%F %T"', plugin)
-    if (cm.error) return this.reply(Bot.String(cm.error))
+    if (cm.error) return this.reply(cm.error.message)
 
     const logAll = cm.stdout.split("\n")
     if (!logAll.length) return false
