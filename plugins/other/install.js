@@ -84,7 +84,7 @@ export class install extends plugin {
     insing = true
     const ret = await Bot.exec(`git clone --depth 1 --single-branch "${url}" "${path}"`)
     if (await Bot.fsStat(`${path}/package.json`))
-      await Bot.exec("pnpm install --force")
+      await Bot.exec("pnpm install")
     insing = false
 
     if (ret.error) {
