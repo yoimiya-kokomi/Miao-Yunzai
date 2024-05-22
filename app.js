@@ -1,22 +1,7 @@
 switch (process.env.app_type || process.argv[2]) {
   case "pm2":
   case "start": {
-    const bot = new (await import("./lib/bot.js")).default
-    global.Bot = new Proxy({}, {
-      get: (target, prop, receiver) => {
-        const value = bot[prop] ?? target[prop]
-        if (value !== undefined)
-          return value
-        for (const i of bot.uin)
-          if (target[i]?.[prop] !== undefined) {
-            bot.makeLog("trace", `因不存在 Bot.${prop} 而重定向到 Bot.${i}.${prop}`)
-            if (typeof target[i][prop]?.bind == "function")
-              return target[i][prop].bind(target[i])
-            return target[i][prop]
-          }
-        bot.makeLog("trace", `不存在 Bot.${prop}`)
-      }
-    })
+    global.Bot = new (await import("./lib/bot.js")).default
     Bot.run()
     break
   } case "stop": {
