@@ -17,7 +17,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
     ws.sendMsg({ action, params, echo })
     return new Promise(resolve => Bot.once(echo, data => resolve(
       data.data ? new Proxy(data, {
-        get: (target, prop, receiver) => target.data[prop] ?? target[prop],
+        get: (target, prop) => target.data[prop] ?? target[prop],
       }) : data
     )))
   }

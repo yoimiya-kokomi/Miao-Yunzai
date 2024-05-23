@@ -8,6 +8,7 @@ const list = {
   "ws-plugin":"https://gitee.com/xiaoye12123/ws-plugin",
   "TRSS-Plugin"   :"https://Yunzai.TRSS.me",
   "miao-plugin"   :"https://gitee.com/yoimiya-kokomi/miao-plugin",
+  "Guoba-Plugin"  :"https://gitee.com/guoba-yunzai/guoba-plugin",
   "yenai-plugin"  :"https://gitee.com/yeyang52/yenai-plugin",
   "flower-plugin" :"https://gitee.com/Nwflower/flower-plugin",
   "xianyu-plugin" :"https://gitee.com/suancaixianyu/xianyu-plugin",
