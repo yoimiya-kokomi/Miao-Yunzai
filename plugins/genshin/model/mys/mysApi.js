@@ -230,3 +230,13 @@ export default class MysApi {
     return result
   }
 }
+
+export function randomRange() {
+  let randomStr = ''
+  let charStr = 'abcdef0123456789'
+  for (let i = 0; i < 64; i++) {
+    let index = Math.round(Math.random() * (charStr.length - 1))
+    randomStr += charStr.substring(index, index + 1)
+  }
+  return randomStr
+}
