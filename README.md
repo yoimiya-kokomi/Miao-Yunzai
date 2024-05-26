@@ -25,16 +25,18 @@ Yunzai 应用端，支持多账号，支持协议端：OneBotv11、ComWeChat、G
 
 项目仅供学习交流使用，严禁用于任何商业用途和非法行为
 
-## 使用方法
+## 安装教程
 
-### 建议使用 TRSS Script 一键安装管理
+<details><summary>脚本安装</summary>
 
 - [🌌 TRSS](https://TRSS.me)
 - [🔼 Vercel](https://TRSS-Script.Vercel.app)
 - [🐱 GitHub](https://TimeRainStarSky.GitHub.io/TRSS_Script)
 - [🇬 Gitee](https://Gitee.com/TimeRainStarSky/TRSS_Script)
 
-### 手动安装
+</details>
+
+<details><summary>手动安装</summary>
 
 > 环境准备：Windows/Linux/MacOS/Android  
 > [Node.js(>=v21)](https://nodejs.org), [Redis](https://redis.io), [Git](https://git-scm.com), [Chrome(可选)](https://google.cn/chrome)
@@ -49,35 +51,85 @@ git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai
 cd Yunzai
 ```
 
-2. 推荐安装插件(可选)
-
-```sh
-git clone --depth 1 https://github.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
-git clone --depth 1 https://github.com/yoimiya-kokomi/miao-plugin plugins/miao-plugin
-git clone --depth 1 https://github.com/TimeRainStarSky/TRSS-Plugin plugins/TRSS-Plugin
-```
-
-```sh
-git clone --depth 1 https://gitee.com/TimeRainStarSky/Yunzai-genshin plugins/genshin
-git clone --depth 1 https://gitee.com/yoimiya-kokomi/miao-plugin plugins/miao-plugin
-git clone --depth 1 https://Yunzai.TRSS.me plugins/TRSS-Plugin
-```
-
-3. 安装 [pnpm](https://pnpm.io/zh/installation) 和依赖
+2. 安装 [pnpm](https://pnpm.io/zh/installation) 和依赖
 
 ```sh
 npm i -g pnpm
 pnpm i
 ```
 
-4. 前台运行
+3. 前台运行
 
 | 操作 | 命令 |
 | ---- | ---- |
 | 启动 | node . |
 | 停止 | node . stop |
 
-5. 启动协议端
+4. 使用 [pm2](https://pm2.keymetrics.io) 后台运行
+
+| 操作 | 命令 |
+| ---- | ---- |
+| 启动 | pnpm start |
+| 停止 | pnpm stop |
+| 日志 | pnpm log |
+
+5. 开机自启
+
+```sh
+pnpm start
+pnpm pm2 save
+pnpm pm2 startup
+```
+
+</details>
+
+<details><summary>Docker 安装</summary>
+
+```sh
+bash <(curl -L https://github.com/TimeRainStarSky/Yunzai/raw/main/lib/tools/docker.sh)
+bash <(curl -L https://gitee.com/TimeRainStarSky/Yunzai/raw/main/lib/tools/docker.sh)
+```
+
+| 参数 | 描述 | 默认值 |
+| ---- | ---- | ------ |
+| DIR | 安装文件夹 | $HOME/Yunzai |
+| CMD | 启动命令 | tsyz |
+| CMDPATH | 命令文件夹 | /usr/local/bin |
+| DKNAME | 容器名 | Yunzai |
+| DKURL | Docker 源 | docker.nju.edu.cn |
+| GITURL | GIT 源 | https://gitee.com/TimeRainStarSky/Yunzai |
+| APTURL | APT 源 | mirrors.ustc.edu.cn |
+| APTDEP | APT 依赖 | chromium fonts-lxgw-wenkai fonts-noto-color-emoji |
+| NPMURL | NPM 源 | https://registry.npmmirror.com |
+
+- 参数修改方法
+
+```sh
+参数1="值1" 参数2="值2" bash <(x)
+```
+
+| 操作 | 命令 |
+| ---- | ---- |
+| 连接 | tsyz |
+| 断开 | Ctrl+P+Q |
+| 启动 | tsyz start |
+| 停止 | tsyz stop |
+| 日志 | tsyz log 行数 |
+| 命令 | tsyz 命令 |
+
+</details>
+
+## 使用教程
+
+1. 推荐安装插件(可选)
+
+```
+#安装genshin
+#安装miao-plugin
+#安装TRSS-Plugin
+```
+
+2. 启动协议端
 
 <details><summary>WebSocket</summary><blockquote>
 
@@ -182,23 +234,7 @@ ws://localhost:2536/GSUIDCore
 
 </details>
 
-6. 设置主人：发送 `#设置主人`，日志获取验证码并发送
-
-7. 使用 [pm2](https://pm2.keymetrics.io) 后台运行
-
-| 操作 | 命令 |
-| ---- | ---- |
-| 启动 | pnpm start |
-| 停止 | pnpm stop |
-| 日志 | pnpm log |
-
-8. 开机自启
-
-```sh
-pnpm start
-pnpm pm2 save
-pnpm pm2 startup
-```
+3. 设置主人：发送 `#设置主人`，日志获取验证码并发送
 
 ## 班级群(¿
 
