@@ -1,10 +1,12 @@
-# redis地址
+# Redis 命令路径
+path: redis-server
+# Redis 地址
 host: 127.0.0.1
-# redis端口
+# Redis 端口
 port: 6379
-# redis用户名，可以为空
+# Redis 用户名
 username:
-# redis密码，没有密码可以为空
+# Redis 密码
 password:
-# redis数据库
+# Redis 数据库
 db: 0

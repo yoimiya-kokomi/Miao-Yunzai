@@ -113,6 +113,7 @@ bash <(curl -L https://gitee.com/TimeRainStarSky/Yunzai/raw/main/lib/tools/docke
 | 连接 | tsyz |
 | 断开 | Ctrl+P+Q |
 | 启动 | tsyz start |
+| 重启 | tsyz restart |
 | 停止 | tsyz stop |
 | 日志 | tsyz log 行数 |
 | 命令 | tsyz 命令 |

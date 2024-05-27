@@ -79,7 +79,7 @@ RUN sed -i "s|deb.debian.org|'"$APTURL"'|g" /etc/apt/sources.list.d/debian.sourc
  && git config --global --add safe.directory "*"\
  && npm install -g pnpm --registry "'"$NPMURL"'"\
  && rm -rf /var/cache/* /var/log/* /var/lib/apt /root/.npm\
- && echo -n "[ -s .git ]||git clone --depth 1 --single-branch \"'"$GITURL"'\" .&&pnpm install --force&&echo -n \"exec node .\">/start&&exec node .">/start
+ && echo -n "[ -s .git ]||git clone --depth 1 --single-branch \"'"$GITURL"'\" .&&pnpm install --force&&echo -n \"exec node . start\">/start&&exec node . start">/start
 HEALTHCHECK CMD curl -s http://localhost:2536/status||exit 1
 WORKDIR /root/Yunzai
 CMD ["sh","/start"]
@@ -94,8 +94,8 @@ docker run -itd -h Yunzai --name $DKNAME -v "$DIR":/root/Yunzai --restart always
 mkdir -vp "$CMDPATH"&&
 echo -n 'if [ -n "$1" ];then case "$1" in
   s|start)exec docker start '$DKNAME';;
-  st|stop)exec docker stop -t0 '$DKNAME';;
-  rs|restart)exec docker restart -t0 '$DKNAME';;
+  st|stop)exec docker stop '$DKNAME';;
+  rs|restart)exec docker restart '$DKNAME';;
   l|log)exec docker logs -fn"${2:-100}" '$DKNAME';;
   *)exec docker exec -it '$DKNAME' "$@";;
 esac;else
