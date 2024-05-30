@@ -40,15 +40,23 @@ export class update extends plugin {
   }
 
   init() {
-    if (cfg.bot.update_time) {
-      this.e = {
-        isMaster: true,
-        logFnc: "[自动更新]",
-        msg: "#全部静更新",
-        reply: msg => Bot.sendMasterMsg(msg),
-      }
-      this.autoUpdate()
+    this.e = {
+      isMaster: true,
+      logFnc: "[自动更新]",
+      msg: "#全部静更新",
+      reply: msg => Bot.sendMasterMsg(msg),
     }
+    if (cfg.bot.update_time)
+      this.autoUpdate()
+
+    this.task = []
+    if (cfg.bot.update_cron)
+      for (const i of Array.isArray(cfg.bot.update_cron) ? cfg.bot.update_cron : [cfg.bot.update_cron])
+        this.task.push({
+          name: "定时更新",
+          cron: i,
+          fnc: () => this.updateAll(),
+        })
   }
 
   autoUpdate() {
@@ -204,7 +212,7 @@ export class update extends plugin {
 
   async updatePackage() {
     const cmd = "pnpm install"
-    if (process.platform == "win32")
+    if (process.platform === "win32")
       return this.reply(`检测到依赖更新，请 #关机 后执行 ${cmd}`)
     await this.reply("开始更新依赖")
     return this.exec(cmd)
@@ -224,7 +232,7 @@ export class update extends plugin {
     let log = []
     for (let str of logAll) {
       str = str.split("||")
-      if (str[0] == this.oldCommitId) break
+      if (str[0] === this.oldCommitId) break
       if (str[1].includes("Merge branch")) continue
       log.push(str[1])
     }
