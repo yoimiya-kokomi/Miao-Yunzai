@@ -221,7 +221,7 @@ export default class Calculator extends base {
 
     skillList = skillList.filter((item) => item.max_level != 1)
     this.skillList = skillList
-    return body
+    return this.e.isSr ? body : { items: [body] }
   }
 
   async getSkillId (roleId) {
@@ -244,22 +244,37 @@ export default class Calculator extends base {
       headers: this.headers
     })
     if (!computes || computes.retcode !== 0) return false
-    computes = computes.data
+    computes = this.e.isSr ? computes.data : computes.data.overall_material_consume
+    let computeList = {}
 
     let formart = (num) => {
       return num > 10000 ? (num / 10000).toFixed(1) + ' w' : num
     }
     if (this.e.isSr) delete computes.coin_id
     for (let i in computes) {
-      for (let j in computes[i]) {
-        computes[i][j].num = formart(computes[i][j].num)
+      computeList[i] = []
+      if (!this.e.isSr) {
+        computes[i].forEach(({ consume }) => {
+          consume.forEach(val => {
+            computeList[i].push(val)
+            val.num = formart(val.num)
+            if (val.name.includes('「')) {
+              val.isTalent = true
+            }
+          })
+        })
+      } else {
+        for (let j in computes[i]) {
+          computes[i][j].num = formart(computes[i][j].num)
 
-        if (computes[i][j][this.e.isSr ? 'item_name' : 'name'].includes('「')) {
-          computes[i][j].isTalent = true
+          if (computes[i][j].item_name.includes('「')) {
+            computes[i][j].isTalent = true
+          }
+          computeList[i].push(computes[i][j])
         }
       }
     }
 
-    return computes
+    return computeList
   }
 }

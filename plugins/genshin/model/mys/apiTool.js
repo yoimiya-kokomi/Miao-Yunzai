@@ -94,7 +94,7 @@ export default class apiTool {
         },
         /** 养成计算器 */
         compute: {
-          url: `${host}event/e20200928calculate/v2/compute`,
+          url: `${host}event/e20200928calculate/v3/batch_compute`,
           body: data.body
         },
         blueprintCompute: {
