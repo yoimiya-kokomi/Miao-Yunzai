@@ -6,20 +6,29 @@ Bot.adapter.push(new class OneBotv11Adapter {
     this.id = "QQ"
     this.name = "OneBotv11"
     this.path = this.name
+    this.echo = {}
+    this.timeout = 60000
   }
 
   makeLog(msg) {
     return Bot.String(msg).replace(/base64:\/\/.*?(,|]|")/g, "base64://...$1")
   }
 
-  sendApi(ws, action, params) {
+  sendApi(data, ws, action, params = {}) {
     const echo = ulid()
-    ws.sendMsg({ action, params, echo })
-    return new Promise(resolve => Bot.once(echo, data => resolve(
-      data.data ? new Proxy(data, {
-        get: (target, prop) => target.data[prop] ?? target[prop],
-      }) : data
-    )))
+    const request = { action, params, echo }
+    ws.sendMsg(request)
+    return new Promise((resolve, reject) =>
+      this.echo[echo] = {
+        request, resolve, reject,
+        timeout: setTimeout(() => {
+          reject(Object.assign(request, { timeout: this.timeout }))
+          delete this.echo[echo]
+          Bot.makeLog("error", ["请求超时", request], data.self_id)
+          ws.terminate()
+        }, this.timeout),
+      }
+    )
   }
 
   async makeFile(file) {
@@ -696,7 +705,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
     Bot[data.self_id] = {
       adapter: this,
       ws: ws,
-      sendApi: (action, params) => this.sendApi(ws, action, params),
+      sendApi: (action, params) => this.sendApi(data, ws, action, params),
       stat: {
         start_time: data.time,
         stat: {},
@@ -747,13 +756,13 @@ Bot.adapter.push(new class OneBotv11Adapter {
     data.bot.sendApi("_set_model_show", {
       model: data.bot.model,
       model_show: data.bot.model,
-    })
+    }).catch(() => {})
 
-    data.bot.info = (await data.bot.sendApi("get_login_info")).data
-    data.bot.guild_info = (await data.bot.sendApi("get_guild_service_profile")).data
-    data.bot.clients = (await data.bot.sendApi("get_online_clients")).clients
+    data.bot.info = (await data.bot.sendApi("get_login_info").catch(i => i.error)).data
+    data.bot.guild_info = (await data.bot.sendApi("get_guild_service_profile").catch(i => i.error)).data
+    data.bot.clients = (await data.bot.sendApi("get_online_clients").catch(i => i.error)).clients
     data.bot.version = {
-      ...(await data.bot.sendApi("get_version_info")).data,
+      ...(await data.bot.sendApi("get_version_info").catch(i => i.error)).data,
       id: this.id,
       name: this.name,
       get version() {
@@ -984,8 +993,17 @@ Bot.adapter.push(new class OneBotv11Adapter {
         default:
           Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
       }
-    } else if (data.echo) {
-      Bot.emit(data.echo, data)
+    } else if (data.echo && this.echo[data.echo]) {
+      if (![0, 1].includes(data.retcode))
+        this.echo[data.echo].reject(Object.assign(
+          this.echo[data.echo].request, { error: data }
+        ))
+      else
+        this.echo[data.echo].resolve(data.data ? new Proxy(data, {
+          get: (target, prop) => target.data[prop] ?? target[prop],
+        }) : data)
+      clearTimeout(this.echo[data.echo].timeout)
+      delete this.echo[data.echo]
     } else {
       Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
     }

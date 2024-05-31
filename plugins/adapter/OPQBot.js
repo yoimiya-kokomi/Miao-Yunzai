@@ -3,6 +3,8 @@ Bot.adapter.push(new class OPQBotAdapter {
     this.id = "QQ"
     this.name = "OPQBot"
     this.path = this.name
+    this.echo = {}
+    this.timeout = 60000
     this.CommandId = {
       FriendImage: 1,
       GroupImage: 2,
@@ -13,9 +15,19 @@ Bot.adapter.push(new class OPQBotAdapter {
 
   sendApi(id, CgiCmd, CgiRequest) {
     const ReqId = Math.round(Math.random()*10**16)
-    Bot[id].ws.sendMsg({ BotUin: String(id), CgiCmd, CgiRequest, ReqId })
-    return new Promise(resolve =>
-      Bot.once(ReqId, data => resolve(data)))
+    const request = { BotUin: String(id), CgiCmd, CgiRequest, ReqId }
+    Bot[id].ws.sendMsg(request)
+    return new Promise((resolve, reject) =>
+      this.echo[ReqId] = {
+        request, resolve, reject,
+        timeout: setTimeout(() => {
+          reject(Object.assign(request, { timeout: this.timeout }))
+          delete this.echo[ReqId]
+          Bot.makeLog("error", ["请求超时", request], id)
+          Bot[id].ws.terminate()
+        }, this.timeout),
+      }
+    )
   }
 
   makeLog(msg) {
@@ -314,8 +326,15 @@ Bot.adapter.push(new class OPQBotAdapter {
         this.makeBot(id, ws)
 
       this.makeEvent(id, data.CurrentPacket)
-    } else if (data.ReqId) {
-      Bot.emit(data.ReqId, data)
+    } else if (data.ReqId && this.echo[data.ReqId]) {
+      if (data.CgiBaseResponse?.Ret !== 0)
+        this.echo[data.ReqId].reject(Object.assign(
+          this.echo[data.ReqId].request, { error: data }
+        ))
+      else
+        this.echo[data.ReqId].resolve(data)
+      clearTimeout(this.echo[data.ReqId].timeout)
+      delete this.echo[data.ReqId]
     } else {
       Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, id)
     }

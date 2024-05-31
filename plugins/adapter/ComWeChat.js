@@ -6,20 +6,29 @@ Bot.adapter.push(new class ComWeChatAdapter {
     this.id = "WeChat"
     this.name = "ComWeChat"
     this.path = this.name
+    this.echo = {}
+    this.timeout = 60000
   }
 
   makeLog(msg) {
     return Bot.String(msg).replace(/(base64:\/\/|"type":"data","data":").*?"/g, '$1..."')
   }
 
-  sendApi(ws, action, params = {}) {
+  sendApi(data, ws, action, params = {}) {
     const echo = ulid()
-    ws.sendMsg({ action, params, echo })
-    return new Promise(resolve => Bot.once(echo, data => resolve(
-      data.data ? new Proxy(data, {
-        get: (target, prop) => target.data[prop] ?? target[prop],
-      }) : data
-    )))
+    const request = { action, params, echo }
+    ws.sendMsg(request)
+    return new Promise((resolve, reject) =>
+      this.echo[echo] = {
+        request, resolve, reject,
+        timeout: setTimeout(() => {
+          reject(Object.assign(request, { timeout: this.timeout }))
+          delete this.echo[echo]
+          Bot.makeLog("error", ["请求超时", request], data.self_id)
+          ws.terminate()
+        }, this.timeout),
+      }
+    )
   }
 
   async uploadFile(data, file) {
@@ -242,7 +251,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     Bot[data.self_id] = {
       adapter: this,
       ws: ws,
-      sendApi: (action, params) => this.sendApi(ws, action, params),
+      sendApi: (action, params) => this.sendApi(data, ws, action, params),
       stat: { ...data.status, start_time: data.time },
 
       info: {},
@@ -270,9 +279,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
     if (!Bot.uin.includes(data.self_id))
       Bot.uin.push(data.self_id)
 
-    data.bot.info = (await data.bot.sendApi("get_self_info")).data
+    data.bot.info = (await data.bot.sendApi("get_self_info").catch(i => i.error)).data
     data.bot.version = {
-      ...(await data.bot.sendApi("get_version")).data,
+      ...(await data.bot.sendApi("get_version").catch(i => i.error)).data,
       id: this.id,
       name: this.name,
     }
@@ -455,8 +464,17 @@ Bot.adapter.push(new class ComWeChatAdapter {
         default:
           Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
       }
-    } else if (data.echo) {
-      Bot.emit(data.echo, data)
+    } else if (data.echo && this.echo[data.echo]) {
+      if (data.retcode !== 0)
+        this.echo[data.echo].reject(Object.assign(
+          this.echo[data.echo].request, { error: data }
+        ))
+      else
+        this.echo[data.echo].resolve(data.data ? new Proxy(data, {
+          get: (target, prop) => target.data[prop] ?? target[prop],
+        }) : data)
+      clearTimeout(this.echo[data.echo].timeout)
+      delete this.echo[data.echo]
     } else {
       Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
     }
