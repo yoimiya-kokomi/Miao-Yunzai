@@ -142,7 +142,7 @@ export default class apiTool {
         ...(['prod_gf_cn', 'prod_qd_cn'].includes(this.server) ? {
           UserGame: {
             url: `${host}binding/api/getUserGameRolesByCookie`,
-            query: `game_biz=hkrpg_cn`
+            query: `game_biz=hkrpg_cn&region=${this.server}&game_uid=${this.uid}`
           },
           /** 体力接口fp参数用于避开验证码 */
           getFp: {
@@ -160,7 +160,7 @@ export default class apiTool {
         } : {
           UserGame: {
             url: `${host}binding/api/getUserGameRolesByCookie`,
-            query: `game_biz=hkrpg_global`
+            query: `game_biz=hkrpg_global&region=${this.server}&game_uid=${this.uid}`
           },
           /** 体力接口fp参数用于避开验证码 */
           getFp: {
