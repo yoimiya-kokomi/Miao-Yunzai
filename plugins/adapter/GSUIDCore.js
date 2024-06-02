@@ -121,7 +121,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       target_id: data.user_id,
       content,
     })
-    return { message_id: Date.now() }
+    return { message_id: Date.now().toString(36) }
   }
 
   async sendGroupMsg(data, msg) {
@@ -135,7 +135,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       target_id: target[1],
       content,
     })
-    return { message_id: Date.now() }
+    return { message_id: Date.now().toString(36) }
   }
 
   pickFriend(id, user_id) {
