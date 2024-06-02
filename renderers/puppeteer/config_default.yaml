@@ -21,3 +21,8 @@ args:
 
 # puppeteer截图超时时间
 puppeteerTimeout:
+
+# 页面goto时的参数
+pageGotoParams:
+  timeout: 120000
+  waitUntil: networkidle2
