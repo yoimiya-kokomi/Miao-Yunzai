@@ -196,8 +196,8 @@ export default class apiTool {
         },
         /** 开拓月历接口 */
         ys_ledger: {
-          url: 'https://api-takumi.mihoyo.com/event/srledger/month_info',
-          query: `region=${this.server}&uid=${this.uid}&month=${data.month}`
+          url: `${host}event/srledger/month_info`,
+          query: `lang=zh-cn&region=${this.server}&uid=${this.uid}&month=${data.month}`
         },
         /** 角色详情 */
         character: {
@@ -237,11 +237,6 @@ export default class apiTool {
       urlMap.genshin.ys_ledger.query = `lang=zh-cn&month=${data.month}&uid=${this.uid}&region=${this.server}`
       urlMap.genshin.useCdk.url = 'https://sg-hk4e-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey'
       urlMap.genshin.useCdk.query = `uid=${this.uid}&region=${this.server}&lang=zh-cn&cdkey=${data.cdk}&game_biz=hk4e_global`
-    }
-
-    if (this.isSr&&this.server.includes('official')) {
-      urlMap.honkaisr.ys_ledger.url = 'https://sg-public-api.hoyolab.com/event/srledger/month_info'// 区分国际服开拓月历
-      urlMap.honkaisr.ys_ledger.query = `lang=zh-cn&uid=${this.uid}&region=${this.server}&month=${data.month}`
     }
     return urlMap[this.game]
   }
