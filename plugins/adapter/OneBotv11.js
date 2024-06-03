@@ -44,7 +44,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
     const msgs = []
     const forward = []
     for (let i of msg) {
-      if (typeof i != "object")
+      if (typeof i !== "object")
         i = { type: "text", data: { text: i }}
       else if (!i.data)
         i = { type: i.type, data: { ...i, type: undefined }}
@@ -88,7 +88,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
     if (message.length)
       ret.push(await send(message))
-    if (ret.length == 1) return ret[0]
+    if (ret.length === 1) return ret[0]
 
     const message_id = []
     for (const i of ret) if (i?.message_id)
@@ -140,7 +140,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   parseMsg(msg) {
     const array = []
     for (const i of Array.isArray(msg) ? msg : [msg])
-      if (typeof i == "object")
+      if (typeof i === "object")
         array.push({ ...i.data, type: i.type })
       else
         array.push({ type: "text", text: String(i) })
@@ -379,7 +379,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
 
   setProfile(data, profile) {
-    Bot.makeLog("info", `设置资料：${JSON.stringify(profile)}`, data.self_id)
+    Bot.makeLog("info", `设置资料：${Bot.String(profile)}`, data.self_id)
     return data.bot.sendApi("set_qq_profile", profile)
   }
 
@@ -601,7 +601,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   pickMember(data, group_id, user_id) {
-    if (typeof group_id == "string" && group_id.match("-")) {
+    if (typeof group_id === "string" && group_id.match("-")) {
       const guild_id = group_id.split("-")
       const i = {
         ...data,
@@ -633,13 +633,13 @@ Bot.adapter.push(new class OneBotv11Adapter {
       mute: duration => this.setGroupBan(i, i.user_id, duration),
       kick: reject_add_request => this.setGroupKick(i, i.user_id, reject_add_request),
       get is_friend() { return data.bot.fl.has(user_id) },
-      get is_owner() { return i.role == "owner" },
-      get is_admin() { return i.role == "admin" },
+      get is_owner() { return i.role === "owner" },
+      get is_admin() { return i.role === "admin" },
     }
   }
 
   pickGroup(data, group_id) {
-    if (typeof group_id == "string" && group_id.match("-")) {
+    if (typeof group_id === "string" && group_id.match("-")) {
       const guild_id = group_id.split("-")
       const i = {
         ...data.bot.gl.get(group_id),
@@ -696,8 +696,8 @@ Bot.adapter.push(new class OneBotv11Adapter {
       kickMember: (user_id, reject_add_request) => this.setGroupKick(i, user_id, reject_add_request),
       quit: is_dismiss => this.setGroupLeave(i, is_dismiss),
       fs: this.getGroupFs(i),
-      get is_owner() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role == "owner" },
-      get is_admin() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role == "admin" },
+      get is_owner() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role === "owner" },
+      get is_admin() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role === "admin" },
     }
   }
 
@@ -796,7 +796,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       } case "guild":
         data.message_type = "group"
         data.group_id = `${data.guild_id}-${data.channel_id}`
-        Bot.makeLog("info", `频道消息：[${data.sender.nickname}] ${JSON.stringify(data.message)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `频道消息：[${data.sender.nickname}] ${Bot.String(data.message)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         Object.defineProperty(data, "friend", { get() { return this.member || {}}})
         break
       default:
@@ -816,24 +816,24 @@ Bot.adapter.push(new class OneBotv11Adapter {
         break
       case "group_increase":
         Bot.makeLog("info", `群成员增加：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`)
-        if (data.user_id == data.self_id)
+        if (data.user_id === data.self_id)
           data.bot.getGroupMemberMap()
         else
           data.bot.pickGroup(data.group_id).getMemberMap()
         break
       case "group_decrease":
         Bot.makeLog("info", `群成员减少：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`)
-        if (data.user_id == data.self_id)
+        if (data.user_id === data.self_id)
           data.bot.getGroupMemberMap()
         else
           data.bot.pickGroup(data.group_id).getMemberMap()
         break
       case "group_admin":
         Bot.makeLog("info", `群管理员变动：${data.sub_type}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
-        data.set = data.sub_type == "set"
+        data.set = data.sub_type === "set"
         break
       case "group_upload":
-        Bot.makeLog("info", `群文件上传：${JSON.stringify(data.file)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群文件上传：${Bot.String(data.file)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         break
       case "group_ban":
         Bot.makeLog("info", `群禁言：${data.operator_id} => ${data.user_id} ${data.sub_type} ${data.duration}秒`, `${data.self_id} <= ${data.group_id}`)
@@ -869,10 +869,10 @@ Bot.adapter.push(new class OneBotv11Adapter {
         Bot.makeLog("info", `群名片更新：${data.card_old} => ${data.card_new}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
         break
       case "offline_file":
-        Bot.makeLog("info", `离线文件：${JSON.stringify(data.file)}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `离线文件：${Bot.String(data.file)}`, `${data.self_id} <= ${data.user_id}`)
         break
       case "client_status":
-        Bot.makeLog("info", `客户端${data.online ? "上线" : "下线"}：${JSON.stringify(data.client)}`, data.self_id)
+        Bot.makeLog("info", `客户端${data.online ? "上线" : "下线"}：${Bot.String(data.client)}`, data.self_id)
         data.clients = (await data.bot.sendApi("get_online_clients")).clients
         data.bot.clients = data.clients
         break
@@ -885,20 +885,20 @@ Bot.adapter.push(new class OneBotv11Adapter {
         break
       case "message_reactions_updated":
         data.notice_type = "guild_message_reactions_updated"
-        Bot.makeLog("info", `频道消息表情贴：${data.message_id} ${JSON.stringify(data.current_reactions)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `频道消息表情贴：${data.message_id} ${Bot.String(data.current_reactions)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
         break
       case "channel_updated":
         data.notice_type = "guild_channel_updated"
-        Bot.makeLog("info", `子频道更新：${JSON.stringify(data.old_info)} => ${JSON.stringify(data.new_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `子频道更新：${Bot.String(data.old_info)} => ${Bot.String(data.new_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
         break
       case "channel_created":
         data.notice_type = "guild_channel_created"
-        Bot.makeLog("info", `子频道创建：${JSON.stringify(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `子频道创建：${Bot.String(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
         data.bot.getGroupMap()
         break
       case "channel_destroyed":
         data.notice_type = "guild_channel_destroyed"
-        Bot.makeLog("info", `子频道删除：${JSON.stringify(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `子频道删除：${Bot.String(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
         data.bot.getGroupMap()
         break
       default:
@@ -967,7 +967,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
     }
 
     if (data.post_type) {
-      if (data.meta_event_type != "lifecycle" && !Bot.uin.includes(data.self_id)) {
+      if (data.meta_event_type !== "lifecycle" && !Bot.uin.includes(data.self_id)) {
         Bot.makeLog("warn", `找不到对应Bot，忽略消息：${logger.magenta(data.raw)}`, data.self_id)
         return false
       }

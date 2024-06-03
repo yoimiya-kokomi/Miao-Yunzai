@@ -58,7 +58,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     }
 
     for (let i of msg) {
-      if (typeof i != "object")
+      if (typeof i !== "object")
         i = { type: "text", text: i }
 
       switch (i.type) {
@@ -88,7 +88,7 @@ Bot.adapter.push(new class OPQBotAdapter {
             message[i] = i.data[i]
           continue
         default:
-          message.Content += JSON.stringify(i)
+          message.Content += Bot.String(i)
       }
     }
 

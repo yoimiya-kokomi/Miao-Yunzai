@@ -55,7 +55,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
       msg = [msg]
     const msgs = []
     for (let i of msg) {
-      if (typeof i != "object")
+      if (typeof i !== "object")
         i = { type: "text", data: { text: i }}
       else if (!i.data)
         i = { type: i.type, data: { ...i, type: undefined }}
@@ -74,7 +74,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
           i.type = "file"
           break
         case "at":
-          if (i.data.qq == "all")
+          if (i.data.qq === "all")
             i = { type: "mention_all", data: {}}
           else
             i = { type: "mention", data: { user_id: i.data.qq }}
@@ -89,7 +89,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
           i = i.data
           break
         default:
-          i = { type: "text", data: { text: JSON.stringify(i) }}
+          i = { type: "text", data: { text: Bot.String(i) }}
       }
       msgs.push(i)
     }
@@ -121,7 +121,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     for (const i of (await data.bot.sendApi("get_friend_list")).data)
       array.push({
         ...i,
-        nickname: i.user_remark == "null" ? i.user_displayname || i.user_name : i.user_remark,
+        nickname: i.user_remark === "null" ? i.user_displayname || i.user_name : i.user_remark,
       })
     return array
   }
@@ -442,7 +442,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
 
     if (data.type) {
-      if (data.type != "meta" && !Bot.uin.includes(data.self_id)) {
+      if (data.type !== "meta" && !Bot.uin.includes(data.self_id)) {
         Bot.makeLog("warn", `找不到对应Bot，忽略消息：${logger.magenta(data.raw)}`, data.self_id)
         return false
       }
