@@ -259,24 +259,22 @@ export default class MysInfo {
    */
   static async initCache (force = false, clearData = false) {
     // 检查缓存标记
-    let cache = DailyCache.create()
-    if (!force && await cache.get('cache-ready')) {
+    const cache = DailyCache.create()
+    if (!force && await cache.get('cache-ready') || this.initing)
       return true
-    }
+    this.initing = true
     await DailyCache.clearOutdatedData()
 
-    if (clearData) {
+    if (clearData)
       await MysUser.clearCache()
-    }
 
     // 先初始化用户CK，减少一些公共CK中ltuid无法识别的情况
     await MysInfo.initUserCk()
-
-    await cache.set('cache-ready', new Date() * 1)
-
     // 初始化公共ck
     await MysInfo.initPubCk()
 
+    await cache.set('cache-ready', new Date() * 1)
+    delete this.initing
     return true
   }
 
