@@ -1,5 +1,5 @@
 import { MessageCallBackType } from './types.js'
-import plugin from '../../lib/plugins/plugin.js'
+import { plugin } from './plugin.js'
 
 // 插件super默认值
 export const PluginSuperDefine = {

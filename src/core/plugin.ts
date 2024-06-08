@@ -1,12 +1,11 @@
 import { Common } from './local.js'
-
 import { EventType } from './types.js'
 
 const stateArr = {}
 const SymbolTimeout = Symbol('Timeout')
 const SymbolResolve = Symbol('Resolve')
 
-export default class plugin {
+export class plugin {
   name = 'your-plugin'
   dsc = '无'
   rule: {
@@ -171,7 +170,7 @@ export default class plugin {
    * @param type
    * @param isGroup
    */
-  finish(type:string, isGroup?: boolean) {
+  finish(type: string, isGroup?: boolean) {
     const key = this.conKey(isGroup)
     if (stateArr[key]?.[type]) {
       clearTimeout(stateArr[key][type][SymbolTimeout])
