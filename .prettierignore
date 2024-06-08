@@ -1,2 +1,21 @@
 # Node dependencies
 node_modules
+
+
+# 旧版文件夹
+config
+docker
+lib
+plugins
+renderers
+
+# 旧版文件
+
+CHANGELOG.md
+docker-compose.yaml
+miao.js
+
+
+# 缓存目录
+data
+trss.js
