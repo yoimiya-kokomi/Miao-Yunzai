@@ -14,21 +14,35 @@
 
 如果你的系统不支持18.18.2版本，最低能下载16.14.0版本，这是最新的puppeteer版本限制。
 
-该版本将支持TS、TSX环境，提供Miao-Yunzai完全的类型声明及其开发文档。
 
-## 新版目录
+## 使用教程
+ 
+- 安装源码
 
-- 核心源码
+```sh
+git clone --depth=1 -b dev https://github.com/yoimiya-kokomi/Miao-Yunzai.git
+```
 
-src/core
+- 安装依赖
 
-- 接口板块
+```sh
+npm install pnpm -g
+pnpm install
+```
 
-src/mys
+- 启动
 
-- 工具类
+```sh
+npm run ts:app
+```
 
-src/utils
+- 重新登录
+
+```sh
+npm run ts:app login
+```
+
+> [开发相关](./DEV.md)
 
 ## 环境补充
 

@@ -18,6 +18,6 @@
     "transpileOnly": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["plugins", "lib", "src"],
+  "include": ["plugins", "src"],
   "exclude": ["node_modules"]
 }
