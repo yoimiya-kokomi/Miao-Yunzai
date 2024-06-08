@@ -1,1 +1,1 @@
-export * from "#miao"
+export * from '#miao'

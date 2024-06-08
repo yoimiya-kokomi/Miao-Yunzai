@@ -16,7 +16,6 @@
 
 该版本将支持TS、TSX环境，提供Miao-Yunzai完全的类型声明及其开发文档。
 
-
 ## 新版目录
 
 - 核心源码
@@ -25,7 +24,7 @@ src/core
 
 - 接口板块
 
-src/mts
+src/mys
 
 - 工具类
 
@@ -47,7 +46,7 @@ yum groupinstall fonts -y
 
 - libstdc
 
-下载 [libstdc++.so.6.0.29.zip](https://baiyin1314.lanzouq.com/i8Nr21ig8hyf) 
+下载 [libstdc++.so.6.0.29.zip](https://baiyin1314.lanzouq.com/i8Nr21ig8hyf)
 
 将 **解压缩后** 的文件放在/usr/lib64/中
 
@@ -73,10 +72,10 @@ node --no-warnings=ExperimentalWarning --loader ts-node/esm alemon.config.ts
 
 ## 致谢
 
-|                           Nickname                            | Contribution     |
-|:-------------------------------------------------------------:|------------------|
-|      [Yunzai v3.0](https://gitee.com/le-niao/Yunzai-Bot)      | 乐神的Yunzai-Bot V3 |
-| [GardenHamster](https://github.com/GardenHamster/GenshinPray) | 模拟抽卡背景素材来源       |
-|      [西风驿站](https://bbs.mihoyo.com/ys/collection/839181)      | 角色攻略图来源          |
-|     [米游社友人A](https://bbs.mihoyo.com/ys/collection/428421)     | 角色突破素材图来源        |
-| [icqq](https://github.com/icqqjs/icqq) | ICQQ             |
+|                           Nickname                            | Contribution         |
+| :-----------------------------------------------------------: | -------------------- |
+|      [Yunzai v3.0](https://gitee.com/le-niao/Yunzai-Bot)      | 乐神的Yunzai-Bot V3  |
+| [GardenHamster](https://github.com/GardenHamster/GenshinPray) | 模拟抽卡背景素材来源 |
+|    [西风驿站](https://bbs.mihoyo.com/ys/collection/839181)    | 角色攻略图来源       |
+|  [米游社友人A](https://bbs.mihoyo.com/ys/collection/428421)   | 角色突破素材图来源   |
+|            [icqq](https://github.com/icqqjs/icqq)             | ICQQ                 |

@@ -9,7 +9,8 @@
     "app": "ts-node app.js",
     "dev": "ts-node app.js dev",
     "login": "ts-node app.js login",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "dependencies": {
     "art-template": "^4.13.2",

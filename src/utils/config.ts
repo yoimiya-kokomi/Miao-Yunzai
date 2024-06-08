@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 export class BaseConfig<D> {
   #data: D = null

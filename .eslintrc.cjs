@@ -17,7 +17,7 @@ module.exports = {
     segment: true
   },
   rules: {
-    eqeqeq: ['off'],
+    'eqeqeq': ['off'],
     'prefer-const': ['off'],
     'arrow-body-style': 'off'
   }

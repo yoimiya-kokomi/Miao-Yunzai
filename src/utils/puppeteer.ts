@@ -37,7 +37,7 @@ export class Puppeteer {
   #isBrowser = false
   // 配置
   #launch: PuppeteerLaunchOptions = PuppeteerLunchConfig.all()
-  
+
   /**
    * 设置
    * @param val
