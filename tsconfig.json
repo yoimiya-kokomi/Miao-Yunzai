@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+      "target": "ESNext",
+      "module": "ESNext",
+      "noImplicitAny": false,
+      "esModuleInterop": true,
+      "moduleResolution": "node",
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "ignoreDeprecations": "5.0",
+      "jsx": "react",
+      "allowJs": false,
+      "suppressImplicitAnyIndexErrors": true,
+      "typeRoots": ["node_modules/@types"]
+    },
+    "ts-node": {
+      "esm": true,
+      "transpileOnly": true,
+      "experimentalSpecifierResolution": "node"
+    },
+    "include": ["plugins", "lib","src"],
+    "exclude": ["node_modules"]
+  }
+  
