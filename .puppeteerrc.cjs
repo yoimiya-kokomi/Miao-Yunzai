@@ -46,5 +46,7 @@ if (executablePath || arch === 'arm64' || arch === 'aarch64') {
   )
   skipDownload = true
 }
-
+/**
+ * @type {import("puppeteer").Configuration}
+ */
 module.exports = { skipDownload, executablePath }

@@ -145,3 +145,6 @@ yunzai
 /temp/
 /pnpm-lock.yaml
 /entrypoint.sh
+
+
+dist

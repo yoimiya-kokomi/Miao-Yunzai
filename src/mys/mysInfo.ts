@@ -1,7 +1,7 @@
 import MysApi from './mysApi.js'
 
 // tudo
-import GsCfg from '../gsCfg.js'
+import GsCfg from './gsCfg.js'
 
 import lodash from 'lodash'
 import NoteUser from './NoteUser.js'

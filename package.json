@@ -13,6 +13,7 @@
     "restart": "pm2 restart ./config/pm2/pm2.json",
     "ts:app": "ts-node src/main.ts",
     "ts:login": "ts-node src/main.ts login",
+    "ts:build": "rollup --config rollup.config.js",
     "format": "prettier --write .",
     "prepare": "husky"
   },
