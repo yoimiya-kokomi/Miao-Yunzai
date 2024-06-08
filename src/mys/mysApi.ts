@@ -70,7 +70,11 @@ export default class MysApi {
   }
 
   async getData(type, data = {}, cached = false) {
-    if (!this._device_fp && !data?.Getfp && !data?.headers?.['x-rpc-device_fp']) {
+    if (
+      !this._device_fp &&
+      !data?.Getfp &&
+      !data?.headers?.['x-rpc-device_fp']
+    ) {
       this._device_fp = await this.getData('getFp', {
         seed_id: this.generateSeed(16),
         Getfp: true
@@ -92,7 +96,11 @@ export default class MysApi {
       headers = { ...headers, ...data.headers }
     }
 
-    if (type !== 'getFp' && !headers['x-rpc-device_fp'] && this._device_fp.data?.device_fp) {
+    if (
+      type !== 'getFp' &&
+      !headers['x-rpc-device_fp'] &&
+      this._device_fp.data?.device_fp
+    ) {
       headers['x-rpc-device_fp'] = this._device_fp.data.device_fp
     }
 
@@ -117,7 +125,9 @@ export default class MysApi {
     }
 
     if (!response.ok) {
-      logger.error(`[米游社接口][${type}][${this.uid}] ${response.status} ${response.statusText}`)
+      logger.error(
+        `[米游社接口][${type}][${this.uid}] ${response.status} ${response.statusText}`
+      )
       return false
     }
     if (this.option.log) {
@@ -148,7 +158,8 @@ export default class MysApi {
     }
     const os = {
       app_version: '2.55.0',
-      User_Agent: 'Mozilla/5.0 (Linux; Android 11; J9110 Build/55.2.A.4.332; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.179 Mobile Safari/537.36 miHoYoBBSOversea/2.55.0',
+      User_Agent:
+        'Mozilla/5.0 (Linux; Android 11; J9110 Build/55.2.A.4.332; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.179 Mobile Safari/537.36 miHoYoBBSOversea/2.55.0',
       client_type: '2',
       Origin: 'https://act.hoyolab.com',
       X_Requested_With: 'com.mihoyo.hoyolab',
@@ -164,14 +175,16 @@ export default class MysApi {
       'x-rpc-app_version': client.app_version,
       'x-rpc-client_type': client.client_type,
       'User-Agent': client.User_Agent,
-      Referer: client.Referer,
-      DS: this.getDs(query, body)
+      'Referer': client.Referer,
+      'DS': this.getDs(query, body)
     }
   }
 
   getDs(q = '', b = '') {
     let n = ''
-    if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
+    if (
+      ['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)
+    ) {
       n = 'xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs'
     } else if (/os_|official/.test(this.server)) {
       n = 'okr4obncj8bw5a65hbnn5oo6ixjc3l9w'
@@ -187,7 +200,20 @@ export default class MysApi {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
     }
 
-    return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
+    return (
+      S4() +
+      S4() +
+      '-' +
+      S4() +
+      '-' +
+      S4() +
+      '-' +
+      S4() +
+      '-' +
+      S4() +
+      S4() +
+      S4()
+    )
   }
 
   cacheKey(type, data) {
@@ -207,11 +233,13 @@ export default class MysApi {
     if (!/os_|official/.test(this.server)) return null
 
     if (HttpsProxyAgent === '') {
-      HttpsProxyAgent = await import('https-proxy-agent').catch((err) => {
+      HttpsProxyAgent = await import('https-proxy-agent').catch(err => {
         logger.error(err)
       })
 
-      HttpsProxyAgent = HttpsProxyAgent ? HttpsProxyAgent.HttpsProxyAgent : undefined
+      HttpsProxyAgent = HttpsProxyAgent
+        ? HttpsProxyAgent.HttpsProxyAgent
+        : undefined
     }
 
     if (HttpsProxyAgent) {

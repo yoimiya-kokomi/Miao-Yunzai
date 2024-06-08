@@ -25,7 +25,10 @@ class GsCfg {
   }
 
   get element() {
-    return { ...this.getdefSet('element', 'role'), ...this.getdefSet('element', 'weapon') }
+    return {
+      ...this.getdefSet('element', 'role'),
+      ...this.getdefSet('element', 'weapon')
+    }
   }
 
   /**
@@ -42,7 +45,10 @@ class GsCfg {
       return this.getYaml(app, name, 'config')
     }
 
-    return { ...this.getdefSet(app, name), ...this.getYaml(app, name, 'config') }
+    return {
+      ...this.getdefSet(app, name),
+      ...this.getYaml(app, name, 'config')
+    }
   }
 
   /**
@@ -58,9 +64,7 @@ class GsCfg {
     if (this[type][key]) return this[type][key]
 
     try {
-      this[type][key] = YAML.parse(
-        fs.readFileSync(file, 'utf8')
-      )
+      this[type][key] = YAML.parse(fs.readFileSync(file, 'utf8'))
     } catch (error) {
       logger.error(`[${app}][${name}] 格式错误 ${error}`)
       return false
@@ -106,9 +110,9 @@ class GsCfg {
     await NoteUser.forEach(async function (user) {
       let qq = user.qq + ''
       let tmp = {}
-      lodash.forEach(user.mysUsers, (mys) => {
+      lodash.forEach(user.mysUsers, mys => {
         let uids = mys.getUids(game)
-        lodash.forEach(uids, (uid) => {
+        lodash.forEach(uids, uid => {
           let ckData = mys.getCkInfo(game)
           ckData.qq = qq
           if (!ck[uid]) {
@@ -136,7 +140,6 @@ class GsCfg {
     let char = Character.get(keyword, isSr ? 'sr' : 'gs')
     return char?.id || false
   }
-
 
   /**
    * 原神角色武器长名称缩写
@@ -203,7 +206,6 @@ class GsCfg {
     }
   }
 
-
   cpCfg(app, name) {
     if (!fs.existsSync('./plugins/genshin/config')) {
       fs.mkdirSync('./plugins/genshin/config')
@@ -247,7 +249,6 @@ class GsCfg {
       }
     }
   }
-
 
   // 仅供内部调用
   _roleNameToID(keyword, isSr) {
@@ -321,7 +322,6 @@ class GsCfg {
   getAbbr() {
     console.log('gsCfg.getAbbr() 已经废弃')
   }
-
 }
 
 export default new GsCfg()

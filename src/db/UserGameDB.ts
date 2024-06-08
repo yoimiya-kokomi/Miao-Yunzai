@@ -12,7 +12,7 @@ const COLUMNS = {
   uid: Types.STRING,
   data: {
     type: Types.STRING,
-    get () {
+    get() {
       let data = this.getDataValue('data')
       let ret = {}
       try {
@@ -20,22 +20,20 @@ const COLUMNS = {
       } catch (e) {
         data = []
       }
-      lodash.forEach(data, (ds) => {
+      lodash.forEach(data, ds => {
         if (ds.uid) {
           ret[ds.uid] = ds
         }
       })
       return ret
     },
-    set (data) {
+    set(data) {
       this.setDataValue('data', JSON.stringify(lodash.values(data)))
     }
   }
 }
 
-class UserGameDB extends BaseModel {
-
-}
+class UserGameDB extends BaseModel {}
 
 BaseModel.initDB(UserGameDB, COLUMNS)
 await UserGameDB.sync()

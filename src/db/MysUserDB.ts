@@ -21,7 +21,7 @@ const COLUMNS = {
   device: Types.STRING,
   uids: {
     type: Types.STRING,
-    get () {
+    get() {
       let data = this.getDataValue('uids')
       let ret = {}
       try {
@@ -31,14 +31,14 @@ const COLUMNS = {
       }
       return ret
     },
-    set (uids) {
+    set(uids) {
       this.setDataValue('uids', JSON.stringify(uids))
     }
   }
 }
 
 class MysUserDB extends BaseModel {
-  static async find (ltuid = '', create = false) {
+  static async find(ltuid = '', create = false) {
     // DB查询
     let mys = await MysUserDB.findByPk(ltuid)
     if (!mys && create) {
@@ -49,7 +49,7 @@ class MysUserDB extends BaseModel {
     return mys || false
   }
 
-  async saveDB (mys) {
+  async saveDB(mys) {
     if (!mys.ck || !mys.device || !mys.db) {
       return false
     }

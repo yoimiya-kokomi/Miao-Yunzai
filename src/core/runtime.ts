@@ -9,7 +9,6 @@ import cfg from '../../lib/config/config.js'
 import Handler from '../../lib/plugins/handler.js'
 import puppeteer from '../../lib/puppeteer/puppeteer.js'
 
-
 /**
  * tudo
  * 不合理的调用逻辑
@@ -49,52 +48,52 @@ export default class Runtime {
     }
   }
 
-  get uid () {
+  get uid() {
     return this.user?.uid
   }
 
-  get hasCk () {
+  get hasCk() {
     return this.user?.hasCk
   }
 
-  get user () {
+  get user() {
     return this.e.user
   }
 
-  get cfg () {
+  get cfg() {
     return cfg
   }
 
-  get gsCfg () {
+  get gsCfg() {
     return gsCfg
   }
 
-  get common () {
+  get common() {
     return common
   }
 
-  get puppeteer () {
+  get puppeteer() {
     return puppeteer
   }
 
-  get MysInfo () {
+  get MysInfo() {
     return MysInfo
   }
 
-  get NoteUser () {
+  get NoteUser() {
     return NoteUser
   }
 
-  get MysUser () {
+  get MysUser() {
     return MysUser
   }
 
   /**
-   * 
-   * @param e 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
-  static async init (e) {
+  static async init(e) {
     await MysInfo.initCache()
     let runtime = new Runtime(e)
     e.runtime = runtime
@@ -103,14 +102,14 @@ export default class Runtime {
   }
 
   /**
-   * 
+   *
    */
-  async initUser () {
+  async initUser() {
     let e = this.e
     let user = await NoteUser.create(e)
     if (user) {
       e.user = new Proxy(user, {
-        get (self, key, receiver) {
+        get(self, key, receiver) {
           let game = e.game
           let fnMap = {
             uid: 'getUid',
@@ -124,13 +123,30 @@ export default class Runtime {
           if (key === 'uidData') {
             return self.getUidData('', game)
           }
-          if (['getUid', 'getUidList', 'getMysUser', 'getCkUidList', 'getUidMapList', 'getGameDs'].includes(key)) {
+          if (
+            [
+              'getUid',
+              'getUidList',
+              'getMysUser',
+              'getCkUidList',
+              'getUidMapList',
+              'getGameDs'
+            ].includes(key)
+          ) {
             return (_game, arg2) => {
               return self[key](_game || game, arg2)
             }
           }
           // 不能将类型“symbol”分配给类型“string”。
-          if (['getUidData', 'hasUid', 'addRegUid', 'delRegUid', 'setMainUid'].includes(key)) {
+          if (
+            [
+              'getUidData',
+              'hasUid',
+              'addRegUid',
+              'delRegUid',
+              'setMainUid'
+            ].includes(key)
+          ) {
             return (uid, _game = '') => {
               return self[key](uid, _game || game)
             }
@@ -147,18 +163,21 @@ export default class Runtime {
    * @param targetType all: 所有用户均可， cookie：查询用户必须具备Cookie
    * @returns {Promise<boolean|MysInfo>}
    */
-  async getMysInfo (targetType = 'all') {
+  async getMysInfo(targetType = 'all') {
     if (!this._mysInfo[targetType]) {
-      this._mysInfo[targetType] = await MysInfo.init(this.e, targetType === 'cookie' ? 'detail' : 'roleIndex')
+      this._mysInfo[targetType] = await MysInfo.init(
+        this.e,
+        targetType === 'cookie' ? 'detail' : 'roleIndex'
+      )
     }
     return this._mysInfo[targetType]
   }
 
   /**
-   * 
-   * @returns 
+   *
+   * @returns
    */
-  async getUid () {
+  async getUid() {
     return await MysInfo.getUid(this.e)
   }
 
@@ -170,7 +189,7 @@ export default class Runtime {
    * @param isSr 是否为星穹铁道
    * @returns {Promise<boolean|MysApi>}
    */
-  async getMysApi (targetType = 'all', option = {}, isSr = false) {
+  async getMysApi(targetType = 'all', option = {}, isSr = false) {
     let mys = await this.getMysInfo(targetType)
     if (mys.uid && mys?.ckInfo?.ck) {
       return new MysApi(mys.uid, mys.ckInfo.ck, option, isSr)
@@ -186,7 +205,7 @@ export default class Runtime {
    * @param isSr 是否为星穹铁道
    * @returns {Promise<MysApi>}
    */
-  async createMysApi (uid, ck, option, isSr = false) {
+  async createMysApi(uid, ck, option, isSr = false) {
     return new MysApi(uid, ck, option, isSr)
   }
 
@@ -203,13 +222,13 @@ export default class Runtime {
    * @param cfg.beforeRender({data}) 可改写渲染的data数据
    * @returns {Promise<boolean>}
    */
-  async render (plugin, path, data = {}, cfg = {}) {
+  async render(plugin, path, data = {}, cfg = {}) {
     // 处理传入的path
     path = path.replace(/.html$/, '')
-    let paths = lodash.filter(path.split('/'), (p) => !!p)
+    let paths = lodash.filter(path.split('/'), p => !!p)
     path = paths.join('/')
     // 创建目录
-    const mkdir = (check) => {
+    const mkdir = check => {
       let currDir = `${process.cwd()}/temp`
       for (let p of check.split('/')) {
         currDir = `${currDir}/${p}`
@@ -223,13 +242,13 @@ export default class Runtime {
     // 自动计算pluResPath
     let pluResPath = `../../../${lodash.repeat('../', paths.length)}plugins/${plugin}/resources/`
     let miaoResPath = `../../../${lodash.repeat('../', paths.length)}plugins/miao-plugin/resources/`
-    const layoutPath = process.cwd() + '/plugins/miao-plugin/resources/common/layout/'
+    const layoutPath =
+      process.cwd() + '/plugins/miao-plugin/resources/common/layout/'
 
     /**
      * tudo
      * 不符合阅读习惯的，data重写data
      */
-
 
     // 渲染data
     data = {
@@ -257,7 +276,6 @@ export default class Runtime {
       }
     }
 
-    
     // 处理beforeRender
     if (cfg.beforeRender) {
       data = cfg.beforeRender({ data }) || data

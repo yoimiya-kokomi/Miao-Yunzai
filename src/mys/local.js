@@ -1,2 +1,2 @@
-export * from '#miao';
-export { Character, Weapon } from '#miao.models';
+export * from '#miao'
+export { Character, Weapon } from '#miao.models'

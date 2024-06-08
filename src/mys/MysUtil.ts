@@ -1,10 +1,13 @@
 import { Data } from './local.js'
 
-const games = [{ key: 'gs', name: '原神' }, { key: 'sr', name: '星穹铁道' }]
+const games = [
+  { key: 'gs', name: '原神' },
+  { key: 'sr', name: '星穹铁道' }
+]
 
 const MysUtil = {
   // 获取标准ltuid
-  getLtuid (data) {
+  getLtuid(data) {
     if (!data) {
       return false
     }
@@ -19,7 +22,7 @@ const MysUtil = {
   },
 
   // 获取标准gameKey
-  getGameKey (game) {
+  getGameKey(game) {
     // 兼容e的处理
     if (game.user_id) {
       return game.isSr ? 'sr' : 'gs'
@@ -28,23 +31,36 @@ const MysUtil = {
   },
 
   // 生成设备guid
-  getDeviceGuid () {
-    function S4 () {
+  getDeviceGuid() {
+    function S4() {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
     }
 
-    return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
+    return (
+      S4() +
+      S4() +
+      '-' +
+      S4() +
+      '-' +
+      S4() +
+      '-' +
+      S4() +
+      '-' +
+      S4() +
+      S4() +
+      S4()
+    )
   },
 
   // 循环game
-  async eachGame (fn) {
-    await Data.forEach(games, (ds) => {
+  async eachGame(fn) {
+    await Data.forEach(games, ds => {
       return fn(ds.key, ds)
     })
   },
 
   // 循环server
-  async eachServ (fn) {
+  async eachServ(fn) {
     await Data.forEach(['mys', 'hoyolab'], fn)
   }
 }

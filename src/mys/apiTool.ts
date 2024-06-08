@@ -24,7 +24,9 @@ export default class apiTool {
 
   getUrlMap = (data = {}) => {
     let host, hostRecord, hostPublicData
-    if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
+    if (
+      ['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)
+    ) {
       host = 'https://api-takumi.mihoyo.com/'
       hostRecord = 'https://api-takumi-record.mihoyo.com/'
       hostPublicData = 'https://public-data-api.mihoyo.com/'
@@ -36,33 +38,35 @@ export default class apiTool {
     let urlMap = {
       genshin: {
         /** 体力接口fp参数用于避开验证码 */
-        ...(['cn_gf01', 'cn_qd01'].includes(this.server) ? {
-          getFp: {
-            url: `${hostPublicData}device-fp/api/getFp`,
-            body: {
-              seed_id: data.seed_id,
-              device_id: data.deviceId.toUpperCase(),
-              platform: '1',
-              seed_time: new Date().getTime() + '',
-              ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
-              app_name: 'bbs_cn',
-              device_fp: '38d7ee834d1e9'
+        ...(['cn_gf01', 'cn_qd01'].includes(this.server)
+          ? {
+              getFp: {
+                url: `${hostPublicData}device-fp/api/getFp`,
+                body: {
+                  seed_id: data.seed_id,
+                  device_id: data.deviceId.toUpperCase(),
+                  platform: '1',
+                  seed_time: new Date().getTime() + '',
+                  ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
+                  app_name: 'bbs_cn',
+                  device_fp: '38d7ee834d1e9'
+                }
+              }
             }
-          }
-        } : {
-          getFp: {
-            url: `${hostPublicData}device-fp/api/getFp`,
-            body: {
-              seed_id: data.seed_id,
-              device_id: data.deviceId.toUpperCase(),
-              platform: '5',
-              seed_time: new Date().getTime() + '',
-              ext_fields: `{"userAgent":"Mozilla/5.0 (Linux; Android 11; J9110 Build/55.2.A.4.332; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.179 Mobile Safari/537.36 miHoYoBBSOversea/2.55.0","browserScreenSize":"387904","maxTouchPoints":"5","isTouchSupported":"1","browserLanguage":"zh-CN","browserPlat":"Linux aarch64","browserTimeZone":"Asia/Shanghai","webGlRender":"Adreno (TM) 640","webGlVendor":"Qualcomm","numOfPlugins":"0","listOfPlugins":"unknown","screenRatio":"2.625","deviceMemory":"4","hardwareConcurrency":"8","cpuClass":"unknown","ifNotTrack":"unknown","ifAdBlock":"0","hasLiedLanguage":"0","hasLiedResolution":"1","hasLiedOs":"0","hasLiedBrowser":"0","canvas":"${randomRange()}","webDriver":"0","colorDepth":"24","pixelRatio":"2.625","packageName":"unknown","packageVersion":"2.27.0","webgl":"${randomRange()}"}`,
-              app_name: 'hk4e_global',
-              device_fp: '38d7f2364db95'
-            }
-          }
-        }),
+          : {
+              getFp: {
+                url: `${hostPublicData}device-fp/api/getFp`,
+                body: {
+                  seed_id: data.seed_id,
+                  device_id: data.deviceId.toUpperCase(),
+                  platform: '5',
+                  seed_time: new Date().getTime() + '',
+                  ext_fields: `{"userAgent":"Mozilla/5.0 (Linux; Android 11; J9110 Build/55.2.A.4.332; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.179 Mobile Safari/537.36 miHoYoBBSOversea/2.55.0","browserScreenSize":"387904","maxTouchPoints":"5","isTouchSupported":"1","browserLanguage":"zh-CN","browserPlat":"Linux aarch64","browserTimeZone":"Asia/Shanghai","webGlRender":"Adreno (TM) 640","webGlVendor":"Qualcomm","numOfPlugins":"0","listOfPlugins":"unknown","screenRatio":"2.625","deviceMemory":"4","hardwareConcurrency":"8","cpuClass":"unknown","ifNotTrack":"unknown","ifAdBlock":"0","hasLiedLanguage":"0","hasLiedResolution":"1","hasLiedOs":"0","hasLiedBrowser":"0","canvas":"${randomRange()}","webDriver":"0","colorDepth":"24","pixelRatio":"2.625","packageName":"unknown","packageVersion":"2.27.0","webgl":"${randomRange()}"}`,
+                  app_name: 'hk4e_global',
+                  device_fp: '38d7f2364db95'
+                }
+              }
+            }),
         /** 首页宝箱 */
         index: {
           url: `${hostRecord}game_record/app/genshin/api/index`,
@@ -139,43 +143,45 @@ export default class apiTool {
         }
       },
       honkaisr: {
-        ...(['prod_gf_cn', 'prod_qd_cn'].includes(this.server) ? {
-          UserGame: {
-            url: `${host}binding/api/getUserGameRolesByCookie`,
-            query: `game_biz=hkrpg_cn&region=${this.server}&game_uid=${this.uid}`
-          },
-          /** 体力接口fp参数用于避开验证码 */
-          getFp: {
-            url: `${hostPublicData}device-fp/api/getFp`,
-            body: {
-              seed_id: data.seed_id,
-              device_id: data.deviceId.toUpperCase(),
-              platform: '1',
-              seed_time: new Date().getTime() + '',
-              ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
-              app_name: 'bbs_cn',
-              device_fp: '38d7ee834d1e9'
+        ...(['prod_gf_cn', 'prod_qd_cn'].includes(this.server)
+          ? {
+              UserGame: {
+                url: `${host}binding/api/getUserGameRolesByCookie`,
+                query: `game_biz=hkrpg_cn&region=${this.server}&game_uid=${this.uid}`
+              },
+              /** 体力接口fp参数用于避开验证码 */
+              getFp: {
+                url: `${hostPublicData}device-fp/api/getFp`,
+                body: {
+                  seed_id: data.seed_id,
+                  device_id: data.deviceId.toUpperCase(),
+                  platform: '1',
+                  seed_time: new Date().getTime() + '',
+                  ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
+                  app_name: 'bbs_cn',
+                  device_fp: '38d7ee834d1e9'
+                }
+              }
             }
-          }
-        } : {
-          UserGame: {
-            url: `${host}binding/api/getUserGameRolesByCookie`,
-            query: `game_biz=hkrpg_global&region=${this.server}&game_uid=${this.uid}`
-          },
-          /** 体力接口fp参数用于避开验证码 */
-          getFp: {
-            url: `${hostPublicData}device-fp/api/getFp`,
-            body: {
-              seed_id: data.seed_id,
-              device_id: data.deviceId.toUpperCase(),
-              platform: '5',
-              seed_time: new Date().getTime() + '',
-              ext_fields: `{"userAgent":"Mozilla/5.0 (Linux; Android 11; J9110 Build/55.2.A.4.332; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.179 Mobile Safari/537.36 miHoYoBBSOversea/2.55.0","browserScreenSize":"387904","maxTouchPoints":"5","isTouchSupported":"1","browserLanguage":"zh-CN","browserPlat":"Linux aarch64","browserTimeZone":"Asia/Shanghai","webGlRender":"Adreno (TM) 640","webGlVendor":"Qualcomm","numOfPlugins":"0","listOfPlugins":"unknown","screenRatio":"2.625","deviceMemory":"4","hardwareConcurrency":"8","cpuClass":"unknown","ifNotTrack":"unknown","ifAdBlock":"0","hasLiedLanguage":"0","hasLiedResolution":"1","hasLiedOs":"0","hasLiedBrowser":"0","canvas":"${randomRange()}","webDriver":"0","colorDepth":"24","pixelRatio":"2.625","packageName":"unknown","packageVersion":"2.27.0","webgl":"${randomRange()}"}`,
-              app_name: 'hkrpg_global',
-              device_fp: '38d7f2364db95'
-            }
-          }
-        }),
+          : {
+              UserGame: {
+                url: `${host}binding/api/getUserGameRolesByCookie`,
+                query: `game_biz=hkrpg_global&region=${this.server}&game_uid=${this.uid}`
+              },
+              /** 体力接口fp参数用于避开验证码 */
+              getFp: {
+                url: `${hostPublicData}device-fp/api/getFp`,
+                body: {
+                  seed_id: data.seed_id,
+                  device_id: data.deviceId.toUpperCase(),
+                  platform: '5',
+                  seed_time: new Date().getTime() + '',
+                  ext_fields: `{"userAgent":"Mozilla/5.0 (Linux; Android 11; J9110 Build/55.2.A.4.332; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.179 Mobile Safari/537.36 miHoYoBBSOversea/2.55.0","browserScreenSize":"387904","maxTouchPoints":"5","isTouchSupported":"1","browserLanguage":"zh-CN","browserPlat":"Linux aarch64","browserTimeZone":"Asia/Shanghai","webGlRender":"Adreno (TM) 640","webGlVendor":"Qualcomm","numOfPlugins":"0","listOfPlugins":"unknown","screenRatio":"2.625","deviceMemory":"4","hardwareConcurrency":"8","cpuClass":"unknown","ifNotTrack":"unknown","ifAdBlock":"0","hasLiedLanguage":"0","hasLiedResolution":"1","hasLiedOs":"0","hasLiedBrowser":"0","canvas":"${randomRange()}","webDriver":"0","colorDepth":"24","pixelRatio":"2.625","packageName":"unknown","packageVersion":"2.27.0","webgl":"${randomRange()}"}`,
+                  app_name: 'hkrpg_global',
+                  device_fp: '38d7f2364db95'
+                }
+              }
+            }),
         /** 首页宝箱 */
         index: {
           url: `${hostRecord}game_record/app/hkrpg/api/index`,
@@ -212,7 +218,7 @@ export default class apiTool {
         /** 养成计算器 */
         compute: {
           url: `${host}event/rpgcalc/compute?`,
-          query:`game=hkrpg`,
+          query: `game=hkrpg`,
           body: data.body
         },
         /** 详情 */
@@ -224,18 +230,25 @@ export default class apiTool {
     }
 
     if (this.server.startsWith('os')) {
-      urlMap.genshin.detail.url = 'https://sg-public-api.hoyolab.com/event/calculateos/sync/avatar/detail'// 角色天赋详情
+      urlMap.genshin.detail.url =
+        'https://sg-public-api.hoyolab.com/event/calculateos/sync/avatar/detail' // 角色天赋详情
       urlMap.genshin.detail.query = `lang=zh-cn&uid=${this.uid}&region=${this.server}&avatar_id=${data.avatar_id}`
-      urlMap.genshin.avatarSkill.url = 'https://sg-public-api.hoyolab.com/event/calculateos/avatar/skill_list'// 查询未持有的角色天赋
+      urlMap.genshin.avatarSkill.url =
+        'https://sg-public-api.hoyolab.com/event/calculateos/avatar/skill_list' // 查询未持有的角色天赋
       urlMap.genshin.avatarSkill.query = `lang=zh-cn&avatar_id=${data.avatar_id}`
-      urlMap.genshin.compute.url = 'https://sg-public-api.hoyolab.com/event/calculateos/compute'// 已支持养成计算
-      urlMap.genshin.blueprint.url = 'https://sg-public-api.hoyolab.com/event/calculateos/furniture/blueprint'
+      urlMap.genshin.compute.url =
+        'https://sg-public-api.hoyolab.com/event/calculateos/compute' // 已支持养成计算
+      urlMap.genshin.blueprint.url =
+        'https://sg-public-api.hoyolab.com/event/calculateos/furniture/blueprint'
       urlMap.genshin.blueprint.query = `share_code=${data.share_code}&region=${this.server}&lang=zh-cn`
-      urlMap.genshin.blueprintCompute.url = 'https://sg-public-api.hoyolab.com/event/calculateos/furniture/compute'
+      urlMap.genshin.blueprintCompute.url =
+        'https://sg-public-api.hoyolab.com/event/calculateos/furniture/compute'
       urlMap.genshin.blueprintCompute.body = { lang: 'zh-cn', ...data.body }
-      urlMap.genshin.ys_ledger.url = 'https://sg-hk4e-api.hoyolab.com/event/ysledgeros/month_info'// 支持了国际服札记
+      urlMap.genshin.ys_ledger.url =
+        'https://sg-hk4e-api.hoyolab.com/event/ysledgeros/month_info' // 支持了国际服札记
       urlMap.genshin.ys_ledger.query = `lang=zh-cn&month=${data.month}&uid=${this.uid}&region=${this.server}`
-      urlMap.genshin.useCdk.url = 'https://sg-hk4e-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey'
+      urlMap.genshin.useCdk.url =
+        'https://sg-hk4e-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey'
       urlMap.genshin.useCdk.query = `uid=${this.uid}&region=${this.server}&lang=zh-cn&cdkey=${data.cdk}&game_biz=hk4e_global`
     }
     return urlMap[this.game]

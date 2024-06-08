@@ -15,7 +15,6 @@ import fetch from 'node-fetch'
 
 import { MysUserDB, UserDB } from '../db/index.js'
 
-
 import { Data } from './local.js'
 
 const tables = {
@@ -42,7 +41,6 @@ const tables = {
 }
 
 export default class MysUser extends BaseModel {
-
   constructor(ltuid) {
     super()
     if (!ltuid) {
@@ -76,7 +74,7 @@ export default class MysUser extends BaseModel {
 
   static async forEach(fn) {
     let dbs = await MysUserDB.findAll()
-    await Data.forEach(dbs, async (db) => {
+    await Data.forEach(dbs, async db => {
       let mys = await MysUser.create(db.ltuid, db)
       return await fn(mys)
     })
@@ -108,7 +106,9 @@ export default class MysUser extends BaseModel {
     // 根据uid检索已查询记录。包括公共CK/自己CK/已查询过
     let ret = await create(await servCache.zKey(tables.detail, uid))
     if (ret) {
-      logger.mark(`[米游社查询][uid：${uid}]${logger.green(`[使用已查询ck：${ret.ltuid}]`)}`)
+      logger.mark(
+        `[米游社查询][uid：${uid}]${logger.green(`[使用已查询ck：${ret.ltuid}]`)}`
+      )
       return ret
     }
 
@@ -118,7 +118,9 @@ export default class MysUser extends BaseModel {
     // 使用CK池内容，分配次数最少的一个ltuid
     ret = await create(await servCache.zMinKey(tables.detail))
     if (ret) {
-      logger.mark(`[米游社查询][uid：${uid}]${logger.green(`[分配查询ck：${ret.ltuid}]`)}`)
+      logger.mark(
+        `[米游社查询][uid：${uid}]${logger.green(`[分配查询ck：${ret.ltuid}]`)}`
+      )
       return ret
     }
 
@@ -126,8 +128,8 @@ export default class MysUser extends BaseModel {
   }
 
   static async eachServ(fn) {
-    await MysUtil.eachServ(async (serv) => {
-      await MysUtil.eachGame(async (game) => {
+    await MysUtil.eachServ(async serv => {
+      await MysUtil.eachGame(async game => {
         let servCache = DailyCache.create(serv, game)
         await fn(servCache, serv, game)
       })
@@ -158,7 +160,7 @@ export default class MysUser extends BaseModel {
         count[type] = num
         totalCount[type] = (totalCount[type] || 0) + num
       }
-      lodash.forEach(data, (ds) => {
+      lodash.forEach(data, ds => {
         list.push({
           ltuid: ds.value,
           num: ds.score
@@ -174,7 +176,8 @@ export default class MysUser extends BaseModel {
       stat('last', count.normal * 30 - count.query)
       list = lodash.sortBy(list, ['num', 'ltuid']).reverse()
       ret.servs[serv] = {
-        list, count
+        list,
+        count
       }
     })
     ret.count = totalCount
@@ -246,7 +249,10 @@ export default class MysUser extends BaseModel {
     let detailRet = await mys.getData('detail', { avatar_id: 10000021 })
     if (detailRet.retcode !== 0 || lodash.isEmpty(detailRet.data)) {
       let msg = noteRet.message !== 'OK' ? noteRet.message : 'CK失效'
-      return err(`${msg || 'CK失效'}，当前CK仍可查询体力及角色，但无法查询角色详情数据`, 1)
+      return err(
+        `${msg || 'CK失效'}，当前CK仍可查询体力及角色，但无法查询角色详情数据`,
+        1
+      )
     }
     return {
       uids,
@@ -331,7 +337,11 @@ export default class MysUser extends BaseModel {
 
     if (!res) return err(msg)
     let playerList = res?.data?.list || []
-    playerList = playerList.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
+    playerList = playerList.filter(v =>
+      ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(
+        v.game_biz
+      )
+    )
     if (!playerList || playerList.length <= 0) {
       return err('该账号尚未绑定原神或星穹角色')
     }
@@ -341,7 +351,10 @@ export default class MysUser extends BaseModel {
 
     /** 米游社默认展示的角色 */
     for (let val of playerList) {
-      this.addUid(val.game_uid, ['hk4e_cn', 'hk4e_global'].includes(val.game_biz) ? 'gs' : 'sr')
+      this.addUid(
+        val.game_uid,
+        ['hk4e_cn', 'hk4e_global'].includes(val.game_biz) ? 'gs' : 'sr'
+      )
     }
     await this.save()
     return { status: 0, msg: '' }
@@ -351,7 +364,8 @@ export default class MysUser extends BaseModel {
     let ck = this.ck
     let url = {
       mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie',
-      hoyolab: 'https://sg-public-api.hoyolab.com/binding/api/getUserGameRolesByCookie'
+      hoyolab:
+        'https://sg-public-api.hoyolab.com/binding/api/getUserGameRolesByCookie'
     }
 
     let res = await fetch(url[serv], { method: 'get', headers: { Cookie: ck } })
@@ -415,7 +429,7 @@ export default class MysUser extends BaseModel {
     this.device = data.device || this.device || MysUtil.getDeviceGuid()
     this.uids = this.uids || {}
     let self = this
-    MysUtil.eachGame((game) => {
+    MysUtil.eachGame(game => {
       self.uids[game] = data?.uids?.[game] || self.uids[game] || []
     })
   }
@@ -454,7 +468,7 @@ export default class MysUser extends BaseModel {
       return
     }
     let self = this
-    await MysUtil.eachGame(async (game) => {
+    await MysUtil.eachGame(async game => {
       let uids = self.uids[game]
       await this.addQueryUid(uids, game)
       let cache = self.getCache(game)
@@ -463,7 +477,7 @@ export default class MysUser extends BaseModel {
       if (cacheSearchList && cacheSearchList.length > 0) {
         for (let searchedUid of cacheSearchList) {
           // 检查对应uid是否有新的查询记录
-          if (!await this.getQueryLtuid(searchedUid, game)) {
+          if (!(await this.getQueryLtuid(searchedUid, game))) {
             await this.addQueryUid(searchedUid, game)
           }
         }
@@ -487,7 +501,7 @@ export default class MysUser extends BaseModel {
     // TODO 检查一ltuid多绑定的情况
     // 将查询过的uid缓存起来，以备后续重新绑定时恢复
     let self = this
-    await MysUtil.eachGame(async (game) => {
+    await MysUtil.eachGame(async game => {
       let uids = await this.getQueryUids(game)
       let cache = self.getCache(game)
       await cache.set(tables.del, uids)

@@ -7,12 +7,12 @@ let cacheMap = {}
 let reFn = {}
 
 export default class BaseModel {
-  constructor () {
+  constructor() {
     return this
   }
 
   // 获取缓存
-  _getThis (model, id = '', time = 10 * 60) {
+  _getThis(model, id = '', time = 10 * 60) {
     const uuid = `${model}:${id}`
     this._uuid = uuid
     if (uuid && cacheMap[uuid]) {
@@ -21,7 +21,7 @@ export default class BaseModel {
   }
 
   // 设置缓存
-  _cacheThis (model, id, time = 10 * 60) {
+  _cacheThis(model, id, time = 10 * 60) {
     const uuid = this._uuid || `${model}:${id}`
     this._uuid = uuid
     if (uuid) {
@@ -33,7 +33,7 @@ export default class BaseModel {
   }
 
   // 设置超时时间
-  _expire (time = 10 * 60) {
+  _expire(time = 10 * 60) {
     let id = this._uuid
     reFn[id] && clearTimeout(reFn[id])
     if (time > 0) {
@@ -48,22 +48,22 @@ export default class BaseModel {
     }
   }
 
-  _delCache () {
+  _delCache() {
     let id = this._uuid
     reFn[id] && clearTimeout(reFn[id])
     delete reFn[id]
     delete cacheMap[id]
   }
 
-  gameKey (game = 'gs') {
+  gameKey(game = 'gs') {
     return MysUtil.getGameKey(game)
   }
 
-  isGs (game = 'gs') {
+  isGs(game = 'gs') {
     return this.gameKey(game) === 'gs'
   }
 
-  isSr (game = 'gs') {
+  isSr(game = 'gs') {
     return this.gameKey(game) === 'sr'
   }
 }
