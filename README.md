@@ -51,6 +51,8 @@ node app
 
 ## 常见问题
 
+<details><summary>展开/收起</summary>
+
 ### 无头浏览器相关
 
 linux环境，其他环境请自行探索
@@ -81,6 +83,8 @@ cd /usr/lib64/
 sudo mv libstdc++.so.6 libstdc++.so.6.bak
 sudo ln -s libstdc++.so.6.0.29 libstdc++.so.6
 ```
+
+</details>
 
 ## 与原版Yunzai-Bot的差异
 
