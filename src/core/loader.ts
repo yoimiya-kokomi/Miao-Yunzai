@@ -7,27 +7,27 @@ class ListenerLoader {
   client = null
 
   /**
-   * 
-   * @param listener 
-   * @param File 
-   * @returns 
+   *
+   * @param listener
+   * @param File
+   * @returns
    */
   init = (listener, File: string) => {
     try {
       if (!listener.default) return
 
       /**
-        * 
-        */
+       *
+       */
       listener = new listener.default()
 
       /**
-       * 
+       *
        */
       listener.client = this.client
 
       /**
-       * 
+       *
        */
       const on = listener.once ? 'once' : 'on'
 
@@ -68,7 +68,6 @@ class ListenerLoader {
     this.init(await import('./events/offline.js'), './events/offline.js')
     this.init(await import('./events/online.js'), './events/online.js')
     this.init(await import('./events/request.js'), './events/request.js')
-
   }
 }
 

@@ -66,16 +66,17 @@ export class plugin {
     dsc && (this.dsc = dsc)
     event && (this.event = event)
     priority && (this.priority = priority)
-    
+
     /** 定时任务，可以是数组 */
-    task && (this.task =  {
-      /** 任务名 */
-      name:  task?.name ?? '',
-      /** 任务方法名 */
-      fnc: task?.fnc ?? '',
-      /** 任务cron表达式 */
-      cron: task?.cron ?? ''
-    })
+    task &&
+      (this.task = {
+        /** 任务名 */
+        name: task?.name ?? '',
+        /** 任务方法名 */
+        fnc: task?.fnc ?? '',
+        /** 任务cron表达式 */
+        cron: task?.cron ?? ''
+      })
 
     /** 命令规则 */
     rule && (this.rule = rule)
