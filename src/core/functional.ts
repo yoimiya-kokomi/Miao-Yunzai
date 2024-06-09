@@ -4,7 +4,12 @@ import { plugin } from './plugin.js'
 /**
  * 插件super默认值
  */
-export const PluginSuperDefine = {
+export const PluginSuperDefine: {
+  name?: string,
+  dsc?: string,
+  event?: string,
+  priority?: number
+} = {
   name: 'group-app',
   dsc: 'group-dsc',
   event: 'message',
@@ -20,6 +25,12 @@ export class Messages {
     reg: RegExp
     fnc: string
   }[] = []
+
+  #init = PluginSuperDefine
+
+  constructor(init?: typeof PluginSuperDefine) {
+    this.#init = init
+  }
 
   /**
    *
@@ -43,7 +54,7 @@ export class Messages {
     class Children extends plugin {
       constructor() {
         super({
-          ...PluginSuperDefine,
+          ...App.#init,
           rule: App.rule
         })
         for (const key of App.rule) {
