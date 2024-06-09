@@ -14,12 +14,29 @@
 
 如果你的系统不支持18.18.2版本，最低能下载16.14.0版本，这是最新的puppeteer版本限制。
 
+## 开发者
+
+> [开发相关](./md/developer.md)
+
 ## 使用教程
 
 - 安装源码
 
 ```sh
 git clone --depth=1 -b dev https://github.com/yoimiya-kokomi/Miao-Yunzai.git
+```
+
+- 进入目录
+
+```sh
+cd Miao-Yunzai
+```
+
+- 安装插件(计划移除中...)
+
+```sh
+
+git clone --depth=1 https://github.com/yoimiya-kokomi/miao-plugin.git ./plugins/miao-plugin/
 ```
 
 - 安装依赖
@@ -41,9 +58,7 @@ npm run ts:app
 npm run ts:app login
 ```
 
-## 开发者
-
-> [开发相关](./md/developer.md)
+> 暂不支持PM2托管进程
 
 ## Unknown file ".ts"
 

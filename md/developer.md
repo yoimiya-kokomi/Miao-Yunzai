@@ -104,6 +104,14 @@ src/mys
 
 src/utils
 
+## 生成开发文档
+
+```sh
+npm run docs
+```
+
+浏览器打开文件`docs/index.html`
+
 ## 新开发示例
 
 > [开发示例](./example.md)
