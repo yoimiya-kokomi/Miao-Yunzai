@@ -41,35 +41,11 @@ npm run ts:app
 npm run ts:app login
 ```
 
-> [开发相关](./DEV.md)
+## 开发者
 
-## 环境补充
+> [开发相关](./md/developer.md)
 
-### Centos
-
-```sh
-yum install pango.x86_64 libXcomposite.x86_64 libXcursor.x86_64 libXdamage.x86_64 libXext.x86_64 libXi.x86_64 libXtst.x86_64 cups-libs.x86_64 libXScrnSaver.x86_64 libXrandr.x86_64 GConf2.x86_64 alsa-lib.x86_64 atk.x86_64 gtk3.x86_64 -y
-```
-
-- 字体
-
-```sh
-yum groupinstall fonts -y
-```
-
-- libstdc
-
-下载 [libstdc++.so.6.0.29.zip](https://baiyin1314.lanzouq.com/i8Nr21ig8hyf)
-
-将 **解压缩后** 的文件放在/usr/lib64/中
-
-```sh
-cd /usr/lib64/
-sudo mv libstdc++.so.6 libstdc++.so.6.bak
-sudo ln -s libstdc++.so.6.0.29 libstdc++.so.6
-```
-
-# Unknown file ".ts"
+## Unknown file ".ts"
 
 node >= 20.0.0
 
@@ -84,13 +60,3 @@ npm run latest:app
 ```sh
 npm run latest:app login
 ```
-
-## 致谢
-
-|                           Nickname                            | Contribution         |
-| :-----------------------------------------------------------: | -------------------- |
-|      [Yunzai v3.0](https://gitee.com/le-niao/Yunzai-Bot)      | 乐神的Yunzai-Bot V3  |
-| [GardenHamster](https://github.com/GardenHamster/GenshinPray) | 模拟抽卡背景素材来源 |
-|    [西风驿站](https://bbs.mihoyo.com/ys/collection/839181)    | 角色攻略图来源       |
-|  [米游社友人A](https://bbs.mihoyo.com/ys/collection/428421)   | 角色突破素材图来源   |
-|            [icqq](https://github.com/icqqjs/icqq)             | ICQQ                 |
