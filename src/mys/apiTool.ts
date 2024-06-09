@@ -5,21 +5,27 @@ import { randomRange } from './mysApi.js'
  * 临时处理，后续大概率重写 主要原因（懒）
  */
 export default class apiTool {
+  uid = null
+  isSr = false
+  server = null
+  game = 'genshin'
+
   /**
    *
    * @param {用户uid} uid
    * @param {区服} server
    * @param {是否为星穹铁道或其他游戏? type(bool or string)} isSr
    */
-  constructor(uid, server, isSr = false) {
-    this.uid = uid
-    this.isSr = isSr
-    this.server = server
+  constructor(uid: string | null, server, isSr: boolean = false) {
+    uid && (this.uid = uid)
+    typeof isSr != 'undefined' && (this.uid = uid)
+    server && (this.server = server)
+
+    // init
     this.game = 'genshin'
+
     if (isSr) this.game = 'honkaisr'
-    if (typeof isSr !== 'boolean') {
-      this.game = isSr
-    }
+    if (typeof isSr !== 'boolean') this.game = isSr
   }
 
   /**
@@ -27,7 +33,7 @@ export default class apiTool {
    * @param data
    * @returns
    */
-  getUrlMap = (data = {}) => {
+  getUrlMap = (data: any = {}) => {
     let host, hostRecord, hostPublicData
     if (
       ['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)

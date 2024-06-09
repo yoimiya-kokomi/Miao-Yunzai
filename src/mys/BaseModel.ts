@@ -3,11 +3,20 @@
  */
 import MysUtil from './MysUtil.js'
 
-let cacheMap = {}
-let reFn = {}
+const cacheMap = {}
+const reFn = {}
 
 export default class BaseModel {
+  _uuid = null
+
+  /**
+   *
+   * @returns
+   */
   constructor() {
+    /**
+     * ????
+     */
     return this
   }
 

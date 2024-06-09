@@ -14,13 +14,15 @@ const redisKeyRoot = 'Yz:cache:'
  *
  */
 export default class DailyCache extends BaseModel {
+  keyPre = null
+
   /**
    *
    * @param uid
    * @param game
    * @returns
    */
-  constructor(uid, game = 'config') {
+  constructor(uid: string | number, game = 'config') {
     super()
     const storeKey = DailyCache.getStoreKey(uid, game)
     // 检查实例缓存

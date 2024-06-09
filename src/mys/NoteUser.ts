@@ -5,11 +5,13 @@ import MysUtil from './MysUtil.js'
 import { UserDB } from '../db/index.js'
 import { Data } from '../local.js'
 /**
+ * *******************
  * Bot实际User用户类
  * 主键QQ
  *
  *  User可以注册UID，通过 getRegUid / setRegUid
  *  一个User可以绑定多个MysUser CK，绑定MysUser
+ * *******************
  */
 export default class NoteUser extends BaseModel {
   /**
@@ -32,12 +34,17 @@ export default class NoteUser extends BaseModel {
    * OLD Func {{
    */
 
+  /**
+   *
+   */
   get uid() {
     console.warn('NoteUser.uid 默认返回原神UID，可更改为 user.getUid(game)')
     return this.getUid()
   }
 
-  // 获取绑定CK的UID列表，如未绑定CK则返回空数组
+  /**
+   * 获取绑定CK的UID列表，如未绑定CK则返回空数组
+   */
   get ckUids() {
     console.warn(
       'NoteUser.ckUids 默认返回原神UID，可更改为 user.getCkUidList(game)'
