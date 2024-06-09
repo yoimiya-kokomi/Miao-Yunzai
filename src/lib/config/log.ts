@@ -2,20 +2,15 @@ import log4js from 'log4js'
 import chalk from 'chalk'
 import cfg from './config.js'
 import fs from 'node:fs'
+ 
 
 /**
-* 设置日志样式
-*/
-export default function setLog () {
-  let file = './logs'
-  if (!fs.existsSync(file)) {
-    fs.mkdirSync(file)
-  }
-
-  /** 调整error日志等级 */
+ * 创建日志
+ * @returns 
+ */
+function createLog() {
   // log4js.levels.levels[5].level = Number.MAX_VALUE
   // log4js.levels.levels.sort((a, b) => a.level - b.level)
-
   log4js.configure({
     appenders: {
       console: {
@@ -57,40 +52,57 @@ export default function setLog () {
   const commandLogger = log4js.getLogger('command')
   const errorLogger = log4js.getLogger('error')
 
-  /* eslint-disable no-useless-call */
-  /** 全局变量 logger */
-  global.logger = {
-    trace () {
+  /** 调整error日志等级 */
+
+  const logger = {
+    trace() {
       defaultLogger.trace.call(defaultLogger, ...arguments)
     },
-    debug () {
+    debug() {
       defaultLogger.debug.call(defaultLogger, ...arguments)
     },
-    info () {
+    info() {
       defaultLogger.info.call(defaultLogger, ...arguments)
     },
     // warn及以上的日志采用error策略
-    warn () {
+    warn() {
       commandLogger.warn.call(defaultLogger, ...arguments)
     },
-    error () {
+    error() {
       errorLogger.error.call(errorLogger, ...arguments)
     },
-    fatal () {
+    fatal() {
       errorLogger.fatal.call(errorLogger, ...arguments)
     },
-    mark () {
+    mark() {
       errorLogger.mark.call(commandLogger, ...arguments)
     }
   }
-
-  logColor()
+  return logger
 }
 
 /**
- * 
- */
-function logColor () {
+* 设置日志样式
+*/
+export default function setLog() {
+
+  /**
+   * 
+   */
+  let file = './logs'
+
+  /**
+   * 
+   */
+  if (!fs.existsSync(file)){
+    fs.mkdirSync(file, {
+      'recursive': true
+    })
+  }
+ 
+  /** 全局变量 logger */
+  global.logger = createLog()
+
   logger.chalk = chalk
   logger.red = chalk.red
   logger.green = chalk.green
