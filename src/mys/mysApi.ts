@@ -3,8 +3,28 @@ import fetch from 'node-fetch'
 import cfg from '../config/config.js'
 import apiTool from './apiTool.js'
 
-let HttpsProxyAgent = ''
+let HttpsProxyAgent = null
+
+/**
+ *
+ */
 export default class MysApi {
+  uid = null
+  cookie = null
+  isSr = null
+  server = null
+  apiTool = null
+
+  /**
+   * 5分钟缓存
+   */
+  cacheCd = 300
+  /**
+   *
+   */
+  _device = null
+  option = null
+
   /**
    * @param uid 游戏uid
    * @param cookie 米游社cookie
@@ -278,17 +298,14 @@ export default class MysApi {
     let proxyAddress = cfg.bot.proxyAddress
     if (!proxyAddress) return null
     if (proxyAddress === 'http://0.0.0.0:0') return null
-
     if (!/os_|official/.test(this.server)) return null
 
-    if (HttpsProxyAgent === '') {
-      HttpsProxyAgent = await import('https-proxy-agent').catch(err => {
+    //
+    if (HttpsProxyAgent == null) {
+      const data = await import('https-proxy-agent').catch(err => {
         logger.error(err)
       })
-
-      HttpsProxyAgent = HttpsProxyAgent
-        ? HttpsProxyAgent.HttpsProxyAgent
-        : undefined
+      HttpsProxyAgent = data ? data.HttpsProxyAgent : undefined
     }
 
     if (HttpsProxyAgent) {

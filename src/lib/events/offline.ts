@@ -1,6 +1,7 @@
 import EventListener from '../listener/listener.js'
 import fetch from 'node-fetch'
 import cfg from '../../config/config.js'
+import { BOT_NAME } from '../../config/system.js'
 
 /**
  * 监听下线事件
@@ -25,7 +26,7 @@ export default class offlineEvent extends EventListener {
   async execute (e) {
     logger.mark('掉线了')
     let config = cfg.getConfig('notice')
-    let title = `Miao-Yunzai(${Bot.nickname})已离线，请关注`
+    let title = `${BOT_NAME}(${Bot.nickname})已离线，请关注`
     if (config.iyuu) {
       await fetch(`https://iyuu.cn/${config.iyuu}.send?text=${title}&desp=${e.message}`)
     }

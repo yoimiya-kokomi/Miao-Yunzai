@@ -1,8 +1,9 @@
 import fs from 'fs'
 import inquirer from 'inquirer'
+import chalk from 'chalk'
+import { BOT_NAME, CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
 import cfg from './config.js'
 import { sleep } from '../utils/common.js'
-import chalk from 'chalk'
 
 /**
  * 创建qq配置文件 `config/bot/qq.yaml`
@@ -20,11 +21,10 @@ export default async function createQQ() {
     return
   }
 
-
   /**
    * 
    */
-  console.log(`欢迎使用${chalk.green('Miao-Yunzai v' + cfg.package.version)}\n请按提示输入完成QQ配置`)
+  console.log(`欢迎使用${chalk.green(`${BOT_NAME} v` + cfg.package.version)}\n请按提示输入完成QQ配置`)
 
 
   /**
@@ -99,8 +99,11 @@ export default async function createQQ() {
   /**
    * 
    */
-  let file = './config/config/'
-  let fileDef = './config/default_config/'
+  const file = `./${CONFIG_INIT_PATH}`
+
+  const fileDef = `./${CONFIG_DEFAULT_PATH}`
+
+
 
   let qq = fs.readFileSync(`${fileDef}qq.yaml`, 'utf8')
 

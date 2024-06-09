@@ -261,6 +261,10 @@ class GsCfg {
     }
   }
 
+  nameID = new Map()
+
+  sr_nameID = new Map()
+
   /**
    * 仅供内部调用
    * @returns
@@ -270,6 +274,7 @@ class GsCfg {
 
     this.nameID = new Map()
     this.sr_nameID = new Map()
+
     let nameArr = this.getdefSet('role', 'name')
     let sr_nameArr = this.getdefSet('role', 'sr_name')
     let nameArrUser = this.getConfig('role', 'name')
@@ -303,7 +308,7 @@ class GsCfg {
    * @param isSr
    * @returns
    */
-  _roleNameToID(keyword, isSr) {
+  _roleNameToID(keyword, isSr?: boolean) {
     if (isSr) this.isSr = isSr
     if (!isNaN(keyword)) keyword = Number(keyword)
     this._getAbbr()

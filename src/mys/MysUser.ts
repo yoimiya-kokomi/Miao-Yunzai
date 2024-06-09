@@ -62,7 +62,7 @@ export default class MysUser extends BaseModel {
   constructor(ltuid) {
     super()
     if (!ltuid) {
-      return false
+      return
     }
     // 检查实例缓存
     let self = this._getThis('mys', ltuid)
@@ -520,7 +520,7 @@ export default class MysUser extends BaseModel {
    * 设置ck数据
    * @param data
    */
-  setCkData(data = {}) {
+  setCkData(data: { ck: string; type: string; device: string; uids?: any }) {
     this.ck = data.ck || this.ck || ''
     this.type = data.type || this.type || 'mys'
     this.device = data.device || this.device || MysUtil.getDeviceGuid()

@@ -1,11 +1,14 @@
 import moment from 'moment'
 import BaseModel from './BaseModel.js'
 import MysUtil from './MysUtil.js'
+import { REDIS_ROOT_KEY } from '../config/system.js'
 
+//
 const servs = ['mys', 'hoyolab']
 // 超时时间不必精确，直接定24小时即可
 const EX = 3600 * 24
-const redisKeyRoot = 'Yz:cache:'
+//
+const redisKeyRoot = REDIS_ROOT_KEY
 
 /**
  * ************

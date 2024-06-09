@@ -16,7 +16,7 @@ export default class apiTool {
    * @param {区服} server
    * @param {是否为星穹铁道或其他游戏? type(bool or string)} isSr
    */
-  constructor(uid: string | null, server, isSr: boolean = false) {
+  constructor(uid: string | null, server: string, isSr: boolean = false) {
     uid && (this.uid = uid)
     typeof isSr != 'undefined' && (this.uid = uid)
     server && (this.server = server)

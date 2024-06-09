@@ -1,6 +1,8 @@
 import YAML from 'yaml'
 import fs from 'node:fs'
 import chokidar from 'chokidar'
+import { join } from 'node:path'
+import { CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
 
 /**
  * ********
@@ -13,17 +15,17 @@ class Cfg {
   /** 监听文件 */
   watcher = { config: {}, defSet: {} }
 
-  constructor () {
+  constructor() {
     this.initCfg()
   }
 
-  
+
   /**
    * 初始化配置
    */
-  initCfg () {
-    let path = 'config/config/'
-    let pathDef = 'config/default_config/'
+  initCfg() {
+    const path = CONFIG_INIT_PATH
+    const pathDef = CONFIG_DEFAULT_PATH
     const files = fs.readdirSync(pathDef).filter(file => file.endsWith('.yaml'))
     for (let file of files) {
       if (!fs.existsSync(`${path}${file}`)) {
@@ -37,45 +39,45 @@ class Cfg {
   /**
    * 机器人qq号
    */
-  get qq () {
+  get qq() {
     return Number(this.getConfig('qq').qq)
   }
 
   /**
    * 密码
    */
-  get pwd () {
+  get pwd() {
     return this.getConfig('qq').pwd
   }
 
   /**
    * icqq配置
    */
-  get bot () {
+  get bot() {
     let bot = this.getConfig('bot')
     let defbot = this.getdefSet('bot')
-    bot = { ...defbot, ...bot }
-    bot.platform = this.getConfig('qq').platform
-    /** 设置data目录，防止pm2运行时目录不对 */
-    bot.data_dir = process.cwd() + '/data/icqq/' + this.qq || ''
-
-    if (!bot.ffmpeg_path) delete bot.ffmpeg_path
-    if (!bot.ffprobe_path) delete bot.ffprobe_path
-
-    return bot
+    const Config = { ...defbot, ...bot }
+    Config.platform = this.getConfig('qq').platform
+    /**
+     * 设置data目录，防止pm2运行时目录不对
+     */
+    Config.data_dir = join(process.cwd(), `/data/icqq/${this.qq}`)
+    if (!Config.ffmpeg_path) delete Config.ffmpeg_path
+    if (!Config.ffprobe_path) delete Config.ffprobe_path
+    return Config
   }
 
   /**
    * 
    */
-  get other () {
+  get other() {
     return this.getConfig('other')
   }
 
   /**
    * 
    */
-  get redis () {
+  get redis() {
     return this.getConfig('redis')
   }
 
@@ -96,25 +98,29 @@ class Cfg {
   /**
    * 主人qq
    */
-  get masterQQ () {
-    let masterQQ = this.getConfig('other').masterQQ || []
-
+  get masterQQ() {
+    const masterQQ = this.getConfig('other')?.masterQQ || []
     if (Array.isArray(masterQQ)) {
-      masterQQ.forEach(qq => { qq = String(qq) })
+      return masterQQ.forEach(qq => { qq = String(qq) })
     } else {
-      masterQQ = [String(masterQQ)]
+      return [String(masterQQ)]
     }
-    return masterQQ
   }
+
+  _package = null
 
   /**
    * package.json 
    */
-  get package () {
+  get package() {
     if (this._package) return this._package
-
-    this._package = JSON.parse(fs.readFileSync('package.json', 'utf8'))
-    return this._package
+    try {
+      const data = fs.readFileSync('package.json', 'utf8')
+      this._package = JSON.parse(data)
+      return this._package
+    } catch {
+      return {}
+    }
   }
 
   /**
@@ -122,9 +128,9 @@ class Cfg {
    * @param groupId 
    * @returns 
    */
-  getGroup (groupId = '') {
-    let config = this.getConfig('group')
-    let defCfg = this.getdefSet('group')
+  getGroup(groupId = '') {
+    const config = this.getConfig('group')
+    const defCfg = this.getdefSet('group')
     if (config[groupId]) {
       return { ...defCfg.default, ...config.default, ...config[groupId] }
     }
@@ -135,9 +141,9 @@ class Cfg {
    * other配置
    * @returns 
    */
-  getOther () {
-    let def = this.getdefSet('other')
-    let config = this.getConfig('other')
+  getOther() {
+    const def = this.getdefSet('other')
+    const config = this.getConfig('other')
     return { ...def, ...config }
   }
 
@@ -145,27 +151,27 @@ class Cfg {
    * notice配置
    * @returns 
    */
-  getNotice () {
-    let def = this.getdefSet('notice')
-    let config = this.getConfig('notice')
+  getNotice() {
+    const def = this.getdefSet('notice')
+    const config = this.getConfig('notice')
     return { ...def, ...config }
   }
 
   /**
-   * 
+   * 得到默认配置
    * @param name 配置文件名称
    * @returns 
    */
-  getdefSet (name) {
+  getdefSet(name: string) {
     return this.getYaml('default_config', name)
   }
 
   /**
-   * 用户配置
+   * 得到生成式配置
    * @param name 
    * @returns 
    */
-  getConfig (name) {
+  getConfig(name: string) {
     return this.getYaml('config', name)
   }
 
@@ -174,7 +180,7 @@ class Cfg {
    * @param type 默认跑配置-defSet，用户配置-config
    * @param name 名称
    */
-  getYaml (type, name) {
+  getYaml(type, name) {
     let file = `config/${type}/${name}.yaml`
     let key = `${type}.${name}`
     if (this.config[key]) return this.config[key]
@@ -195,13 +201,11 @@ class Cfg {
    * @param type 
    * @returns 
    */
-  watch (file, name, type = 'default_config') {
-    let key = `${type}.${name}`
-
+  watch(file:string, name:string, type = 'default_config') {
+    const key = `${type}.${name}`
     if (this.watcher[key]) return
-
     const watcher = chokidar.watch(file)
-    watcher.on('change', path => {
+    watcher.on('change', () => {
       delete this.config[key]
       if (typeof Bot == 'undefined') return
       logger.mark(`[修改配置文件][${type}][${name}]`)
@@ -209,7 +213,6 @@ class Cfg {
         this[`change_${name}`]()
       }
     })
-
     this.watcher[key] = watcher
   }
 
@@ -217,20 +220,18 @@ class Cfg {
    * 
    * @returns 
    */
-  change_qq () {
+  change_qq() {
     if (process.argv.includes('login') || !this.qq) return
     logger.info('修改机器人QQ或密码，请手动重启')
   }
 
   /**
-   * 
+   * 修改日志等级
    */
-  async change_bot () {
-    /** 修改日志等级 */
-    let log = await import('./log.js')
+  async change_bot() {
+    const log = await import('./log.js')
     log.default()
   }
-
 
 }
 

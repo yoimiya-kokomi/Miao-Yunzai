@@ -425,15 +425,13 @@ export default class NoteUser extends BaseModel {
     return await this.delMysUser(ltuid)
   }
 
-  mysUsers = []
-
   _map = null
 
   /**
    *
    * @param mysUser
    */
-  async delMysUser(mysUser = '') {
+  async delMysUser(mysUser: any = '') {
     let ltuid = mysUser.ltuid || mysUser
     if (ltuid && this.mysUsers[ltuid]) {
       let mys = this.mysUsers[ltuid]
@@ -484,7 +482,7 @@ export default class NoteUser extends BaseModel {
       // TODO: 若checkRet中返回了不同的uid，进行CK保存更新
       // 失效
       let mysUser = await MysUser.create(ck)
-      if (mysUser) {
+      if (mysUser && checkRet) {
         let status = checkRet.status
         if (status === 0 || status === 1) {
           // status为1时无法查询天赋，但仍可查询角色，保留CK
