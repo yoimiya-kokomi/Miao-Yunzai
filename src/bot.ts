@@ -3,11 +3,11 @@
  * 配置初始化
  * **********
  */
-import './lib/config/init.js'
+import './config/init.js'
 /**
  * 配置读取工具
  */
-import cfg from './lib/config/config.js'
+import cfg from './config/config.js'
 /**
  * 监听
  */

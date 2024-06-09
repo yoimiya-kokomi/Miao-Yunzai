@@ -1,5 +1,5 @@
-import common from '../lib/common/common.js'
-import cfg from '../lib/config/config.js'
+import * as common from '../utils/common.js'
+import cfg from '../config/config.js'
 import Handler from '../lib/plugins/handler.js'
 
 import {

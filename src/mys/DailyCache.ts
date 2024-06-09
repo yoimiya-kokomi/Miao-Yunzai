@@ -22,7 +22,7 @@ export default class DailyCache extends BaseModel {
    * @param game
    * @returns
    */
-  constructor(uid: string | number, game = 'config') {
+  constructor(uid: number | string, game = 'config') {
     super()
     const storeKey = DailyCache.getStoreKey(uid, game)
     // 检查实例缓存
@@ -43,7 +43,7 @@ export default class DailyCache extends BaseModel {
    * * 传入servKey (mys/hoyolab)，会返回指定的servCache
    * @returns {DailyCache}
    */
-  static create(uid, game = 'config') {
+  static create(uid: number | string, game = 'config') {
     return new DailyCache(uid, game)
   }
 

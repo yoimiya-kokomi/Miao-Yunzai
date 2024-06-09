@@ -1,16 +1,17 @@
 import fs from 'fs'
 import inquirer from 'inquirer'
 import cfg from './config.js'
-import common from '../common/common.js'
+import { sleep } from '../utils/common.js'
 import chalk from 'chalk'
 
 /**
  * 创建qq配置文件 `config/bot/qq.yaml`
  * Git Bash 运行npm命令会无法选择列表
+ * @returns 
  */
-export default async function createQQ () {
+export default async function createQQ() {
   /** 跳过登录ICQQ */
-  if(cfg.bot.skip_login) return
+  if (cfg.bot.skip_login) return
 
   /**
    * 
@@ -24,8 +25,8 @@ export default async function createQQ () {
    * 
    */
   console.log(`欢迎使用${chalk.green('Miao-Yunzai v' + cfg.package.version)}\n请按提示输入完成QQ配置`)
- 
- 
+
+
   /**
    * 
    */
@@ -34,7 +35,7 @@ export default async function createQQ () {
       type: 'Input',
       message: '请输入机器人QQ号(建议用小号)：',
       name: 'QQ',
-      validate (value) {
+      validate(value) {
         if (/^[1-9][0-9]{4,14}$/.test(value)) return true
         return '请输入正确的QQ号'
       }
@@ -52,13 +53,13 @@ export default async function createQQ () {
       choices: ['Tim', 'iPad', '安卓手机', '安卓手表', 'MacOS', 'aPad'],
       filter: (val) => {
         switch (val) {
-          case 'Tim':return 6
-          case 'iPad':return 5
-          case 'MacOS':return 4
-          case '安卓手机':return 1
-          case '安卓手表':return 3
-          case 'aPad':return 2
-          default:return 6
+          case 'Tim': return 6
+          case 'iPad': return 5
+          case 'MacOS': return 4
+          case '安卓手机': return 1
+          case '安卓手表': return 3
+          case 'aPad': return 2
+          default: return 6
         }
       }
     }
@@ -134,5 +135,5 @@ export default async function createQQ () {
   /**
    * 
    */
-  await common.sleep(2000)
+  await sleep(2000)
 }

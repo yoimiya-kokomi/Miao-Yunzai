@@ -46,6 +46,14 @@ const tables = {
  * ***********
  */
 export default class MysUser extends BaseModel {
+  gsUids = []
+
+  srUids = []
+
+  ltuid = null
+
+  uids: any = []
+
   /**
    *
    * @param ltuid
@@ -386,7 +394,7 @@ export default class MysUser extends BaseModel {
     let res = null
     let msg = 'error'
     for (let serv of ['mys', 'hoyolab']) {
-      let roleRes = await this.getGameRole(serv)
+      const roleRes = await this.getGameRole(serv)
       if (roleRes?.retcode === 0) {
         res = roleRes
         if (serv === 'hoyolab') {
@@ -431,18 +439,18 @@ export default class MysUser extends BaseModel {
    * @returns
    */
   async getGameRole(serv = 'mys') {
-    let ck = this.ck
-    let url = {
+    const ck = this.ck
+    const url = {
       mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie',
       hoyolab:
         'https://sg-public-api.hoyolab.com/binding/api/getUserGameRolesByCookie'
     }
-
-    let res = await fetch(url[serv], { method: 'get', headers: { Cookie: ck } })
+    const res = await fetch(url[serv], {
+      method: 'get',
+      headers: { Cookie: ck }
+    })
     if (!res.ok) return false
-    res = await res.json()
-
-    return res
+    return await res.json()
   }
 
   /**
@@ -468,9 +476,10 @@ export default class MysUser extends BaseModel {
       }
     })
     if (!res.ok) return res
-    res = await res.json()
-    return res
+    return await res.json()
   }
+
+  cache = null
 
   /**
    *
@@ -496,10 +505,16 @@ export default class MysUser extends BaseModel {
     if (this.db && !db) {
       return
     }
+    // tudo
+    // ???
     db = db && db !== true ? db : await MysUserDB.find(this.ltuid, true)
     this.db = db
     this.setCkData(db)
   }
+
+  type = null
+
+  device = null
 
   /**
    * 设置ck数据
@@ -515,6 +530,8 @@ export default class MysUser extends BaseModel {
       self.uids[game] = data?.uids?.[game] || self.uids[game] || []
     })
   }
+
+  db = null
 
   /**
    *
@@ -556,6 +573,8 @@ export default class MysUser extends BaseModel {
     game = this.gameKey(game)
     return this.uids[game]?.length > 0
   }
+
+  ck = null
 
   /**
    * 初始化当前MysUser缓存记录

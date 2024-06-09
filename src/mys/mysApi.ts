@@ -1,6 +1,6 @@
 import md5 from 'md5'
 import fetch from 'node-fetch'
-import cfg from '../lib/config/config.js'
+import cfg from '../config/config.js'
 import apiTool from './apiTool.js'
 
 let HttpsProxyAgent = ''

@@ -15,6 +15,14 @@ import DailyCache from './DailyCache.js'
  */
 export default class MysInfo {
   static tips = '请先#绑定Cookie\n发送【Cookie帮助】查看配置教程'
+  uid = null
+  e = null
+  userId = null
+  ckInfo = null
+  auth = null
+  gtest = null
+  mysButton = null
+
   /**
    *
    * @param e
@@ -54,6 +62,12 @@ export default class MysInfo {
     ]
 
     this.gtest = false
+
+    /**
+     * ********
+     * tudo
+     * *****
+     */
     this.mysButton = segment.button([
       { text: '米游社', link: 'https://miyoushe.com' }
     ])
@@ -597,6 +611,8 @@ export default class MysInfo {
     if (!isTask) await this.ckUser.addQueryUid(this.uid)
     return res
   }
+
+  ckUser = null
 
   /**
    * 删除失效ck

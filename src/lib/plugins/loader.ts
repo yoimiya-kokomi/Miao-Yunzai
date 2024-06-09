@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import lodash from 'lodash'
-import cfg from '../config/config.js'
+import cfg from '../../config/config.js'
 import schedule from 'node-schedule'
 import { segment } from 'icqq'
 import chokidar from 'chokidar'
@@ -80,6 +80,8 @@ class PluginsLoader {
     }
     return ret
   }
+
+  pluginCount = null
 
   /**
    * 监听事件加载

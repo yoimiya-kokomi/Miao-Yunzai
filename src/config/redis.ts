@@ -1,5 +1,5 @@
 import cfg from "./config.js"
-import common from "../common/common.js"
+import { sleep } from "../utils/common.js"
 import { createClient } from "redis"
 import { exec } from "node:child_process"
 
@@ -26,7 +26,7 @@ export default async function redisInit() {
     const cmd = "redis-server --save 900 1 --save 300 10 --daemonize yes" + await aarch64()
     logger.info("正在启动 Redis...")
     await execSync(cmd)
-    await common.sleep(1000)
+    await sleep(1000)
 
     try {
       client = createClient({ url: redisUrl })
@@ -55,7 +55,7 @@ export default async function redisInit() {
  * 
  * @returns 
  */
-async function aarch64() {
+export async function aarch64() {
   if (process.platform == "win32")
     return ""
   /** 判断arch */
@@ -78,7 +78,7 @@ async function aarch64() {
  * @param cmd 
  * @returns 
  */
-function execSync (cmd) {
+export function execSync(cmd) {
   return new Promise((resolve, reject) => {
     exec(cmd, (error, stdout, stderr) => {
       resolve({ error, stdout, stderr })

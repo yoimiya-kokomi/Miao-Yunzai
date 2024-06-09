@@ -129,6 +129,10 @@ export default class NoteUser extends BaseModel {
     })
   }
 
+  db = null
+
+  qq = null
+
   /**
    * 初始化数据
    * @param db
@@ -147,6 +151,8 @@ export default class NoteUser extends BaseModel {
     this._games = this.db.games
     await this.save()
   }
+
+  mysUsers = null
 
   /**
    * 初始化MysUser对象
@@ -336,6 +342,8 @@ export default class NoteUser extends BaseModel {
     this.save()
   }
 
+  _games = null
+
   /**
    *
    * @param game
@@ -375,7 +383,7 @@ export default class NoteUser extends BaseModel {
   setMainUid(uid = '', game = 'gs', save = true) {
     this._map = false
     game = this.gameKey(game)
-    if (uid < 100 || !uid) {
+    if (Number(uid) < 100 || !uid) {
       let uids = this.getUidList(game)
       uid = (uids?.[uid] || uids?.[0])?.uid || ''
     }
@@ -416,6 +424,10 @@ export default class NoteUser extends BaseModel {
     console.warn('delCk即将废弃')
     return await this.delMysUser(ltuid)
   }
+
+  mysUsers = []
+
+  _map = null
 
   /**
    *

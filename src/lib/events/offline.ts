@@ -1,6 +1,6 @@
 import EventListener from '../listener/listener.js'
 import fetch from 'node-fetch'
-import cfg from '../config/config.js'
+import cfg from '../../config/config.js'
 
 /**
  * 监听下线事件

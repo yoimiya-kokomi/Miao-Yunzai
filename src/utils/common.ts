@@ -10,15 +10,17 @@ import path from 'node:path'
  * @param msg 消息
  * @param uin 指定bot发送，默认为Bot
  */
-async function relpyPrivate (userId, msg, uin = Bot.uin) {
+export async function relpyPrivate(userId, msg, uin = Bot.uin) {
   userId = Number(userId)
-
   let friend = Bot.fl.get(userId)
   if (friend) {
     logger.mark(`发送好友消息[${friend.nickname}](${userId})`)
-    return await Bot[uin].pickUser(userId).sendMsg(msg).catch((err) => {
-      logger.mark(err)
-    })
+    return await Bot[uin]
+      .pickUser(userId)
+      .sendMsg(msg)
+      .catch(err => {
+        logger.mark(err)
+      })
   }
 }
 
@@ -26,8 +28,8 @@ async function relpyPrivate (userId, msg, uin = Bot.uin) {
  * 休眠函数
  * @param ms 毫秒
  */
-function sleep (ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 /**
@@ -36,7 +38,7 @@ function sleep (ms) {
  * @param savePath 保存路径
  * @param param
  */
-async function downFile (fileUrl, savePath, param = {}) {
+export async function downFile(fileUrl: string, savePath: string, param = {}) {
   try {
     mkdirs(path.dirname(savePath))
     logger.debug(`[下载文件] ${fileUrl}`)
@@ -51,11 +53,11 @@ async function downFile (fileUrl, savePath, param = {}) {
 }
 
 /**
- * 
- * @param dirname 
- * @returns 
+ *
+ * @param dirname
+ * @returns
  */
-function mkdirs (dirname) {
+export function mkdirs(dirname: string) {
   if (fs.existsSync(dirname)) {
     return true
   } else {
@@ -73,68 +75,96 @@ function mkdirs (dirname) {
  * @param dec 转发描述
  * @param msgsscr 转发信息是否伪装
  */
-async function makeForwardMsg (e, msg = [], dec = '', msgsscr = false) {
+export async function makeForwardMsg(
+  e: any,
+  msg: any[] | string = [],
+  dec: string = '',
+  msgsscr = false
+) {
+  // 不是数组
+  if (!Array.isArray(msg)) msg = [msg]
 
-  if (!Array.isArray(msg)) {
-    msg = [msg]
-  }
-
+  //
   let name = msgsscr ? e.sender.card || e.user_id : Bot.nickname
-  let id = msgsscr ? e.user_id : Bot.uin
 
+  //
+  const Id = msgsscr ? e.user_id : Bot.uin
+
+  // 是群聊
   if (e.isGroup) {
     try {
-      let info = await e.bot.getGroupMemberInfo(e.group_id, id)
-      name = info.card || info.nickname
-    } catch (err) { }
-  }
-
-  let userInfo = {
-    user_id: id,
-    nickname: name
-  }
-
-  let forwardMsg = []
-  for (const message of msg) {
-    if (!message) {
-      continue
+      const Info = await e.bot.getGroupMemberInfo(e.group_id, Id)
+      name = Info.card || Info.nickname
+    } catch (err) {
+      console.error(err)
     }
+  }
+
+  let forwardMsg:
+    | {
+        user_id: number
+        nickname: string
+        message: any
+      }[]
+    | {
+        data: any
+      } = []
+
+  /**
+   *
+   */
+  for (const message of msg) {
+    if (!message) continue
     forwardMsg.push({
-      ...userInfo,
+      user_id: Id,
+      nickname: name,
       message: message
     })
   }
 
-  /** 制作转发内容 */
+  /**
+   * 制作转发内容
+   */
   try {
+    /**
+     *
+     */
     if (e?.group?.makeForwardMsg) {
+      // ?
       forwardMsg = await e.group.makeForwardMsg(forwardMsg)
     } else if (e?.friend?.makeForwardMsg) {
+      // ?
       forwardMsg = await e.friend.makeForwardMsg(forwardMsg)
     } else {
+      //
       return msg.join('\n')
     }
 
+    /**
+     *
+     */
     if (dec) {
-      /** 处理描述 */
-      if (typeof (forwardMsg.data) === 'object') {
-        let detail = forwardMsg.data?.meta?.detail
-        if (detail) {
-          detail.news = [{ text: dec }]
+      /**
+       * 处理描述
+       */
+      if (typeof forwardMsg.data === 'object') {
+        const Detail = forwardMsg.data?.meta?.detail
+        if (Detail) {
+          Detail.news = [{ text: dec }]
         }
       } else {
+        /**
+         *
+         */
         forwardMsg.data = forwardMsg.data
           .replace(/\n/g, '')
           .replace(/<title color="#777777" size="26">(.+?)<\/title>/g, '___')
           .replace(/___+/, `<title color="#777777" size="26">${dec}</title>`)
       }
     }
-  } catch (err) { }
+  } catch (err) {
+    console.error(err)
+  }
 
   return forwardMsg
 }
-
-/**
- * 
- */
-export default { sleep, relpyPrivate, downFile, makeForwardMsg }

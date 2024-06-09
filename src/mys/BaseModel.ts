@@ -42,7 +42,7 @@ export default class BaseModel {
    * @param time
    * @returns
    */
-  _cacheThis(model, id, time = 10 * 60) {
+  _cacheThis(model?: any, id?: any, time = 10 * 60) {
     const uuid = this._uuid || `${model}:${id}`
     this._uuid = uuid
     if (uuid) {

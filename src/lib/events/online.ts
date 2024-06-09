@@ -1,6 +1,6 @@
 import EventListener from '../listener/listener.js'
-import cfg from '../config/config.js'
-import common from '../common/common.js'
+import cfg from '../../config/config.js'
+import { relpyPrivate } from '../../utils/common.js'
 
 /**
  * 监听上线事件
@@ -10,8 +10,8 @@ export default class onlineEvent extends EventListener {
   /**
    * 
    */
-  constructor () {
-    
+  constructor() {
+
     /**
      * 
      */
@@ -25,7 +25,7 @@ export default class onlineEvent extends EventListener {
    * 默认方法
    * @param e 
    */
-  async execute (e) {
+  async execute(e) {
     logger.mark('----^_^----')
     logger.mark(logger.green(`Miao-Yunzai 上线成功 版本v${cfg.package.version}`))
     logger.mark(logger.green('https://github.com/yoimiya-kokomi/Miao-Yunzai'))
@@ -41,7 +41,7 @@ export default class onlineEvent extends EventListener {
    * 
    * @returns 
    */
-  async loginMsg () {
+  async loginMsg() {
     if (!cfg.bot.online_msg) return
     if (!cfg.masterQQ || !cfg.masterQQ[0]) return
     let key = `Yz:loginMsg:${Bot.uin}`
@@ -52,6 +52,6 @@ export default class onlineEvent extends EventListener {
 
     redis.set(key, '1', { EX: cfg.bot.online_msg_exp })
 
-    setTimeout(() => common.relpyPrivate(cfg.masterQQ[0], msg), 1000)
+    setTimeout(() => relpyPrivate(cfg.masterQQ[0], msg), 1000)
   }
 }
