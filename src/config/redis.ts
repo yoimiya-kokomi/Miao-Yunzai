@@ -1,5 +1,5 @@
 import cfg from "./config.js"
-import { sleep } from "../utils/common.js"
+import { execAsync, sleep } from "../utils/common.js"
 import { createClient } from "redis"
 import { exec } from "node:child_process"
 
@@ -46,7 +46,8 @@ export default async function redisInit() {
   })
 
   /** 全局变量 redis */
-  global.redis = client
+  global.redis = client as any
+
   logger.info("Redis 连接成功")
   return client
 }
@@ -56,21 +57,23 @@ export default async function redisInit() {
  * @returns 
  */
 export async function aarch64() {
-  if (process.platform == "win32")
+  if (process.platform == "win32"){
     return ""
-  /** 判断arch */
-  const arch = await execSync("uname -m")
-  if (arch.stdout && arch.stdout.includes("aarch64")) {
-    /** 判断redis版本 */
-    let v = await execSync("redis-server -v")
-    if (v.stdout) {
-      v = v.stdout.match(/v=(\d)./)
-      /** 忽略arm警告 */
-      if (v && v[1] >= 6)
-        return " --ignore-warnings ARM64-COW-BUG"
-    }
   }
-  return ""
+  return await execAsync("uname -m").then( async arch=>{
+    if (arch.stdout && arch.stdout.includes("aarch64")) {
+      /** 判断redis版本 */
+      let v = await execAsync("redis-server -v")
+      if (v.stdout) {
+        const data = v.stdout.match(/v=(\d)./)
+        /** 忽略arm警告 */
+        if (data && Number(data[1]) >= 6){
+          return " --ignore-warnings ARM64-COW-BUG"
+        }
+      }
+    }
+    return ''
+  })
 }
 
 /**

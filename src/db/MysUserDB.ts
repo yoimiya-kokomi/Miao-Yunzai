@@ -44,6 +44,11 @@ const COLUMNS = {
  *
  */
 class MysUserDB extends BaseModel {
+  ck = null
+  type = null
+  device = null
+  uids = null
+
   static async find(ltuid = '', create = false) {
     // DB查询
     let mys = await MysUserDB.findByPk(ltuid)

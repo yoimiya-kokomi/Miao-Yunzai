@@ -62,7 +62,7 @@ export default class MysApi {
    * @returns
    */
   getUrl(type, data = {}) {
-    let urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
+    const urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
 
     let { url, query = '', body = '' } = urlMap[type]
@@ -70,7 +70,7 @@ export default class MysApi {
     if (query) url += `?${query}`
     if (body) body = JSON.stringify(body)
 
-    let headers = this.getHeaders(query, body)
+    const headers = this.getHeaders(query, body)
 
     return { url, headers, body }
   }
@@ -99,6 +99,9 @@ export default class MysApi {
     return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
   }
 
+
+  _device_fp = null
+
   /**
    *
    * @param type
@@ -106,7 +109,7 @@ export default class MysApi {
    * @param cached
    * @returns
    */
-  async getData(type, data = {}, cached = false) {
+  async getData(type, data:any = {}, cached = false) {
     if (
       !this._device_fp &&
       !data?.Getfp &&
@@ -142,6 +145,8 @@ export default class MysApi {
     }
 
     let param = {
+      method:null,
+      body:null,
       headers,
       agent: await this.getAgent(),
       timeout: 10000
@@ -152,7 +157,11 @@ export default class MysApi {
     } else {
       param.method = 'get'
     }
-    let response = {}
+    let response = {
+      ok:null,
+      status: null,
+      statusText:null 
+    }
     let start = Date.now()
     try {
       response = await fetch(url, param)

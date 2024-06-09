@@ -119,7 +119,7 @@ class PluginsLoader {
    * @param file 
    * @param packageErr 
    */
-  async importPlugin(file, packageErr) {
+  async importPlugin(file, packageErr?:any) {
     try {
       let app = await import(file.path)
       if (app.apps) app = { ...app.apps }
@@ -497,7 +497,7 @@ class PluginsLoader {
        * @param data.recallMsg 群聊是否撤回消息，0-120秒，0不撤回
        * @param data.at 是否at用户
        */
-      e.reply = async (msg = '', quote = false, data = {}) => {
+      e.reply = async (msg = '', quote = false, data:any = {}) => {
         if (!msg) return false
 
         /** 禁言中 */

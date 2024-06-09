@@ -240,6 +240,8 @@ export default class MysInfo {
   static async get(e, api, data = {}, option = {}) {
     let mysInfo = await MysInfo.init(e, api)
 
+    if(!mysInfo) return false
+
     if (!mysInfo.uid || !mysInfo.ckInfo.ck) return false
     e.uid = mysInfo.uid
 
@@ -330,6 +332,8 @@ export default class MysInfo {
     logger.mark(`加载用户UID：${userCount}个，加入查询池`)
   }
 
+  static initing = null
+
   /**
    * 初始化缓存
    * @param force 若已经初始化是否强制初始化
@@ -351,7 +355,7 @@ export default class MysInfo {
     // 初始化公共ck
     await MysInfo.initPubCk()
 
-    await cache.set('cache-ready', new Date() * 1)
+    await cache.set('cache-ready', Date.now())
     delete this.initing
     return true
   }

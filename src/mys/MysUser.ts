@@ -193,10 +193,13 @@ export default class MysUser extends BaseModel {
    */
   static async getStatData() {
     let totalCount = {}
-    let ret = { servs: {} }
+    let ret = { servs: {}, count: null }
     await MysUser.eachServ(async function (servCache, serv) {
       let data = await servCache.zStat(tables.detail)
-      let count = {}
+      let count = {
+        normal: null,
+        query: null
+      }
       let list = []
       let query = 0
       const stat = (type, num) => {
@@ -438,7 +441,7 @@ export default class MysUser extends BaseModel {
    * @param serv
    * @returns
    */
-  async getGameRole(serv = 'mys') {
+  async getGameRole(serv = 'mys'): Promise<any> {
     const ck = this.ck
     const url = {
       mys: 'https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie',

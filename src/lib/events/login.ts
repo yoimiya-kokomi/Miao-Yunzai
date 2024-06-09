@@ -14,6 +14,9 @@ let inSlider = false
  */
 export default class loginEvent extends EventListener {
 
+
+  client = null
+
   /**
    * 
    */
@@ -64,8 +67,10 @@ export default class loginEvent extends EventListener {
       }
     }, 2000)
 
-    /** 刷新二维码 */
-    inquirer.prompt({ type: 'Input', message: '回车刷新二维码，等待扫码中...\n', name: 'enter' }).then(async () => {
+    /**
+     * 刷新二维码
+     */
+    inquirer.prompt({ type: 'input', message: '回车刷新二维码，等待扫码中...\n', name: 'enter' }).then(async () => {
       if (!inSlider) {
         clearInterval(interval)
         console.log('  重新刷新二维码...\n\n')
@@ -113,7 +118,7 @@ export default class loginEvent extends EventListener {
 
     if (!ticket) {
       let res = await inquirer.prompt({
-        type: 'Input',
+        type: 'input',
         message: '请输入ticket:',
         name: 'ticket',
         validate(value) {
@@ -145,11 +150,10 @@ export default class loginEvent extends EventListener {
     console.log(`${logger.green(req)}\n----完成后将自动进行登录----`)
 
     for (let i = 0; i < 40; i++) {
-      let res = await fetch(req, {
+      const res = await fetch(req, {
         method: 'POST',
         body: JSON.stringify({ submit: Bot.uin })
-      })
-      res = await res.json()
+      }).then(res => res.json())
       if (res.data?.ticket) return res.data.ticket
       await sleep(3000)
     }
@@ -162,6 +166,9 @@ export default class loginEvent extends EventListener {
    */
   async requestCode(url) {
     let txhelper = {
+      req: null,
+      res: null,
+      code: null,
       url: url.replace('ssl.captcha.qq.com', 'txhelper.glitch.me')
     }
     txhelper.req = await fetch(txhelper.url).catch((err) => console.log(err.toString()))
@@ -177,14 +184,21 @@ export default class loginEvent extends EventListener {
     console.log(`\n请打开滑动验证app，输入请求码${logger.green('【' + txhelper.code + '】')}，然后完成滑动验证\n`)
 
     await sleep(200)
+
+    //
     await inquirer.prompt({
-      type: 'Input',
+      type: 'input',
       message: '验证完成后按回车确认，等待在操作中...',
       name: 'enter'
     })
 
+    //
     txhelper.res = await fetch(txhelper.url).catch((err) => console.log(err.toString()))
+
+    //
     if (!txhelper.res) return false
+
+    //
     txhelper.res = await txhelper.res.text()
 
     if (!txhelper.res) return false
@@ -219,14 +233,14 @@ export default class loginEvent extends EventListener {
     if (ret.type == '1.网页扫码验证') {
       console.log('\n' + logger.green(event.url) + '\n')
       console.log('请打开上面链接，完成验证后按回车')
-      await inquirer.prompt({ type: 'Input', message: '等待操作中...', name: 'enter' })
+      await inquirer.prompt({ type: 'input', message: '等待操作中...', name: 'enter' })
       await this.client.login()
     } else {
       console.log('\n')
       this.client.sendSmsCode()
       await sleep(200)
       logger.info(`验证码已发送：${event.phone}\n`)
-      let res = await inquirer.prompt({ type: 'Input', message: '请输入短信验证码:', name: 'sms' })
+      let res = await inquirer.prompt({ type: 'input', message: '请输入短信验证码:', name: 'sms' })
       await this.client.submitSmsCode(res.sms)
     }
   }

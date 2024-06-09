@@ -3,6 +3,7 @@ import { promisify } from 'util'
 import fetch from 'node-fetch'
 import fs from 'node:fs'
 import path from 'node:path'
+import { exec } from 'child_process'
 
 /**
  * 休眠函数
@@ -46,4 +47,22 @@ export function mkdirs(dirname: string) {
       return true
     }
   }
+}
+
+
+/**
+ * 
+ * @param cmd 
+ * @returns 
+ */
+export function execAsync(cmd: string): Promise<{
+  stdout: string,
+  stderr: string
+}> {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (error, stdout, stderr) => {
+      if (error) reject(error)
+      resolve({ stdout, stderr })
+    })
+  })
 }
