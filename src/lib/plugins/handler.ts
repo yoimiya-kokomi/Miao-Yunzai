@@ -1,8 +1,20 @@
 import util from 'node:util'
 import lodash from 'lodash'
 
-let events = {}
-let Handler = {
+/**
+ * 
+ */
+const events = {}
+
+/**
+ * 
+ */
+const Handler = {
+  /**
+   * 
+   * @param cfg 
+   * @returns 
+   */
   add (cfg) {
     let { ns, fn, self, property = 50 } = cfg
     let key = cfg.key || cfg.event
@@ -21,6 +33,12 @@ let Handler = {
     })
     events[key] = lodash.orderBy(events[key], ['priority'], ['asc'])
   },
+  /**
+   * 
+   * @param ns 
+   * @param key 
+   * @returns 
+   */
   del (ns, key = '') {
     if (!key) {
       for (let key in events) {
@@ -39,10 +57,24 @@ let Handler = {
       }
     }
   },
+  /**
+   * 
+   * @param key 
+   * @param e 
+   * @param args 
+   */
   async callAll (key, e, args) {
     // 暂时屏蔽调用
     // return Handler.call(key, e, args, true)
   },
+  /**
+   * 
+   * @param key 
+   * @param e 
+   * @param args 
+   * @param allHandler 
+   * @returns 
+   */
   async call (key, e, args, allHandler = false) {
     let ret
     for (let obj of events[key]) {
@@ -65,9 +97,18 @@ let Handler = {
     }
     return ret
   },
+  /**
+   * 
+   * @param key 
+   * @returns 
+   */
   has (key) {
     return !!events[key]
   }
 }
+
+/**
+ * 
+ */
 export default Handler
 

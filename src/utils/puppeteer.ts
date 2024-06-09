@@ -3,6 +3,9 @@ import puppeteer, { Browser } from 'puppeteer'
 import { ScreenshotFileOptions } from './types.js'
 import { BaseConfig } from './config.js'
 
+/**
+ *
+ */
 export const PuppeteerLunchConfig = new BaseConfig<PuppeteerLaunchOptions>({
   // 禁用超时
   timeout: 0, //otocolTimeout: 0,
@@ -26,6 +29,9 @@ export const PuppeteerLunchConfig = new BaseConfig<PuppeteerLaunchOptions>({
   // }
 })
 
+/**
+ *
+ */
 export class Puppeteer {
   // 截图次数记录
   #pic = 0

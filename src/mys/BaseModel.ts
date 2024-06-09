@@ -11,7 +11,13 @@ export default class BaseModel {
     return this
   }
 
-  // 获取缓存
+  /**
+   * 获取缓存
+   * @param model
+   * @param id
+   * @param time
+   * @returns
+   */
   _getThis(model, id = '', time = 10 * 60) {
     const uuid = `${model}:${id}`
     this._uuid = uuid
@@ -20,7 +26,13 @@ export default class BaseModel {
     }
   }
 
-  // 设置缓存
+  /**
+   * 设置缓存
+   * @param model
+   * @param id
+   * @param time
+   * @returns
+   */
   _cacheThis(model, id, time = 10 * 60) {
     const uuid = this._uuid || `${model}:${id}`
     this._uuid = uuid
@@ -32,7 +44,11 @@ export default class BaseModel {
     return this
   }
 
-  // 设置超时时间
+  /**
+   * 设置超时时间
+   * @param time
+   * @returns
+   */
   _expire(time = 10 * 60) {
     let id = this._uuid
     reFn[id] && clearTimeout(reFn[id])
@@ -48,6 +64,9 @@ export default class BaseModel {
     }
   }
 
+  /**
+   *
+   */
   _delCache() {
     let id = this._uuid
     reFn[id] && clearTimeout(reFn[id])
@@ -55,14 +74,29 @@ export default class BaseModel {
     delete cacheMap[id]
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   gameKey(game = 'gs') {
     return MysUtil.getGameKey(game)
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   isGs(game = 'gs') {
     return this.gameKey(game) === 'gs'
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   isSr(game = 'gs') {
     return this.gameKey(game) === 'sr'
   }

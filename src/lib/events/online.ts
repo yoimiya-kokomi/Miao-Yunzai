@@ -6,14 +6,25 @@ import common from '../common/common.js'
  * 监听上线事件
  */
 export default class onlineEvent extends EventListener {
+
+  /**
+   * 
+   */
   constructor () {
+    
+    /**
+     * 
+     */
     super({
       event: 'system.online',
       once: true
     })
   }
 
-  /** 默认方法 */
+  /**
+   * 默认方法
+   * @param e 
+   */
   async execute (e) {
     logger.mark('----^_^----')
     logger.mark(logger.green(`Miao-Yunzai 上线成功 版本v${cfg.package.version}`))
@@ -26,6 +37,10 @@ export default class onlineEvent extends EventListener {
     this.loginMsg()
   }
 
+  /**
+   * 
+   * @returns 
+   */
   async loginMsg () {
     if (!cfg.bot.online_msg) return
     if (!cfg.masterQQ || !cfg.masterQQ[0]) return

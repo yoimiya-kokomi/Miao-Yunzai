@@ -1,7 +1,9 @@
 import { type ScreenshotOptions, type PuppeteerLifeCycleEvent } from 'puppeteer'
-
 import queryString from 'querystring'
 
+/**
+ *
+ */
 export interface ScreenshotFileOptions {
   SOptions?: {
     type: 'jpeg' | 'png' | 'webp'
@@ -11,6 +13,9 @@ export interface ScreenshotFileOptions {
   timeout?: number
 }
 
+/**
+ *
+ */
 export interface ScreenshotUrlOptions {
   url: string
   time?: number

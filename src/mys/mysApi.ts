@@ -35,6 +35,12 @@ export default class MysApi {
     return this._device
   }
 
+  /**
+   *
+   * @param type
+   * @param data
+   * @returns
+   */
   getUrl(type, data = {}) {
     let urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
@@ -49,6 +55,10 @@ export default class MysApi {
     return { url, headers, body }
   }
 
+  /**
+   *
+   * @returns
+   */
   getServer() {
     switch (String(this.uid).slice(0, -8)) {
       case '1':
@@ -69,6 +79,13 @@ export default class MysApi {
     return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
   }
 
+  /**
+   *
+   * @param type
+   * @param data
+   * @param cached
+   * @returns
+   */
   async getData(type, data = {}, cached = false) {
     if (
       !this._device_fp &&
@@ -147,6 +164,12 @@ export default class MysApi {
     return res
   }
 
+  /**
+   *
+   * @param query
+   * @param body
+   * @returns
+   */
   getHeaders(query = '', body = '') {
     const cn = {
       app_version: '2.40.1',
@@ -180,6 +203,12 @@ export default class MysApi {
     }
   }
 
+  /**
+   *
+   * @param q
+   * @param b
+   * @returns
+   */
   getDs(q = '', b = '') {
     let n = ''
     if (
@@ -195,6 +224,10 @@ export default class MysApi {
     return `${t},${r},${DS}`
   }
 
+  /**
+   *
+   * @returns
+   */
   getGuid() {
     function S4() {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
@@ -216,15 +249,31 @@ export default class MysApi {
     )
   }
 
+  /**
+   *
+   * @param type
+   * @param data
+   * @returns
+   */
   cacheKey(type, data) {
     return 'Yz:genshin:mys:cache:' + md5(this.uid + type + JSON.stringify(data))
   }
 
+  /**
+   *
+   * @param res
+   * @param cacheKey
+   * @returns
+   */
   async cache(res, cacheKey) {
     if (!res || res.retcode !== 0) return
     redis.setEx(cacheKey, this.cacheCd, JSON.stringify(res))
   }
 
+  /**
+   *
+   * @returns
+   */
   async getAgent() {
     let proxyAddress = cfg.bot.proxyAddress
     if (!proxyAddress) return null
@@ -249,6 +298,11 @@ export default class MysApi {
     return null
   }
 
+  /**
+   *
+   * @param length
+   * @returns
+   */
   generateSeed(length = 16) {
     const characters = '0123456789abcdef'
     let result = ''
@@ -259,6 +313,10 @@ export default class MysApi {
   }
 }
 
+/**
+ *
+ * @returns
+ */
 export function randomRange() {
   let randomStr = ''
   let charStr = 'abcdef0123456789'

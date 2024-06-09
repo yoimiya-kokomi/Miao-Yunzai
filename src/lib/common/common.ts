@@ -50,6 +50,11 @@ async function downFile (fileUrl, savePath, param = {}) {
   }
 }
 
+/**
+ * 
+ * @param dirname 
+ * @returns 
+ */
 function mkdirs (dirname) {
   if (fs.existsSync(dirname)) {
     return true
@@ -129,4 +134,7 @@ async function makeForwardMsg (e, msg = [], dec = '', msgsscr = false) {
   return forwardMsg
 }
 
+/**
+ * 
+ */
 export default { sleep, relpyPrivate, downFile, makeForwardMsg }

@@ -1,12 +1,22 @@
-import { Data } from './local.js'
+import { Data } from '../local.js'
 
+/**
+ *
+ */
 const games = [
   { key: 'gs', name: '原神' },
   { key: 'sr', name: '星穹铁道' }
 ]
 
+/**
+ *
+ */
 const MysUtil = {
-  // 获取标准ltuid
+  /**
+   * 获取标准ltuid
+   * @param data
+   * @returns
+   */
   getLtuid(data) {
     if (!data) {
       return false
@@ -21,7 +31,11 @@ const MysUtil = {
     return false
   },
 
-  // 获取标准gameKey
+  /**
+   * 获取标准gameKey
+   * @param game
+   * @returns
+   */
   getGameKey(game) {
     // 兼容e的处理
     if (game.user_id) {
@@ -30,7 +44,10 @@ const MysUtil = {
     return ['sr', 'star'].includes(game) ? 'sr' : 'gs'
   },
 
-  // 生成设备guid
+  /**
+   * 生成设备guid
+   * @returns
+   */
   getDeviceGuid() {
     function S4() {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
@@ -52,16 +69,26 @@ const MysUtil = {
     )
   },
 
-  // 循环game
+  /**
+   * 循环game
+   * @param fn
+   */
   async eachGame(fn) {
     await Data.forEach(games, ds => {
       return fn(ds.key, ds)
     })
   },
 
-  // 循环server
+  /**
+   * 循环server
+   * @param fn
+   */
   async eachServ(fn) {
     await Data.forEach(['mys', 'hoyolab'], fn)
   }
 }
+
+/**
+ *
+ */
 export default MysUtil

@@ -11,10 +11,24 @@ import chalk from 'chalk'
 export default async function createQQ () {
   /** 跳过登录ICQQ */
   if(cfg.bot.skip_login) return
+
+  /**
+   * 
+   */
   if (cfg.qq && !process.argv.includes('login')) {
     return
   }
+
+
+  /**
+   * 
+   */
   console.log(`欢迎使用${chalk.green('Miao-Yunzai v' + cfg.package.version)}\n请按提示输入完成QQ配置`)
+ 
+ 
+  /**
+   * 
+   */
   let propmtList = [
     {
       type: 'Input',
@@ -56,6 +70,9 @@ export default async function createQQ () {
     // }
   ]
 
+  /**
+   * 
+   */
   if (!process.argv.includes('login')) {
     propmtList.push({
       type: 'Input',
@@ -63,13 +80,24 @@ export default async function createQQ () {
       name: 'masterQQ'
     })
   }
+
+  /**
+   * 
+   */
   propmtList.push({
     type: 'input',
     message: '请输入签名API地址（可留空）：',
     name: 'signAPI'
   })
+
+  /**
+   * 
+   */
   const ret = await inquirer.prompt(propmtList)
 
+  /**
+   * 
+   */
   let file = './config/config/'
   let fileDef = './config/default_config/'
 
@@ -83,12 +111,18 @@ export default async function createQQ () {
   let bot = fs.readFileSync(`${fileDef}bot.yaml`, 'utf8')
   // bot = bot.replace(/proxyAddress:/g, `proxyAddress:  ${ret.proxyAddress}`)
 
+  /**
+   * 
+   */
   if (ret.masterQQ) {
     let other = fs.readFileSync(`${fileDef}other.yaml`, 'utf8')
     other = other.replace(/masterQQ:/g, `masterQQ:\n  - ${ret.masterQQ}`)
     fs.writeFileSync(`${file}other.yaml`, other, 'utf8')
   }
 
+  /**
+   * 
+   */
   if (ret.signAPI) {
     bot = bot.replace(/sign_api_addr:/g, `sign_api_addr: ${ret.signAPI}`)
   }
@@ -97,5 +131,8 @@ export default async function createQQ () {
 
   console.log(`\nQQ配置完成，正在登录\n后续修改账号可以运行命令： ${chalk.green('node app login')}\n`)
 
+  /**
+   * 
+   */
   await common.sleep(2000)
 }

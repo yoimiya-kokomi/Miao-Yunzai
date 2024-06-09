@@ -22,6 +22,11 @@ export default class apiTool {
     }
   }
 
+  /**
+   *
+   * @param data
+   * @returns
+   */
   getUrlMap = (data = {}) => {
     let host, hostRecord, hostPublicData
     if (

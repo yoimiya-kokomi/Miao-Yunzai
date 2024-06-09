@@ -17,12 +17,21 @@ import ListenerLoader from './lib/listener/loader.js'
  */
 import { Client } from 'icqq'
 export class Yunzai extends Client {
-  // eslint-disable-next-line no-useless-constructor
+  /**
+   *
+   * @param conf
+   */
   constructor(conf) {
+    /**
+     *
+     */
     super(conf)
   }
 
-  /** 登录机器人 */
+  /**
+   * 登录机器人
+   * @returns
+   */
   static async run() {
     const bot = new Yunzai(cfg.bot)
     /** 加载监听事件 */
@@ -40,7 +49,11 @@ export class Yunzai extends Client {
     return bot
   }
 
-  /** 跳过登录ICQQ */
+  /**
+   * 跳过登录ICQQ
+   * @param bot
+   * @returns
+   */
   static async skip_login(bot) {
     bot.uin = 88888
     bot[bot.uin] = bot

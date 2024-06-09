@@ -1,9 +1,11 @@
 import fs from 'fs'
-import { createRequire } from 'module'
-const require = createRequire(import.meta.url)
-const { exec } = require('child_process')
+import { exec } from 'child_process'
 
-export async function checkRun () {
+/**
+ * 
+ * @returns 
+ */
+export async function checkRun() {
   if (process.argv[1].includes('pm2')) return
   if (process.argv[1].includes('test')) return
 
@@ -17,7 +19,12 @@ export async function checkRun () {
   }
 }
 
-async function execSync (cmd) {
+/**
+ * 
+ * @param cmd 
+ * @returns 
+ */
+async function execSync(cmd) {
   return new Promise((resolve, reject) => {
     exec(cmd, (error, stdout, stderr) => {
       resolve({ error, stdout, stderr })
@@ -25,7 +32,11 @@ async function execSync (cmd) {
   })
 }
 
-function pm2Cfg () {
+/**
+ * 
+ * @returns 
+ */
+function pm2Cfg() {
   let cfg = fs.readFileSync('./config/pm2/pm2.json')
   cfg = JSON.parse(cfg)
   return cfg

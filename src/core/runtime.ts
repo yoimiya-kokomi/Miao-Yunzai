@@ -22,10 +22,13 @@ export default class Runtime {
   _mysInfo = null
   handler = null
 
+  /**
+   *
+   * @param e
+   */
   constructor(e) {
     this.e = e
     this._mysInfo = {}
-
     this.handler = {
       has: Handler.has,
       call: Handler.call,
@@ -33,26 +36,44 @@ export default class Runtime {
     }
   }
 
+  /**
+   *
+   */
   get uid() {
     return this.user?.uid
   }
 
+  /**
+   *
+   */
   get hasCk() {
     return this.user?.hasCk
   }
 
+  /**
+   *
+   */
   get user() {
     return this.e.user
   }
 
+  /**
+   *
+   */
   get cfg() {
     return cfg
   }
 
+  /**
+   *
+   */
   get gsCfg() {
     return gsCfg
   }
 
+  /**
+   *
+   */
   get common() {
     return common
   }
@@ -64,14 +85,23 @@ export default class Runtime {
     return null
   }
 
+  /**
+   *
+   */
   get MysInfo() {
     return MysInfo
   }
 
+  /**
+   *
+   */
   get NoteUser() {
     return NoteUser
   }
 
+  /**
+   *
+   */
   get MysUser() {
     return MysUser
   }

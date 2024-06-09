@@ -7,7 +7,19 @@ const servs = ['mys', 'hoyolab']
 const EX = 3600 * 24
 const redisKeyRoot = 'Yz:cache:'
 
+/**
+ * ************
+ * tudo
+ * ***********
+ *
+ */
 export default class DailyCache extends BaseModel {
+  /**
+   *
+   * @param uid
+   * @param game
+   * @returns
+   */
   constructor(uid, game = 'config') {
     super()
     const storeKey = DailyCache.getStoreKey(uid, game)
@@ -33,7 +45,12 @@ export default class DailyCache extends BaseModel {
     return new DailyCache(uid, game)
   }
 
-  // 内部方法：获取redis表前缀
+  /**
+   * 内部方法：获取redis表前缀
+   * @param uid
+   * @param game
+   * @returns
+   */
   static getStoreKey(uid, game = 'config') {
     let key
     if (!uid || game === 'config') {
@@ -78,7 +95,12 @@ export default class DailyCache extends BaseModel {
     }
   }
 
-  // 内部方法，用于decode value
+  /**
+   * 内部方法，用于decode value
+   * @param value
+   * @param decode
+   * @returns
+   */
   static decodeValue(value, decode = false) {
     if (value && decode) {
       try {
@@ -90,7 +112,11 @@ export default class DailyCache extends BaseModel {
     return value
   }
 
-  // 内部方法，用于encode value
+  /**
+   * 内部方法，用于encode value
+   * @param value
+   * @returns
+   */
   static encodeValue(value) {
     if (typeof value === 'object') {
       return JSON.stringify(value) || ''
@@ -102,7 +128,13 @@ export default class DailyCache extends BaseModel {
   }
 
   /** ---- 基础方法 ---- **/
-  // 内部方法：获取redis表key键值
+
+  /**
+   * 内部方法：获取redis表key键值
+   * @param key
+   * @param sub
+   * @returns
+   */
   getTableKey(key, sub = '') {
     if (sub) {
       return `${this.keyPre}:${key}-${sub}`

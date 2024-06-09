@@ -87,6 +87,9 @@ export default function setLog () {
   logColor()
 }
 
+/**
+ * 
+ */
 function logColor () {
   logger.chalk = chalk
   logger.red = chalk.red

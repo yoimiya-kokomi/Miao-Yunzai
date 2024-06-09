@@ -1,18 +1,29 @@
 import { Sequelize, DataTypes, Model } from 'sequelize'
-import { Data } from './local.js'
+import { Data } from '../local.js'
+import { join } from 'path'
 
+/**
+ * 创建路径
+ */
 Data.createDir('/data/db', 'root')
-let dbPath = process.cwd() + '/data/db/data.db'
 
-// TODO DB自定义
+/**
+ * DB自定义
+ */
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: dbPath,
+  storage: join(process.cwd(), '/data/db/data.db'),
   logging: false
 })
 
+/**
+ * 校验连接
+ */
 await sequelize.authenticate()
 
+/**
+ *
+ */
 export default class BaseModel extends Model {
   static Types = DataTypes
 
@@ -23,4 +34,8 @@ export default class BaseModel extends Model {
     model.COLUMNS = columns
   }
 }
+
+/**
+ *
+ */
 export { sequelize }

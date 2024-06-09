@@ -2,18 +2,25 @@ import YAML from 'yaml'
 import fs from 'node:fs'
 import chokidar from 'chokidar'
 
-/** 配置文件 */
+/**
+ * ********
+ * 配置文件
+ * ********
+ */
 class Cfg {
+  config = {}
+
+  /** 监听文件 */
+  watcher = { config: {}, defSet: {} }
+
   constructor () {
-    this.config = {}
-
-    /** 监听文件 */
-    this.watcher = { config: {}, defSet: {} }
-
     this.initCfg()
   }
 
-  /** 初始化配置 */
+  
+  /**
+   * 初始化配置
+   */
   initCfg () {
     let path = 'config/config/'
     let pathDef = 'config/default_config/'
@@ -27,17 +34,23 @@ class Cfg {
     if (!fs.existsSync("resources")) fs.mkdirSync("resources")
   }
 
-  /** 机器人qq号 */
+  /**
+   * 机器人qq号
+   */
   get qq () {
     return Number(this.getConfig('qq').qq)
   }
 
-  /** 密码 */
+  /**
+   * 密码
+   */
   get pwd () {
     return this.getConfig('qq').pwd
   }
 
-  /** icqq配置 */
+  /**
+   * icqq配置
+   */
   get bot () {
     let bot = this.getConfig('bot')
     let defbot = this.getdefSet('bot')
@@ -52,23 +65,37 @@ class Cfg {
     return bot
   }
 
+  /**
+   * 
+   */
   get other () {
     return this.getConfig('other')
   }
 
+  /**
+   * 
+   */
   get redis () {
     return this.getConfig('redis')
   }
 
+  /**
+   * 
+   */
   get renderer() {
     return this.getConfig('renderer');
   }
 
+  /**
+   * 
+   */
   get notice() {
     return this.getConfig('notice');
   }
 
-  /** 主人qq */
+  /**
+   * 主人qq
+   */
   get masterQQ () {
     let masterQQ = this.getConfig('other').masterQQ || []
 
@@ -80,7 +107,9 @@ class Cfg {
     return masterQQ
   }
 
-  /** package.json */
+  /**
+   * package.json 
+   */
   get package () {
     if (this._package) return this._package
 
@@ -88,7 +117,11 @@ class Cfg {
     return this._package
   }
 
-  /** 群配置 */
+  /**
+   * 群配置
+   * @param groupId 
+   * @returns 
+   */
   getGroup (groupId = '') {
     let config = this.getConfig('group')
     let defCfg = this.getdefSet('group')
@@ -98,14 +131,20 @@ class Cfg {
     return { ...defCfg.default, ...config.default }
   }
 
-  /** other配置 */
+  /**
+   * other配置
+   * @returns 
+   */
   getOther () {
     let def = this.getdefSet('other')
     let config = this.getConfig('other')
     return { ...def, ...config }
   }
 
-  /** notice配置 */
+  /**
+   * notice配置
+   * @returns 
+   */
   getNotice () {
     let def = this.getdefSet('notice')
     let config = this.getConfig('notice')
@@ -113,14 +152,19 @@ class Cfg {
   }
 
   /**
-   * @param app  功能
+   * 
    * @param name 配置文件名称
+   * @returns 
    */
   getdefSet (name) {
     return this.getYaml('default_config', name)
   }
 
-  /** 用户配置 */
+  /**
+   * 用户配置
+   * @param name 
+   * @returns 
+   */
   getConfig (name) {
     return this.getYaml('config', name)
   }
@@ -144,7 +188,13 @@ class Cfg {
     return this.config[key]
   }
 
-  /** 监听配置文件 */
+  /**
+   * 监听配置文件
+   * @param file 
+   * @param name 
+   * @param type 
+   * @returns 
+   */
   watch (file, name, type = 'default_config') {
     let key = `${type}.${name}`
 
@@ -163,16 +213,30 @@ class Cfg {
     this.watcher[key] = watcher
   }
 
+  /**
+   * 
+   * @returns 
+   */
   change_qq () {
     if (process.argv.includes('login') || !this.qq) return
     logger.info('修改机器人QQ或密码，请手动重启')
   }
 
+  /**
+   * 
+   */
   async change_bot () {
     /** 修改日志等级 */
     let log = await import('./log.js')
     log.default()
   }
+
+
 }
 
+/**
+ * **********
+ * 
+ * ***
+ */
 export default new Cfg()

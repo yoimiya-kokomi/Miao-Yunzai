@@ -8,8 +8,20 @@ import fetch from 'node-fetch'
  * 监听上线事件
  */
 let inSlider = false
+
+/**
+ * 
+ */
 export default class loginEvent extends EventListener {
+
+  /**
+   * 
+   */
   constructor () {
+
+    /**
+     * 
+     */
     super({
       prefix: 'system.login.',
       event: ['qrcode', 'slider', 'device', 'error'],
@@ -17,10 +29,16 @@ export default class loginEvent extends EventListener {
     })
   }
 
-  async execute (event) {
-  }
+  /**
+   * 
+   * @param event 
+   */
+  async execute (event) {}
 
-  /** 扫码登录现在仅能在同一ip下进行 */
+  /**
+   * 扫码登录现在仅能在同一ip下进行
+   * @param event 
+   */
   async qrcode (event) {
     logger.mark(`请使用登录当前QQ的手机${logger.green('扫码')}完成登录，如果显示二维码过期，可以按${logger.green('回车键（Enter）')}刷新，重新输入密码请执行命令：${logger.green('node app login')}`)
     // logger.info('等待扫码中...')
@@ -57,8 +75,10 @@ export default class loginEvent extends EventListener {
     })
   }
 
+
   /**
    * 收到滑动验证码提示后，必须使用手机拉动，PC浏览器已经无效
+   * @param event 
    */
   async slider (event) {
     inSlider = true
@@ -109,6 +129,11 @@ export default class loginEvent extends EventListener {
     this.client.submitSlider(ticket.trim())
   }
 
+  /**
+   * 
+   * @param url 
+   * @returns 
+   */
    async getTicket (url) {
     let req = `https://hlhs-nb.cn/captcha/slider?key=${Bot.uin}`
     await fetch(req, {
@@ -130,6 +155,11 @@ export default class loginEvent extends EventListener {
     }
   }
 
+  /**
+   * 
+   * @param url 
+   * @returns 
+   */
   async requestCode (url) {
     let txhelper = {
       url: url.replace('ssl.captcha.qq.com', 'txhelper.glitch.me')
@@ -167,7 +197,11 @@ export default class loginEvent extends EventListener {
     return lodash.trim(txhelper.res)
   }
 
-  /** 设备锁 */
+
+  /**
+   * 设备锁
+   * @param event 
+   */
   async device (event) {
     global.inputTicket = false
     console.log(`\n\n------------------${logger.green('↓↓设备锁验证↓↓')}----------------------\n`)
@@ -197,7 +231,10 @@ export default class loginEvent extends EventListener {
     }
   }
 
-  /** 登录错误 */
+  /**
+   * 登录错误
+   * @param event 
+   */
   error (event) {
     if (Number(event.code) === 1) logger.error('QQ密码错误，运行命令重新登录：node app login')
     if (global.inputTicket && event.code == 237) {
@@ -207,7 +244,6 @@ export default class loginEvent extends EventListener {
     } else {
       logger.error('登录错误，已停止运行')
     }
-
     process.exit()
   }
 }

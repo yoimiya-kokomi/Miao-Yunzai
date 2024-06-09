@@ -6,11 +6,22 @@ import cfg from '../config/config.js'
  * 监听下线事件
  */
 export default class offlineEvent extends EventListener {
+
+  /**
+   * 
+   */
   constructor () {
+    
+    /**
+     * 
+     */
     super({ event: 'system.offline' })
   }
 
-  /** 默认方法 */
+  /**
+   * 默认方法
+   * @param e 
+   */
   async execute (e) {
     logger.mark('掉线了')
     let config = cfg.getConfig('notice')

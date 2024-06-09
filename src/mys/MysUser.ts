@@ -15,7 +15,7 @@ import fetch from 'node-fetch'
 
 import { MysUserDB, UserDB } from '../db/index.js'
 
-import { Data } from './local.js'
+import { Data } from '../local.js'
 
 const tables = {
   // ltuid-uid 查询表
@@ -40,7 +40,17 @@ const tables = {
   del: 'del-detail'
 }
 
+/**
+ * **********
+ * tudo
+ * ***********
+ */
 export default class MysUser extends BaseModel {
+  /**
+   *
+   * @param ltuid
+   * @returns
+   */
   constructor(ltuid) {
     super()
     if (!ltuid) {
@@ -55,13 +65,19 @@ export default class MysUser extends BaseModel {
     return self._cacheThis()
   }
 
-  // 可传入ltuid、cookie、ck对象来创建MysUser实例
-
+  /**
+   * 可传入ltuid、cookie、ck对象来创建MysUser实例
+   */
   get uid() {
     return this.uids?.gs?.[0] || ''
   }
 
-  // 在仅传入ltuid时，必须是之前传入过的才能被识别
+  /**
+   * 在仅传入ltuid时，必须是之前传入过的才能被识别
+   * @param ltuid
+   * @param db
+   * @returns
+   */
   static async create(ltuid, db = false) {
     ltuid = MysUtil.getLtuid(ltuid)
     if (!ltuid) {
@@ -72,6 +88,10 @@ export default class MysUser extends BaseModel {
     return mys
   }
 
+  /**
+   *
+   * @param fn
+   */
   static async forEach(fn) {
     let dbs = await MysUserDB.findAll()
     await Data.forEach(dbs, async db => {
@@ -80,7 +100,13 @@ export default class MysUser extends BaseModel {
     })
   }
 
-  // 根据uid获取查询MysUser
+  /**
+   * 根据uid获取查询MysUser
+   * @param uid
+   * @param game
+   * @param onlySelfCk
+   * @returns
+   */
   static async getByQueryUid(uid, game = 'gs', onlySelfCk = false) {
     let servCache = DailyCache.create(uid, game)
     // 查找已经查询过的ltuid || 分配最少查询的ltuid
@@ -127,6 +153,10 @@ export default class MysUser extends BaseModel {
     return false
   }
 
+  /**
+   *
+   * @param fn
+   */
   static async eachServ(fn) {
     await MysUtil.eachServ(async serv => {
       await MysUtil.eachGame(async game => {
@@ -136,7 +166,9 @@ export default class MysUser extends BaseModel {
     })
   }
 
-  // 清除当日缓存
+  /**
+   * 清除当日缓存
+   */
   static async clearCache() {
     await MysUser.eachServ(async function (servCache) {
       await servCache.empty(tables.detail)
@@ -147,7 +179,10 @@ export default class MysUser extends BaseModel {
     await cache.empty(tables.qq)
   }
 
-  // 获取用户统计数据
+  /**
+   * 获取用户统计数据
+   * @returns
+   */
   static async getStatData() {
     let totalCount = {}
     let ret = { servs: {} }
@@ -261,7 +296,11 @@ export default class MysUser extends BaseModel {
     }
   }
 
-  // 不建议使用，为了兼容老数据格式，后续废弃
+  /**
+   * 不建议使用，为了兼容老数据格式，后续废弃
+   * @param game
+   * @returns
+   */
   getCkInfo(game = 'gs') {
     return {
       ck: this.ck,
@@ -271,6 +310,12 @@ export default class MysUser extends BaseModel {
     }
   }
 
+  /**
+   *
+   * @param uid
+   * @param game
+   * @returns
+   */
   getUidData(uid, game = 'gs') {
     game = this.gameKey(game)
     if (!this.hasUid(uid, game)) {
@@ -284,20 +329,40 @@ export default class MysUser extends BaseModel {
     }
   }
 
+  /**
+   *
+   * @param uid
+   * @param game
+   * @returns
+   */
   hasUid(uid, game = 'gs') {
     game = this.gameKey(game)
     return this.uids[game].includes(uid + '')
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   getUid(game = 'gs') {
     return this.getUids(game)[0]
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   getUids(game = 'gs') {
     let gameKey = this.gameKey(game)
     return this.uids[gameKey] || []
   }
 
+  /**
+   *
+   * @returns
+   */
   getUidInfo() {
     let ret = []
     MysUtil.eachGame((game, gameDs) => {
@@ -360,6 +425,11 @@ export default class MysUser extends BaseModel {
     return { status: 0, msg: '' }
   }
 
+  /**
+   *
+   * @param serv
+   * @returns
+   */
   async getGameRole(serv = 'mys') {
     let ck = this.ck
     let url = {
@@ -375,7 +445,11 @@ export default class MysUser extends BaseModel {
     return res
   }
 
-  // 获取米游社通行证id
+  /**
+   * 获取米游社通行证id
+   * @param serv
+   * @returns
+   */
   async getUserFullInfo(serv = 'mys') {
     let ck = this.ck
     let url = {
@@ -398,6 +472,11 @@ export default class MysUser extends BaseModel {
     return res
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   getCache(game = 'gs') {
     if (!this.cache) {
       this.cache = {}
@@ -422,7 +501,10 @@ export default class MysUser extends BaseModel {
     this.setCkData(db)
   }
 
-  // 设置ck数据
+  /**
+   * 设置ck数据
+   * @param data
+   */
   setCkData(data = {}) {
     this.ck = data.ck || this.ck || ''
     this.type = data.type || this.type || 'mys'
@@ -434,11 +516,19 @@ export default class MysUser extends BaseModel {
     })
   }
 
+  /**
+   *
+   */
   async save() {
     await this.db.saveDB(this)
   }
 
-  // 为当前MysUser绑定uid
+  /**
+   * 为当前MysUser绑定uid
+   * @param uid
+   * @param game
+   * @returns
+   */
   addUid(uid, game = 'gs') {
     if (lodash.isArray(uid)) {
       for (let u of uid) {
@@ -457,12 +547,20 @@ export default class MysUser extends BaseModel {
     return true
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   hasGame(game = 'gs') {
     game = this.gameKey(game)
     return this.uids[game]?.length > 0
   }
 
-  // 初始化当前MysUser缓存记录
+  /**
+   * 初始化当前MysUser缓存记录
+   * @returns
+   */
   async initCache() {
     if (!this.ltuid || !this.ck) {
       return
@@ -486,13 +584,16 @@ export default class MysUser extends BaseModel {
     return true
   }
 
+  /**
+   *
+   * @param game
+   */
   async disable(game = 'gs') {
     let cache = this.getCache(game)
     await cache.zDel(tables.detail, this.ltuid)
     logger.mark(`[标记无效ck][game:${game}, ltuid:${this.ltuid}`)
   }
 
-  //
   /**
    * 删除缓存, 供User解绑CK时调用
    * @returns {Promise<boolean>}
@@ -513,7 +614,10 @@ export default class MysUser extends BaseModel {
     logger.mark(`[删除失效ck][ltuid:${this.ltuid}]`)
   }
 
-  // 删除MysUser用户记录，会反向删除User中的记录及绑定关系
+  /**
+   * 删除MysUser用户记录，会反向删除User中的记录及绑定关系
+   * @param game
+   */
   async delWithUser(game = 'gs') {
     // 查找用户
     let cache = this.getCache(game)
@@ -530,7 +634,12 @@ export default class MysUser extends BaseModel {
     await this.del()
   }
 
-  // 为当前用户添加uid查询记录
+  /**
+   * 为当前用户添加uid查询记录
+   * @param uid
+   * @param game
+   * @returns
+   */
   async addQueryUid(uid, game = 'gs') {
     if (lodash.isArray(uid)) {
       for (let u of uid) {
@@ -544,19 +653,33 @@ export default class MysUser extends BaseModel {
     }
   }
 
-  // 获取当前用户已查询uid列表
+  /**
+   * 获取当前用户已查询uid列表
+   * @param game
+   * @returns
+   */
   async getQueryUids(game = 'gs') {
     let cache = this.getCache(game)
     return await cache.zList(tables.detail, this.ltuid)
   }
 
-  // 根据uid获取查询ltuid
+  /**
+   * 根据uid获取查询ltuid
+   * @param uid
+   * @param game
+   * @returns
+   */
   async getQueryLtuid(uid, game = 'gs') {
     let cache = this.getCache(game)
     return await cache.zKey(tables.detail, uid)
   }
 
-  // 检查指定uid是否为当前MysUser所有
+  /**
+   * 检查指定uid是否为当前MysUser所有
+   * @param uid
+   * @param game
+   * @returns
+   */
   ownUid(uid, game = 'gs') {
     if (!uid) {
       return false

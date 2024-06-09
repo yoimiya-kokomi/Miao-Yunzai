@@ -3,8 +3,10 @@ import common from "../common/common.js"
 import { createClient } from "redis"
 import { exec } from "node:child_process"
 
+
 /**
  * 初始化全局redis客户端
+ * @returns 
  */
 export default async function redisInit() {
   const rc = cfg.redis
@@ -49,6 +51,10 @@ export default async function redisInit() {
   return client
 }
 
+/**
+ * 
+ * @returns 
+ */
 async function aarch64() {
   if (process.platform == "win32")
     return ""
@@ -67,6 +73,11 @@ async function aarch64() {
   return ""
 }
 
+/**
+ * 
+ * @param cmd 
+ * @returns 
+ */
 function execSync (cmd) {
   return new Promise((resolve, reject) => {
     exec(cmd, (error, stdout, stderr) => {

@@ -1,3 +1,9 @@
+import BaseModel from './BaseModel.js'
+import lodash from 'lodash'
+import MysUser from './MysUser.js'
+import MysUtil from './MysUtil.js'
+import { UserDB } from '../db/index.js'
+import { Data } from '../local.js'
 /**
  * Bot实际User用户类
  * 主键QQ
@@ -5,17 +11,12 @@
  *  User可以注册UID，通过 getRegUid / setRegUid
  *  一个User可以绑定多个MysUser CK，绑定MysUser
  */
-import BaseModel from './BaseModel.js'
-import lodash from 'lodash'
-import MysUser from './MysUser.js'
-import MysUtil from './MysUtil.js'
-
-import { UserDB } from '../db/index.js'
-
-//
-import { Data } from './local.js'
-
 export default class NoteUser extends BaseModel {
+  /**
+   *
+   * @param qq
+   * @returns
+   */
   constructor(qq) {
     super()
     // 检查实例缓存
@@ -109,6 +110,10 @@ export default class NoteUser extends BaseModel {
     return user
   }
 
+  /**
+   *
+   * @param fn
+   */
   static async forEach(fn) {
     let dbs = await UserDB.findAll()
     await Data.forEach(dbs, async db => {
@@ -117,7 +122,11 @@ export default class NoteUser extends BaseModel {
     })
   }
 
-  // 初始化数据
+  /**
+   * 初始化数据
+   * @param db
+   * @returns
+   */
   async initDB(db = false) {
     if (this.db && !db) {
       return
@@ -132,7 +141,9 @@ export default class NoteUser extends BaseModel {
     await this.save()
   }
 
-  // 初始化MysUser对象
+  /**
+   * 初始化MysUser对象
+   */
   async initMysUser() {
     let ltuids = this.db?.ltuids || ''
     this.mysUsers = {}
@@ -144,10 +155,19 @@ export default class NoteUser extends BaseModel {
     }
   }
 
+  /**
+   *
+   */
   async save() {
     await this.db.saveDB(this)
   }
 
+  /**
+   *
+   * @param game
+   * @param type
+   * @returns
+   */
   getUidMapList(game = 'gs', type = 'all') {
     if (this._map?.[game]?.[type]) {
       return this._map[game][type]
@@ -186,6 +206,12 @@ export default class NoteUser extends BaseModel {
     return this._map[game][type]
   }
 
+  /**
+   *
+   * @param uid
+   * @param game
+   * @returns
+   */
   getUidData(uid = '', game = 'gs') {
     if (!uid) {
       uid = this.getUid(game)
@@ -193,7 +219,12 @@ export default class NoteUser extends BaseModel {
     return this.getUidMapList(game, 'all').map[uid]
   }
 
-  /** 有Uid */
+  /**
+   * 有Uid
+   * @param uid
+   * @param game
+   * @returns
+   */
   hasUid(uid = '', game = '') {
     if (!uid) {
       return this.getUidMapList(game, 'all').list?.length > 0
@@ -201,19 +232,31 @@ export default class NoteUser extends BaseModel {
     return !!this.getUidData(uid, game)
   }
 
-  /** 获取CK-Uid */
+  /**
+   * 获取CK-Uid
+   * @param game
+   * @returns
+   */
   getCkUid(game = 'gs') {
     let uid = this.getUid(game)
     let { map, list } = this.getUidMapList(game, 'ck')
     return (map[uid] ? uid : list[0]?.uid) || ''
   }
 
-  /** 获取CK-Uid列表 */
+  /**
+   * 获取CK-Uid列表
+   * @param game
+   * @returns
+   */
   getCkUidList(game = 'gs') {
     return this.getUidMapList(game, 'ck').list
   }
 
-  /** 获取当前UID */
+  /**
+   * 获取当前UID
+   * @param game
+   * @returns
+   */
   getUid(game = 'gs') {
     game = this.gameKey(game)
     // todo 刷新uid
@@ -224,12 +267,20 @@ export default class NoteUser extends BaseModel {
     return ds.uid || ''
   }
 
-  /** 获取UID列表 */
+  /**
+   * 获取UID列表
+   * @param game
+   * @returns
+   */
   getUidList(game = 'gs') {
     return this.getUidMapList(game, 'all').list
   }
 
-  /** 获取当前的MysUser对象 */
+  /**
+   * 获取当前的MysUser对象
+   * @param game
+   * @returns
+   */
   getMysUser(game = 'gs') {
     if (lodash.isEmpty(this.mysUsers)) {
       return false
@@ -242,7 +293,12 @@ export default class NoteUser extends BaseModel {
     return this.mysUsers[uidData.ltuid]
   }
 
-  // 添加UID
+  /**
+   * 添加UID
+   * @param uid
+   * @param game
+   * @param save
+   */
   addRegUid(uid, game = 'gs', save = true) {
     game = this.gameKey(game)
     uid = uid + ''
@@ -255,7 +311,11 @@ export default class NoteUser extends BaseModel {
     }
   }
 
-  // 删除UID
+  /**
+   * 删除UID
+   * @param uid
+   * @param game
+   */
   delRegUid(uid, game = 'gs') {
     game = this.gameKey(game)
     let gameDs = this.getGameDs(game)
@@ -269,6 +329,11 @@ export default class NoteUser extends BaseModel {
     this.save()
   }
 
+  /**
+   *
+   * @param game
+   * @returns
+   */
   getGameDs(game = 'gs') {
     game = this.gameKey(game)
     if (!this._games[game]) {
@@ -293,7 +358,13 @@ export default class NoteUser extends BaseModel {
     return uid
   }
 
-  // 切换绑定CK生效的UID
+  /**
+   * 切换绑定CK生效的UID
+   * @param uid
+   * @param game
+   * @param save
+   * @returns
+   */
   setMainUid(uid = '', game = 'gs', save = true) {
     this._map = false
     game = this.gameKey(game)
@@ -313,7 +384,10 @@ export default class NoteUser extends BaseModel {
     }
   }
 
-  // 添加MysUser
+  /**
+   * 添加MysUser
+   * @param mysUser
+   */
   async addMysUser(mysUser) {
     this.mysUsers[mysUser.ltuid] = mysUser
     this._map = false
@@ -326,12 +400,20 @@ export default class NoteUser extends BaseModel {
     this.save()
   }
 
-  // 删除当前用户绑定CK
+  /**
+   * 删除当前用户绑定CK
+   * @param ltuid
+   * @returns
+   */
   async delCk(ltuid = '') {
     console.warn('delCk即将废弃')
     return await this.delMysUser(ltuid)
   }
 
+  /**
+   *
+   * @param mysUser
+   */
   async delMysUser(mysUser = '') {
     let ltuid = mysUser.ltuid || mysUser
     if (ltuid && this.mysUsers[ltuid]) {
@@ -344,6 +426,10 @@ export default class NoteUser extends BaseModel {
     await this.save()
   }
 
+  /**
+   *
+   * @param fn
+   */
   async eachMysUser(fn) {
     await Data.forEach(this.mysUsers, async (mys, ltuid) => {
       if (!mys) {
@@ -353,12 +439,18 @@ export default class NoteUser extends BaseModel {
     })
   }
 
+  /**
+   *
+   * @param fn
+   * @returns
+   */
   async eachAllMysUser(fn) {
     return MysUser.forEach(fn)
   }
 
   /**
    * 检查当前用户绑定的CK状态
+   * @returns
    */
   async checkCk() {
     // TODO:待完善文案

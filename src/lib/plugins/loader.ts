@@ -19,11 +19,15 @@ class PluginsLoader {
   task = []
   dir = 'plugins'
 
-  /** 命令冷却cd */
+  /**
+   * 命令冷却cd
+   */
   groupGlobalCD = {}
   singleCD = {}
 
-  /** 插件监听 */
+  /**
+   * 插件监听
+   */
   watcher = {}
 
   eventMap = {
@@ -34,10 +38,16 @@ class PluginsLoader {
 
   msgThrottle = {}
 
-  /** 星铁命令前缀 */
+  /**
+   * 星铁命令前缀
+   */
   srReg = /^#?(\*|星铁|星轨|穹轨|星穹|崩铁|星穹铁道|崩坏星穹铁道|铁道)+/
 
 
+  /**
+   * 
+   * @returns 
+   */
   async getPlugins() {
     const files = await fs.readdir(this.dir, { withFileTypes: true })
     const ret = []
@@ -102,6 +112,11 @@ class PluginsLoader {
     this.priority = lodash.orderBy(this.priority, ['priority'], ['asc'])
   }
 
+  /**
+   * 
+   * @param file 
+   * @param packageErr 
+   */
   async importPlugin(file, packageErr) {
     try {
       let app = await import(file.path)
@@ -125,6 +140,12 @@ class PluginsLoader {
     }
   }
 
+  /**
+   * 
+   * @param file 
+   * @param p 
+   * @returns 
+   */
   async loadPlugin(file, p) {
     if (!p?.prototype) return
     this.pluginCount++
@@ -153,6 +174,11 @@ class PluginsLoader {
     }
   }
 
+  /**
+   * 
+   * @param packageErr 
+   * @returns 
+   */
   packageTips(packageErr) {
     if (!packageErr || packageErr.length <= 0) return
     logger.mark('--------插件载入错误--------')
@@ -276,7 +302,12 @@ class PluginsLoader {
     }
   }
 
-  /** 过滤事件 */
+  /**
+   * 过滤事件
+   * @param e 
+   * @param v 
+   * @returns 
+   */
   filtEvent(e, v) {
     if (!v.event) return false
     const event = v.event.split(".")
@@ -291,7 +322,13 @@ class PluginsLoader {
     return v.event == newEvent.join(".")
   }
 
-  /** 判断权限 */
+  
+  /**
+   * 判断权限
+   * @param e 
+   * @param v 
+   * @returns 
+   */
   filtPermission(e, v) {
     if (v.permission == 'all' || !v.permission) return true
 
@@ -338,12 +375,10 @@ class PluginsLoader {
    * @param e.isMaster 是否管理员
    * @param e.logText 日志用户字符串
    * @param e.logFnc  日志方法字符串
-
    * 频道
    * @param e.isGuild 是否频道
    * @param e.at 支持频道 tiny_id
    * @param e.atBot 支持频道
-
    */
   dealMsg(e) {
     if (e.message) {
@@ -446,7 +481,10 @@ class PluginsLoader {
     }
   }
 
-  /** 处理回复,捕获发送失败异常 */
+  /**
+   * 处理回复,捕获发送失败异常
+   * @param e 
+   */
   reply(e) {
     if (e.reply) {
       e.replyNew = e.reply
@@ -532,6 +570,11 @@ class PluginsLoader {
     }
   }
 
+  /**
+   * 
+   * @param e 
+   * @param msg 
+   */
   count(e, msg) {
     let screenshot = false
     if (msg && msg?.file && Buffer.isBuffer(msg?.file)) {
@@ -547,6 +590,11 @@ class PluginsLoader {
     }
   }
 
+  /**
+   * 
+   * @param type 
+   * @param groupId 
+   */
   saveCount(type, groupId = '') {
     let key = 'Yz:count:'
 
@@ -565,20 +613,28 @@ class PluginsLoader {
     redis.expire(monthKey, 3600 * 24 * 30)
   }
 
+  /**
+   * 
+   */
   delCount() {
     let key = 'Yz:count:'
     redis.set(`${key}sendMsg:total`, '0')
     redis.set(`${key}screenshot:total`, '0')
   }
 
-  /** 收集定时任务 */
+  /**
+   * 收集定时任务
+   * @param task 
+   */
   collectTask(task) {
     for (const i of Array.isArray(task) ? task : [task])
       if (i.cron && i.name)
         this.task.push(i)
   }
 
-  /** 创建定时任务 */
+  /**
+   * 创建定时任务
+   */
   createTask() {
     for (const i of this.task)
       i.job = schedule.scheduleJob(i.cron, async () => {
@@ -595,7 +651,11 @@ class PluginsLoader {
       })
   }
 
-  /** 检查命令冷却cd */
+  /**
+   * 检查命令冷却cd
+   * @param e 
+   * @returns 
+   */
   checkLimit(e) {
     /** 禁言中 */
     if (e.isGroup && e?.group?.mute_left > 0) return false
@@ -624,7 +684,11 @@ class PluginsLoader {
     return true
   }
 
-  /** 设置冷却cd */
+  /**
+   * 设置冷却cd
+   * @param e 
+   * @returns 
+   */
   setLimit(e) {
     if (!e.message || e.isPrivate) return
     let config = cfg.getGroup(e.group_id)
@@ -644,7 +708,11 @@ class PluginsLoader {
     }
   }
 
-  /** 是否只关注主动at */
+  /**
+   * 是否只关注主动at
+   * @param e 
+   * @returns 
+   */
   onlyReplyAt(e) {
     if (!e.message || e.isPrivate) return true
 
@@ -665,12 +733,20 @@ class PluginsLoader {
     return false
   }
 
-  /** 判断频道消息 */
+  /**
+   * 判断频道消息
+   * @param e 
+   * @returns 
+   */
   checkGuildMsg(e) {
     return cfg.getOther().disableGuildMsg && e.detail_type == 'guild'
   }
 
-  /** 判断黑白名单 */
+  /**
+   * 判断黑白名单
+   * @param e 
+   * @returns 
+   */
   checkBlack(e) {
     const other = cfg.getOther()
 
@@ -698,7 +774,11 @@ class PluginsLoader {
     return true
   }
 
-  /** 判断是否启用功能 */
+  /**
+   * 判断是否启用功能
+   * @param p 
+   * @returns 
+   */
   checkDisable(p) {
     const groupCfg = cfg.getGroup(p.e.group_id)
     if (groupCfg.disable?.length && groupCfg.disable.includes(p.name))
@@ -708,6 +788,10 @@ class PluginsLoader {
     return true
   }
 
+  /**
+   * 
+   * @param key 
+   */
   async changePlugin(key) {
     try {
       let app = await import(`../../${this.dir}/${key}?${moment().format('x')}`)
@@ -727,7 +811,12 @@ class PluginsLoader {
     }
   }
 
-  /** 监听热更新 */
+  /**
+   * 监听热更新
+   * @param dirName 
+   * @param appName 
+   * @returns 
+   */
   watch(dirName, appName) {
     this.watchDir(dirName)
     if (this.watcher[`${dirName}.${appName}`]) return
@@ -757,7 +846,12 @@ class PluginsLoader {
     this.watcher[`${dirName}.${appName}`] = watcher
   }
 
-  /** 监听文件夹更新 */
+
+  /**
+   * 监听文件夹更新
+   * @param dirName 
+   * @returns 
+   */
   watchDir(dirName) {
     if (this.watcher[dirName]) return
     const watcher = chokidar.watch(`./${this.dir}/${dirName}/`)
@@ -780,6 +874,11 @@ class PluginsLoader {
     }, 10000)
     this.watcher[dirName] = watcher
   }
+
+
 }
 
+/**
+ * 
+ */
 export default new PluginsLoader()

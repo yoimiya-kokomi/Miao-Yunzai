@@ -8,9 +8,17 @@ import NoteUser from './NoteUser.js'
 import MysUser from './MysUser.js'
 import DailyCache from './DailyCache.js'
 
+/**
+ * *************
+ * tudo
+ * *********
+ */
 export default class MysInfo {
   static tips = '请先#绑定Cookie\n发送【Cookie帮助】查看配置教程'
-
+  /**
+   *
+   * @param e
+   */
   constructor(e) {
     if (e) {
       this.e = e
@@ -51,6 +59,12 @@ export default class MysInfo {
     ])
   }
 
+  /**
+   *
+   * @param e
+   * @param api
+   * @returns
+   */
   static async init(e, api) {
     await MysInfo.initCache()
 
@@ -328,12 +342,21 @@ export default class MysInfo {
     return true
   }
 
+  /**
+   *
+   * @returns
+   */
   static async getBingCkUid() {
     let res = await GsCfg.getBingCk()
     return { ...res.ck }
   }
 
-  // 获取uid绑定的ck信息
+  /**
+   *  获取uid绑定的ck信息
+   * @param uid
+   * @param game
+   * @returns
+   */
   static async checkUidBing(uid, game = 'gs') {
     let ckUser = await MysUser.getByQueryUid(uid, game, true)
     if (ckUser && ckUser.ck) {
@@ -342,6 +365,10 @@ export default class MysInfo {
     return false
   }
 
+  /**
+   *
+   * @returns
+   */
   static async delDisable() {
     return await MysUser.delDisable()
   }
@@ -363,6 +390,10 @@ export default class MysInfo {
     return false
   }
 
+  /**
+   *
+   * @returns
+   */
   async checkReply() {
     if (this.e.noTips === true) return
 
@@ -413,6 +444,15 @@ export default class MysInfo {
     return this.ckUser?.ck
   }
 
+  /**
+   *
+   * @param res
+   * @param type
+   * @param mysApi
+   * @param data
+   * @param isTask
+   * @returns
+   */
   async checkCode(res, type, mysApi = {}, data = {}, isTask = false) {
     if (!res) {
       if (!isTask)
@@ -558,7 +598,10 @@ export default class MysInfo {
     return res
   }
 
-  /** 删除失效ck */
+  /**
+   * 删除失效ck
+   * @returns
+   */
   async delCk() {
     if (!this.ckUser) {
       return false
@@ -568,7 +611,10 @@ export default class MysInfo {
     await ckUser.delWithUser()
   }
 
-  /** 查询次数满，今日内标记失效 */
+  /**
+   * 查询次数满，今日内标记失效
+   * @param game
+   */
   async disableToday(game = 'gs') {
     /** 统计次数设为超限 */
     await this.ckUser.disable(game)

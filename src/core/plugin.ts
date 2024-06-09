@@ -1,4 +1,4 @@
-import { Common } from './local.js'
+import { Common } from '../local.js'
 import { EventType } from './types.js'
 
 const stateArr = {}

@@ -1,7 +1,9 @@
 import { MessageCallBackType } from './types.js'
 import { plugin } from './plugin.js'
 
-// 插件super默认值
+/**
+ * 插件super默认值
+ */
 export const PluginSuperDefine = {
   name: 'group-app',
   dsc: 'group-dsc',
@@ -9,13 +11,21 @@ export const PluginSuperDefine = {
   priority: 9999
 }
 
-// 消息
+/**
+ * 消息
+ */
 export class Messages {
   count = 0
   rule: {
     reg: RegExp
     fnc: string
   }[] = []
+
+  /**
+   *
+   * @param reg
+   * @param fnc
+   */
   response(reg: RegExp, fnc: MessageCallBackType) {
     this.count++
     const propName = `prop_${this.count}`
@@ -25,8 +35,10 @@ export class Messages {
       fnc: propName
     })
   }
+  /**
+   *
+   */
   get ok() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const App = this
     class Children extends plugin {
       constructor() {
@@ -49,14 +61,30 @@ export class Messages {
  * 事件
  */
 export class Events {
+  /**
+   *
+   */
   count = 0
+
+  /**
+   *
+   */
   data: {
     [key: string]: typeof plugin
   } = {}
+
+  /**
+   *
+   * @param val
+   */
   use(val: typeof plugin) {
     this.count++
     this.data[this.count] = val
   }
+
+  /**
+   *
+   */
   get ok() {
     return this.data
   }

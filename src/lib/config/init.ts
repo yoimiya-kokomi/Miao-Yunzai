@@ -8,6 +8,9 @@ import yaml from "yaml"
 /** 设置标题 */
 process.title = "Miao-Yunzai"
 
+/**
+ * 
+ */
 async function UpdateTitle() {
   // 添加一些多余的标题内容
   let title = "Miao-Yunzai"
@@ -70,7 +73,9 @@ process.on("exit", async code => {
 
 await checkInit()
 
-/** 初始化事件 */
+/**
+ * 初始化事件
+ */
 async function checkInit() {
   /** 检查node_modules */
   if (!fs.existsSync("./node_modules") || !fs.existsSync("./node_modules/icqq")) {

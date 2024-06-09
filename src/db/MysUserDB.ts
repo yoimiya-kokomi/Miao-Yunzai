@@ -2,6 +2,9 @@ import BaseModel from './BaseModel.js'
 
 const { Types } = BaseModel
 
+/**
+ *
+ */
 const COLUMNS = {
   // 用户ID，qq为数字
   ltuid: {
@@ -37,6 +40,9 @@ const COLUMNS = {
   }
 }
 
+/**
+ *
+ */
 class MysUserDB extends BaseModel {
   static async find(ltuid = '', create = false) {
     // DB查询
@@ -62,7 +68,17 @@ class MysUserDB extends BaseModel {
   }
 }
 
+/**
+ *
+ */
 BaseModel.initDB(MysUserDB, COLUMNS)
+
+/**
+ *
+ */
 await MysUserDB.sync()
 
+/**
+ *
+ */
 export default MysUserDB

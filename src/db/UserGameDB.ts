@@ -1,8 +1,14 @@
 import BaseModel from './BaseModel.js'
 import lodash from 'lodash'
 
+/**
+ *
+ */
 const { Types } = BaseModel
 
+/**
+ *
+ */
 const COLUMNS = {
   // 用户ID，qq为数字
   userId: {
@@ -33,9 +39,22 @@ const COLUMNS = {
   }
 }
 
+/**
+ *
+ */
 class UserGameDB extends BaseModel {}
 
+/**
+ *
+ */
 BaseModel.initDB(UserGameDB, COLUMNS)
+
+/**
+ *
+ */
 await UserGameDB.sync()
 
+/**
+ *
+ */
 export default UserGameDB
