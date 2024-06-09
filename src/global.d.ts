@@ -9,6 +9,6 @@ declare global {
   var redis: RedisClientType
   var Bot: typeof Yunzai.prototype
   var segment: typeof se
-  var plugin: typeof p.prototype
+  var plugin: typeof p
   var logger: any
 }

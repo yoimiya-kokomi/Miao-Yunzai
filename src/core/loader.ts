@@ -16,7 +16,7 @@ class ListenerLoader {
 
     const files = fs
       .readdirSync('./src/core/events')
-      .filter(file => file.endsWith('.js'))
+      .filter(file => /(.ts|.js)$/.test(file))
 
     for (let File of files) {
       try {

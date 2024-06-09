@@ -5,7 +5,7 @@ import schedule from 'node-schedule'
 import { segment } from 'icqq'
 import chokidar from 'chokidar'
 import moment from 'moment'
-import path from 'node:path'
+import path, { join } from 'node:path'
 import Runtime from './runtime.js'
 import Handler from './handler.js'
 
@@ -17,12 +17,16 @@ class PluginsLoader {
   priority = []
   handler = {}
   task = []
-  dir = 'plugins'
+  
+  //
+  dir = join(process.cwd(),'plugins')
 
   /**
    * 命令冷却cd
    */
   groupGlobalCD = {}
+
+  //
   singleCD = {}
 
   /**
@@ -43,7 +47,6 @@ class PluginsLoader {
    */
   srReg = /^#?(\*|星铁|星轨|穹轨|星穹|崩铁|星穹铁道|崩坏星穹铁道|铁道)+/
 
-
   /**
    * 
    * @returns 
@@ -55,21 +58,31 @@ class PluginsLoader {
       if (val.isFile()) continue
       const tmp = {
         name: val.name,
-        path: `../../${this.dir}/${val.name}`,
+        path: join(this.dir,val.name),
       }
 
       try {
-        if (await fs.stat(`${this.dir}/${val.name}/index.js`)) {
-          tmp.path = `${tmp.path}/index.js`
+        const dir = join(tmp.path,'index.js')
+        if (await fs.stat(dir)) {
+          tmp.path = dir
           ret.push(tmp)
           continue
         }
-      } catch (err) { }
+      } catch (err) {
+        //
+       }
 
-      const apps = await fs.readdir(`${this.dir}/${val.name}`, { withFileTypes: true })
+       //
+
+      const dir =  join(this.dir,val.name)
+
+      const apps = await fs.readdir(dir, { withFileTypes: true })
+
+      //
       for (const app of apps) {
         if (!app.isFile()) continue
-        if (!app.name.endsWith('.js')) continue
+        // .js .ts
+        if (!/^(.js|.ts)$/.test(app.name)) continue
         ret.push({
           name: `${tmp.name}/${app.name}`,
           path: `${tmp.path}/${app.name}`,
@@ -121,7 +134,7 @@ class PluginsLoader {
    */
   async importPlugin(file, packageErr?:any) {
     try {
-      let app = await import(file.path)
+      let app = await import(`file://${file.path}`)
       if (app.apps) app = { ...app.apps }
       const pluginArray = []
       lodash.forEach(app, p =>

@@ -17,6 +17,13 @@ import ListenerLoader from './core/loader.js'
  */
 import { Client } from 'icqq'
 
+import { plugin } from './core/plugin.js'
+
+/**
+ * global
+ */
+global.plugin = plugin
+
 /**
  *
  */
