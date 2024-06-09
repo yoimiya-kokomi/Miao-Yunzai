@@ -6,9 +6,9 @@ import { plugin as p } from './core/index.js'
  * 全局变量声明
  */
 declare global {
-  let redis: RedisClientType
-  let Bot: typeof Yunzai.prototype
-  let segment: typeof se
-  let plugin: typeof p.prototype
-  let logger: any
+  var redis: RedisClientType
+  var Bot: typeof Yunzai.prototype
+  var segment: typeof se
+  var plugin: typeof p.prototype
+  var logger: any
 }
