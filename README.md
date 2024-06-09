@@ -73,14 +73,16 @@ sudo ln -s libstdc++.so.6.0.29 libstdc++.so.6
 
 node >= 20.0.0
 
-```ts
-ts-node alemon.config.ts
+- 启动
+
+```sh
+npm run latest:app
 ```
 
-更改为
+- 重新登录
 
-```ts
-node --no-warnings=ExperimentalWarning --loader ts-node/esm alemon.config.ts
+```sh
+npm run latest:app login
 ```
 
 ## 致谢

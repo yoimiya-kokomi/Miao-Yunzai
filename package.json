@@ -14,6 +14,8 @@
     "ts:app": "ts-node src/main.ts",
     "ts:login": "ts-node src/main.ts login",
     "ts:build": "rollup --config rollup.config.js",
+    "latest:app": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts",
+    "latest:login": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts login",
     "format": "prettier --write .",
     "prepare": "husky"
   },
