@@ -1,5 +1,5 @@
-import EventListener from './listener.js'
-import { sleep } from '../utils/common.js'
+import EventListener from '../listener.js'
+import { sleep } from '../../utils/common.js'
 import inquirer from 'inquirer'
 import lodash from 'lodash'
 import fetch from 'node-fetch'
@@ -71,7 +71,7 @@ export default class loginEvent extends EventListener {
      */
     inquirer
       .prompt({
-        type: 'input',
+        // type: 'input',
         message: '回车刷新二维码，等待扫码中...\n',
         name: 'enter'
       })
@@ -134,7 +134,7 @@ export default class loginEvent extends EventListener {
 
     if (!ticket) {
       let res = await inquirer.prompt({
-        type: 'input',
+        // type: 'input',
         message: '请输入ticket:',
         name: 'ticket',
         validate(value) {
@@ -211,7 +211,7 @@ export default class loginEvent extends EventListener {
 
     //
     await inquirer.prompt({
-      type: 'input',
+      // type: 'input',
       message: '验证完成后按回车确认，等待在操作中...',
       name: 'enter'
     })
@@ -261,7 +261,7 @@ export default class loginEvent extends EventListener {
       console.log('\n' + logger.green(event.url) + '\n')
       console.log('请打开上面链接，完成验证后按回车')
       await inquirer.prompt({
-        type: 'input',
+        // type: 'input',
         message: '等待操作中...',
         name: 'enter'
       })
@@ -272,7 +272,7 @@ export default class loginEvent extends EventListener {
       await sleep(200)
       logger.info(`验证码已发送：${event.phone}\n`)
       let res = await inquirer.prompt({
-        type: 'input',
+        // type: 'input',
         message: '请输入短信验证码:',
         name: 'sms'
       })

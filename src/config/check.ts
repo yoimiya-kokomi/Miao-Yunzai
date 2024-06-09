@@ -27,17 +27,13 @@ export async function checkRun() {
      * 
      */
     if (status.stdout.includes('online')) {
-      //
       logger.mark('检测到后台正在运行')
       logger.mark('已停止后台进程，防止重复运行')
-
       execAsync(`pm2 stop ${cfg.apps[0].name}`).catch(logger.error)
-
-      //
     }
 
 
-  }).catch(logger.error)
+  }).catch(()=>{})
 
 }
 

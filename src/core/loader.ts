@@ -15,12 +15,12 @@ class ListenerLoader {
     this.client = client
 
     const files = fs
-      .readdirSync('./lib/events')
+      .readdirSync('./src/core/events')
       .filter(file => file.endsWith('.js'))
 
     for (let File of files) {
       try {
-        let listener = await import(`../events/${File}`)
+        let listener = await import(`./events/${File}`)
 
         /* eslint-disable new-cap */
         if (!listener.default) continue

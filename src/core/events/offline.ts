@@ -1,7 +1,7 @@
-import EventListener from './listener.js'
+import EventListener from '../listener.js'
 import fetch from 'node-fetch'
-import cfg from '../config/config.js'
-import { BOT_NAME } from '../config/system.js'
+import cfg from '../../config/config.js'
+import { BOT_NAME } from '../../config/system.js'
 
 /**
  * 监听下线事件

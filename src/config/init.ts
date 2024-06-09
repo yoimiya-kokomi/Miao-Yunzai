@@ -1,6 +1,6 @@
 import fs, { promises } from "node:fs"
 import yaml from "yaml"
-import { BOT_NAME } from "./system.js"
+import { BOT_NAME, CONFIG_INIT_PATH } from "./system.js"
 import createQQ from "./qq.js"
 import setLog from "./log.js"
 import redisInit from "./redis.js"
@@ -17,7 +17,7 @@ export async function UpdateTitle() {
   let title = BOT_NAME
 
   //
-  const qq = await promises.readFile("./config/config/qq.yaml", 'utf-8').then(yaml.parse).catch(() => null)
+  const qq = await promises.readFile(`./${CONFIG_INIT_PATH}qq.yaml`, 'utf-8').then(yaml.parse).catch(() => null)
 
   /**
    * 
