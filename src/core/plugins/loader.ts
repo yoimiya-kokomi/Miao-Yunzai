@@ -643,8 +643,9 @@ class PluginsLoader {
    */
   collectTask(task) {
     for (const i of Array.isArray(task) ? task : [task])
-      if (i.cron && i.name)
+      if (i?.cron && i?.name){
         this.task.push(i)
+      }
   }
 
   /**
@@ -652,7 +653,7 @@ class PluginsLoader {
    */
   createTask() {
     for (const i of this.task)
-      i.job = schedule.scheduleJob(i.cron, async () => {
+      i.job = schedule.scheduleJob(i?.cron, async () => {
         try {
           if (i.log == true)
             logger.mark(`开始定时任务：${i.name}`)

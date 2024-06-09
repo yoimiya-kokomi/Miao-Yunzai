@@ -66,26 +66,19 @@ export class plugin {
     dsc && (this.dsc = dsc)
     event && (this.event = event)
     priority && (this.priority = priority)
-
-    /** 插件名称 */
-    this.name = name
-    /** 插件描述 */
-    this.dsc = dsc
-    /** 监听事件，默认message https://oicqjs.github.io/oicq/#events */
-    this.event = event
-    /** 优先级 */
-    this.priority = priority
+    
     /** 定时任务，可以是数组 */
-    this.task = {
+    task && (this.task =  {
       /** 任务名 */
-      name: '',
+      name:  task?.name ?? '',
       /** 任务方法名 */
-      fnc: task.fnc || '',
+      fnc: task?.fnc ?? '',
       /** 任务cron表达式 */
-      cron: task.cron || ''
-    }
+      cron: task?.cron ?? ''
+    })
+
     /** 命令规则 */
-    this.rule = rule
+    rule && (this.rule = rule)
 
     if (handler) {
       this.handler = handler
