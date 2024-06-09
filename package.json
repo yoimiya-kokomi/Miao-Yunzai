@@ -16,6 +16,7 @@
     "ts:build": "rollup --config rollup.config.js",
     "latest:app": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts",
     "latest:login": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts login",
+    "docs": "typedoc --options typedoc.json",
     "format": "prettier --write .",
     "prepare": "husky"
   },
@@ -62,10 +63,12 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
+    "husky": "^9.0.11",
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "rollup": "^4.16.4",
     "ts-node": "^10.9.1",
+    "typedoc": "^0.25.4",
     "typescript": "^5.0.4"
   },
   "imports": {
