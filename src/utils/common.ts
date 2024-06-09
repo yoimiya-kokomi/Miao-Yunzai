@@ -49,14 +49,13 @@ export function mkdirs(dirname: string) {
   }
 }
 
-
 /**
- * 
- * @param cmd 
- * @returns 
+ *
+ * @param cmd
+ * @returns
  */
 export function execAsync(cmd: string): Promise<{
-  stdout: string,
+  stdout: string
   stderr: string
 }> {
   return new Promise((resolve, reject) => {

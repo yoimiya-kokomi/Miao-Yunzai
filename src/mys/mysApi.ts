@@ -99,7 +99,6 @@ export default class MysApi {
     return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
   }
 
-
   _device_fp = null
 
   /**
@@ -109,7 +108,7 @@ export default class MysApi {
    * @param cached
    * @returns
    */
-  async getData(type, data:any = {}, cached = false) {
+  async getData(type, data: any = {}, cached = false) {
     if (
       !this._device_fp &&
       !data?.Getfp &&
@@ -145,8 +144,8 @@ export default class MysApi {
     }
 
     let param = {
-      method:null,
-      body:null,
+      method: null,
+      body: null,
       headers,
       agent: await this.getAgent(),
       timeout: 10000
@@ -158,9 +157,9 @@ export default class MysApi {
       param.method = 'get'
     }
     let response = {
-      ok:null,
+      ok: null,
       status: null,
-      statusText:null 
+      statusText: null
     }
     let start = Date.now()
     try {

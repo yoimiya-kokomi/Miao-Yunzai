@@ -240,7 +240,7 @@ export default class MysInfo {
   static async get(e, api, data = {}, option = {}) {
     let mysInfo = await MysInfo.init(e, api)
 
-    if(!mysInfo) return false
+    if (!mysInfo) return false
 
     if (!mysInfo.uid || !mysInfo.ckInfo.ck) return false
     e.uid = mysInfo.uid
