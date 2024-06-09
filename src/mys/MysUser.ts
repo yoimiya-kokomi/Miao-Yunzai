@@ -257,8 +257,24 @@ export default class MysUser extends BaseModel {
    * @returns {Promise<boolean|{msg: string, uids: *[], status: number}>}
    */
   static async checkCkStatus(ck) {
+    /**
+     *
+     */
+    if (!ck) {
+      return false
+    }
+    /**
+     *
+     */
     let uids = []
-    let err = (msg, status = 2) => {
+
+    /**
+     *
+     * @param msg
+     * @param status
+     * @returns
+     */
+    const err = (msg, status = 2) => {
       msg = msg + '\n请退出米游社并重新登录后，再次获取CK'
       return {
         status,
@@ -266,18 +282,23 @@ export default class MysUser extends BaseModel {
         uids
       }
     }
-    if (!ck) {
-      return false
-    }
+
+    /**
+     * *********
+     * tudo
+     * **********
+     */
 
     // 检查绑定UID
-    uids = await MysUser.getCkUid(ck, true, true)
-    if (!uids.uids || uids.uids.length === 0) {
-      return err(uids.msg || 'CK失效')
-    }
-    uids = uids.uids
-    let uid = uids[0]
-    let mys = new MysApi(uid + '', ck, { log: false })
+    // uids = await MysUser.getCkUid(ck, true, true)
+    // if (!uids.uids || uids.uids.length === 0) {
+    //   return err(uids.msg || 'CK失效')
+    // }
+    // uids = uids.uids
+
+    let uid = uids[0] ?? '0'
+
+    let mys = new MysApi(String(uid), ck, { log: false })
     // 体力查询
     let noteRet = await mys.getData('dailyNote')
     if (noteRet.retcode !== 0 || lodash.isEmpty(noteRet.data)) {
@@ -504,14 +525,21 @@ export default class MysUser extends BaseModel {
   }
 
   // 初始化数据
-  async initDB(db = false) {
+  async initDB(db) {
+    // 检查当前实例是否已有数据库连接
     if (this.db && !db) {
       return
     }
-    // tudo
-    // ???
-    db = db && db !== true ? db : await MysUserDB.find(this.ltuid, true)
+
+    // 如果传入了 db 参数且 db 参数不为 true，则使用传入的 db；否则，调用 MysUserDB.find 获取 db
+    if (!db || db === true) {
+      db = await MysUserDB.find(this.ltuid, true)
+    }
+
+    // 设置实例的 db 属性
     this.db = db
+
+    // 调用 setCkData 方法，并传入 db
     this.setCkData(db)
   }
 
@@ -584,9 +612,7 @@ export default class MysUser extends BaseModel {
    * @returns
    */
   async initCache() {
-    if (!this.ltuid || !this.ck) {
-      return
-    }
+    if (!this.ltuid || !this.ck) return
     let self = this
     await MysUtil.eachGame(async game => {
       let uids = self.uids[game]

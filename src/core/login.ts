@@ -1,5 +1,5 @@
-import EventListener from '../listener/listener.js'
-import { sleep } from '../../utils/common.js'
+import EventListener from './listener.js'
+import { sleep } from '../utils/common.js'
 import inquirer from 'inquirer'
 import lodash from 'lodash'
 import fetch from 'node-fetch'
@@ -10,20 +10,17 @@ import fetch from 'node-fetch'
 let inSlider = false
 
 /**
- * 
+ *
  */
 export default class loginEvent extends EventListener {
-
-
   client = null
 
   /**
-   * 
+   *
    */
   constructor() {
-
     /**
-     * 
+     *
      */
     super({
       prefix: 'system.login.',
@@ -33,17 +30,19 @@ export default class loginEvent extends EventListener {
   }
 
   /**
-   * 
-   * @param event 
+   *
+   * @param event
    */
-  async execute(event) { }
+  async execute(event) {}
 
   /**
    * 扫码登录现在仅能在同一ip下进行
-   * @param event 
+   * @param event
    */
   async qrcode(event) {
-    logger.mark(`请使用登录当前QQ的手机${logger.green('扫码')}完成登录，如果显示二维码过期，可以按${logger.green('回车键（Enter）')}刷新，重新输入密码请执行命令：${logger.green('node app login')}`)
+    logger.mark(
+      `请使用登录当前QQ的手机${logger.green('扫码')}完成登录，如果显示二维码过期，可以按${logger.green('回车键（Enter）')}刷新，重新输入密码请执行命令：${logger.green('node app login')}`
+    )
     // logger.info('等待扫码中...')
 
     /** 获取扫码结果 */
@@ -70,36 +69,53 @@ export default class loginEvent extends EventListener {
     /**
      * 刷新二维码
      */
-    inquirer.prompt({ type: 'input', message: '回车刷新二维码，等待扫码中...\n', name: 'enter' }).then(async () => {
-      if (!inSlider) {
-        clearInterval(interval)
-        console.log('  重新刷新二维码...\n\n')
-        await sleep(1000)
-        this.client.fetchQrcode()
-      }
-    })
+    inquirer
+      .prompt({
+        type: 'input',
+        message: '回车刷新二维码，等待扫码中...\n',
+        name: 'enter'
+      })
+      .then(async () => {
+        if (!inSlider) {
+          clearInterval(interval)
+          console.log('  重新刷新二维码...\n\n')
+          await sleep(1000)
+          this.client.fetchQrcode()
+        }
+      })
   }
-
 
   /**
    * 收到滑动验证码提示后，必须使用手机拉动，PC浏览器已经无效
-   * @param event 
+   * @param event
    */
   async slider(event) {
     inSlider = true
-    console.log(`\n\n------------------${logger.green('↓↓滑动验证链接↓↓')}----------------------\n`)
+    console.log(
+      `\n\n------------------${logger.green('↓↓滑动验证链接↓↓')}----------------------\n`
+    )
     console.log(logger.green(event.url))
     console.log('\n--------------------------------------------------------')
-    console.log(`提示：打开上面链接获取ticket，可使用${logger.green('【滑动验证app】')}获取`)
-    console.log(`链接存在${logger.green('有效期')}，请尽快操作，多次操作失败可能会被冻结`)
-    console.log('滑动验证app下载地址：https://wwp.lanzouy.com/i6w3J08um92h 密码:3kuu\n')
+    console.log(
+      `提示：打开上面链接获取ticket，可使用${logger.green('【滑动验证app】')}获取`
+    )
+    console.log(
+      `链接存在${logger.green('有效期')}，请尽快操作，多次操作失败可能会被冻结`
+    )
+    console.log(
+      '滑动验证app下载地址：https://wwp.lanzouy.com/i6w3J08um92h 密码:3kuu\n'
+    )
 
     const ret = await inquirer.prompt([
       {
         type: 'list',
         name: 'type',
         message: '触发滑动验证，需要获取ticket通过验证，请选择获取方式:',
-        choices: ['0.自动获取ticket', '1.手动获取ticket', '2.滑动验证app请求码获取']
+        choices: [
+          '0.自动获取ticket',
+          '1.手动获取ticket',
+          '2.滑动验证app请求码获取'
+        ]
       }
     ])
 
@@ -135,9 +151,9 @@ export default class loginEvent extends EventListener {
   }
 
   /**
-   * 
-   * @param url 
-   * @returns 
+   *
+   * @param url
+   * @returns
    */
   async getTicket(url) {
     let req = `https://hlhs-nb.cn/captcha/slider?key=${Bot.uin}`
@@ -150,7 +166,11 @@ export default class loginEvent extends EventListener {
     console.log(`${logger.green(req)}\n----完成后将自动进行登录----`)
 
     for (let i = 0; i < 40; i++) {
-      const res = await fetch(req, {
+      const res: {
+        data?: {
+          ticket: null
+        }
+      } = await fetch(req, {
         method: 'POST',
         body: JSON.stringify({ submit: Bot.uin })
       }).then(res => res.json())
@@ -160,9 +180,9 @@ export default class loginEvent extends EventListener {
   }
 
   /**
-   * 
-   * @param url 
-   * @returns 
+   *
+   * @param url
+   * @returns
    */
   async requestCode(url) {
     let txhelper = {
@@ -171,7 +191,9 @@ export default class loginEvent extends EventListener {
       code: null,
       url: url.replace('ssl.captcha.qq.com', 'txhelper.glitch.me')
     }
-    txhelper.req = await fetch(txhelper.url).catch((err) => console.log(err.toString()))
+    txhelper.req = await fetch(txhelper.url).catch(err =>
+      console.log(err.toString())
+    )
 
     if (!txhelper.req?.ok) return false
 
@@ -181,7 +203,9 @@ export default class loginEvent extends EventListener {
     txhelper.code = /\d+/g.exec(txhelper.req)
     if (!txhelper.code) return false
 
-    console.log(`\n请打开滑动验证app，输入请求码${logger.green('【' + txhelper.code + '】')}，然后完成滑动验证\n`)
+    console.log(
+      `\n请打开滑动验证app，输入请求码${logger.green('【' + txhelper.code + '】')}，然后完成滑动验证\n`
+    )
 
     await sleep(200)
 
@@ -193,7 +217,9 @@ export default class loginEvent extends EventListener {
     })
 
     //
-    txhelper.res = await fetch(txhelper.url).catch((err) => console.log(err.toString()))
+    txhelper.res = await fetch(txhelper.url).catch(err =>
+      console.log(err.toString())
+    )
 
     //
     if (!txhelper.res) return false
@@ -211,14 +237,15 @@ export default class loginEvent extends EventListener {
     return lodash.trim(txhelper.res)
   }
 
-
   /**
    * 设备锁
-   * @param event 
+   * @param event
    */
   async device(event) {
     global.inputTicket = false
-    console.log(`\n\n------------------${logger.green('↓↓设备锁验证↓↓')}----------------------\n`)
+    console.log(
+      `\n\n------------------${logger.green('↓↓设备锁验证↓↓')}----------------------\n`
+    )
     const ret = await inquirer.prompt([
       {
         type: 'list',
@@ -233,26 +260,37 @@ export default class loginEvent extends EventListener {
     if (ret.type == '1.网页扫码验证') {
       console.log('\n' + logger.green(event.url) + '\n')
       console.log('请打开上面链接，完成验证后按回车')
-      await inquirer.prompt({ type: 'input', message: '等待操作中...', name: 'enter' })
+      await inquirer.prompt({
+        type: 'input',
+        message: '等待操作中...',
+        name: 'enter'
+      })
       await this.client.login()
     } else {
       console.log('\n')
       this.client.sendSmsCode()
       await sleep(200)
       logger.info(`验证码已发送：${event.phone}\n`)
-      let res = await inquirer.prompt({ type: 'input', message: '请输入短信验证码:', name: 'sms' })
+      let res = await inquirer.prompt({
+        type: 'input',
+        message: '请输入短信验证码:',
+        name: 'sms'
+      })
       await this.client.submitSmsCode(res.sms)
     }
   }
 
   /**
    * 登录错误
-   * @param event 
+   * @param event
    */
   error(event) {
-    if (Number(event.code) === 1) logger.error('QQ密码错误，运行命令重新登录：node app login')
+    if (Number(event.code) === 1)
+      logger.error('QQ密码错误，运行命令重新登录：node app login')
     if (global.inputTicket && event.code == 237) {
-      logger.error(`${logger.red('ticket')}输入错误或者已失效，已停止运行，请重新登录验证`)
+      logger.error(
+        `${logger.red('ticket')}输入错误或者已失效，已停止运行，请重新登录验证`
+      )
     } else if (event?.message.includes('冻结')) {
       logger.error('账号已被冻结，已停止运行')
     } else {

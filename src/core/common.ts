@@ -99,7 +99,7 @@ export async function makeForwardMsg(
     /**
      *
      */
-    if (dec) {
+    if (dec && !Array.isArray(forwardMsg)) {
       /**
        * 处理描述
        */

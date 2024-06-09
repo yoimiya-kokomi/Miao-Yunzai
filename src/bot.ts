@@ -11,7 +11,7 @@ import cfg from './config/config.js'
 /**
  * 监听
  */
-import ListenerLoader from './lib/listener/loader.js'
+import ListenerLoader from './core/loader.js'
 /**
  * 扩展
  */
@@ -64,6 +64,6 @@ export class Yunzai extends Client {
     /** 全局变量 bot */
     global.Bot = bot
     /** 加载插件 */
-    return await (await import('./lib/plugins/loader.js')).default.load()
+    return await (await import('./core/plugins/loader.js')).default.load()
   }
 }

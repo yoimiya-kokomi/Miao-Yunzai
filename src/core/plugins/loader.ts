@@ -6,7 +6,7 @@ import { segment } from 'icqq'
 import chokidar from 'chokidar'
 import moment from 'moment'
 import path from 'node:path'
-import Runtime from '../../core/runtime.js'
+import Runtime from './runtime.js'
 import Handler from './handler.js'
 
 
@@ -462,7 +462,7 @@ class PluginsLoader {
       e.isGuild = true
     }
 
-    if (e.user_id && cfg.masterQQ.includes(Number(e.user_id) || String(e.user_id))) {
+    if (e.user_id && cfg.masterQQ.includes(String(e.user_id) || String(e.user_id))) {
       e.isMaster = true
     }
 
@@ -497,7 +497,7 @@ class PluginsLoader {
        * @param data.recallMsg 群聊是否撤回消息，0-120秒，0不撤回
        * @param data.at 是否at用户
        */
-      e.reply = async (msg = '', quote = false, data:any = {}) => {
+      e.reply = async (msg:any = '', quote = false, data:any = {}) => {
         if (!msg) return false
 
         /** 禁言中 */

@@ -5,14 +5,18 @@ import lodash from 'lodash'
  * 加载监听事件
  */
 class ListenerLoader {
+  client = null
+
   /**
    * 监听事件加载
    * @param client Bot示例
    */
-  async load (client) {
+  async load(client) {
     this.client = client
 
-    const files = fs.readdirSync('./lib/events').filter(file => file.endsWith('.js'))
+    const files = fs
+      .readdirSync('./lib/events')
+      .filter(file => file.endsWith('.js'))
 
     for (let File of files) {
       try {
@@ -25,13 +29,15 @@ class ListenerLoader {
         const on = listener.once ? 'once' : 'on'
 
         if (lodash.isArray(listener.event)) {
-          listener.event.forEach((type) => {
+          listener.event.forEach(type => {
             const e = listener[type] ? type : 'execute'
             this.client[on](listener.prefix + type, event => listener[e](event))
           })
         } else {
           const e = listener[listener.event] ? listener.event : 'execute'
-          this.client[on](listener.prefix + listener.event, event => listener[e](event))
+          this.client[on](listener.prefix + listener.event, event =>
+            listener[e](event)
+          )
         }
       } catch (e) {
         logger.mark(`监听事件错误：${File}`)
@@ -42,6 +48,6 @@ class ListenerLoader {
 }
 
 /**
- * 
+ *
  */
 export default new ListenerLoader()

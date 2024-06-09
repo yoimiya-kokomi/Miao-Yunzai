@@ -1,35 +1,35 @@
-import EventListener from '../listener/listener.js'
-import cfg from '../../config/config.js'
-import { relpyPrivate } from '../../core/common.js'
-import { BOT_NAME } from '../../config/system.js'
+import EventListener from './listener.js'
+import cfg from '../config/config.js'
+import { relpyPrivate } from '../core/common.js'
+import { BOT_NAME } from '../config/system.js'
 
 /**
  * 监听上线事件
  */
 export default class onlineEvent extends EventListener {
-
   /**
-   * 
+   *
    */
   constructor() {
-
     /**
-     * 
+     *
      */
     super({
       event: 'system.online',
       once: true,
-      prefix: undefined,  
+      prefix: undefined
     })
   }
 
   /**
    * 默认方法
-   * @param e 
+   * @param e
    */
   async execute(e) {
     logger.mark('----^_^----')
-    logger.mark(logger.green(`${BOT_NAME} 上线成功 版本v${cfg.package.version}`))
+    logger.mark(
+      logger.green(`${BOT_NAME} 上线成功 版本v${cfg.package.version}`)
+    )
     logger.mark(logger.green('https://github.com/yoimiya-kokomi/Miao-Yunzai'))
     // logger.mark('-----------')
     /** 加载插件 */
@@ -40,8 +40,8 @@ export default class onlineEvent extends EventListener {
   }
 
   /**
-   * 
-   * @returns 
+   *
+   * @returns
    */
   async loginMsg() {
     if (!cfg.bot.online_msg) return

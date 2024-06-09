@@ -99,11 +99,11 @@ class Cfg {
    * 主人qq
    */
   get masterQQ() {
-    const masterQQ = this.getConfig('other')?.masterQQ || []
-    if (Array.isArray(masterQQ)) {
-      return masterQQ.forEach(qq => { qq = String(qq) })
+    const qqs = this.getConfig('other')?.masterQQ || []
+    if (Array.isArray(qqs)) {
+      return qqs.map(qq => String(qq))
     } else {
-      return [String(masterQQ)]
+      return [String(qqs)]
     }
   }
 

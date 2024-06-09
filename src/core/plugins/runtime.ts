@@ -1,6 +1,6 @@
-import * as common from '../utils/common.js'
-import cfg from '../config/config.js'
-import Handler from '../lib/plugins/handler.js'
+import * as common from '../../utils/common.js'
+import cfg from '../../config/config.js'
+import Handler from './handler.js'
 
 import {
   gsCfg,
@@ -8,7 +8,7 @@ import {
   mysInfo as MysInfo,
   NoteUser,
   MysUser
-} from '../mys/index.js'
+} from '../../mys/index.js'
 
 /**
  * ********************

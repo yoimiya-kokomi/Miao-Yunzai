@@ -121,7 +121,11 @@ export default class MysApi {
     }
     if (type === 'getFp' && !data?.Getfp) return this._device_fp
 
-    let { url, headers, body } = this.getUrl(type, data)
+    const UrlData = this.getUrl(type, data)
+
+    if (!UrlData) return false
+
+    let { url, headers, body } = UrlData
 
     if (!url) return false
 
@@ -156,40 +160,37 @@ export default class MysApi {
     } else {
       param.method = 'get'
     }
-    let response = {
-      ok: null,
-      status: null,
-      statusText: null
-    }
+
     let start = Date.now()
+
     try {
-      response = await fetch(url, param)
+      const response = await fetch(url, param)
+      if (!response.ok) {
+        logger.error(
+          `[米游社接口][${type}][${this.uid}] ${response.status} ${response.statusText}`
+        )
+        return false
+      }
+      if (this.option.log) {
+        logger.mark(
+          `[米游社接口][${type}][${this.uid}] ${Date.now() - start}ms`
+        )
+      }
+      //
+      const data: {
+        api?: any
+      } = await response.json()
+      if (!data) {
+        logger.mark('mys接口没有返回')
+        return false
+      }
+      data.api = type
+      if (cached) this.cache(data, cacheKey)
+      return data
     } catch (error) {
       logger.error(error.toString())
       return false
     }
-
-    if (!response.ok) {
-      logger.error(
-        `[米游社接口][${type}][${this.uid}] ${response.status} ${response.statusText}`
-      )
-      return false
-    }
-    if (this.option.log) {
-      logger.mark(`[米游社接口][${type}][${this.uid}] ${Date.now() - start}ms`)
-    }
-    const res = await response.json()
-
-    if (!res) {
-      logger.mark('mys接口没有返回')
-      return false
-    }
-
-    res.api = type
-
-    if (cached) this.cache(res, cacheKey)
-
-    return res
   }
 
   /**
@@ -227,7 +228,8 @@ export default class MysApi {
       'x-rpc-client_type': client.client_type,
       'User-Agent': client.User_Agent,
       'Referer': client.Referer,
-      'DS': this.getDs(query, body)
+      'DS': this.getDs(query, body),
+      'Cookie': null
     }
   }
 

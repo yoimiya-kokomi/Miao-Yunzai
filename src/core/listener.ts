@@ -1,7 +1,7 @@
-import PluginsLoader from '../plugins/loader.js'
+import PluginsLoader from './plugins/loader.js'
 
 /**
- * 
+ *
  */
 export default class EventListener {
   prefix = ''

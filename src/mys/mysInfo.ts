@@ -70,7 +70,7 @@ export default class MysInfo {
      */
     this.mysButton = segment.button([
       { text: '米游社', link: 'https://miyoushe.com' }
-    ])
+    ] as any)
   }
 
   /**
@@ -153,7 +153,7 @@ export default class MysInfo {
         e.reply(
           [
             '尚未绑定uid',
-            segment.button([{ text: '绑定UID', input: '#绑定uid' }])
+            segment.button([{ text: '绑定UID', input: '#绑定uid' }] as any)
           ],
           false,
           { at }
@@ -180,7 +180,7 @@ export default class MysInfo {
       e.reply(
         [
           '请先#绑定uid',
-          segment.button([{ text: '绑定UID', input: '#绑定uid' }])
+          segment.button([{ text: '绑定UID', input: '#绑定uid' }] as any)
         ],
         false,
         { at: at || true }
@@ -207,7 +207,9 @@ export default class MysInfo {
         e.reply(
           [
             '尚未绑定Cookie',
-            segment.button([{ text: 'Cookie帮助', callback: '#Cookie帮助' }])
+            segment.button([
+              { text: 'Cookie帮助', callback: '#Cookie帮助' }
+            ] as any)
           ],
           false,
           { at: selfUser.qq }
@@ -303,7 +305,8 @@ export default class MysInfo {
     for (let ck of pubCks) {
       let pubUser = await MysUser.create(ck)
       if (pubUser) {
-        let ret = await pubUser.initCache({ qq: 'pub' })
+        // await pubUser.initCache({ qq: 'pub' })
+        let ret = await pubUser.initCache()
         if (ret) {
           pubCount++
         }
@@ -419,7 +422,7 @@ export default class MysInfo {
       this.e.reply(
         [
           '请先#绑定uid',
-          segment.button([{ text: '绑定UID', input: '#绑定uid' }])
+          segment.button([{ text: '绑定UID', input: '#绑定uid' }] as any)
         ],
         false,
         { at: true }
@@ -429,7 +432,7 @@ export default class MysInfo {
     if (!this.ckInfo.ck) {
       this.e.reply([
         '暂无可用CK，请绑定更多用户或设置公共ck..',
-        segment.button([{ text: 'Cookie帮助', callback: '#Cookie帮助' }])
+        segment.button([{ text: 'Cookie帮助', callback: '#Cookie帮助' }] as any)
       ])
     }
 
