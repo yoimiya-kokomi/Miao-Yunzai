@@ -18,7 +18,8 @@ export default class onlineEvent extends EventListener {
      */
     super({
       event: 'system.online',
-      once: true
+      once: true,
+      prefix: undefined,  
     })
   }
 

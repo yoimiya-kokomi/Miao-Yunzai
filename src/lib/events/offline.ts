@@ -11,19 +11,19 @@ export default class offlineEvent extends EventListener {
   /**
    * 
    */
-  constructor () {
-    
+  constructor() {
+
     /**
      * 
      */
-    super({ event: 'system.offline' })
+    super({ event: 'system.offline', prefix: undefined, once: undefined })
   }
 
   /**
    * 默认方法
    * @param e 
    */
-  async execute (e) {
+  async execute(e) {
     logger.mark('掉线了')
     let config = cfg.getConfig('notice')
     let title = `${BOT_NAME}(${Bot.nickname})已离线，请关注`
@@ -33,21 +33,21 @@ export default class offlineEvent extends EventListener {
     if (config.sct) {
       await fetch(`https://sctapi.ftqq.com/${config.sct}.send?title=${title}&content=${e.message}`)
     }
-    if (config.feishu_webhook){
+    if (config.feishu_webhook) {
       let offline_content = {
         msg_type: 'post',
         content: {
-            post: {
-                'zh-cn': {
-                    title: title,
-                    content: [
-                        [{
-                            tag: "text",
-                            text: e.message
-                        }]
-                    ]
-                }
+          post: {
+            'zh-cn': {
+              title: title,
+              content: [
+                [{
+                  tag: "text",
+                  text: e.message
+                }]
+              ]
             }
+          }
         }
       };
       await fetch(config.feishu_webhook, {

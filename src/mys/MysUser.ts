@@ -13,7 +13,7 @@ import MysUtil from './MysUtil.js'
 import lodash from 'lodash'
 import fetch from 'node-fetch'
 
-import { MysUserDB, UserDB } from '../db/index.js'
+import { MysUserDB } from '../db/index.js'
 
 import { Data } from '../local.js'
 
