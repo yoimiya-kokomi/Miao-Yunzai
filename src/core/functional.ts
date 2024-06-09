@@ -5,9 +5,9 @@ import { plugin } from './plugin.js'
  * 插件super默认值
  */
 export const PluginSuperDefine: {
-  name?: string,
-  dsc?: string,
-  event?: string,
+  name?: string
+  dsc?: string
+  event?: string
   priority?: number
 } = {
   name: 'group-app',
