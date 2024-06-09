@@ -10,9 +10,9 @@
 
 > 必要环境 Windows/Linux + Chrome/Chromium/Edge
 
-> 必要环境 18.18.2>Node.js>16.14.0 + Redis>5.0.0
+> 必要环境 Node.js>16.14.0 + Redis>5.0.0
 
-如果你的系统不支持18.18.2版本，最低能下载16.14.0版本，这是最新的puppeteer版本限制。
+推荐使用`18.18.2`版本，如果系统不支持，最低要求`16.14.0`,这是新版`puppeteer`的限制
 
 ## 开发者
 
@@ -49,29 +49,23 @@ pnpm install
 - 启动
 
 ```sh
-npm run ts:app
+npm run app
 ```
 
 - 重新登录
 
 ```sh
-npm run ts:app login
+npm run app login
 ```
 
-> 暂不支持PM2托管进程
-
-## Unknown file ".ts"
-
-node >= 20.0.0
-
-- 启动
+- 进程托管
 
 ```sh
-npm run latest:app
+npm run start
 ```
 
-- 重新登录
+- 杀死进程
 
 ```sh
-npm run latest:app login
+npm run kill
 ```
