@@ -8,9 +8,6 @@ const games = [
   { key: 'sr', name: '星穹铁道' }
 ]
 
-
-
-
 /**
  *
  */

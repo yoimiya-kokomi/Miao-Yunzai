@@ -25,7 +25,7 @@
  * @param T 任意字符串
  * @returns false
  */
-function getTest(T:string){
+function getTest(T: string) {
   return false
 }
 ```
@@ -34,17 +34,13 @@ function getTest(T:string){
 
 ```ts
 // 获得test值
-function getTest(T:string){
-}
+function getTest(T: string) {}
 // 设置
-function setTest(T:string){
-}
+function setTest(T: string) {}
 // 删除
-function delTest(T:string){
-}
+function delTest(T: string) {}
 // 获取某数据依据为id
-function getDataById(T:string){
-}
+function getDataById(T: string) {}
 
 // 系统常量
 const ENV_TEST = 'dev'
@@ -88,11 +84,9 @@ lib目录将在未来逐渐放弃，在版本发布后，开发者需要有意�
 
 ## 新版目录
 
-
 - 核心源码
 
 src/core
-
 
 - 配置管理
 

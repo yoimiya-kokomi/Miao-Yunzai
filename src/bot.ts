@@ -18,7 +18,7 @@ import ListenerLoader from './lib/listener/loader.js'
 import { Client } from 'icqq'
 
 /**
- * 
+ *
  */
 export class Yunzai extends Client {
   /**
