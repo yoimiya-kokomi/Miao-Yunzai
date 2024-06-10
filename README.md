@@ -1,14 +1,12 @@
 # Miao-Yunzai
 
-这里是Miao-Yunzai V4 测试仓库,
-
-你应该积极使用 V3 ，它仍然是长期支持并维护的版本。
+你应该积极使用 V3 ，它仍然是长期支持并维护的版本
 
 > 必要环境 Windows/Linux + Chrome/Chromium/Edge
 
 > 必要环境 Node.js>16.14.0 + Redis>5.0.0
 
-推荐使用`18.18.2`版本，如果系统不支持，最低要求`16.14.0`,这是新版`puppeteer`的限制
+> 推荐环境 Node.js=18.18.2 + Redis>6.0.0
 
 [！点击阅读Miao-Yunzai文档了解更多](https://ningmengchongshui.github.io/Miao-Yunzai-Docs/)
 
