@@ -92,6 +92,13 @@ tailwindcss将识别plugins目录下的tsx和jsx文件
 
 [查看 开发示例](./example/index.tsx)
 
+> 执行尝试生产html
+
+```sh
+npm run css
+npx ts-node ./example/index.ts
+```
+
 ## 生成开发文档
 
 ```sh
@@ -164,9 +171,9 @@ const Obj = {}
 // 不推荐new
 ```
 
-## 关于lib目录
+## 关于lib
 
-lib目录将在未来逐渐放弃，在版本发布后，开发者需要有意识的对此变化做出调整.
+将在未来逐渐放弃，在版本发布后，开发者需要有意识的对此变化做出调整.
 
 ```ts
 // 已废弃
@@ -181,15 +188,3 @@ lib目录将在未来逐渐放弃，在版本发布后，开发者需要有意�
 
 // 其他内容逐步优化。。。
 ```
-
-## 新版目录
-
-- 核心源码 src/core
-
-- 配置管理 src/config
-
-- 数据管理 src/db
-
-- 接口板块 src/mys
-
-- 工具类 src/utils

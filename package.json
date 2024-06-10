@@ -17,6 +17,7 @@
     "monit": "pm2 monit",
     "pm2": "pm2",
     "docs": "typedoc --options typedoc.json",
+    "css": "tailwindcss -i ./src/input.css -o ./public/output.css",
     "format": "prettier --write .",
     "prepare": "husky"
   },

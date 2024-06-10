@@ -147,6 +147,7 @@ yunzai
 /entrypoint.sh
 
 # mkdir
-dist
-docs
-public
+dist/
+docs/
+public/
+html/
