@@ -1,6 +1,6 @@
 import EventListener from '../listener.js'
 import cfg from '../../config/config.js'
-import { relpyPrivate } from '../common.js'
+import { relpyPrivate } from '../plugins/common.js'
 import { BOT_NAME } from '../../config/system.js'
 
 /**

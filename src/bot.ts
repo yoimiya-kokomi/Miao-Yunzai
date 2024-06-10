@@ -11,13 +11,13 @@ import cfg from './config/config.js'
 /**
  * 监听
  */
-import ListenerLoader from './core/loader.js'
+import ListenerLoader from './core/events.loader.js'
 /**
  * 扩展
  */
 import { Client } from 'icqq'
 
-import { plugin } from './core/plugin.js'
+import { plugin } from './core/plugins/index.js'
 
 /**
  * global
@@ -71,6 +71,6 @@ export class Yunzai extends Client {
     /** 全局变量 bot */
     global.Bot = bot
     /** 加载插件 */
-    return await (await import('./core/plugins/loader.js')).default.load()
+    return await (await import('./core/plugins.loader.js')).default.load()
   }
 }

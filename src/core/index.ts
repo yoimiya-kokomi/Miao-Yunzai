@@ -1,3 +1,3 @@
-export * from './plugin.js'
-export * from './functional.js'
-export * from './types.js'
+export * from './plugins/index.js'
+export * from './plugins/functional.js'
+export * from './plugins/types.js'

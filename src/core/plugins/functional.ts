@@ -1,5 +1,5 @@
 import { MessageCallBackType } from './types.js'
-import { plugin } from './plugin.js'
+import { plugin } from './index.js'
 
 /**
  * 插件super默认值

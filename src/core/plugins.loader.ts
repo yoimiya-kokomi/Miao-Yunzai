@@ -1,14 +1,13 @@
 import fs from 'node:fs/promises'
 import lodash from 'lodash'
-import cfg from '../../config/config.js'
+import cfg from '../config/config.js'
 import schedule from 'node-schedule'
 import { segment } from 'icqq'
 import chokidar from 'chokidar'
 import moment from 'moment'
-import path, { join } from 'node:path'
-import Runtime from './runtime.js'
-import Handler from './handler.js'
-
+import path from 'node:path'
+import Runtime from './plugins/runtime.js'
+import Handler from './plugins/handler.js'
 
 /**
  * 加载插件
@@ -19,7 +18,7 @@ class PluginsLoader {
   task = []
 
   //
-  dir = join(process.cwd(), 'plugins')
+  dir = 'plugins'
 
   /**
    * 命令冷却cd
@@ -35,9 +34,9 @@ class PluginsLoader {
   watcher = {}
 
   eventMap = {
-    message: ["post_type", "message_type", "sub_type"],
-    notice: ["post_type", "notice_type", "sub_type"],
-    request: ["post_type", "request_type", "sub_type"],
+    message: ['post_type', 'message_type', 'sub_type'],
+    notice: ['post_type', 'notice_type', 'sub_type'],
+    request: ['post_type', 'request_type', 'sub_type']
   }
 
   msgThrottle = {}
@@ -48,8 +47,8 @@ class PluginsLoader {
   srReg = /^#?(\*|星铁|星轨|穹轨|星穹|崩铁|星穹铁道|崩坏星穹铁道|铁道)+/
 
   /**
-   * 
-   * @returns 
+   *
+   * @returns
    */
   async getPlugins() {
     const files = await fs.readdir(this.dir, { withFileTypes: true })
@@ -58,13 +57,13 @@ class PluginsLoader {
       if (val.isFile()) continue
       const tmp = {
         name: val.name,
-        path: join(this.dir, val.name),
+        path: `../../${this.dir}/${val.name}`
       }
 
       try {
-        const dir = join(tmp.path, 'index.js')
+        const dir = `${this.dir}/${val.name}/index.js`
         if (await fs.stat(dir)) {
-          tmp.path = dir
+          tmp.path = `${tmp.path}/index.js`
           ret.push(tmp)
           continue
         }
@@ -72,20 +71,16 @@ class PluginsLoader {
         //
       }
 
-      //
-
-      const dir = join(this.dir, val.name)
-
-      const apps = await fs.readdir(dir, { withFileTypes: true })
-
-      //
+      const apps = await fs.readdir(`${this.dir}/${val.name}`, {
+        withFileTypes: true
+      })
       for (const app of apps) {
         if (!app.isFile()) continue
-        // .js .ts
-        if (!/^(.js|.ts)$/.test(app.name)) continue
+        // 解析js和ts
+        if (!/(.js|.ts|.jsx|.tsx)$/.test(app.name)) continue
         ret.push({
           name: `${tmp.name}/${app.name}`,
-          path: `${tmp.path}/${app.name}`,
+          path: `${tmp.path}/${app.name}`
         })
         /** 监听热更新 */
         this.watch(val.name, app.name)
@@ -113,9 +108,9 @@ class PluginsLoader {
     this.pluginCount = 0
     const packageErr = []
 
-    await Promise.allSettled(files.map(file =>
-      this.importPlugin(file, packageErr)
-    ))
+    await Promise.allSettled(
+      files.map(file => this.importPlugin(file, packageErr))
+    )
 
     this.packageTips(packageErr)
     this.createTask()
@@ -128,18 +123,16 @@ class PluginsLoader {
   }
 
   /**
-   * 
-   * @param file 
-   * @param packageErr 
+   *
+   * @param file
+   * @param packageErr
    */
   async importPlugin(file, packageErr?: any) {
     try {
-      let app = await import(`file://${file.path}`)
+      let app = await import(file.path)
       if (app.apps) app = { ...app.apps }
       const pluginArray = []
-      lodash.forEach(app, p =>
-        pluginArray.push(this.loadPlugin(file, p))
-      )
+      lodash.forEach(app, p => pluginArray.push(this.loadPlugin(file, p)))
       for (const i of await Promise.allSettled(pluginArray))
         if (i?.status && i.status != 'fulfilled') {
           logger.error(`加载插件错误：${logger.red(file.name)}`)
@@ -156,18 +149,18 @@ class PluginsLoader {
   }
 
   /**
-   * 
-   * @param file 
-   * @param p 
-   * @returns 
+   *
+   * @param file
+   * @param p
+   * @returns
    */
   async loadPlugin(file, p) {
     if (!p?.prototype) return
     this.pluginCount++
-    const plugin = new p
+    const plugin = new p()
     logger.debug(`加载插件 [${file.name}][${plugin.name}]`)
     /** 执行初始化，返回 return 则跳过加载 */
-    if (plugin.init && await plugin.init() == 'return') return
+    if (plugin.init && (await plugin.init()) == 'return') return
     /** 初始化定时任务 */
     this.collectTask(plugin.task)
     this.priority.push({
@@ -190,9 +183,9 @@ class PluginsLoader {
   }
 
   /**
-   * 
-   * @param packageErr 
-   * @returns 
+   *
+   * @param packageErr
+   * @returns
    */
   packageTips(packageErr) {
     if (!packageErr || packageErr.length <= 0) return
@@ -201,7 +194,9 @@ class PluginsLoader {
       let pack = v.error.stack.match(/'(.+?)'/g)[0].replace(/'/g, '')
       logger.mark(`${v.file.name} 缺少依赖：${logger.red(pack)}`)
       logger.mark(`新增插件后请执行安装命令：${logger.red('pnpm i')} 安装依赖`)
-      logger.mark(`如安装后仍未解决可联系插件作者将 ${logger.red(pack)} 依赖添加至插件的package.json dependencies中，或手工安装依赖`)
+      logger.mark(
+        `如安装后仍未解决可联系插件作者将 ${logger.red(pack)} 依赖添加至插件的package.json dependencies中，或手工安装依赖`
+      )
     })
     // logger.error('或者使用其他包管理工具安装依赖')
     logger.mark('---------------------')
@@ -236,8 +231,7 @@ class PluginsLoader {
       const p = new i.class(e)
       p.e = e
       /** 判断是否启用功能，过滤事件 */
-      if (this.checkDisable(p) && this.filtEvent(e, p))
-        priority.push(p)
+      if (this.checkDisable(p) && this.filtEvent(e, p)) priority.push(p)
     }
 
     for (const plugin of priority) {
@@ -245,7 +239,7 @@ class PluginsLoader {
       if (!plugin.getContext) continue
       const context = {
         ...plugin.getContext(),
-        ...plugin.getContext(false, true),
+        ...plugin.getContext(false, true)
       }
       if (!lodash.isEmpty(context)) {
         let ret
@@ -265,11 +259,11 @@ class PluginsLoader {
     // e.isSr = true，且命令标准化为 #星铁 开头
     Object.defineProperty(e, 'isSr', {
       get: () => e.game === 'sr',
-      set: (v) => e.game = v ? 'sr' : 'gs'
+      set: v => (e.game = v ? 'sr' : 'gs')
     })
     Object.defineProperty(e, 'isGs', {
       get: () => e.game === 'gs',
-      set: (v) => e.game = v ? 'gs' : 'sr'
+      set: v => (e.game = v ? 'gs' : 'sr')
     })
     if (this.srReg.test(e.msg)) {
       e.game = 'sr'
@@ -286,63 +280,65 @@ class PluginsLoader {
 
     a: for (const plugin of priority) {
       /** 正则匹配 */
-      if (plugin.rule) for (const v of plugin.rule) {
-        /** 判断事件 */
-        if (v.event && !this.filtEvent(e, v)) continue
-        if (!new RegExp(v.reg).test(e.msg)) continue
-        e.logFnc = `[${plugin.name}][${v.fnc}]`
+      if (plugin.rule)
+        for (const v of plugin.rule) {
+          /** 判断事件 */
+          if (v.event && !this.filtEvent(e, v)) continue
+          if (!new RegExp(v.reg).test(e.msg)) continue
+          e.logFnc = `[${plugin.name}][${v.fnc}]`
 
-        if (v.log !== false)
-          logger.info(`${e.logFnc}${e.logText} ${lodash.truncate(e.msg, { length: 100 })}`)
+          if (v.log !== false)
+            logger.info(
+              `${e.logFnc}${e.logText} ${lodash.truncate(e.msg, { length: 100 })}`
+            )
 
-        /** 判断权限 */
-        if (!this.filtPermission(e, v)) break a
+          /** 判断权限 */
+          if (!this.filtPermission(e, v)) break a
 
-        try {
-          const start = Date.now()
-          const res = plugin[v.fnc] && (await plugin[v.fnc](e))
-          if (res !== false) {
-            /** 设置冷却cd */
-            this.setLimit(e)
-            if (v.log !== false)
-              logger.mark(`${e.logFnc} ${lodash.truncate(e.msg, { length: 100 })} 处理完成 ${Date.now() - start}ms`)
+          try {
+            const start = Date.now()
+            const res = plugin[v.fnc] && (await plugin[v.fnc](e))
+            if (res !== false) {
+              /** 设置冷却cd */
+              this.setLimit(e)
+              if (v.log !== false)
+                logger.mark(
+                  `${e.logFnc} ${lodash.truncate(e.msg, { length: 100 })} 处理完成 ${Date.now() - start}ms`
+                )
+              break a
+            }
+          } catch (error) {
+            logger.error(`${e.logFnc}`)
+            logger.error(error.stack)
             break a
           }
-        } catch (error) {
-          logger.error(`${e.logFnc}`)
-          logger.error(error.stack)
-          break a
         }
-      }
     }
   }
 
   /**
    * 过滤事件
-   * @param e 
-   * @param v 
-   * @returns 
+   * @param e
+   * @param v
+   * @returns
    */
   filtEvent(e, v) {
     if (!v.event) return false
-    const event = v.event.split(".")
+    const event = v.event.split('.')
     const eventMap = this.eventMap[e.post_type] || []
     const newEvent = []
     for (const i in event) {
-      if (event[i] == "*")
-        newEvent.push(event[i])
-      else
-        newEvent.push(e[eventMap[i]])
+      if (event[i] == '*') newEvent.push(event[i])
+      else newEvent.push(e[eventMap[i]])
     }
-    return v.event == newEvent.join(".")
+    return v.event == newEvent.join('.')
   }
-
 
   /**
    * 判断权限
-   * @param e 
-   * @param v 
-   * @returns 
+   * @param e
+   * @param v
+   * @returns
    */
   filtPermission(e, v) {
     if (v.permission == 'all' || !v.permission) return true
@@ -400,7 +396,12 @@ class PluginsLoader {
       for (let val of e.message) {
         switch (val.type) {
           case 'text':
-            e.msg = (e.msg || '') + (val.text || '').replace(/^\s*[＃井#]+\s*/, '#').replace(/^\s*[\\*※＊]+\s*/, '*').trim()
+            e.msg =
+              (e.msg || '') +
+              (val.text || '')
+                .replace(/^\s*[＃井#]+\s*/, '#')
+                .replace(/^\s*[\\*※＊]+\s*/, '*')
+                .trim()
             break
           case 'image':
             if (!e.img) {
@@ -423,9 +424,13 @@ class PluginsLoader {
           case 'file':
             e.file = { name: val.name, fid: val.fid }
             break
-          case "xml":
-          case "json":
-            e.msg = (e.msg || "") + (typeof val.data == "string" ? val.data : JSON.stringify(val.data))
+          case 'xml':
+          case 'json':
+            e.msg =
+              (e.msg || '') +
+              (typeof val.data == 'string'
+                ? val.data
+                : JSON.stringify(val.data))
             break
         }
       }
@@ -475,7 +480,10 @@ class PluginsLoader {
       e.isGuild = true
     }
 
-    if (e.user_id && cfg.masterQQ.includes(String(e.user_id) || String(e.user_id))) {
+    if (
+      e.user_id &&
+      cfg.masterQQ.includes(String(e.user_id) || String(e.user_id))
+    ) {
       e.isMaster = true
     }
 
@@ -498,7 +506,7 @@ class PluginsLoader {
 
   /**
    * 处理回复,捕获发送失败异常
-   * @param e 
+   * @param e
    */
   reply(e) {
     if (e.reply) {
@@ -535,10 +543,8 @@ class PluginsLoader {
             text = lodash.truncate(text, { length: 10 })
           }
 
-          if (Array.isArray(msg))
-            msg.unshift(segment.at(at, text), "\n")
-          else
-            msg = [segment.at(at, text), "\n", msg]
+          if (Array.isArray(msg)) msg.unshift(segment.at(at, text), '\n')
+          else msg = [segment.at(at, text), '\n', msg]
         }
 
         let msgRes
@@ -551,15 +557,24 @@ class PluginsLoader {
           }
           logger.error(`发送消息错误:${msg}`)
           logger.error(err)
-          if (cfg.bot.sendmsg_error) Bot[Bot.uin].pickUser(cfg.masterQQ[0]).sendMsg(`发送消息错误:${msg}`)
+          if (cfg.bot.sendmsg_error)
+            Bot[Bot.uin]
+              .pickUser(cfg.masterQQ[0])
+              .sendMsg(`发送消息错误:${msg}`)
         }
 
         // 频道一下是不是频道
         if (!e.isGuild && recallMsg > 0 && msgRes?.message_id) {
           if (e.isGroup) {
-            setTimeout(() => e.group.recallMsg(msgRes.message_id), recallMsg * 1000)
+            setTimeout(
+              () => e.group.recallMsg(msgRes.message_id),
+              recallMsg * 1000
+            )
           } else if (e.friend) {
-            setTimeout(() => e.friend.recallMsg(msgRes.message_id), recallMsg * 1000)
+            setTimeout(
+              () => e.friend.recallMsg(msgRes.message_id),
+              recallMsg * 1000
+            )
           }
         }
 
@@ -571,24 +586,27 @@ class PluginsLoader {
         if (!msg) return false
         this.count(e, msg)
         if (e.group_id) {
-          return await e.group.sendMsg(msg).catch((err) => {
+          return await e.group.sendMsg(msg).catch(err => {
             logger.warn(err)
           })
         } else {
           let friend = e.bot.fl.get(e.user_id)
           if (!friend) return
-          return await e.bot.pickUser(e.user_id).sendMsg(msg).catch((err) => {
-            logger.warn(err)
-          })
+          return await e.bot
+            .pickUser(e.user_id)
+            .sendMsg(msg)
+            .catch(err => {
+              logger.warn(err)
+            })
         }
       }
     }
   }
 
   /**
-   * 
-   * @param e 
-   * @param msg 
+   *
+   * @param e
+   * @param msg
    */
   count(e, msg) {
     let screenshot = false
@@ -606,9 +624,9 @@ class PluginsLoader {
   }
 
   /**
-   * 
-   * @param type 
-   * @param groupId 
+   *
+   * @param type
+   * @param groupId
    */
   saveCount(type, groupId = '') {
     let key = 'Yz:count:'
@@ -629,7 +647,7 @@ class PluginsLoader {
   }
 
   /**
-   * 
+   *
    */
   delCount() {
     let key = 'Yz:count:'
@@ -639,7 +657,7 @@ class PluginsLoader {
 
   /**
    * 收集定时任务
-   * @param task 
+   * @param task
    */
   collectTask(task) {
     for (const i of Array.isArray(task) ? task : [task])
@@ -655,11 +673,9 @@ class PluginsLoader {
     for (const i of this.task)
       i.job = schedule.scheduleJob(i?.cron, async () => {
         try {
-          if (i.log == true)
-            logger.mark(`开始定时任务：${i.name}`)
+          if (i.log == true) logger.mark(`开始定时任务：${i.name}`)
           await i.fnc()
-          if (i.log == true)
-            logger.mark(`定时任务完成：${i.name}`)
+          if (i.log == true) logger.mark(`定时任务完成：${i.name}`)
         } catch (error) {
           logger.error(`定时任务报错：${i.name}`)
           logger.error(error)
@@ -669,8 +685,8 @@ class PluginsLoader {
 
   /**
    * 检查命令冷却cd
-   * @param e 
-   * @returns 
+   * @param e
+   * @returns
    */
   checkLimit(e) {
     /** 禁言中 */
@@ -702,8 +718,8 @@ class PluginsLoader {
 
   /**
    * 设置冷却cd
-   * @param e 
-   * @returns 
+   * @param e
+   * @returns
    */
   setLimit(e) {
     if (!e.message || e.isPrivate) return
@@ -726,8 +742,8 @@ class PluginsLoader {
 
   /**
    * 是否只关注主动at
-   * @param e 
-   * @returns 
+   * @param e
+   * @returns
    */
   onlyReplyAt(e) {
     if (!e.message || e.isPrivate) return true
@@ -751,8 +767,8 @@ class PluginsLoader {
 
   /**
    * 判断频道消息
-   * @param e 
-   * @returns 
+   * @param e
+   * @returns
    */
   checkGuildMsg(e) {
     return cfg.getOther().disableGuildMsg && e.detail_type == 'guild'
@@ -760,8 +776,8 @@ class PluginsLoader {
 
   /**
    * 判断黑白名单
-   * @param e 
-   * @returns 
+   * @param e
+   * @returns
    */
   checkBlack(e) {
     const other = cfg.getOther()
@@ -780,10 +796,16 @@ class PluginsLoader {
 
     if (e.group_id) {
       /** 黑名单群 */
-      if (other.blackGroup?.length && other.blackGroup.includes(Number(e.group_id) || String(e.group_id)))
+      if (
+        other.blackGroup?.length &&
+        other.blackGroup.includes(Number(e.group_id) || String(e.group_id))
+      )
         return false
       /** 白名单群 */
-      if (other.whiteGroup?.length && !other.whiteGroup.includes(Number(e.group_id) || String(e.group_id)))
+      if (
+        other.whiteGroup?.length &&
+        !other.whiteGroup.includes(Number(e.group_id) || String(e.group_id))
+      )
         return false
     }
 
@@ -792,8 +814,8 @@ class PluginsLoader {
 
   /**
    * 判断是否启用功能
-   * @param p 
-   * @returns 
+   * @param p
+   * @returns
    */
   checkDisable(p) {
     const groupCfg = cfg.getGroup(p.e.group_id)
@@ -805,17 +827,20 @@ class PluginsLoader {
   }
 
   /**
-   * 
-   * @param key 
+   *
+   * @param key
    */
   async changePlugin(key) {
     try {
       let app = await import(`../../${this.dir}/${key}?${moment().format('x')}`)
       if (app.apps) app = { ...app.apps }
       lodash.forEach(app, p => {
-        const plugin = new p
+        const plugin = new p()
         for (const i in this.priority)
-          if (this.priority[i].key == key && this.priority[i].name == plugin.name) {
+          if (
+            this.priority[i].key == key &&
+            this.priority[i].name == plugin.name
+          ) {
             this.priority[i].class = p
             this.priority[i].priority = plugin.priority
           }
@@ -829,9 +854,9 @@ class PluginsLoader {
 
   /**
    * 监听热更新
-   * @param dirName 
-   * @param appName 
-   * @returns 
+   * @param dirName
+   * @param appName
+   * @returns
    */
   watch(dirName, appName) {
     this.watchDir(dirName)
@@ -862,11 +887,10 @@ class PluginsLoader {
     this.watcher[`${dirName}.${appName}`] = watcher
   }
 
-
   /**
    * 监听文件夹更新
-   * @param dirName 
-   * @returns 
+   * @param dirName
+   * @returns
    */
   watchDir(dirName) {
     if (this.watcher[dirName]) return
@@ -881,7 +905,7 @@ class PluginsLoader {
         const key = `${dirName}/${appName}`
         await this.importPlugin({
           name: key,
-          path: `../../${this.dir}/${key}?${moment().format('X')}`,
+          path: `../../${this.dir}/${key}?${moment().format('X')}`
         })
         /** 优先级排序 */
         this.priority = lodash.orderBy(this.priority, ['priority'], ['asc'])
@@ -890,11 +914,9 @@ class PluginsLoader {
     }, 10000)
     this.watcher[dirName] = watcher
   }
-
-
 }
 
 /**
- * 
+ *
  */
 export default new PluginsLoader()
