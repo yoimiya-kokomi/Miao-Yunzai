@@ -4,14 +4,31 @@
     "module": "ESNext",
     "noImplicitAny": false,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "removeComments": true,
     "preserveConstEnums": true,
     "ignoreDeprecations": "5.0",
     "jsx": "react",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "allowJs": false,
     "suppressImplicitAnyIndexErrors": true,
     "typeRoots": ["node_modules/@types"],
+
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    /* Linting */
+    // "strict": true, 严格模式
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
     "paths": {
       "#miao": ["./plugins/miao-plugin/components/index.js"],
       "#miao.models": ["./plugins/miao-plugin/models/index.js"]
@@ -22,6 +39,5 @@
     "transpileOnly": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["plugins", "src"],
-  "exclude": ["node_modules"]
+  "include": ["src", "src-koa", "src-image"]
 }

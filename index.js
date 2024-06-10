@@ -1,6 +1,21 @@
-import { spawn } from 'child_process'
+import { exec, spawn } from 'child_process'
 const argv = [...process.argv].splice(2)
 const argvs = argv.join(' ').replace(/(\S+\.js|\S+\.ts)/g, '')
+
+/**
+ * **********
+ * 生成css文件
+ * **********
+ */
+exec(
+  'tailwindcss -i ./src/input.css -o ./public/output.css',
+  (error, stdout, stderr) => {
+    if (error) {
+      //
+    }
+  }
+)
+
 /**
  * ***************
  * 启动内部运行脚本

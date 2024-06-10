@@ -146,7 +146,7 @@ yunzai
 /pnpm-lock.yaml
 /entrypoint.sh
 
-
+# mkdir
 dist
-
 docs
+public
