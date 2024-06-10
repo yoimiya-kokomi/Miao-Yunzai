@@ -66,9 +66,41 @@ npm run start
 npm run kill
 ```
 
-# 开发者需知
+## 新特性
 
 支持TS、TSX环境，提供Miao-Yunzai完全的类型声明及其开发文档。
+
+- 消息回调
+
+[查看 开发示例](./example/apps.ts)
+
+- 图片组件
+
+你无需再写原生的html，React将为你进行组件和管理
+
+[学习 React.js](https://react.docschina.org/)
+
+你无需再写原生从css !
+
+tailwindcss将识别plugins目录下的tsx和jsx文件
+
+为你自动生成css , 存放在`./publick/output.css`
+
+[学习 tailwindcss](https://www.tailwindcss.cn/)
+
+> 插件间浏览器都将独立控制且互不影响
+
+[查看 开发示例](./example/index.tsx)
+
+## 生成开发文档
+
+```sh
+npm run docs
+```
+
+浏览器打开文件`docs/index.html`
+
+# 开发者需知
 
 - 提交
 
@@ -161,61 +193,3 @@ lib目录将在未来逐渐放弃，在版本发布后，开发者需要有意�
 - 接口板块 src/mys
 
 - 工具类 src/utils
-
-## 新开发示例
-
-- 消息回调
-
-```ts
-import { Messages } from './src/core/index.js'
-const message = new Messages({
-  priority: 9000
-})
-message.response(/^你好/, async e => {
-  e.reply('你好')
-})
-```
-
-- 图片组件
-
-你无需再写原生的html，React将为你进行组件和管理
-
-[学习 React.js](https://react.docschina.org/)
-
-你无需再写原生从css !
-
-tailwindcss将识别plugins目录下的tsx和jsx文件
-
-为你自动生成css , 存放在`./publick/output.css`
-
-[学习 tailwindcss](https://www.tailwindcss.cn/)
-
-> 创建组件
-
-```tsx
-import React from 'react'
-type PropsType = {
-  data: {
-    name: string
-  }
-}
-export default function App({ data }: PropsType) {
-  return <div className="text-red-500 p-2 text-xl">Hello, ${data.name}!</div>
-}
-```
-
-> 渲染数据
-
-```tsx
-import React from 'react'
-import Hello from './hello.tsx'
-const component = <Hello data={{ name: 'word' }} />
-```
-
-## 生成开发文档
-
-```sh
-npm run docs
-```
-
-浏览器打开文件`docs/index.html`
