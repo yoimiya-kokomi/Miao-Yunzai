@@ -13,19 +13,21 @@ export class Image {
    * @returns
    */
   getHelloComponent(uid: number, data: DataType) {
-    // 生成 html 地址
+    // 生成 html 地址 或 html字符串
     const Address = Com.create(<Hello data={data} />, {
       /**
        * 注意，不设置json_dir时，
        * html_head路径应该是../public/output.css
        * 且html_head默认值路径也是../public/output.css
-       * 因此，不增加其他head的话，html_head和join_dir都可以胜利
+       * 因此，不增加其他head的话，html_head和join_dir都可以省略
        * { html_name: `${uid}.html`}
        */
       html_head: `<link rel="stylesheet" href="../../public/output.css"></link>`,
       // html/hello/uid.html
       join_dir: 'hello',
       html_name: `${uid}.html`
+      // 不生成文件，返回的将是html字符串
+      // file_create:false
     })
     return Pup.render(Address)
   }

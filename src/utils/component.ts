@@ -8,6 +8,7 @@ type ComponentCreateOpsionType = {
   html_name?: string
   join_dir?: string
   html_body?: string
+  file_create?: boolean
 }
 
 /**
@@ -39,6 +40,12 @@ export class Component {
     const head = `<head>${options?.html_head ?? Link}</head>`
     const body = `<body> ${str} ${options?.html_body ?? ''}</body>`
     const html = `${DOCTYPE}<html>${head}${body}</html>`
+    if (
+      typeof options?.file_create == 'boolean' &&
+      options?.file_create == false
+    ) {
+      return html
+    }
     writeFileSync(address, html)
     return address
   }
