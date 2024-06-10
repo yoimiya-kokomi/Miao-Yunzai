@@ -10,6 +10,8 @@
 
 推荐使用`18.18.2`版本，如果系统不支持，最低要求`16.14.0`,这是新版`puppeteer`的限制
 
+[！点击阅读Miao-Yunzai文档了解更多](https://ningmengchongshui.github.io/Miao-Yunzai-Docs/)
+
 ## 使用教程
 
 - 安装源码
@@ -47,7 +49,7 @@ npm run app
 - 重新登录
 
 ```sh
-npm run app login
+npm run login
 ```
 
 - 进程托管
@@ -62,133 +64,12 @@ npm run start
 npm run kill
 ```
 
-## 新特性
+## 致谢
 
-支持TS、TSX环境，提供Miao-Yunzai完全的类型声明及其开发文档。
-
-- 消息回调
-
-[查看 开发示例](./example/apps.ts)
-
-- 图片组件
-
-你无需再写原生的html，React将为你进行组件和管理
-
-[学习 React.js](https://react.docschina.org/)
-
-你无需再写原生从css !
-
-tailwindcss将识别plugins目录下的tsx和jsx文件
-
-为你自动生成css , 存放在`./public/output.css`
-
-[学习 tailwindcss](https://www.tailwindcss.cn/)
-
-- 测试生成HTML
-
-```sh
-npm run css
-npx ts-node ./example/index.ts
-```
-
-> 插件间浏览器都将独立控制
-
-[查看 开发示例](./example/index.tsx)
-
-- 热开发图片
-
-```sh
-npm run image
-```
-
-[查看 配置示例](./example/routes.tsx)
-
-## 生成开发文档
-
-```sh
-npm run docs
-```
-
-浏览器打开文件`docs/index.html`
-
-## 关于lib
-
-将在未来逐渐放弃，在版本发布后，开发者需要有意识的对此变化做出调整.
-
-```ts
-// 已废弃
---lib / puppeteer
-// 无扩展性，计划废弃
---lib / renderer
-// 非机器人框架的核心处理代码
-// 消耗服务器内存，无扩展性，计划废弃
---lib / tools / web.js / test.js / log.js / ksr.js
-// 计划废弃
---renderers
-
-// 其他内容逐步优化。。。
-```
-
-# 开发者需知
-
-- 提交
-
-```ts
-/**
- * feature：新功能
- * update：更新某功能
- * fix：修补某功能
- * refactor：重构某个功能
- * optimize: 优化构建工具或运行时性能
- * style：仅样式改动
- * docs：仅文档新增/改动
- * chore：构建过程或辅助工具的变动
- */
-```
-
-- 注释风格
-
-```ts
-/**
- * 返回false
- * @param T 任意字符串
- * @returns false
- */
-function getTest(T: string) {
-  return false
-}
-```
-
-- 命名风格
-
-```ts
-// 获得test值
-function getTest(T: string) {}
-// 设置
-function setTest(T: string) {}
-// 删除
-function delTest(T: string) {}
-// 获取某数据依据为id
-function getDataById(T: string) {}
-
-// 系统常量
-const ENV_TEST = 'dev'
-
-// 局域常量
-const MyName = 'yunzai'
-
-// 可修改变量
-let values = ''
-
-// 禁止使用 var values = ''
-
-// 声明数组
-const Arr = []
-
-// 不推荐  new
-
-// 声明对象
-const Obj = {}
-
-// 不推荐new
-```
+|                           Nickname                            | Contribution         |
+| :-----------------------------------------------------------: | -------------------- |
+|      [Yunzai v3.0](https://gitee.com/le-niao/Yunzai-Bot)      | 乐神的Yunzai-Bot V3  |
+| [GardenHamster](https://github.com/GardenHamster/GenshinPray) | 模拟抽卡背景素材来源 |
+|    [西风驿站](https://bbs.mihoyo.com/ys/collection/839181)    | 角色攻略图来源       |
+|  [米游社友人A](https://bbs.mihoyo.com/ys/collection/428421)   | 角色突破素材图来源   |
+|            [icqq](https://github.com/icqqjs/icqq)             | ICQQ                 |

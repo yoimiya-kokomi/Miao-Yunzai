@@ -9,7 +9,7 @@ const argvs = argv.join(' ').replace(/(\S+\.js|\S+\.ts)/g, '')
  */
 exec(
   'tailwindcss -i ./src/input.css -o ./public/output.css',
-  (error, stdout, stderr) => {
+  (error, _, __) => {
     if (error) {
       //
     }

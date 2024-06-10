@@ -17,7 +17,6 @@
     "monit": "pm2 monit",
     "pm2": "pm2",
     "image": "nodemon --config image/nodemon.json",
-    "docs": "typedoc --options typedoc.json",
     "css": "tailwindcss -i ./src/input.css -o ./public/output.css",
     "format": "prettier --write .",
     "prepare": "husky"
@@ -77,7 +76,6 @@
     "rollup": "^4.16.4",
     "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.1",
-    "typedoc": "^0.25.4",
     "typescript": "^5.0.4"
   },
   "imports": {
