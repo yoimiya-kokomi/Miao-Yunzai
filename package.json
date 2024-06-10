@@ -1,6 +1,6 @@
 {
   "name": "miao-yunzai",
-  "version": "4.0.0",
+  "version": "4.0.0-rc.0",
   "author": "Yoimiya-Kokomi, Le-niao",
   "description": "QQ Group Bot",
   "main": "./index.js",
@@ -79,6 +79,7 @@
     "typescript": "^5.0.4"
   },
   "imports": {
+    "#miao/*": "./src/*",
     "#miao": "./plugins/miao-plugin/components/index.js",
     "#miao.models": "./plugins/miao-plugin/models/index.js"
   }

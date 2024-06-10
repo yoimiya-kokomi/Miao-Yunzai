@@ -29,7 +29,13 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
 
+    "forceConsistentCasingInFileNames": true,
+
+    //
     "paths": {
+      // 内部核心模块导出
+      "#miao/*": ["./src/*"],
+      // 外部模块  待移除
       "#miao": ["./plugins/miao-plugin/components/index.js"],
       "#miao.models": ["./plugins/miao-plugin/models/index.js"]
     }

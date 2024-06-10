@@ -1,4 +1,4 @@
-import { type ComponentCreateOpsionType } from '../src/utils/component.js'
+import { type ComponentCreateOpsionType } from '#miao/utils'
 export type RouterType = {
   url: string
   element: React.ReactNode

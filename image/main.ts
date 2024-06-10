@@ -1,7 +1,7 @@
 import Koa from 'koa'
 import KoaStatic from 'koa-static'
 import Router from 'koa-router'
-import { Component } from '../src/utils/index.js'
+import { Component } from '#miao/utils'
 import { readdirSync } from 'fs'
 import { join } from 'path'
 import './tailwindcss.js'
