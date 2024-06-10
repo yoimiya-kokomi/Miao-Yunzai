@@ -31,12 +31,13 @@ export class Component {
    */
   create(element: React.ReactNode, options: ComponentCreateOpsionType) {
     const str = renderToString(element)
-    const dir = join(this.#dir, options.join_dir)
+    const dir = join(this.#dir, options?.join_dir ?? '')
     mkdirSync(dir, { recursive: true })
-    const address = join(dir, options.html_name)
+    const address = join(dir, options?.html_name ?? 'hello.html')
     const DOCTYPE = '<!DOCTYPE html>'
-    const head = `<head>${options.html_head}</head>`
-    const body = `<body>${str}${options.html_body}</body>`
+    const Link = `<link rel="stylesheet" href="../public/output.css"></link>`
+    const head = `<head>${options?.html_head ?? Link}</head>`
+    const body = `<body> ${str} ${options?.html_body ?? ''}</body>`
     const html = `${DOCTYPE}<html>${head}${body}</html>`
     writeFileSync(address, html)
     return address
