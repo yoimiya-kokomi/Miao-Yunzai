@@ -1,0 +1,8 @@
+{
+  "watch": ["plugins"],
+  "ext": "tsx,jsx",
+  "exec": "node --no-warnings=ExperimentalWarning --loader ts-node/esm image/main.ts",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

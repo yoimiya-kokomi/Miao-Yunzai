@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
-type ComponentCreateOpsionType = {
+export type ComponentCreateOpsionType = {
   html_head?: string
   html_name?: string
   join_dir?: string

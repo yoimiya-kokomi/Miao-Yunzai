@@ -92,12 +92,20 @@ tailwindcss将识别plugins目录下的tsx和jsx文件
 
 [查看 开发示例](./example/index.tsx)
 
-> 执行尝试生产html
+> 执行尝试生产 html
 
 ```sh
 npm run css
 npx ts-node ./example/index.ts
 ```
+
+> 热开发图片启动
+
+```sh
+npm run image
+```
+
+[查看 配置示例](./example/routes.tsx)
 
 ## 生成开发文档
 

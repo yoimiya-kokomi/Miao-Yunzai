@@ -39,5 +39,5 @@
     "transpileOnly": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["src", "src-koa", "src-image"]
+  "include": ["src", "image", "example"]
 }
