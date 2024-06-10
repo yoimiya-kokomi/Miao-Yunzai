@@ -4,10 +4,6 @@
 
 你应该积极使用 V3 ，它仍然是长期支持并维护的版本。
 
-哪怕 V4 后续发布，V3仍然接受长期支持并维护。
-
-在功能点未完成测试之前，仓库不会发布任何有关新功能信息。
-
 > 必要环境 Windows/Linux + Chrome/Chromium/Edge
 
 > 必要环境 Node.js>16.14.0 + Redis>5.0.0
@@ -84,22 +80,22 @@ npm run kill
 
 tailwindcss将识别plugins目录下的tsx和jsx文件
 
-为你自动生成css , 存放在`./publick/output.css`
+为你自动生成css , 存放在`./public/output.css`
 
 [学习 tailwindcss](https://www.tailwindcss.cn/)
 
-> 插件间浏览器都将独立控制且互不影响
-
-[查看 开发示例](./example/index.tsx)
-
-> 执行尝试生产 html
+- 测试生成HTML
 
 ```sh
 npm run css
 npx ts-node ./example/index.ts
 ```
 
-> 热开发图片启动
+> 插件间浏览器都将独立控制
+
+[查看 开发示例](./example/index.tsx)
+
+- 热开发图片
 
 ```sh
 npm run image
@@ -114,6 +110,24 @@ npm run docs
 ```
 
 浏览器打开文件`docs/index.html`
+
+## 关于lib
+
+将在未来逐渐放弃，在版本发布后，开发者需要有意识的对此变化做出调整.
+
+```ts
+// 已废弃
+--lib / puppeteer
+// 无扩展性，计划废弃
+--lib / renderer
+// 非机器人框架的核心处理代码
+// 消耗服务器内存，无扩展性，计划废弃
+--lib / tools / web.js / test.js / log.js / ksr.js
+// 计划废弃
+--renderers
+
+// 其他内容逐步优化。。。
+```
 
 # 开发者需知
 
@@ -177,22 +191,4 @@ const Arr = []
 const Obj = {}
 
 // 不推荐new
-```
-
-## 关于lib
-
-将在未来逐渐放弃，在版本发布后，开发者需要有意识的对此变化做出调整.
-
-```ts
-// 已废弃
---lib / puppeteer
-// 无扩展性，计划废弃
---lib / renderer
-// 非机器人框架的核心处理代码
-// 消耗服务器内存，无扩展性，计划废弃
---lib / tools / web.js / test.js / log.js / ksr.js
-// 计划废弃
---renderers
-
-// 其他内容逐步优化。。。
 ```
