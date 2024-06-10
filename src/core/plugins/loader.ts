@@ -17,9 +17,9 @@ class PluginsLoader {
   priority = []
   handler = {}
   task = []
-  
+
   //
-  dir = join(process.cwd(),'plugins')
+  dir = join(process.cwd(), 'plugins')
 
   /**
    * 命令冷却cd
@@ -58,11 +58,11 @@ class PluginsLoader {
       if (val.isFile()) continue
       const tmp = {
         name: val.name,
-        path: join(this.dir,val.name),
+        path: join(this.dir, val.name),
       }
 
       try {
-        const dir = join(tmp.path,'index.js')
+        const dir = join(tmp.path, 'index.js')
         if (await fs.stat(dir)) {
           tmp.path = dir
           ret.push(tmp)
@@ -70,11 +70,11 @@ class PluginsLoader {
         }
       } catch (err) {
         //
-       }
+      }
 
-       //
+      //
 
-      const dir =  join(this.dir,val.name)
+      const dir = join(this.dir, val.name)
 
       const apps = await fs.readdir(dir, { withFileTypes: true })
 
@@ -132,7 +132,7 @@ class PluginsLoader {
    * @param file 
    * @param packageErr 
    */
-  async importPlugin(file, packageErr?:any) {
+  async importPlugin(file, packageErr?: any) {
     try {
       let app = await import(`file://${file.path}`)
       if (app.apps) app = { ...app.apps }
@@ -337,7 +337,7 @@ class PluginsLoader {
     return v.event == newEvent.join(".")
   }
 
-  
+
   /**
    * 判断权限
    * @param e 
@@ -510,7 +510,7 @@ class PluginsLoader {
        * @param data.recallMsg 群聊是否撤回消息，0-120秒，0不撤回
        * @param data.at 是否at用户
        */
-      e.reply = async (msg:any = '', quote = false, data:any = {}) => {
+      e.reply = async (msg: any = '', quote = false, data: any = {}) => {
         if (!msg) return false
 
         /** 禁言中 */
@@ -567,7 +567,7 @@ class PluginsLoader {
         return msgRes
       }
     } else {
-      e.reply = async (msg = '', quote = false, data = {}) => {
+      e.reply = async (msg = '', _ = false, __ = {}) => {
         if (!msg) return false
         this.count(e, msg)
         if (e.group_id) {
@@ -643,7 +643,7 @@ class PluginsLoader {
    */
   collectTask(task) {
     for (const i of Array.isArray(task) ? task : [task])
-      if (i?.cron && i?.name){
+      if (i?.cron && i?.name) {
         this.task.push(i)
       }
   }
@@ -842,13 +842,13 @@ class PluginsLoader {
     const key = `${dirName}/${appName}`
 
     /** 监听修改 */
-    watcher.on('change', path => {
+    watcher.on('change', () => {
       logger.mark(`[修改插件][${dirName}][${appName}]`)
       this.changePlugin(key)
     })
 
     /** 监听删除 */
-    watcher.on('unlink', async path => {
+    watcher.on('unlink', () => {
       logger.mark(`[卸载插件][${dirName}][${appName}]`)
       /** 停止更新监听 */
       this.watcher[`${dirName}.${appName}`].removeAllListeners('change')

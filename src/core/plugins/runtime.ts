@@ -128,7 +128,7 @@ export default class Runtime {
     if (user) {
       // 对象代理
       e.user = new Proxy(user, {
-        get(self, key, receiver) {
+        get(self, key) {
           let game = e.game
           let fnMap = {
             uid: 'getUid',
@@ -232,7 +232,7 @@ export default class Runtime {
   /**
    * @deprecated 不符合架构设计，已废弃
    */
-  async render(plugin, path, data = {}, cfg = {}) {
+  async render(_, __, ___ = {}, ____ = {}) {
     return false
   }
 }

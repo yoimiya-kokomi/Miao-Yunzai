@@ -6,7 +6,7 @@ import { exec } from 'child_process'
  */
 exec(
   'tailwindcss -i ./src/input.css -o ./public/output.css --watch',
-  (error, stdout, stderr) => {
+  (error, _, __) => {
     if (error) {
       //
     }

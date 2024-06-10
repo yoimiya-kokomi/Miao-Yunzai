@@ -34,5 +34,5 @@ export class Image {
 }
 export const imgae = new Image()
 // render 是异步的，因此  此处也是异步的
-const img = await imgae.getHelloComponent(1715713638, { name: 'word' })
+await imgae.getHelloComponent(1715713638, { name: 'word' })
 // e.reply(segment.buffer(img))

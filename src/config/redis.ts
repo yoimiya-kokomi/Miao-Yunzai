@@ -1,8 +1,6 @@
 import cfg from "./config.js"
 import { execAsync, sleep } from "../utils/common.js"
 import { createClient } from "redis"
-import { exec } from "node:child_process"
-
 
 /**
  * 初始化全局redis客户端
@@ -25,7 +23,9 @@ export default async function redisInit() {
 
     const cmd = "redis-server --save 900 1 --save 300 10 --daemonize yes" + await aarch64()
     logger.info("正在启动 Redis...")
-    await execSync(cmd)
+
+    await execAsync(cmd)
+
     await sleep(1000)
 
     try {
@@ -57,34 +57,21 @@ export default async function redisInit() {
  * @returns 
  */
 export async function aarch64() {
-  if (process.platform == "win32"){
+  if (process.platform == "win32") {
     return ""
   }
-  return await execAsync("uname -m").then( async arch=>{
+  return await execAsync("uname -m").then(async arch => {
     if (arch.stdout && arch.stdout.includes("aarch64")) {
       /** 判断redis版本 */
       let v = await execAsync("redis-server -v")
       if (v.stdout) {
         const data = v.stdout.match(/v=(\d)./)
         /** 忽略arm警告 */
-        if (data && Number(data[1]) >= 6){
+        if (data && Number(data[1]) >= 6) {
           return " --ignore-warnings ARM64-COW-BUG"
         }
       }
     }
     return ''
-  })
-}
-
-/**
- * 
- * @param cmd 
- * @returns 
- */
-export function execSync(cmd) {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (error, stdout, stderr) => {
-      resolve({ error, stdout, stderr })
-    })
   })
 }

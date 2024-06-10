@@ -63,7 +63,7 @@ const Handler = {
    * @param e 
    * @param args 
    */
-  async callAll (key, e, args) {
+  async callAll (_, __, ___) {
     // 暂时屏蔽调用
     // return Handler.call(key, e, args, true)
   },

@@ -108,7 +108,7 @@ class GsCfg {
     if (this.watcher[type][key]) return
 
     const watcher = chokidar.watch(file)
-    watcher.on('change', path => {
+    watcher.on('change', () => {
       delete this[type][key]
       logger.mark(`[修改配置文件][${type}][${app}][${name}]`)
       if (this[`change_${app}${name}`]) {
@@ -323,7 +323,7 @@ class GsCfg {
    * @param isSr
    * @returns
    */
-  _getRole(msg, filterMsg = '', isSr = false) {
+  _getRole(msg, filterMsg = '', _ = false) {
     let alias = msg.replace(/#|老婆|老公|([1-9]|18)[0-9]{8}/g, '').trim()
     if (filterMsg) {
       alias = alias.replace(new RegExp(filterMsg, 'g'), '').trim()
@@ -349,7 +349,7 @@ class GsCfg {
    * @deprecated 已废弃
    * @returns
    */
-  getWeaponDataByWeaponHash(hash) {
+  getWeaponDataByWeaponHash(_) {
     console.log('gsCfg.getWeaponDataByWeaponHash() 已废弃')
     return {}
   }
@@ -370,7 +370,7 @@ class GsCfg {
    * @param userId
    * @returns
    */
-  getBingCkSingle(userId) {
+  getBingCkSingle(_) {
     console.log('gsCfg.getBingCkSingle() 已废弃')
     return {}
   }
@@ -381,7 +381,7 @@ class GsCfg {
    * @param userId
    * @param data
    */
-  saveBingCk(userId, data) {
+  saveBingCk(_, __) {
     console.log('gsCfg.saveBingCk() 已废弃')
   }
 
@@ -391,7 +391,7 @@ class GsCfg {
    * @param roleName
    * @returns
    */
-  getElementByRoleName(roleName) {
+  getElementByRoleName(_) {
     console.log('gsCfg.getElementByRoleName() 已废弃')
     return ''
   }
@@ -403,7 +403,7 @@ class GsCfg {
    * @param roleName
    * @returns
    */
-  getSkillDataByskillId(skillId, roleName) {
+  getSkillDataByskillId(_, __) {
     console.log('gsCfg.getSkillDataByskillId() 已废弃')
     return {}
   }
@@ -414,7 +414,7 @@ class GsCfg {
    * @param propId
    * @returns
    */
-  fightPropIdToName(propId) {
+  fightPropIdToName(_) {
     console.log('gsCfg.fightPropIdToName() 已废弃')
     return ''
   }
@@ -425,7 +425,7 @@ class GsCfg {
    * @param talentId
    * @returns
    */
-  getRoleTalentByTalentId(talentId) {
+  getRoleTalentByTalentId(_) {
     console.log('gsCfg.getRoleTalentByTalentId 已废弃')
     return {}
   }

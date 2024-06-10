@@ -33,13 +33,13 @@ export default class loginEvent extends EventListener {
    *
    * @param event
    */
-  async execute(event) {}
+  async execute(_) {}
 
   /**
    * 扫码登录现在仅能在同一ip下进行
    * @param event
    */
-  async qrcode(event) {
+  async qrcode(_) {
     logger.mark(
       `请使用登录当前QQ的手机${logger.green('扫码')}完成登录，如果显示二维码过期，可以按${logger.green('回车键（Enter）')}刷新，重新输入密码请执行命令：${logger.green('node app login')}`
     )

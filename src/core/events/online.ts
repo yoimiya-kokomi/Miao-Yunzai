@@ -25,7 +25,7 @@ export default class onlineEvent extends EventListener {
    * 默认方法
    * @param e
    */
-  async execute(e) {
+  async execute(_) {
     logger.mark('----^_^----')
     logger.mark(
       logger.green(`${BOT_NAME} 上线成功 版本v${cfg.package.version}`)
