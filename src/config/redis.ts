@@ -56,7 +56,7 @@ export default async function redisInit() {
  * 
  * @returns 
  */
-export async function aarch64() {
+async function aarch64() {
   if (process.platform == "win32") {
     return ""
   }

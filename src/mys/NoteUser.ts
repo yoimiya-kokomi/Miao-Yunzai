@@ -3,7 +3,7 @@ import lodash from 'lodash'
 import MysUser from './MysUser.js'
 import MysUtil from './MysUtil.js'
 import { UserDB } from '../db/index.js'
-import { Data } from '../local.js'
+import { Data } from '../miao.js'
 /**
  * *******************
  * Bot实际User用户类

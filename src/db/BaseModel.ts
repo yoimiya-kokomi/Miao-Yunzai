@@ -1,5 +1,5 @@
 import { Sequelize, DataTypes, Model } from 'sequelize'
-import { Data } from '../local.js'
+import { Data } from '../miao.js'
 import { join } from 'path'
 
 /**

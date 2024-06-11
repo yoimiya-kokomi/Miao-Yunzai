@@ -6,12 +6,6 @@
 import './config/init.js'
 /**
  * **********
- * 全局变量配置
- * *********
- */
-import './global.js'
-/**
- * **********
  * 配置读取工具
  * **********
  */
@@ -25,7 +19,13 @@ import ListenerLoader from './core/events.loader.js'
 /**
  * 扩展
  */
-import { Client } from 'icqq'
+import { Client, segment } from 'icqq'
+import { plugin } from './core/plugins/index.js'
+/**
+ * global
+ */
+global.plugin = plugin
+global.segment = segment
 /**
  *
  */

@@ -1,4 +1,4 @@
-import { Data } from '../local.js'
+import { Data } from '../miao.js'
 
 /**
  *

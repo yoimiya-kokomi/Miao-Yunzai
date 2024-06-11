@@ -15,7 +15,7 @@ import fetch from 'node-fetch'
 
 import { MysUserDB } from '../db/index.js'
 
-import { Data } from '../local.js'
+import { Data } from '../miao.js'
 
 const tables = {
   // ltuid-uid 查询表

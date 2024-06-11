@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import lodash from 'lodash'
 import MysInfo from './mysInfo.js'
 import NoteUser from './NoteUser.js'
-import { Character, Weapon } from '../local.js'
+import { Character, Weapon } from '../miao.js'
 
 /**
  * ***********

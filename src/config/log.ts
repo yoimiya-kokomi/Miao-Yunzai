@@ -101,7 +101,7 @@ export default function setLog() {
   }
  
   /** 全局变量 logger */
-  global.logger = createLog()
+  global.logger = createLog() as any
 
   logger.chalk = chalk
   logger.red = chalk.red
