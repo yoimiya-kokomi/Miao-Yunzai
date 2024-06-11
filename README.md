@@ -6,7 +6,7 @@
 
 > 必要环境 Node.js>16.14.0 + Redis>5.0.0
 
-> 推荐环境 Node.js=18.18.2 + Redis>6.0.0
+> 推荐环境 Node.js@18.18.2 + Rediss@6.0.0
 
 [！点击阅读Miao-Yunzai文档了解更多](https://ningmengchongshui.github.io/Miao-Yunzai-Docs/)
 
@@ -27,7 +27,6 @@ cd Miao-Yunzai
 - 安装插件(计划移除中...)
 
 ```sh
-
 git clone --depth=1 https://github.com/yoimiya-kokomi/miao-plugin.git ./plugins/miao-plugin/
 ```
 
@@ -50,7 +49,7 @@ npm run app
 npm run login
 ```
 
-- 进程托管
+- 托管
 
 ```sh
 npm run start

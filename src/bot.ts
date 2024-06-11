@@ -5,25 +5,27 @@
  */
 import './config/init.js'
 /**
+ * **********
+ * 全局变量配置
+ * *********
+ */
+import './global.js'
+/**
+ * **********
  * 配置读取工具
+ * **********
  */
 import cfg from './config/config.js'
 /**
+ * **********
  * 监听
+ * **********
  */
 import ListenerLoader from './core/events.loader.js'
 /**
  * 扩展
  */
 import { Client } from 'icqq'
-
-import { plugin } from './core/plugins/index.js'
-
-/**
- * global
- */
-global.plugin = plugin
-
 /**
  *
  */
