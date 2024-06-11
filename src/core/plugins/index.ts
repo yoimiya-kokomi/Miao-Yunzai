@@ -1,5 +1,4 @@
 
-import { segment } from 'icqq'
 import { Common } from '../../miao.js'
 import { EventType } from './types.js'
 
@@ -51,9 +50,7 @@ export class plugin {
   /**
    * 
    */
-  e: EventType & {
-    segment: typeof segment
-  }
+  e: EventType
 
   /**
    * @param name 插件名称
@@ -128,9 +125,6 @@ export class plugin {
       this.namespace = namespace || ''
     }
 
-    // 携带segment
-    this.e.segment = segment
-
   }
 
   /**
@@ -138,9 +132,8 @@ export class plugin {
    * @param quote 是否引用回复
    * @param data.recallMsg 群聊是否撤回消息，0-120秒，0不撤回
    * @param data.at 是否at用户
-   * @deprecated 已废弃
    */
-  reply(msg = '', quote = false, data = {}) {
+  reply(msg: any[] | string = '', quote = false, data = {}) {
     if (!this.e?.reply || !msg) return false
     return this.e.reply(msg, quote, data)
   }

@@ -35,7 +35,7 @@
     "paths": {
       // 内部核心模块导出
       "#image/*": ["./image/*"],
-      "#miao/*": ["./src/*"],
+      "#yunzai/*": ["./src/*"],
       // 外部模块  待移除
       "#miao": ["./plugins/miao-plugin/components/index.js"],
       "#miao.models": ["./plugins/miao-plugin/models/index.js"]
@@ -46,5 +46,5 @@
     "transpileOnly": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["src", "image", "plugins"]
+  "include": ["src", "image", "plugins", "plugins/system-plugin"]
 }
