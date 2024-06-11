@@ -1,9 +1,6 @@
-import MysApi from './mysApi.js'
-
-// tudo
-import GsCfg from './gsCfg.js'
-
 import lodash from 'lodash'
+import MysApi from './mysApi.js'
+import GsCfg from './gsCfg.js'
 import NoteUser from './NoteUser.js'
 import MysUser from './MysUser.js'
 import DailyCache from './DailyCache.js'
@@ -15,14 +12,23 @@ import DailyCache from './DailyCache.js'
  */
 export default class MysInfo {
   static tips = '请先#绑定Cookie\n发送【Cookie帮助】查看配置教程'
+  /**
+   * 当前查询原神uid
+   */
   uid = null
   e = null
   userId = null
+  /**
+   * 当前ck信息
+   */
   ckInfo = null
   auth = null
   gtest = null
   mysButton = null
-
+  /**
+   * ck对应MysUser对象
+   */
+  ckUser = null
   /**
    *
    * @param e
@@ -32,9 +38,7 @@ export default class MysInfo {
       this.e = e
       this.userId = String(e.user_id)
     }
-    /** 当前查询原神uid */
     this.uid = ''
-    /** 当前ck信息 */
     this.ckInfo = {
       ck: '',
       uid: '',
@@ -42,7 +46,6 @@ export default class MysInfo {
       ltuid: '',
       type: ''
     }
-    // ck对应MysUser对象
     this.ckUser = null
     this.auth = [
       'dailyNote',
@@ -60,9 +63,7 @@ export default class MysInfo {
       'action_cardList',
       'avatarInfo'
     ]
-
     this.gtest = false
-
     /**
      * ********
      * tudo
@@ -618,8 +619,6 @@ export default class MysInfo {
     if (!isTask) await this.ckUser.addQueryUid(this.uid)
     return res
   }
-
-  ckUser = null
 
   /**
    * 删除失效ck

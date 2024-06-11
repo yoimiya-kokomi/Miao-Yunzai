@@ -14,6 +14,13 @@ import { Data } from '../miao.js'
  * *******************
  */
 export default class NoteUser extends BaseModel {
+  db = null
+
+  qq = null
+
+  mysUsers = null
+
+  _map = null
   /**
    *
    * @param qq
@@ -129,10 +136,6 @@ export default class NoteUser extends BaseModel {
     })
   }
 
-  db = null
-
-  qq = null
-
   /**
    * 初始化数据
    * @param db
@@ -151,8 +154,6 @@ export default class NoteUser extends BaseModel {
     this._games = this.db.games
     await this.save()
   }
-
-  mysUsers = null
 
   /**
    * 初始化MysUser对象
@@ -424,8 +425,6 @@ export default class NoteUser extends BaseModel {
     console.warn('delCk即将废弃')
     return await this.delMysUser(ltuid)
   }
-
-  _map = null
 
   /**
    *

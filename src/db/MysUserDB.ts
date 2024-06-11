@@ -1,6 +1,5 @@
 import BaseModel from './BaseModel.js'
-
-const { Types } = BaseModel
+import { DataTypes } from 'sequelize'
 
 /**
  *
@@ -8,22 +7,22 @@ const { Types } = BaseModel
 const COLUMNS = {
   // 用户ID，qq为数字
   ltuid: {
-    type: Types.INTEGER,
+    type: DataTypes.INTEGER,
     primaryKey: true
   },
 
   // MysUser类型，mys / hoyolab
   type: {
-    type: Types.STRING,
+    type: DataTypes.STRING,
     defaultValue: 'mys',
     notNull: true
   },
 
   // CK
-  ck: Types.STRING,
-  device: Types.STRING,
+  ck: DataTypes.STRING,
+  device: DataTypes.STRING,
   uids: {
-    type: Types.STRING,
+    type: DataTypes.STRING,
     get() {
       let data = this.getDataValue('uids')
       let ret = {}

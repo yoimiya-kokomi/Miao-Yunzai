@@ -1,13 +1,23 @@
 import { Common } from '../../miao.js'
 import { EventType } from './types.js'
 
-const stateArr = {}
+const State = {}
 const SymbolTimeout = Symbol('Timeout')
 const SymbolResolve = Symbol('Resolve')
 
 export class plugin {
+  /**
+   * @deprecated 已废弃
+   */
   name = 'your-plugin'
+  /**
+   * @deprecated 已废弃
+   */
   dsc = '无'
+  /**
+   * @deprecated 已废弃
+   */
+  task = null
   rule: {
     reg?: RegExp | string
     fnc: string
@@ -17,7 +27,6 @@ export class plugin {
   }[] = []
   event = 'message'
   priority = 9999
-  task = null
   namespace = null
   handler = null
   e: EventType
@@ -53,12 +62,21 @@ export class plugin {
     task,
     rule
   }: {
+    /**
+     * @deprecated 已废弃
+     */
     name?: typeof this.name
+    /**
+     * @deprecated 已废弃
+     */
     dsc?: typeof this.dsc
     namespace?: typeof this.namespace
     priority?: typeof this.priority
     handler?: typeof this.handler
     event?: typeof this.event
+    /**
+     * @deprecated 已废弃
+     */
     task?: typeof this.task
     rule?: typeof this.rule
   }) {
@@ -92,6 +110,7 @@ export class plugin {
    * @param quote 是否引用回复
    * @param data.recallMsg 群聊是否撤回消息，0-120秒，0不撤回
    * @param data.at 是否at用户
+   * @deprecated 已废弃
    */
   reply(msg = '', quote = false, data = {}) {
     if (!this.e?.reply || !msg) return false
@@ -99,14 +118,20 @@ export class plugin {
   }
 
   /**
-   * ******
-   * tudo
-   * 异常写法
-   * *****
+   * @deprecated 已废弃
    */
   group_id: number
+  /**
+   * @deprecated 已废弃
+   */
   groupId: number
+  /**
+   * @deprecated 已废弃
+   */
   user_id: number
+  /**
+   * @deprecated 已废弃
+   */
   userId: number
 
   /**
@@ -135,17 +160,17 @@ export class plugin {
     timeout = '操作超时已取消'
   ) {
     const key = this.conKey(isGroup)
-    if (!stateArr[key]) stateArr[key] = {}
-    stateArr[key][type] = this.e
+    if (!State[key]) State[key] = {}
+    State[key][type] = this.e
     if (time)
-      stateArr[key][type][SymbolTimeout] = setTimeout(() => {
-        if (stateArr[key][type]) {
-          const resolve = stateArr[key][type][SymbolResolve]
-          delete stateArr[key][type]
+      State[key][type][SymbolTimeout] = setTimeout(() => {
+        if (State[key][type]) {
+          const resolve = State[key][type][SymbolResolve]
+          delete State[key][type]
           resolve ? resolve(false) : this.reply(timeout, true)
         }
       }, time * 1000)
-    return stateArr[key][type]
+    return State[key][type]
   }
 
   /**
@@ -155,8 +180,8 @@ export class plugin {
    * @returns
    */
   getContext(type: string, isGroup?: boolean) {
-    if (type) return stateArr[this.conKey(isGroup)]?.[type]
-    return stateArr[this.conKey(isGroup)]
+    if (type) return State[this.conKey(isGroup)]?.[type]
+    return State[this.conKey(isGroup)]
   }
 
   /**
@@ -166,9 +191,9 @@ export class plugin {
    */
   finish(type: string, isGroup?: boolean) {
     const key = this.conKey(isGroup)
-    if (stateArr[key]?.[type]) {
-      clearTimeout(stateArr[key][type][SymbolTimeout])
-      delete stateArr[key][type]
+    if (State[key]?.[type]) {
+      clearTimeout(State[key][type][SymbolTimeout])
+      delete State[key][type]
     }
   }
 
@@ -194,7 +219,7 @@ export class plugin {
   }
 
   /**
-   *
+   * @deprecated 已废弃
    * @param plugin
    * @param tpl
    * @param data

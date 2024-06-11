@@ -20,16 +20,24 @@ export const PluginSuperDefine: {
  * 消息
  */
 export class Messages {
-  count = 0
-  rule: {
+  #count = 0
+  #rule: {
     reg: RegExp
     fnc: string
   }[] = []
 
   #init = PluginSuperDefine
 
+  /**
+   * 初始化配置
+   * @param init 
+   */
   constructor(init?: typeof PluginSuperDefine) {
-    this.#init = init
+    for (const key in init) {
+      if (Object.prototype.hasOwnProperty.call(this.#init, key)) {
+        this.#init[key] = init[key]
+      }
+    }
   }
 
   /**
@@ -38,10 +46,10 @@ export class Messages {
    * @param fnc
    */
   response(reg: RegExp, fnc: MessageCallBackType) {
-    this.count++
-    const propName = `prop_${this.count}`
+    this.#count++
+    const propName = `prop_${this.#count}`
     this[propName] = fnc
-    this.rule.push({
+    this.#rule.push({
       reg,
       fnc: propName
     })
@@ -55,9 +63,10 @@ export class Messages {
       constructor() {
         super({
           ...App.#init,
-          rule: App.rule
+          rule: App.#rule
         })
-        for (const key of App.rule) {
+        for (const key of App.#rule) {
+          // 确认存在该函数
           if (App[key.fnc] instanceof Function) {
             this[key.fnc] = App[key.fnc].bind(App)
           }
@@ -75,12 +84,12 @@ export class Events {
   /**
    *
    */
-  count = 0
+  #count = 0
 
   /**
    *
    */
-  data: {
+  #data: {
     [key: string]: typeof plugin
   } = {}
 
@@ -89,14 +98,14 @@ export class Events {
    * @param val
    */
   use(val: typeof plugin) {
-    this.count++
-    this.data[this.count] = val
+    this.#count++
+    this.#data[this.#count] = val
   }
 
   /**
    *
    */
   get ok() {
-    return this.data
+    return this.#data
   }
 }

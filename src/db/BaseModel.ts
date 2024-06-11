@@ -10,7 +10,7 @@ Data.createDir('/data/db', 'root')
 /**
  * DB自定义
  */
-const sequelize = new Sequelize({
+export const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: join(process.cwd(), '/data/db/data.db'),
   logging: false
@@ -34,8 +34,3 @@ export default class BaseModel extends Model {
     model.COLUMNS = columns
   }
 }
-
-/**
- *
- */
-export { sequelize }

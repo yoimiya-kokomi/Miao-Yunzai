@@ -54,21 +54,26 @@ type ChalkInstanceType = {
 
 declare global {
   /**
-   * @deprecated 不推荐使用
+   * @deprecated 不推荐使用，未来将废弃
    */
   var redis: RedisClientType
   /**
-   * @deprecated 不推荐使用
+   *
+   * @deprecated 不推荐使用，未来将废弃
    */
   var Bot: typeof Yunzai.prototype
   /**
-   * @deprecated 不推荐使用
+   * @deprecated 不推荐使用，未来将废弃
    */
   var segment: typeof se
   /**
-   * @deprecated 不推荐使用
+   * @deprecated 不推荐使用，未来将废弃
    */
   var plugin: typeof p
+  /**
+   * 统一化的打印对象
+   * 构造颜色请使用 logger.chalk
+   */
   var logger: LoggerType &
     ChalkInstanceType & {
       chalk: ChalkInstance

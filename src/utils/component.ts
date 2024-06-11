@@ -3,6 +3,9 @@ import { renderToString } from 'react-dom/server'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
+/**
+ *
+ */
 export type ComponentCreateOpsionType = {
   html_head?: string
   html_name?: string
@@ -18,6 +21,9 @@ export type ComponentCreateOpsionType = {
  */
 export class Component {
   #dir = ''
+  /**
+   *
+   */
   constructor() {
     this.#dir = join(process.cwd(), 'html')
     mkdirSync(this.#dir, {

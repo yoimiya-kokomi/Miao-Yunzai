@@ -3,6 +3,9 @@ import fetch from 'node-fetch'
 import cfg from '../config/config.js'
 import apiTool from './apiTool.js'
 
+/**
+ *
+ */
 let HttpsProxyAgent = null
 
 /**

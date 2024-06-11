@@ -47,6 +47,7 @@ export function mkdirs(dirname: string) {
       return true
     }
   }
+  return false
 }
 
 /**

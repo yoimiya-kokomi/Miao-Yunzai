@@ -52,8 +52,10 @@ function createLog() {
   const commandLogger = log4js.getLogger('command')
   const errorLogger = log4js.getLogger('error')
 
-  /** 调整error日志等级 */
-
+  
+  /**
+   * 调整error日志等级
+   */
   const logger = {
     trace() {
       defaultLogger.trace.call(defaultLogger, ...arguments)
@@ -100,7 +102,9 @@ export default function setLog() {
     })
   }
  
-  /** 全局变量 logger */
+  /**
+   * 全局变量 logger 
+   */
   global.logger = createLog() as any
 
   logger.chalk = chalk

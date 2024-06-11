@@ -13,8 +13,17 @@ import Handler from './plugins/handler.js'
  * 加载插件
  */
 class PluginsLoader {
+  /**
+   *
+   */
   priority = []
+  /**
+   *
+   */
   handler = {}
+  /**
+   *
+   */
   task = []
 
   //
@@ -25,7 +34,9 @@ class PluginsLoader {
    */
   groupGlobalCD = {}
 
-  //
+  /**
+   *
+   */
   singleCD = {}
 
   /**
@@ -33,9 +44,21 @@ class PluginsLoader {
    */
   watcher = {}
 
+  /**
+   *
+   */
   eventMap = {
+    /**
+     *
+     */
     message: ['post_type', 'message_type', 'sub_type'],
+    /**
+     *
+     */
     notice: ['post_type', 'notice_type', 'sub_type'],
+    /**
+     *
+     */
     request: ['post_type', 'request_type', 'sub_type']
   }
 
@@ -89,6 +112,9 @@ class PluginsLoader {
     return ret
   }
 
+  /**
+   *
+   */
   pluginCount = null
 
   /**
@@ -436,8 +462,14 @@ class PluginsLoader {
       }
     }
 
+    /**
+     *
+     */
     e.logText = ''
 
+    /**
+     *
+     */
     if (e.message_type === 'private' || e.notice_type === 'friend') {
       e.isPrivate = true
 
@@ -453,6 +485,9 @@ class PluginsLoader {
       e.logText = `[私聊][${e.sender.nickname}(${e.user_id})]`
     }
 
+    /**
+     *
+     */
     if (e.message_type === 'group' || e.notice_type === 'group') {
       e.isGroup = true
       if (e.sender) {
@@ -480,6 +515,9 @@ class PluginsLoader {
       e.isGuild = true
     }
 
+    /**
+     *
+     */
     if (
       e.user_id &&
       cfg.masterQQ.includes(String(e.user_id) || String(e.user_id))
@@ -487,7 +525,9 @@ class PluginsLoader {
       e.isMaster = true
     }
 
-    /** 只关注主动at msg处理 */
+    /**
+     * 只关注主动at msg处理
+     */
     if (e.msg && e.isGroup) {
       let groupCfg = cfg.getGroup(e.group_id)
       let alias = groupCfg.botAlias
@@ -509,7 +549,13 @@ class PluginsLoader {
    * @param e
    */
   reply(e) {
+    /**
+     *
+     */
     if (e.reply) {
+      /**
+       *
+       */
       e.replyNew = e.reply
 
       /**
@@ -581,7 +627,13 @@ class PluginsLoader {
         this.count(e, msg)
         return msgRes
       }
+      /**
+       *
+       */
     } else {
+      /**
+       *
+       */
       e.reply = async (msg = '', _ = false, __ = {}) => {
         if (!msg) return false
         this.count(e, msg)
@@ -609,16 +661,37 @@ class PluginsLoader {
    * @param msg
    */
   count(e, msg) {
+    /**
+     *
+     */
     let screenshot = false
+    /**
+     *
+     */
     if (msg && msg?.file && Buffer.isBuffer(msg?.file)) {
       screenshot = true
     }
 
+    /**
+     *
+     */
     this.saveCount('sendMsg')
+    /**
+     *
+     */
     if (screenshot) this.saveCount('screenshot')
 
+    /**
+     *
+     */
     if (e.group_id) {
+      /**
+       *
+       */
       this.saveCount('sendMsg', e.group_id)
+      /**
+       *
+       */
       if (screenshot) this.saveCount('screenshot', e.group_id)
     }
   }
@@ -629,20 +702,53 @@ class PluginsLoader {
    * @param groupId
    */
   saveCount(type, groupId = '') {
+    /**
+     *
+     */
     let key = 'Yz:count:'
 
+    /**
+     *
+     */
     if (groupId) {
+      /**
+       *
+       */
       key += `group:${groupId}:`
     }
 
+    /**
+     *
+     */
     let dayKey = `${key}${type}:day:${moment().format('MMDD')}`
+    /**
+     *
+     */
     let monthKey = `${key}${type}:month:${Number(moment().month()) + 1}`
+    /**
+     *
+     */
     let totalKey = `${key}${type}:total`
 
+    /**
+     *
+     */
     redis.incr(dayKey)
+    /**
+     *
+     */
     redis.incr(monthKey)
+    /**
+     *
+     */
     if (!groupId) redis.incr(totalKey)
+    /**
+     *
+     */
     redis.expire(dayKey, 3600 * 24 * 30)
+    /**
+     *
+     */
     redis.expire(monthKey, 3600 * 24 * 30)
   }
 
@@ -650,8 +756,17 @@ class PluginsLoader {
    *
    */
   delCount() {
+    /**
+     *
+     */
     let key = 'Yz:count:'
+    /**
+     *
+     */
     redis.set(`${key}sendMsg:total`, '0')
+    /**
+     *
+     */
     redis.set(`${key}screenshot:total`, '0')
   }
 
@@ -660,18 +775,31 @@ class PluginsLoader {
    * @param task
    */
   collectTask(task) {
-    for (const i of Array.isArray(task) ? task : [task])
+    /**
+     *
+     */
+    for (const i of Array.isArray(task) ? task : [task]) {
       if (i?.cron && i?.name) {
         this.task.push(i)
       }
+    }
   }
 
   /**
    * 创建定时任务
    */
   createTask() {
-    for (const i of this.task)
+    /**
+     *
+     */
+    for (const i of this.task) {
+      /**
+       *
+       */
       i.job = schedule.scheduleJob(i?.cron, async () => {
+        /**
+         *
+         */
         try {
           if (i.log == true) logger.mark(`开始定时任务：${i.name}`)
           await i.fnc()
@@ -681,6 +809,7 @@ class PluginsLoader {
           logger.error(error)
         }
       })
+    }
   }
 
   /**
@@ -691,24 +820,48 @@ class PluginsLoader {
   checkLimit(e) {
     /** 禁言中 */
     if (e.isGroup && e?.group?.mute_left > 0) return false
+    /**
+     *
+     */
     if (!e.message || e.isPrivate) return true
 
+    /**
+     *
+     */
     let config = cfg.getGroup(e.group_id)
 
+    /**
+     *
+     */
     if (config.groupGlobalCD && this.groupGlobalCD[e.group_id]) {
       return false
     }
+    /**
+     *
+     */
     if (config.singleCD && this.singleCD[`${e.group_id}.${e.user_id}`]) {
       return false
     }
 
+    /**
+     *
+     */
     let { msgThrottle } = this
 
+    /**
+     *
+     */
     let msgId = e.user_id + ':' + e.raw_message
     if (msgThrottle[msgId]) {
       return false
     }
+    /**
+     *
+     */
     msgThrottle[msgId] = true
+    /**
+     *
+     */
     setTimeout(() => {
       delete msgThrottle[msgId]
     }, 200)
@@ -722,9 +875,18 @@ class PluginsLoader {
    * @returns
    */
   setLimit(e) {
+    /**
+     *
+     */
     if (!e.message || e.isPrivate) return
+    /**
+     *
+     */
     let config = cfg.getGroup(e.group_id)
 
+    /**
+     *
+     */
     if (config.groupGlobalCD) {
       this.groupGlobalCD[e.group_id] = true
       setTimeout(() => {
@@ -780,6 +942,9 @@ class PluginsLoader {
    * @returns
    */
   checkBlack(e) {
+    /**
+     *
+     */
     const other = cfg.getOther()
 
     /** 黑名单qq */
@@ -866,13 +1031,17 @@ class PluginsLoader {
     const watcher = chokidar.watch(file)
     const key = `${dirName}/${appName}`
 
-    /** 监听修改 */
+    /**
+     * 监听修改
+     */
     watcher.on('change', () => {
       logger.mark(`[修改插件][${dirName}][${appName}]`)
       this.changePlugin(key)
     })
 
-    /** 监听删除 */
+    /**
+     * 监听删除
+     */
     watcher.on('unlink', () => {
       logger.mark(`[卸载插件][${dirName}][${appName}]`)
       /** 停止更新监听 */
@@ -895,20 +1064,35 @@ class PluginsLoader {
   watchDir(dirName) {
     if (this.watcher[dirName]) return
     const watcher = chokidar.watch(`./${this.dir}/${dirName}/`)
-    /** 热更新 */
+
+    /**
+     * 热更新
+     */
     setTimeout(() => {
-      /** 新增文件 */
+      /**
+       * 新增文件
+       */
       watcher.on('add', async PluPath => {
         const appName = path.basename(PluPath)
-        if (!appName.endsWith('.js')) return
+        /**
+         */
+        if (!/^(.js|.ts)$/.test(appName)) return
         logger.mark(`[新增插件][${dirName}][${appName}]`)
         const key = `${dirName}/${appName}`
+        /**
+         *
+         */
         await this.importPlugin({
           name: key,
           path: `../../${this.dir}/${key}?${moment().format('X')}`
         })
-        /** 优先级排序 */
+        /**
+         * 优先级排序
+         */
         this.priority = lodash.orderBy(this.priority, ['priority'], ['asc'])
+        /**
+         *
+         */
         this.watch(dirName, appName)
       })
     }, 10000)

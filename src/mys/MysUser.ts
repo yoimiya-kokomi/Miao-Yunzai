@@ -5,16 +5,14 @@
  * 一个MysUser对应一个有效CK
  * 一个MysUser可能有多个MysUid关联记录
  */
+import lodash from 'lodash'
+import fetch from 'node-fetch'
 import DailyCache from './DailyCache.js'
 import BaseModel from './BaseModel.js'
 import NoteUser from './NoteUser.js'
 import MysApi from './mysApi.js'
 import MysUtil from './MysUtil.js'
-import lodash from 'lodash'
-import fetch from 'node-fetch'
-
 import { MysUserDB } from '../db/index.js'
-
 import { Data } from '../miao.js'
 
 const tables = {

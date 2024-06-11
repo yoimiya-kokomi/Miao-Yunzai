@@ -4,9 +4,24 @@ import PluginsLoader from './plugins.loader.js'
  *
  */
 export default class EventListener {
+  /**
+   *
+   */
   prefix = ''
+
+  /**
+   *
+   */
   event = null
+
+  /**
+   *
+   */
   once = false
+
+  /**
+   *
+   */
   plugins = PluginsLoader
   /**
    * 事件监听

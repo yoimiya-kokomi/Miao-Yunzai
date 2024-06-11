@@ -10,11 +10,20 @@ import { CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
  * ********
  */
 class Cfg {
+
+  /**
+   * 
+   */
   config = {}
 
-  /** 监听文件 */
+  /**
+   * 监听文件
+   */
   watcher = { config: {}, defSet: {} }
 
+  /**
+   * 
+   */
   constructor() {
     this.initCfg()
   }

@@ -1,23 +1,18 @@
+import { DataTypes } from 'sequelize'
 import BaseModel from './BaseModel.js'
 import lodash from 'lodash'
-
-/**
- *
- */
-const { Types } = BaseModel
-
 /**
  *
  */
 const COLUMNS = {
   // 用户ID，qq为数字
   userId: {
-    type: Types.STRING
+    type: DataTypes.STRING
   },
-  game: Types.STRING,
-  uid: Types.STRING,
+  game: DataTypes.STRING,
+  uid: DataTypes.STRING,
   data: {
-    type: Types.STRING,
+    type: DataTypes.STRING,
     get() {
       let data = this.getDataValue('data')
       let ret = {}

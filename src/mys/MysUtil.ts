@@ -11,7 +11,7 @@ const games = [
 /**
  *
  */
-const MysUtil = {
+export default {
   /**
    * 获取标准ltuid
    * @param data
@@ -87,8 +87,3 @@ const MysUtil = {
     await Data.forEach(['mys', 'hoyolab'], fn)
   }
 }
-
-/**
- *
- */
-export default MysUtil

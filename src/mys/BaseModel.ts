@@ -3,9 +3,19 @@
  */
 import MysUtil from './MysUtil.js'
 
+/**
+ *
+ */
 const cacheMap = {}
+
+/**
+ *
+ */
 const reFn = {}
 
+/**
+ *
+ */
 export default class BaseModel {
   _uuid = null
 

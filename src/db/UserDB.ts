@@ -1,11 +1,7 @@
 import BaseModel from './BaseModel.js'
 import lodash from 'lodash'
 import MysUtil from '../mys/MysUtil.js'
-
-/**
- *
- */
-const { Types } = BaseModel
+import { DataTypes } from 'sequelize'
 
 /**
  *
@@ -13,26 +9,26 @@ const { Types } = BaseModel
 const COLUMNS = {
   // 用户ID，qq为数字
   id: {
-    type: Types.STRING,
+    type: DataTypes.STRING,
     autoIncrement: false,
     primaryKey: true
   },
 
   type: {
-    type: Types.STRING,
+    type: DataTypes.STRING,
     defaultValue: 'qq',
     notNull: true
   },
 
   // 昵称
-  name: Types.STRING,
+  name: DataTypes.STRING,
 
   // 头像
-  face: Types.STRING,
+  face: DataTypes.STRING,
 
-  ltuids: Types.STRING,
+  ltuids: DataTypes.STRING,
   games: {
-    type: Types.STRING,
+    type: DataTypes.STRING,
     get() {
       let data = this.getDataValue('games')
       let ret = {}
@@ -54,7 +50,7 @@ const COLUMNS = {
       this.setDataValue('games', JSON.stringify(data))
     }
   },
-  data: Types.STRING
+  data: DataTypes.STRING
 }
 
 /**
