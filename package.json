@@ -1,5 +1,5 @@
 {
-  "name": "miao-yunzai",
+  "name": "yunzai",
   "version": "4.0.0-rc.0",
   "author": "Yoimiya-Kokomi, Le-niao",
   "description": "QQ Group Bot",
@@ -78,13 +78,27 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   },
+  "exports": {
+    "./config": {
+      "import": "./src/config/index.js"
+    },
+    "./db": {
+      "import": "./src/db/index.js"
+    },
+    "./mys": {
+      "import": "./src/mys/index.js"
+    },
+    "./utils": {
+      "import": "./src/utils/index.js"
+    },
+    "./core": {
+      "import": "./src/core/index.js"
+    },
+    "./image/types": {
+      "import": "./image/types.js"
+    }
+  },
   "imports": {
-    "#image/*": "./image/*",
-    "#yunzai/config": "./src/config/index.js",
-    "#yunzai/core": "./src/core/index.js",
-    "#yunzai/db": "./src/db/index.js",
-    "#yunzai/mys": "./src/mys/index.js",
-    "#yunzai/utils": "./src/utils/index.js",
     "#miao": "./plugins/miao-plugin/components/index.js",
     "#miao.models": "./plugins/miao-plugin/models/index.js"
   }
