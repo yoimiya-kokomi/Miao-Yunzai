@@ -10,8 +10,9 @@ export default async function redisInit() {
   const rc = cfg.redis
   const redisUn = rc.username || ""
   let redisPw = rc.password ? `:${rc.password}` : ""
-  if (rc.username || rc.password)
+  if (rc.username || rc.password) {
     redisPw += "@"
+  }
   const redisUrl = `redis://${redisUn}${redisPw}${rc.host}:${rc.port}/${rc.db}`
   let client = createClient({ url: redisUrl })
 
@@ -57,9 +58,7 @@ export default async function redisInit() {
  * @returns 
  */
 async function aarch64() {
-  if (process.platform == "win32") {
-    return ""
-  }
+  if (process.platform == "win32") return ""
   return await execAsync("uname -m").then(async arch => {
     if (arch.stdout && arch.stdout.includes("aarch64")) {
       /** 判断redis版本 */

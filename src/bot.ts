@@ -20,11 +20,17 @@ import ListenerLoader from './core/events.loader.js'
  * 扩展
  */
 import { Client, segment } from 'icqq'
+/**
+ *
+ */
 import { plugin } from './core/plugins/index.js'
 /**
- * global
+ * global.plugin
  */
 global.plugin = plugin
+/**
+ * global.segment
+ */
 global.segment = segment
 /**
  *

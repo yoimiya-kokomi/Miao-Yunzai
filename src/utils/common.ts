@@ -4,6 +4,7 @@ import fetch from 'node-fetch'
 import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'child_process'
+import { join } from 'path'
 
 /**
  * 休眠函数
@@ -65,4 +66,32 @@ export function execAsync(cmd: string): Promise<{
       resolve({ stdout, stderr })
     })
   })
+}
+
+/**
+ *
+ * @param dir
+ * @returns
+ */
+export function readJSON(dir: string) {
+  try {
+    const cfg = fs.readFileSync(join(process.cwd(), dir), 'utf-8')
+    return JSON.parse(cfg)
+  } catch {
+    return false
+  }
+}
+
+/**
+ *
+ * @returns
+ */
+export function randomRange() {
+  let randomStr = ''
+  let charStr = 'abcdef0123456789'
+  for (let i = 0; i < 64; i++) {
+    let index = Math.round(Math.random() * (charStr.length - 1))
+    randomStr += charStr.substring(index, index + 1)
+  }
+  return randomStr
 }

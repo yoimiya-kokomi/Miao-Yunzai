@@ -1,7 +1,7 @@
 import YAML from 'yaml'
-import fs from 'node:fs'
 import chokidar from 'chokidar'
 import { join } from 'node:path'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
 import { CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
 
 /**
@@ -35,14 +35,14 @@ class Cfg {
   initCfg() {
     const path = CONFIG_INIT_PATH
     const pathDef = CONFIG_DEFAULT_PATH
-    const files = fs.readdirSync(pathDef).filter(file => file.endsWith('.yaml'))
+    const files = readdirSync(pathDef).filter(file => file.endsWith('.yaml'))
     for (let file of files) {
-      if (!fs.existsSync(`${path}${file}`)) {
-        fs.copyFileSync(`${pathDef}${file}`, `${path}${file}`)
+      if (!existsSync(`${path}${file}`)) {
+        copyFileSync(`${pathDef}${file}`, `${path}${file}`)
       }
     }
-    if (!fs.existsSync("data")) fs.mkdirSync("data")
-    if (!fs.existsSync("resources")) fs.mkdirSync("resources")
+    if (!existsSync("data")) mkdirSync("data")
+    if (!existsSync("resources")) mkdirSync("resources")
   }
 
   /**
@@ -124,7 +124,7 @@ class Cfg {
   get package() {
     if (this._package) return this._package
     try {
-      const data = fs.readFileSync('package.json', 'utf8')
+      const data = readFileSync('package.json', 'utf8')
       this._package = JSON.parse(data)
       return this._package
     } catch {
@@ -195,7 +195,7 @@ class Cfg {
     if (this.config[key]) return this.config[key]
 
     this.config[key] = YAML.parse(
-      fs.readFileSync(file, 'utf8')
+      readFileSync(file, 'utf8')
     )
 
     this.watch(file, name, type)
@@ -210,7 +210,7 @@ class Cfg {
    * @param type 
    * @returns 
    */
-  watch(file:string, name:string, type = 'default_config') {
+  watch(file: string, name: string, type = 'default_config') {
     const key = `${type}.${name}`
     if (this.watcher[key]) return
     const watcher = chokidar.watch(file)

@@ -1,4 +1,5 @@
-import { randomRange } from './mysApi.js'
+import { randomRange } from '../utils/index.js'
+
 /**
  * 整合接口用于查询数据
  * 方便后续用于解耦

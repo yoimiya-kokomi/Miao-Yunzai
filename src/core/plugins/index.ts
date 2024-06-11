@@ -1,3 +1,5 @@
+
+import { segment } from 'icqq'
 import { Common } from '../../miao.js'
 import { EventType } from './types.js'
 
@@ -18,6 +20,9 @@ export class plugin {
    * @deprecated 已废弃
    */
   task = null
+  /**
+   * 
+   */
   rule: {
     reg?: RegExp | string
     fnc: string
@@ -25,11 +30,30 @@ export class plugin {
     log?: boolean
     permission?: string
   }[] = []
+  /**
+   * 
+   */
   event = 'message'
+  /**
+   * 
+   */
   priority = 9999
+  /**
+   * 
+   */
   namespace = null
+
+  /**
+   * 
+   */
   handler = null
-  e: EventType
+
+  /**
+   * 
+   */
+  e: EventType & {
+    segment: typeof segment
+  }
 
   /**
    * @param name 插件名称
@@ -103,6 +127,10 @@ export class plugin {
       this.handler = handler
       this.namespace = namespace || ''
     }
+
+    // 携带segment
+    this.e.segment = segment
+
   }
 
   /**

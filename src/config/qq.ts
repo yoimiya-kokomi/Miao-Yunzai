@@ -30,7 +30,7 @@ export default async function createQQ() {
   /**
    * 
    */
-  let propmtList = [
+  const propmtList = [
     {
       type: 'Input',
       message: '请输入机器人QQ号(建议用小号)：',

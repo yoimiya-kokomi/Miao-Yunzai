@@ -15,4 +15,16 @@ export { BaseModel, DailyCache, MysUser, MysUtil, NoteUser }
 /**
  * @deprecated 已废弃
  */
-export { apiTool, gsCfg, mysApi, mysInfo }
+export { apiTool }
+/**
+ * @deprecated 已废弃
+ */
+export { gsCfg }
+/**
+ * @deprecated 已废弃
+ */
+export { mysApi }
+/**
+ * @deprecated 已废弃
+ */
+export { mysInfo }
