@@ -1,7 +1,6 @@
 import { segment as se } from 'icqq'
 import { RedisClientType } from 'redis'
-import { Yunzai } from './bot.js'
-import { plugin as p } from './core/index.js'
+import { Client, plugin as p } from './core/index.js'
 import chalk, { type ChalkInstance } from 'chalk'
 
 /**
@@ -61,7 +60,7 @@ declare global {
    *
    * @deprecated 不推荐使用，未来将废弃
    */
-  var Bot: typeof Yunzai.prototype
+  var Bot: typeof Client.prototype
   /**
    * @deprecated 不推荐使用，未来将废弃
    */

@@ -3,39 +3,27 @@
  * 配置初始化
  * **********
  */
-import './config/init.js'
+import '../config/init.js'
 /**
  * **********
  * 配置读取工具
  * **********
  */
-import cfg from './config/config.js'
+import cfg from '../config/config.js'
 /**
  * **********
  * 监听
  * **********
  */
-import ListenerLoader from './core/events.loader.js'
+import ListenerLoader from './events.loader.js'
 /**
  * 扩展
  */
-import { Client, segment } from 'icqq'
+import { Client as IcqqClient } from 'icqq'
 /**
  *
  */
-import { plugin } from './core/plugins/index.js'
-/**
- * global.plugin
- */
-global.plugin = plugin
-/**
- * global.segment
- */
-global.segment = segment
-/**
- *
- */
-export class Yunzai extends Client {
+export class Client extends IcqqClient {
   /**
    *
    * @param conf
@@ -52,7 +40,7 @@ export class Yunzai extends Client {
    * @returns
    */
   static async run() {
-    const bot = new Yunzai(cfg.bot)
+    const bot = new Client(cfg.bot)
     /** 加载监听事件 */
     await ListenerLoader.load(bot)
 
@@ -79,6 +67,8 @@ export class Yunzai extends Client {
     /** 全局变量 bot */
     global.Bot = bot
     /** 加载插件 */
-    return await (await import('./core/plugins.loader.js')).default.load()
+    return await (await import('./plugins.loader.js')).default.load()
   }
 }
+
+export const Bot = global.Bot as typeof Client.prototype

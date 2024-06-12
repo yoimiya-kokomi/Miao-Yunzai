@@ -1,1 +1,1 @@
-export { Client, segment } from 'icqq'
+export { segment } from 'icqq'
