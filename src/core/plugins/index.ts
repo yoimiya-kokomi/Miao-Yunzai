@@ -72,11 +72,23 @@ export class Plugin {
   name: PluginSuperType['name'] = 'your-plugin'
   dsc: PluginSuperType['dsc'] = '无'
   task: PluginSuperType['task'] = null
+  /**
+   * 指令集
+   */
   rule: PluginSuperType['rule'] = []
+  /**
+   * 事件
+   */
   event: PluginSuperType['event'] = 'message'
+  /**
+   * 优先级
+   */
   priority: PluginSuperType['priority'] = 9999
   namespace: PluginSuperType['namespace'] = null
   handler: PluginSuperType['handler'] = null
+  /**
+   * 事件
+   */
   e: EventType
 
   /**
@@ -159,7 +171,7 @@ export class Plugin {
    * @returns
    */
   conKey(isGroup = false) {
-    if (isGroup) {
+    if (isGroup && this.e.isGroup) {
       return `${this.name}.${this.group_id || this.groupId || this.e.group_id}`
     } else {
       return `${this.name}.${this.user_id || this.userId || this.e.user_id}`
