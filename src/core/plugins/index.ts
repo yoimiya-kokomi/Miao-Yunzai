@@ -84,22 +84,25 @@ export class Plugin {
    * @param priority 优先级，数字越小优先级越高
    * @param rule 优先级，数字越小优先级越高
    */
-  constructor({
-    event,
-    priority = 5000,
-    rule,
-    name,
-    dsc,
-    handler,
-    namespace,
-    task,
-  }: PluginSuperType) {
+  constructor(init?: PluginSuperType) {
+    const {
+      event,
+      priority = 5000,
+      rule,
+      name,
+      dsc,
+      handler,
+      namespace,
+      task,
+    } = init
     name && (this.name = name)
     dsc && (this.dsc = dsc)
     event && (this.event = event)
     priority && (this.priority = priority)
 
-    /** 定时任务，可以是数组 */
+    /**
+     * 定时任务，可以是数组
+     */
     task &&
       (this.task = {
         /** 任务名 */
@@ -110,7 +113,9 @@ export class Plugin {
         cron: task?.cron ?? ''
       })
 
-    /** 命令规则 */
+    /**
+     * 命令规则
+     */
     rule && (this.rule = rule)
 
     if (handler) {
