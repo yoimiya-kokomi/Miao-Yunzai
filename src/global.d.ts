@@ -63,12 +63,12 @@ declare global {
    */
   var Bot: typeof Client.prototype
   /**
-   * import { segment } from 'yunzai/core'
+   * import { Segment } from 'yunzai/core'
    * @deprecated 不推荐使用，未来将废弃
    */
   var segment: typeof se
   /**
-   * import { plugin } from 'yunzai/core'
+   * import { Plugin } from 'yunzai/core'
    * @deprecated 不推荐使用，未来将废弃
    */
   var plugin: typeof p

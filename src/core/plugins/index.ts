@@ -6,7 +6,7 @@ const State = {}
 const SymbolTimeout = Symbol('Timeout')
 const SymbolResolve = Symbol('Resolve')
 
-export class plugin {
+export class Plugin {
   /**
    * @deprecated 已废弃
    */
@@ -251,3 +251,9 @@ export class plugin {
     return Common.render(plugin, tpl, data, { ...cfg, e: this.e })
   }
 }
+
+
+/**
+ * @deprecated 已废弃
+ */
+export const plugin = Plugin
