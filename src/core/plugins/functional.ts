@@ -1,5 +1,6 @@
 import { MessageCallBackType } from './types.js'
 import { plugin } from './index.js'
+import { EventMap } from 'icqq'
 
 /**
  * 插件super默认值
@@ -7,7 +8,7 @@ import { plugin } from './index.js'
 export const PluginSuperDefine: {
   name?: string
   dsc?: string
-  event?: string
+  event?: keyof EventMap
   priority?: number
 } = {
   name: 'group-app',

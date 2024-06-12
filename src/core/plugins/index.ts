@@ -2,105 +2,98 @@
 import { Common } from '../../miao.js'
 import { EventType } from './types.js'
 
+import { type EventMap } from 'icqq'
+
 const State = {}
 const SymbolTimeout = Symbol('Timeout')
 const SymbolResolve = Symbol('Resolve')
 
-export class Plugin {
-  /**
-   * @deprecated 已废弃
-   */
-  name = 'your-plugin'
-  /**
-   * @deprecated 已废弃
-   */
-  dsc = '无'
-  /**
-   * @deprecated 已废弃
-   */
-  task = null
-  /**
-   * 
-   */
-  rule: {
-    reg?: RegExp | string
-    fnc: string
-    event?: string
-    log?: boolean
-    permission?: string
-  }[] = []
-  /**
-   * 
-   */
-  event = 'message'
-  /**
-   * 
-   */
-  priority = 9999
-  /**
-   * 
-   */
-  namespace = null
-
-  /**
-   * 
-   */
-  handler = null
-
-  /**
-   * 
-   */
-  e: EventType
-
+/**
+ * 
+ */
+type PluginSuperType = {
   /**
    * @param name 插件名称
+   * @deprecated 已废弃
+   */
+  name?: string
+  /**
    * @param dsc 插件描述
+   * @deprecated 已废弃
+   */
+  dsc?: string
+  /**
+   * namespace，设置handler时建议设置
+   * @deprecated 已废弃
+   */
+  namespace?: any
+  /**
    * @param handler handler配置
    * @param handler.key handler支持的事件key
    * @param handler.fn handler的处理func
-   * @param namespace namespace，设置handler时建议设置
+   * @deprecated 已废弃
+   */
+  handler?: any
+  /**
+   *  task
+   *  task.name 定时任务名称
+   *  task.cron 定时任务cron表达式
+   *  task.fnc 定时任务方法名
+   *  task.log  false时不显示执行日志
+   * @deprecated 已废弃
+   */
+  task?: any
+  /**
+   * 优先级
+   */
+  priority?: number
+  /**
+   * 事件
+   */
+  event?: keyof EventMap
+  /**
+   *  rule
+   *  rule.reg 命令正则
+   *  rule.fnc 命令执行方法
+   *  rule.event 执行事件，默认message
+   *  rule.log  false时不显示执行日志
+   *  rule.permission 权限 master,owner,admin,all
+   */
+  rule?: {
+    reg?: RegExp,
+    fnc?: string,
+    event?: keyof EventMap,
+    log?: boolean
+    permission?: 'master' | 'owner' | 'admin' | 'all'
+  }[]
+}
+
+export class Plugin {
+  name: PluginSuperType['name'] = 'your-plugin'
+  dsc: PluginSuperType['dsc'] = '无'
+  task: PluginSuperType['task'] = null
+  rule: PluginSuperType['rule'] = []
+  event: PluginSuperType['event'] = 'message'
+  priority: PluginSuperType['priority'] = 9999
+  namespace: PluginSuperType['namespace'] = null
+  handler: PluginSuperType['handler'] = null
+  e: EventType
+
+  /**
    * @param event 执行事件，默认message
    * @param priority 优先级，数字越小优先级越高
-   * @param rule
-   * @param rule.reg 命令正则
-   * @param rule.fnc 命令执行方法
-   * @param rule.event 执行事件，默认message
-   * @param rule.log  false时不显示执行日志
-   * @param rule.permission 权限 master,owner,admin,all
-   * @param task
-   * @param task.name 定时任务名称
-   * @param task.cron 定时任务cron表达式
-   * @param task.fnc 定时任务方法名
-   * @param task.log  false时不显示执行日志
+   * @param rule 优先级，数字越小优先级越高
    */
   constructor({
+    event,
+    priority = 5000,
+    rule,
     name,
     dsc,
     handler,
     namespace,
-    event,
-    priority = 5000,
     task,
-    rule
-  }: {
-    /**
-     * @deprecated 已废弃
-     */
-    name?: typeof this.name
-    /**
-     * @deprecated 已废弃
-     */
-    dsc?: typeof this.dsc
-    namespace?: typeof this.namespace
-    priority?: typeof this.priority
-    handler?: typeof this.handler
-    event?: typeof this.event
-    /**
-     * @deprecated 已废弃
-     */
-    task?: typeof this.task
-    rule?: typeof this.rule
-  }) {
+  }: PluginSuperType) {
     name && (this.name = name)
     dsc && (this.dsc = dsc)
     event && (this.event = event)
