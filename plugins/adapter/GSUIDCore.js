@@ -9,7 +9,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     return Bot.String(msg).replace(/base64:\/\/.*?"/g, "base64://...\"")
   }
 
-  makeButton(data, button) {
+  makeButton(button) {
     const msg = {
       text: button.text,
       pressed_text: button.clicked_text,
