@@ -60,7 +60,7 @@ type PluginSuperType = {
    *  rule.permission 权限 master,owner,admin,all
    */
   rule?: {
-    reg?: RegExp,
+    reg?: RegExp | string,
     fnc?: string,
     event?: keyof EventMap,
     log?: boolean
