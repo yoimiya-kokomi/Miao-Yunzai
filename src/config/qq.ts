@@ -10,7 +10,7 @@ import { sleep } from '../utils/common.js'
  * Git Bash 运行npm命令会无法选择列表
  * @returns 
  */
-export default async function createQQ() {
+export  async function createQQ() {
   /** 跳过登录ICQQ */
   if (cfg.bot.skip_login) return
 
@@ -63,12 +63,6 @@ export default async function createQQ() {
         }
       }
     }
-    // ,{
-    //   type: 'Input',
-    //   message: '代理服务器地址,无需代理服务器请直接按下Enter：',
-    //   name: 'proxyAddress',
-    //   default: 'http://0.0.0.0:0'
-    // }
   ]
 
   /**
@@ -103,8 +97,6 @@ export default async function createQQ() {
 
   const fileDef = `./${CONFIG_DEFAULT_PATH}`
 
-
-
   let qq = fs.readFileSync(`${fileDef}qq.yaml`, 'utf8')
 
   qq = qq.replace(/qq:/g, 'qq: ' + ret.QQ)
@@ -113,7 +105,6 @@ export default async function createQQ() {
   fs.writeFileSync(`${file}qq.yaml`, qq, 'utf8')
 
   let bot = fs.readFileSync(`${fileDef}bot.yaml`, 'utf8')
-  // bot = bot.replace(/proxyAddress:/g, `proxyAddress:  ${ret.proxyAddress}`)
 
   /**
    * 
@@ -133,7 +124,7 @@ export default async function createQQ() {
 
   fs.writeFileSync(`${file}bot.yaml`, bot, 'utf8')
 
-  console.log(`\nQQ配置完成，正在登录\n后续修改账号可以运行命令： ${chalk.green('node app login')}\n`)
+  console.log(`\nQQ配置完成，正在登录\n后续修改账号可以运行命令： ${chalk.green('npm run login')}\n`)
 
   /**
    * 

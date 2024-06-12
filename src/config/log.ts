@@ -2,7 +2,7 @@ import log4js from 'log4js'
 import chalk from 'chalk'
 import cfg from './config.js'
 import fs from 'node:fs'
- 
+
 
 /**
  * 创建日志
@@ -52,7 +52,7 @@ function createLog() {
   const commandLogger = log4js.getLogger('command')
   const errorLogger = log4js.getLogger('error')
 
-  
+
   /**
    * 调整error日志等级
    */
@@ -86,7 +86,7 @@ function createLog() {
 /**
 * 设置日志样式
 */
-export default function setLog() {
+export function setLogger() {
 
   /**
    * 
@@ -96,12 +96,12 @@ export default function setLog() {
   /**
    * 
    */
-  if (!fs.existsSync(file)){
+  if (!fs.existsSync(file)) {
     fs.mkdirSync(file, {
       'recursive': true
     })
   }
- 
+
   /**
    * 全局变量 logger 
    */

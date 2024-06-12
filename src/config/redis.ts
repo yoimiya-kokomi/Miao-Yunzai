@@ -6,7 +6,7 @@ import { createClient } from "redis"
  * 初始化全局redis客户端
  * @returns 
  */
-export default async function redisInit() {
+export  async function redisInit() {
   const rc = cfg.redis
   const redisUn = rc.username || ""
   let redisPw = rc.password ? `:${rc.password}` : ""

@@ -1,16 +1,16 @@
 import fs, { promises } from "node:fs"
 import yaml from "yaml"
 import { BOT_NAME, CONFIG_INIT_PATH } from "./system.js"
-import createQQ from "./qq.js"
-import setLog from "./log.js"
-import redisInit from "./redis.js"
+import { createQQ } from "./qq.js"
+import { setLogger } from "./log.js"
+import { redisInit } from "./redis.js"
 import { checkRun } from "./check.js"
 import { join } from "node:path"
 
 /**
  * 
  */
-export async function UpdateTitle() {
+async function UpdateTitle() {
   /**
    * 添加一些多余的标题内容
    */
@@ -25,31 +25,31 @@ export async function UpdateTitle() {
   if (qq) {
     title += `@${qq.qq || ""}`
     switch (qq.platform) {
-      case 1:{
+      case 1: {
         title += " 安卓手机"
         break
       }
-      case 2:{
+      case 2: {
         title += " aPad"
         break
       }
-      case 3:{
+      case 3: {
         title += " 安卓手表"
         break
       }
-      case 4:{
+      case 4: {
         title += " MacOS"
         break
       }
-      case 5:{
+      case 5: {
         title += " iPad"
         break
       }
-      case 6:{
+      case 6: {
         title += " Tim"
         break
       }
-      default:{
+      default: {
         break
       }
     }
@@ -78,7 +78,7 @@ export async function checkInit() {
   /**
    * 检查node_modules/icqq
    */
-  if(!fs.existsSync(join(process.cwd(), "./node_modules/icqq"))){
+  if (!fs.existsSync(join(process.cwd(), "./node_modules/icqq"))) {
     console.log("未安装icqq。。。。")
     console.log("请先运行命令：pnpm install -P 安装依赖")
     process.exit()
@@ -92,7 +92,7 @@ export async function checkInit() {
   /**
    * 日志设置
    */
-  setLog()
+  setLogger()
 
   /**
    * 
@@ -100,12 +100,12 @@ export async function checkInit() {
   logger.mark(`${BOT_NAME} 启动中...`)
 
   /**
-   * 
+   *  初始化客户端
    */
   await redisInit()
 
   /**
-   * 
+   * 检查程序
    */
   await checkRun()
 

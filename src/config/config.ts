@@ -9,7 +9,7 @@ import { CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
  * 配置文件
  * ********
  */
-class Cfg {
+class ConfigController {
 
   /**
    * 
@@ -238,8 +238,8 @@ class Cfg {
    * 修改日志等级
    */
   async change_bot() {
-    const log = await import('./log.js')
-    log.default()
+    const { setLogger } = await import('./log.js')
+    setLogger && setLogger()
   }
 
 }
@@ -249,4 +249,4 @@ class Cfg {
  * 
  * ***
  */
-export default new Cfg()
+export default new ConfigController()

@@ -53,19 +53,22 @@ type ChalkInstanceType = {
 
 declare global {
   /**
+   * import { Redis } from 'yunzai/core'
    * @deprecated 不推荐使用，未来将废弃
    */
   var redis: RedisClientType
   /**
-   *
+   * import { Bot } from 'yunzai/core'
    * @deprecated 不推荐使用，未来将废弃
    */
   var Bot: typeof Client.prototype
   /**
+   * import { segment } from 'yunzai/core'
    * @deprecated 不推荐使用，未来将废弃
    */
   var segment: typeof se
   /**
+   * import { plugin } from 'yunzai/core'
    * @deprecated 不推荐使用，未来将废弃
    */
   var plugin: typeof p

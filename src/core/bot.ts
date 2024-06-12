@@ -3,7 +3,7 @@
  * 配置初始化
  * **********
  */
-import '../config/init.js'
+import '../config/main.js'
 /**
  * **********
  * 配置读取工具
@@ -71,4 +71,12 @@ export class Client extends IcqqClient {
   }
 }
 
+/**
+ * 内置Redis
+ */
+export const Redis = global.redis
+
+/**
+ * 机器人客户端
+ */
 export const Bot = global.Bot as typeof Client.prototype
