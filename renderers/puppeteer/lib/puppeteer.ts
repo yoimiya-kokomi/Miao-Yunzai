@@ -1,2 +1,2 @@
-import Puppeteer from '../../../src/utils/renderers/puppeteer.js'
-export default Puppeteer
+import { Renderers } from 'yunzai/utils'
+export default Renderers
