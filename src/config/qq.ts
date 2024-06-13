@@ -3,14 +3,14 @@ import inquirer from 'inquirer'
 import chalk from 'chalk'
 import { BOT_NAME, CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
 import cfg from './config.js'
-import { sleep } from '../utils/common.js'
+import { sleep } from "./utils.js"
 
 /**
  * 创建qq配置文件 `config/bot/qq.yaml`
  * Git Bash 运行npm命令会无法选择列表
  * @returns 
  */
-export  async function createQQ() {
+export async function createQQ() {
   /** 跳过登录ICQQ */
   if (cfg.bot.skip_login) return
 

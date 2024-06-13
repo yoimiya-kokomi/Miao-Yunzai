@@ -1,5 +1,5 @@
 import cfg from "./config.js"
-import { execAsync, sleep } from "../utils/common.js"
+import { execAsync, sleep } from "./utils.js"
 import { createClient } from "redis"
 
 /**

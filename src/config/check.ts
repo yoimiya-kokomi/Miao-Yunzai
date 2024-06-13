@@ -1,4 +1,4 @@
-import { execAsync, readJSON } from '../utils/index.js'
+import { execAsync, readJSON } from "./utils.js"
 
 /**
  * 校验运行

@@ -54,15 +54,13 @@ class RendererLoader {
           !renderer.render ||
           !lodash.isFunction(renderer.render)
         ) {
-          console.warn(
-            '渲染后端 ' + (renderer.id || subFolder.name) + ' 不可用'
-          )
+          logger.warn('渲染后端 ' + (renderer.id || subFolder.name) + ' 不可用')
         }
         this.renderers.set(renderer.id, renderer)
-        console.info(`加载渲染后端 ${renderer.id}`)
+        logger.info(`加载渲染后端 ${renderer.id}`)
       } catch (err) {
-        console.error(`渲染后端 ${name} 加载失败`)
-        console.error(err)
+        logger.error(`渲染后端 ${name} 加载失败`)
+        logger.error(err)
       }
     }
   }
