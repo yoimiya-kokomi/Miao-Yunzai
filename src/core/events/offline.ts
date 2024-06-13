@@ -14,7 +14,7 @@ export default class offlineEvent extends EventListener {
     /**
      *
      */
-    super({ event: 'system.offline', prefix: undefined, once: undefined })
+    super({ event: 'system.offline' })
   }
 
   /**

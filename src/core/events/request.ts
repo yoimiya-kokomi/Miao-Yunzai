@@ -11,7 +11,7 @@ export default class requestEvent extends EventListener {
     /**
      *
      */
-    super({ event: 'request', prefix: undefined, once: undefined })
+    super({ event: 'request' })
   }
 
   /**

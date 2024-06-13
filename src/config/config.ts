@@ -4,6 +4,22 @@ import { join } from 'node:path'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
 import { CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
 
+export function configInit() {
+  const path = CONFIG_INIT_PATH
+  const pathDef = CONFIG_DEFAULT_PATH
+  const files = readdirSync(pathDef).filter(file => file.endsWith('.yaml'))
+  mkdirSync(join(process.cwd(), path), {
+    'recursive': true
+  })
+  for (let file of files) {
+    if (!existsSync(`${path}${file}`)) {
+      copyFileSync(`${pathDef}${file}`, `${path}${file}`)
+    }
+  }
+  if (!existsSync("data")) mkdirSync("data")
+  if (!existsSync("resources")) mkdirSync("resources")
+}
+
 /**
  * ********
  * 配置文件
@@ -20,30 +36,6 @@ class ConfigController {
    * 监听文件
    */
   watcher = { config: {}, defSet: {} }
-
-  /**
-   * 
-   */
-  constructor() {
-    this.initCfg()
-  }
-
-
-  /**
-   * 初始化配置
-   */
-  initCfg() {
-    const path = CONFIG_INIT_PATH
-    const pathDef = CONFIG_DEFAULT_PATH
-    const files = readdirSync(pathDef).filter(file => file.endsWith('.yaml'))
-    for (let file of files) {
-      if (!existsSync(`${path}${file}`)) {
-        copyFileSync(`${pathDef}${file}`, `${path}${file}`)
-      }
-    }
-    if (!existsSync("data")) mkdirSync("data")
-    if (!existsSync("resources")) mkdirSync("resources")
-  }
 
   /**
    * 机器人qq号
@@ -238,8 +230,7 @@ class ConfigController {
    * 修改日志等级
    */
   async change_bot() {
-    const { setLogger } = await import('./log.js')
-    setLogger && setLogger()
+    //
   }
 
 }

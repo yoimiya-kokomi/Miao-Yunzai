@@ -1,13 +1,16 @@
 import Renderer from '../renderer/loader.js'
+/**
+ * @deprecated 已废弃
+ */
 const renderer = Renderer.getRenderer()
 renderer.screenshot = async (name, data) => {
-  let img = await renderer.render(name, data)
+  const img = await renderer.render(name, data)
   return img ? segment.image(img) : img
 }
 renderer.screenshots = async (name, data) => {
   data.multiPage = true
-  let imgs = (await renderer.render(name, data)) || []
-  let ret = []
+  const imgs = (await renderer.render(name, data)) || []
+  const ret = []
   for (let img of imgs) {
     ret.push(img ? segment.image(img) : img)
   }

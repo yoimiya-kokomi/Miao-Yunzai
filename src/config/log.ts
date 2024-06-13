@@ -1,8 +1,7 @@
 import log4js from 'log4js'
 import chalk from 'chalk'
 import cfg from './config.js'
-import fs from 'node:fs'
-
+import { mkdirSync } from 'node:fs'
 
 /**
  * 创建日志
@@ -86,27 +85,18 @@ function createLog() {
 /**
 * 设置日志样式
 */
-export function setLogger() {
-
+export function loggerInit() {
   /**
    * 
    */
-  let file = './logs'
-
-  /**
-   * 
-   */
-  if (!fs.existsSync(file)) {
-    fs.mkdirSync(file, {
-      'recursive': true
-    })
-  }
+  mkdirSync('./logs', {
+    'recursive': true
+  })
 
   /**
    * 全局变量 logger 
    */
   global.logger = createLog() as any
-
   logger.chalk = chalk
   logger.red = chalk.red
   logger.green = chalk.green

@@ -7,6 +7,10 @@ interface EventTypeBase {
    */
   isMaster: boolean;
   /**
+   * 是否是管理员
+   */
+  // isAdmin: boolean;
+  /**
    * 是否是群里
    */
   isGroup: boolean;
@@ -21,11 +25,9 @@ interface EventTypeBase {
    */
   reply: (...arg: any[]) => Promise<any>;
   /**
-   * @deprecated 已废弃
    */
   file: any;
   /**
-   * @deprecated 已废弃
    */
   bot: typeof Client.prototype;
   /** 
@@ -49,7 +51,11 @@ interface EventTypeGroup extends EventTypeBase, GroupMessage {
    */
   group_id: number;
   /**
-   * @deprecated 已废弃
+   * 群名
+   */
+  group_name:string
+  /**
+   * 
    */
   group: {
     is_owner: any;

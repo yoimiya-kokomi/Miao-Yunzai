@@ -1,15 +1,30 @@
-import Renderer from "../renderer/Renderer.js"
 import os from "node:os"
 import lodash from "lodash"
-import puppeteer, { Browser } from "puppeteer"
-// 暂时保留对原config的兼容
+import puppeteer, { Browser, PuppeteerLaunchOptions } from "puppeteer"
+/**
+ * 
+ */
+import Renderer from "../renderer/Renderer.js"
+/**
+ * 暂时保留对原config的兼容
+ */
 import { ConfigController as cfg } from "../../config/index.js"
 
+/**
+ * 
+ */
 const _path = process.cwd()
 
-// mac地址
+
+/**
+ * mac地址
+ */
 let mac = ""
 
+/**
+ * 
+ * @deprecated 已废弃
+ */
 export default class Puppeteer extends Renderer {
   browser: false | Browser = false
   lock = false
@@ -27,7 +42,11 @@ export default class Puppeteer extends Renderer {
    * 
    * @param config 
    */
-  constructor(config) {
+  constructor(config?: PuppeteerLaunchOptions & {
+    chromiumPath: string
+    puppeteerWS: any
+    puppeteerTimeout: any
+  }) {
     /**
      * 
      */
@@ -182,16 +201,16 @@ export default class Puppeteer extends Renderer {
    * @param data.pageGotoParams 页面goto时的参数
    * @return img 不做segment包裹
    */
-  async screenshot(name, data: any = {}) {
+  async screenshot(name:string, data: any = {}) {
     if (!await this.browserInit())
       return false
     const pageHeight = data.multiPageHeight || 4000
 
-    let savePath = this.dealTpl(name, data)
+    const savePath = this.dealTpl(name, data)
     if (!savePath) return false
 
     let buff: any = ""
-    let start = Date.now()
+    const start = Date.now()
 
     let ret = []
     this.shoting.push(name)
@@ -213,16 +232,16 @@ export default class Puppeteer extends Renderer {
 
     try {
       const page = await this.browser.newPage()
-      let pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
+      const pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
       await page.goto(`file://${_path}${lodash.trim(savePath, ".")}`, pageGotoParams)
-      let body = await page.$("#container") || await page.$("body")
+      const body = await page.$("#container") || await page.$("body")
 
       // 计算页面高度
       const boundingBox = await body.boundingBox()
       // 分页数
       let num = 1
 
-      let randData = {
+      const randData = {
         type: data.imgType || "jpeg",
         omitBackground: data.omitBackground || false,
         quality: data.quality || 90,
@@ -322,10 +341,10 @@ export default class Puppeteer extends Renderer {
   }
 
   /**
-   * 
+   * 停止
    * @param browser 
    */
-  async stop(browser) {
+  async stop(browser: Browser) {
     try {
       await browser.close()
     } catch (err) {

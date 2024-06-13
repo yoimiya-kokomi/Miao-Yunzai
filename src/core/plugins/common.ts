@@ -10,9 +10,9 @@
  * @param msg 消息
  * @param uin 指定bot发送，默认为Bot
  */
-export async function relpyPrivate(userId, msg, uin = Bot.uin) {
+export async function relpyPrivate(userId: number | string, msg, uin = Bot.uin) {
   userId = Number(userId)
-  let friend = Bot.fl.get(userId)
+  const friend = Bot.fl.get(userId)
   if (friend) {
     logger.mark(`发送好友消息[${friend.nickname}](${userId})`)
     return await Bot[uin]
@@ -58,13 +58,13 @@ export async function makeForwardMsg(
 
   let forwardMsg:
     | {
-        user_id: number
-        nickname: string
-        message: any
-      }[]
+      user_id: number
+      nickname: string
+      message: any
+    }[]
     | {
-        data: any
-      } = []
+      data: any
+    } = []
 
   /**
    *

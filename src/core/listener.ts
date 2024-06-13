@@ -29,7 +29,15 @@ export default class EventListener {
    * @param data.event 监听的事件
    * @param data.once 是否只监听一次
    */
-  constructor({ prefix, event, once }) {
+  constructor({
+    prefix,
+    event,
+    once
+  }: {
+    prefix?: string
+    event?: any
+    once?: any
+  }) {
     prefix && (this.prefix = prefix)
     once && (this.once = once)
     this.event = event

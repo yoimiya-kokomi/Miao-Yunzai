@@ -1,14 +1,7 @@
-/**
- * **********
- * 配置初始化
- * **********
- */
 import './init.js'
-/**
- * 引入模块
- */
 import { plugin, segment, Client } from './core/index.js'
 import { Renderer } from './utils/index.js'
+import { createQQ } from './config/qq.js'
 /**
  * global.plugin
  */
@@ -22,6 +15,12 @@ global.segment = segment
  */
 global.Renderer = Renderer
 /**
- * run
+ *
  */
-await Client.run()
+setTimeout(async () => {
+  await createQQ()
+  /**
+   * run
+   */
+  await Client.run()
+}, 0)

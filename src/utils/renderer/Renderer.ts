@@ -1,8 +1,12 @@
 import template from 'art-template'
 import chokidar from 'chokidar'
 import path from 'node:path'
-import fs from 'node:fs'
+import fs, { writeFileSync } from 'node:fs'
 
+/**
+ *
+ * @deprecated 已废弃
+ */
 export default class Renderer {
   id = null
   type = null
@@ -10,14 +14,13 @@ export default class Renderer {
   dir = './temp/html'
   html = {}
   watcher = {}
-
   /**
    * 渲染器
    * @param data.id 渲染器ID
    * @param data.type 渲染器类型
    * @param data.render 渲染器入口
    */
-  constructor(data) {
+  constructor(data?: { id?: any; type?: any; render?: any }) {
     /** 渲染器ID */
     this.id = data.id || 'renderer'
     /** 渲染器类型 */
@@ -26,13 +29,12 @@ export default class Renderer {
     this.render = this[data.render || 'render']
     this.createDir(this.dir)
   }
-
   /**
    * 创建文件夹
    * @param dirname
    * @returns
    */
-  createDir(dirname) {
+  createDir(dirname: string) {
     if (fs.existsSync(dirname)) {
       return true
     } else {
@@ -42,7 +44,6 @@ export default class Renderer {
       }
     }
   }
-
   /**
    * 模板
    * @param name
@@ -50,8 +51,8 @@ export default class Renderer {
    * @returns
    */
   dealTpl(name, data) {
-    let { tplFile, saveId = name } = data
-    let savePath = `./temp/html/${name}/${saveId}.html`
+    const { tplFile, saveId = name } = data
+    const savePath = `./temp/html/${name}/${saveId}.html`
     /** 读取html模板 */
     if (!this.html[tplFile]) {
       this.createDir(`./temp/html/${name}`)
@@ -63,18 +64,14 @@ export default class Renderer {
       }
       this.watch(tplFile)
     }
-
     data.resPath = `./resources/`
-
     /** 替换模板 */
-    let tmpHtml = template.render(this.html[tplFile], data)
-
+    const tmpHtml = template.render(this.html[tplFile], data)
     /** 保存模板 */
-    fs.writeFileSync(savePath, tmpHtml)
+    writeFileSync(savePath, tmpHtml)
     logger.debug(`[图片生成][使用模板] ${savePath}`)
     return savePath
   }
-
   /**
    * 监听配置文件
    * @param tplFile

@@ -11,7 +11,7 @@ export default class noticeEvent extends EventListener {
     /**
      *
      */
-    super({ event: 'notice', prefix: undefined, once: undefined })
+    super({ event: 'notice' })
   }
 
   /**
