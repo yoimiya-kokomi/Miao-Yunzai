@@ -2,6 +2,7 @@ import { segment as se } from 'icqq'
 import { RedisClientType } from 'redis'
 import { Client, plugin as p } from './core/index.js'
 import chalk, { type ChalkInstance } from 'chalk'
+import Ren from './utils/renderer/Renderer.js'
 
 /**
  *
@@ -80,4 +81,9 @@ declare global {
     ChalkInstanceType & {
       chalk: ChalkInstance
     }
+  /**
+   *
+   * @deprecated 不推荐使用，未来将废弃
+   */
+  var Renderer: typeof Ren
 }

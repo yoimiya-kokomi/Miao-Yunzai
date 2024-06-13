@@ -96,7 +96,7 @@ export class Plugin {
    * @param priority 优先级，数字越小优先级越高
    * @param rule 优先级，数字越小优先级越高
    */
-  constructor(init?: PluginSuperType) {
+  constructor(init: PluginSuperType = {}) {
     const {
       event,
       priority = 5000,

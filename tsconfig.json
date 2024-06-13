@@ -50,5 +50,5 @@
     "transpileOnly": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": ["src", "image", "plugins"]
+  "include": ["src", "image", "lib", "renderers", "plugins"]
 }

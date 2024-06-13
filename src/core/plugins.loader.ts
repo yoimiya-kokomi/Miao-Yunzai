@@ -100,7 +100,7 @@ class PluginsLoader {
       for (const app of apps) {
         if (!app.isFile()) continue
         // 解析js和ts
-        if (!/(.js|.ts|.jsx|.tsx)$/.test(app.name)) continue
+        if (!/(.js|.ts)$/.test(app.name)) continue
         ret.push({
           name: `${tmp.name}/${app.name}`,
           path: `${tmp.path}/${app.name}`
