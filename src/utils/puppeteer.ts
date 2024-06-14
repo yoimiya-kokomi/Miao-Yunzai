@@ -121,10 +121,7 @@ export class Puppeteer {
    * @param timeout 响应检查
    * @returns buffer
    */
-  async render(
-    htmlPath: string | Buffer | URL,
-    Options?: ScreenshotFileOptions
-  ) {
+  async render(htmlPath: string, Options?: ScreenshotFileOptions) {
     if (!(await this.isStart())) return false
     try {
       const page = await this.#browser?.newPage().catch(err => {

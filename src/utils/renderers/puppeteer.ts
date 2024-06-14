@@ -43,9 +43,9 @@ export default class Puppeteer extends Renderer {
    * @param config 
    */
   constructor(config?: PuppeteerLaunchOptions & {
-    chromiumPath: string
-    puppeteerWS: any
-    puppeteerTimeout: any
+    chromiumPath?: string
+    puppeteerWS?: any
+    puppeteerTimeout?: any
   }) {
     /**
      * 

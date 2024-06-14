@@ -10,9 +10,9 @@ import Puppeteer from './puppeteer.js'
  * @returns renderer.render 渲染入口
  */
 export default function (config?: PuppeteerLaunchOptions & {
-  chromiumPath: string;
-  puppeteerWS: any;
-  puppeteerTimeout: any;
+  chromiumPath?: string;
+  puppeteerWS?: any;
+  puppeteerTimeout?: any;
 }) {
   // TODO Puppeteer待简化重构
   return new Puppeteer(config)
