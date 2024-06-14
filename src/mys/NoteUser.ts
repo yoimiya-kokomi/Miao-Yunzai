@@ -18,7 +18,7 @@ export default class NoteUser extends BaseModel {
 
   qq = null
 
-  mysUsers = null
+  mysUsers: any = {}
 
   _map = null
   /**
@@ -343,7 +343,7 @@ export default class NoteUser extends BaseModel {
     this.save()
   }
 
-  _games = null
+  _games = {}
 
   /**
    *
@@ -352,6 +352,9 @@ export default class NoteUser extends BaseModel {
    */
   getGameDs(game = 'gs') {
     game = this.gameKey(game)
+    if (!this._games) {
+      this._games = {}
+    }
     if (!this._games[game]) {
       this._games[game] = {
         uid: '',
