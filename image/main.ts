@@ -1,10 +1,14 @@
+import '../src/init/modules.js'
+import '../src/init/logger.js'
+import '../src/init/config.js'
+import '../src/init/redis.js'
+import './tailwindcss.js'
 import Koa from 'koa'
 import KoaStatic from 'koa-static'
 import Router from 'koa-router'
 import { Component } from 'yunzai/utils'
 import { readdirSync } from 'fs'
 import { join } from 'path'
-import './tailwindcss.js'
 
 const Com = new Component()
 const app = new Koa()
