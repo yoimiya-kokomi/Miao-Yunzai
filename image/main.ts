@@ -22,7 +22,12 @@ const flies = readdirSync(join(process.cwd(), 'plugins'), {
 
 // 解析路由
 for (const flie of flies) {
-  const plugins = readdirSync(join(flie.path, flie.name), {
+  const dir = flie?.path ?? flie?.parentPath
+  if (!dir) {
+    console.log('flie.name', flie.name, '识别错误')
+    continue
+  }
+  const plugins = readdirSync(join(dir, flie.name), {
     withFileTypes: true
   }).filter(flie => flie.isFile())
   for (const plugin of plugins) {

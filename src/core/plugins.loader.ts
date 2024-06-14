@@ -306,12 +306,16 @@ class PluginsLoader {
      */
     await Runtime.init(e)
 
+    /**
+     *
+     */
     const priority = []
 
     /**
      *
      */
     for (const i of this.priority) {
+      // tudo e 为参数将废弃
       const p = new i.class(e)
       p.e = e
       /**
@@ -373,6 +377,7 @@ class PluginsLoader {
      */
     for (const plugin of priority) {
       if (!plugin.accept) continue
+      // e 引入将丢失
       const res = await plugin.accept(e)
       // 结束所有
       if (res == 'return') return
