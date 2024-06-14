@@ -42,7 +42,7 @@ for (const flie of flies) {
           router.get(url, ctx => {
             ctx.body = Com.create(item.element, {
               ...item.options,
-              html_head: `${item?.html_head ?? ''}<link rel="stylesheet" href="/output.css">`,
+              html_head: `${item?.options?.html_head ?? ''}<link rel="stylesheet" href="/output.css">`,
               file_create: false
             })
           })
