@@ -3,7 +3,6 @@ import { sleep } from '../../utils/common.js'
 import inquirer from 'inquirer'
 import lodash from 'lodash'
 import fetch from 'node-fetch'
-
 /**
  * 监听上线事件
  */
@@ -12,7 +11,7 @@ let inSlider = false
 /**
  *
  */
-export default class loginEvent extends EventListener {
+export class EventLogin extends EventListener {
   client = null
 
   /**

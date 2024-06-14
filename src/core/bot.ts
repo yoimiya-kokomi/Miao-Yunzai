@@ -11,6 +11,10 @@ import cfg from '../config/config.js'
  */
 import ListenerLoader from './events.loader.js'
 /**
+ *
+ */
+import PluginsLoader from './plugins.loader.js'
+/**
  * 扩展
  */
 import { Client as IcqqClient } from 'icqq'
@@ -35,17 +39,26 @@ export class Client extends IcqqClient {
    */
   static async run() {
     const bot = new Client(cfg.bot)
-    /** 加载监听事件 */
+
+    /**
+     * 加载监听事件
+     */
     await ListenerLoader.load(bot)
 
-    /** 跳过登录 */
+    /**
+     * 跳过登录
+     */
     if (cfg.bot.skip_login) return await this.skip_login(bot)
 
-    /** 正常的登录 */
+    /**
+     * 正常的登录
+     */
     await bot.login(cfg.qq, cfg.pwd)
     bot[bot.uin] = bot
 
-    /** 全局变量 bot */
+    /**
+     * 全局变量 bot
+     */
     global.Bot = bot
     return bot
   }
@@ -58,10 +71,18 @@ export class Client extends IcqqClient {
   static async skip_login(bot) {
     bot.uin = 88888
     bot[bot.uin] = bot
-    /** 全局变量 bot */
+    /**
+     * 全局变量 bot
+     */
     global.Bot = bot
-    /** 加载插件 */
-    return await (await import('./plugins.loader.js')).default.load()
+    /**
+     * 加载插件
+     */
+    await PluginsLoader.load()
+    /**
+     *
+     */
+    return
   }
 }
 

@@ -1,10 +1,6 @@
-import EventLogin from './events/login'
-import EventMessage from './events/message'
-import EventNotice from './events/notice'
-import EventOffine from './events/offline'
-import EventOnline from './events/online'
-export { EventLogin }
-export { EventMessage }
-export { EventNotice }
-export { EventOffine }
-export { EventOnline }
+export { EventLogin } from './events/login'
+export { EventMessage } from './events/message'
+export { EventNotice } from './events/notice'
+export { EventOffline } from './events/offline'
+export { EventOnline } from './events/online'
+export { EventRequest } from './events/request'

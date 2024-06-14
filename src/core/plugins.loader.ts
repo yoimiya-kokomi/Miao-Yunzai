@@ -47,6 +47,21 @@ class PluginsLoader {
   /**
    *
    */
+  msgThrottle = {}
+
+  /**
+   *
+   */
+  pluginCount = null
+
+  /**
+   * 星铁命令前缀
+   */
+  srReg = /^#?(\*|星铁|星轨|穹轨|星穹|崩铁|星穹铁道|崩坏星穹铁道|铁道)+/
+
+  /**
+   *
+   */
   eventMap = {
     /**
      *
@@ -61,13 +76,6 @@ class PluginsLoader {
      */
     request: ['post_type', 'request_type', 'sub_type']
   }
-
-  msgThrottle = {}
-
-  /**
-   * 星铁命令前缀
-   */
-  srReg = /^#?(\*|星铁|星轨|穹轨|星穹|崩铁|星穹铁道|崩坏星穹铁道|铁道)+/
 
   /**
    *
@@ -113,11 +121,6 @@ class PluginsLoader {
   }
 
   /**
-   *
-   */
-  pluginCount = null
-
-  /**
    * 监听事件加载
    * @param isRefresh 是否刷新
    */
@@ -149,7 +152,7 @@ class PluginsLoader {
   }
 
   /**
-   *
+   * 引入插件
    * @param file
    * @param packageErr
    */
@@ -175,33 +178,65 @@ class PluginsLoader {
   }
 
   /**
-   *
+   * 解析插件
    * @param file
    * @param p
    * @returns
    */
   async loadPlugin(file, p) {
     if (!p?.prototype) return
+
+    /**
+     *
+     */
     this.pluginCount++
+
+    /**
+     *
+     */
     const plugin = new p()
+
+    /**
+     *
+     */
     logger.debug(`加载插件 [${file.name}][${plugin.name}]`)
-    /** 执行初始化，返回 return 则跳过加载 */
+
+    /**
+     * 执行初始化，返回 return 则跳过加载
+     */
     if (plugin.init && (await plugin.init()) == 'return') return
-    /** 初始化定时任务 */
+
+    /**
+     * 初始化定时任务
+     */
     this.collectTask(plugin.task)
+
+    /**
+     *
+     */
     this.priority.push({
       class: p,
       key: file.name,
       name: plugin.name,
       priority: plugin.priority
     })
+
+    /**
+     *
+     */
     if (plugin.handler) {
+      /**
+       *
+       */
       lodash.forEach(plugin.handler, ({ fn, key, priority }) => {
+        /**
+         *
+         */
         Handler.add({
           ns: plugin.namespace || file.name,
           key,
           self: plugin,
-          property: priority || plugin.priority || 500,
+          property: priority || plugin.priority || 9999,
           fn: plugin[fn]
         })
       })
@@ -224,44 +259,73 @@ class PluginsLoader {
         `如安装后仍未解决可联系插件作者将 ${logger.red(pack)} 依赖添加至插件的package.json dependencies中，或手工安装依赖`
       )
     })
-    // logger.error('或者使用其他包管理工具安装依赖')
     logger.mark('---------------------')
   }
 
   /**
    * 处理事件
-   *
    * 参数文档 https://oicqjs.github.io/oicq/interfaces/GroupMessageEvent.html
    * @param e icqq Events
    */
   async deal(e) {
+    /**
+     *
+     */
     Object.defineProperty(e, 'bot', {
       value: Bot[e?.self_id || Bot.uin]
     })
-    /** 检查频道消息 */
+
+    /**
+     * 检查频道消息
+     */
     if (this.checkGuildMsg(e)) return
 
-    /** 冷却 */
+    /**
+     * 冷却
+     */
     if (!this.checkLimit(e)) return
-    /** 处理消息 */
+
+    /**
+     * 处理消息
+     */
     this.dealMsg(e)
-    /** 检查黑白名单 */
+
+    /**
+     * 检查黑白名单
+     */
     if (!this.checkBlack(e)) return
-    /** 处理回复 */
+
+    /**
+     * 处理回复
+     */
     this.reply(e)
-    /** 注册runtime */
+
+    /**
+     * 注册runtime
+     */
     await Runtime.init(e)
 
     const priority = []
+
+    /**
+     *
+     */
     for (const i of this.priority) {
       const p = new i.class(e)
       p.e = e
-      /** 判断是否启用功能，过滤事件 */
+      /**
+       * 判断是否启用功能，过滤事件
+       */
       if (this.checkDisable(p) && this.filtEvent(e, p)) priority.push(p)
     }
 
+    /**
+     *
+     */
     for (const plugin of priority) {
-      /** 上下文hook */
+      /**
+       * 上下文hook
+       */
       if (!plugin.getContext) continue
       const context = {
         ...plugin.getContext(),
@@ -278,7 +342,9 @@ class PluginsLoader {
       }
     }
 
-    /** 是否只关注主动at */
+    /**
+     * 是否只关注主动at
+     */
     if (!this.onlyReplyAt(e)) return
 
     // 判断是否是星铁命令，若是星铁命令则标准化处理
@@ -287,58 +353,102 @@ class PluginsLoader {
       get: () => e.game === 'sr',
       set: v => (e.game = v ? 'sr' : 'gs')
     })
+
     Object.defineProperty(e, 'isGs', {
       get: () => e.game === 'gs',
       set: v => (e.game = v ? 'gs' : 'sr')
     })
+
+    /**
+     *
+     */
     if (this.srReg.test(e.msg)) {
       e.game = 'sr'
       e.msg = e.msg.replace(this.srReg, '#星铁')
     }
 
-    /** 优先执行 accept */
-    for (const plugin of priority)
-      if (plugin.accept) {
-        const res = await plugin.accept(e)
-        if (res == 'return') return
-        if (res) break
-      }
+    /**
+     * 优先执行 accept
+     */
+    for (const plugin of priority) {
+      if (!plugin.accept) continue
+      const res = await plugin.accept(e)
+      // 结束所有
+      if (res == 'return') return
+      // 结束当前
+      if (res) break
+    }
 
-    a: for (const plugin of priority) {
-      /** 正则匹配 */
-      if (plugin.rule)
-        for (const v of plugin.rule) {
-          /** 判断事件 */
-          if (v.event && !this.filtEvent(e, v)) continue
-          if (!new RegExp(v.reg).test(e.msg)) continue
-          e.logFnc = `[${plugin.name}][${v.fnc}]`
+    for (const plugin of priority) {
+      if (!Array.isArray(plugin?.rule) || plugin.rule.length < 1) continue
 
-          if (v.log !== false)
-            logger.info(
-              `${e.logFnc}${e.logText} ${lodash.truncate(e.msg, { length: 100 })}`
-            )
+      for (const v of plugin.rule) {
+        /**
+         * 判断事件
+         */
+        if (v.event && !this.filtEvent(e, v)) continue
 
-          /** 判断权限 */
-          if (!this.filtPermission(e, v)) break a
+        /**
+         *
+         */
+        if (!new RegExp(v.reg).test(e.msg)) continue
 
-          try {
-            const start = Date.now()
-            const res = plugin[v.fnc] && (await plugin[v.fnc](e))
-            if (res !== false) {
-              /** 设置冷却cd */
-              this.setLimit(e)
-              if (v.log !== false)
-                logger.mark(
-                  `${e.logFnc} ${lodash.truncate(e.msg, { length: 100 })} 处理完成 ${Date.now() - start}ms`
-                )
-              break a
-            }
-          } catch (error) {
-            logger.error(`${e.logFnc}`)
-            logger.error(error.stack)
-            break a
-          }
+        /**
+         *
+         */
+        e.logFnc = `[${plugin.name}][${v.fnc}]`
+
+        /**
+         *
+         */
+        if (v.log !== false) {
+          logger.info(
+            `${e.logFnc}${e.logText} ${lodash.truncate(e.msg, { length: 100 })}`
+          )
         }
+
+        /**
+         * 判断权限
+         */
+        if (!this.filtPermission(e, v)) break
+
+        /**
+         *
+         */
+        try {
+          const start = Date.now()
+          /**
+           *
+           */
+          const res = plugin[v.fnc] && (await plugin[v.fnc](e))
+
+          /**
+           * res 不是  false , 结束匹配
+           * 即 return false 的时候。继续匹配。
+           * tudo
+           * 匹配一次之后就不要再匹配，减少循环。
+           * 因此，修改为 仅有当 return true的时候
+           * 才会继续匹配
+           *
+           */
+          if (res !== false) {
+            /**
+             * 设置冷却cd
+             */
+            this.setLimit(e)
+            if (v.log !== false) {
+              logger.mark(
+                `${e.logFnc} ${lodash.truncate(e.msg, { length: 100 })} 处理完成 ${Date.now() - start}ms`
+              )
+            }
+            break
+          }
+        } catch (error) {
+          logger.error(`${e.logFnc}`)
+          logger.error(error.stack)
+          break
+        }
+      }
     }
   }
 

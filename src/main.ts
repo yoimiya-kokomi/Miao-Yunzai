@@ -15,7 +15,8 @@ global.segment = segment
  */
 global.Renderer = Renderer
 /**
- *
+ * 确保所有微任务做好准备后
+ * 再进行宏任务
  */
 setTimeout(async () => {
   await createQQ()

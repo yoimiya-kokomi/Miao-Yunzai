@@ -4,6 +4,9 @@ import { join } from 'node:path'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs'
 import { CONFIG_DEFAULT_PATH, CONFIG_INIT_PATH } from './system.js'
 
+/**
+ * 配置文件初始化
+ */
 export function configInit() {
   const path = CONFIG_INIT_PATH
   const pathDef = CONFIG_DEFAULT_PATH
@@ -11,7 +14,7 @@ export function configInit() {
   mkdirSync(join(process.cwd(), path), {
     'recursive': true
   })
-  for (let file of files) {
+  for (const file of files) {
     if (!existsSync(`${path}${file}`)) {
       copyFileSync(`${pathDef}${file}`, `${path}${file}`)
     }
@@ -26,7 +29,6 @@ export function configInit() {
  * ********
  */
 class ConfigController {
-
   /**
    * 
    */
@@ -55,8 +57,8 @@ class ConfigController {
    * icqq配置
    */
   get bot() {
-    let bot = this.getConfig('bot')
-    let defbot = this.getdefSet('bot')
+    const bot = this.getConfig('bot')
+    const defbot = this.getdefSet('bot')
     const Config = { ...defbot, ...bot }
     Config.platform = this.getConfig('qq').platform
     /**
@@ -182,16 +184,13 @@ class ConfigController {
    * @param name 名称
    */
   getYaml(type, name) {
-    let file = `config/${type}/${name}.yaml`
-    let key = `${type}.${name}`
+    const file = `config/${type}/${name}.yaml`
+    const key = `${type}.${name}`
     if (this.config[key]) return this.config[key]
-
     this.config[key] = YAML.parse(
       readFileSync(file, 'utf8')
     )
-
     this.watch(file, name, type)
-
     return this.config[key]
   }
 
@@ -228,6 +227,7 @@ class ConfigController {
 
   /**
    * 修改日志等级
+   * @deprecated 已废弃
    */
   async change_bot() {
     //

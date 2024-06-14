@@ -6,7 +6,7 @@ import { BOT_NAME } from '../../config/system.js'
 /**
  * 监听下线事件
  */
-export default class offlineEvent extends EventListener {
+export class EventOffline extends EventListener {
   /**
    *
    */

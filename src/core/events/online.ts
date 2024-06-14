@@ -6,7 +6,7 @@ import { BOT_NAME } from '../../config/system.js'
 /**
  * 监听上线事件
  */
-export default class onlineEvent extends EventListener {
+export class EventOnline extends EventListener {
   /**
    *
    */

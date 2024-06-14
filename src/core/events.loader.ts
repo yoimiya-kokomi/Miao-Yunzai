@@ -1,36 +1,36 @@
+import { type Client } from 'icqq'
 import lodash from 'lodash'
+import * as Events from './events.js'
 
 /**
  * 加载监听事件
  */
 class ListenerLoader {
-  client = null
+  /**
+   *
+   */
+  client: Client = null
 
   /**
    *
    * @param listener
-   * @param File
+   * @param name
    * @returns
    */
-  init = (listener, File: string) => {
+  init = (Listener, name: string) => {
     try {
-      if (!listener.default) return
-
       /**
        *
        */
-      listener = new listener.default()
-
+      const listener = new Listener()
       /**
        *
        */
       listener.client = this.client
-
       /**
        *
        */
       const on = listener.once ? 'once' : 'on'
-
       if (lodash.isArray(listener.event)) {
         listener.event.forEach(type => {
           const e = listener[type] ? type : 'execute'
@@ -42,9 +42,9 @@ class ListenerLoader {
           listener[e](event)
         )
       }
-    } catch (e) {
-      logger.mark(`监听事件错误：${File}`)
-      logger.error(e)
+    } catch (err) {
+      logger.mark(`监听事件错误：${name}`)
+      logger.error(err)
     }
   }
 
@@ -52,22 +52,11 @@ class ListenerLoader {
    * 监听事件加载
    * @param client Bot示例
    */
-  async load(client) {
+  async load(client: Client) {
     this.client = client
-
-    /**
-     * ****************
-     * 不可以加载未知代码
-     * *****************
-     * 防止被代码植入
-     */
-
-    this.init(await import('./events/login.js'), './events/login.js')
-    this.init(await import('./events/message.js'), './events/message.js')
-    this.init(await import('./events/notice.js'), './events/notice.js')
-    this.init(await import('./events/offline.js'), './events/offline.js')
-    this.init(await import('./events/online.js'), './events/online.js')
-    this.init(await import('./events/request.js'), './events/request.js')
+    for (const key in Events) {
+      this.init(Events[key], key)
+    }
   }
 }
 

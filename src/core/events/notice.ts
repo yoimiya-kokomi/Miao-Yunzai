@@ -3,7 +3,7 @@ import EventListener from '../listener.js'
 /**
  * 监听群聊消息
  */
-export default class noticeEvent extends EventListener {
+export class EventNotice extends EventListener {
   /**
    *
    */
