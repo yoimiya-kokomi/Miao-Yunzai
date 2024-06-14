@@ -16,7 +16,7 @@ function createLog() {
         type: 'console',
         layout: {
           type: 'pattern',
-          pattern: '%[[MiaoYz][%d{hh:mm:ss.SSS}][%4.4p]%] %m'
+          pattern: '%[[MYZ-V4][%d{hh:mm:ss.SSS}][%4.4p]%] %m'
         }
       },
       command: {

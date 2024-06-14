@@ -1,37 +1,21 @@
-import { existsSync } from 'fs'
-import { join } from 'path'
-import { configInit } from './config/config'
-import { loggerInit } from './config/log'
-import { BOT_NAME } from './config'
-import { redisInit } from './config/redis'
+import './init/modules.js'
+import './init/logger.js'
 import { promises } from 'node:fs'
 import yaml from 'yaml'
+import { configInit } from './config/config'
+import { BOT_NAME } from './config'
+import { redisInit } from './config/redis'
 import { CONFIG_INIT_PATH } from './config/system.js'
 import { checkRun } from './config/check.js'
-
 /**
- * 检查node_modules
+ *
  */
-if (!existsSync(join(process.cwd(), './node_modules'))) {
-  console.log('未安装依赖。。。。')
-  console.log('请先运行命令：pnpm install -P 安装依赖')
-  process.exit()
-}
+logger.mark(`${BOT_NAME} 启动中...`)
 
 /**
  * 初始化配置
  */
 configInit()
-
-/**
- * 日志初始化
- */
-loggerInit()
-
-/**
- *
- */
-logger.mark(`${BOT_NAME} 启动中...`)
 
 /**
  *  初始化客户端
