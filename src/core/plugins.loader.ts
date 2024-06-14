@@ -8,6 +8,7 @@ import moment from 'moment'
 import path from 'node:path'
 import Runtime from './plugins/runtime.js'
 import Handler from './plugins/handler.js'
+import { EventType } from './plugins/types.js'
 
 /**
  * 加载插件
@@ -267,7 +268,7 @@ class PluginsLoader {
    * 参数文档 https://oicqjs.github.io/oicq/interfaces/GroupMessageEvent.html
    * @param e icqq Events
    */
-  async deal(e) {
+  async deal(e: EventType) {
     /**
      *
      */
@@ -658,7 +659,7 @@ class PluginsLoader {
    * 处理回复,捕获发送失败异常
    * @param e
    */
-  reply(e) {
+  reply(e: EventType) {
     /**
      *
      */
@@ -927,7 +928,7 @@ class PluginsLoader {
    * @param e
    * @returns
    */
-  checkLimit(e) {
+  checkLimit(e: EventType) {
     /** 禁言中 */
     if (e.isGroup && e?.group?.mute_left > 0) return false
     /**
@@ -938,7 +939,7 @@ class PluginsLoader {
     /**
      *
      */
-    let config = cfg.getGroup(e.group_id)
+    let config = cfg.getGroup(String(e.group_id))
 
     /**
      *
@@ -984,7 +985,7 @@ class PluginsLoader {
    * @param e
    * @returns
    */
-  setLimit(e) {
+  setLimit(e: EventType) {
     /**
      *
      */
@@ -992,7 +993,7 @@ class PluginsLoader {
     /**
      *
      */
-    let config = cfg.getGroup(e.group_id)
+    let config = cfg.getGroup(String(e.group_id))
 
     /**
      *
@@ -1017,10 +1018,10 @@ class PluginsLoader {
    * @param e
    * @returns
    */
-  onlyReplyAt(e) {
+  onlyReplyAt(e: EventType) {
     if (!e.message || e.isPrivate) return true
 
-    let groupCfg = cfg.getGroup(e.group_id)
+    let groupCfg = cfg.getGroup(String(e.group_id))
 
     /** 模式0，未开启前缀 */
     if (groupCfg.onlyReplyAt == 0 || !groupCfg.botAlias) return true
@@ -1042,7 +1043,7 @@ class PluginsLoader {
    * @param e
    * @returns
    */
-  checkGuildMsg(e) {
+  checkGuildMsg(e: EventType) {
     return cfg.getOther().disableGuildMsg && e.detail_type == 'guild'
   }
 
@@ -1051,7 +1052,7 @@ class PluginsLoader {
    * @param e
    * @returns
    */
-  checkBlack(e) {
+  checkBlack(e: EventType) {
     /**
      *
      */

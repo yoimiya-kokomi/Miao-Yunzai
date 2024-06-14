@@ -1,5 +1,6 @@
-import { type GroupMessage, Client } from 'icqq'
-import { PrivateMessage } from 'oicq'
+import { type GroupMessage } from 'icqq'
+// import { Client } from 'icqq'
+// import { PrivateMessage } from 'oicq'
 
 interface EventTypeBase {
   /**
@@ -29,7 +30,7 @@ interface EventTypeBase {
   file: any;
   /**
    */
-  bot: typeof Client.prototype;
+  bot: any;
   /** 
    * 
    */
@@ -42,10 +43,38 @@ interface EventTypeBase {
    * 
    */
   logText: any;
-}
+  /**
+   * 
+   */
+  isSr?: boolean
+  /**
+   * 
+   */
+  isGs?: boolean
+  /**
+   * 
+   */
+  self_id?: any
+  /**
+   * 
+   */
+  game?: any
 
-interface EventTypeGroup extends EventTypeBase, GroupMessage {
-  isGroup: true;
+  /**
+   * 
+   */
+  logFnc?: any
+
+  /**
+   * 
+   */
+  detail_type?: any
+
+  /**
+   * 
+   */
+  at?: any
+
   /**
    * 群号
    */
@@ -53,7 +82,7 @@ interface EventTypeGroup extends EventTypeBase, GroupMessage {
   /**
    * 群名
    */
-  group_name:string
+  group_name: string
   /**
    * 
    */
@@ -62,18 +91,48 @@ interface EventTypeGroup extends EventTypeBase, GroupMessage {
     recallMsg: (...arg: any[]) => any;
     getMemberMap: any;
     quit: any;
+    mute_left: any
+
+    pickMember: any
+
+
+    sendMsg: any
   };
   /**
    * 
    */
   atBot: any;
+
+  /**
+   * 
+   */
+
+  isPrivate?: any
+
+  /**
+   * 
+   */
+  hasAlias?: any
+
+  /**
+   * 
+   */
+
+  replyNew?: any
+
+  /**
+   * 
+   */
+
+  isGuild?: any
+
+  /**
+   * 
+   */
+  friend?: any
 }
 
-interface EventTypePrivate extends EventTypeBase, PrivateMessage {
-  isGroup: false;
-}
-
-export type EventType = EventTypeGroup | EventTypePrivate;
+export interface EventType extends EventTypeBase, GroupMessage { }
 
 /**
  * 函数式回调类型
