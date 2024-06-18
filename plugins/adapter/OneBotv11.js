@@ -250,7 +250,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
           group_name: `${guild.guild_name}-${channel.channel_name}`,
         })
     } catch (err) {
-      Bot.makeLog("error", ["获取频道列表错误", err])
+      //Bot.makeLog("error", ["获取频道列表错误", err])
     }
     return array
   }

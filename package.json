@@ -37,7 +37,7 @@
     "sqlite3": "5.1.6",
     "strip-ansi": "^7.1.0",
     "ulid": "^2.3.0",
-    "ws": "^8.17.0",
+    "ws": "^8.17.1",
     "yaml": "^2.4.5"
   },
   "devDependencies": {
