@@ -96,7 +96,7 @@ bash <(curl -L https://gitee.com/TimeRainStarSky/Yunzai/raw/main/lib/tools/docke
 | CMD | 启动命令 | tsyz |
 | CMDPATH | 命令文件夹 | /usr/local/bin |
 | DKNAME | 容器名 | Yunzai |
-| DKURL | Docker 源 | docker.nju.edu.cn |
+| DKURL | Docker 源 | docker.m.daocloud.io |
 | GITURL | GIT 源 | https://gitee.com/TimeRainStarSky/Yunzai |
 | APTURL | APT 源 | mirrors.ustc.edu.cn |
 | APTDEP | APT 依赖 | chromium fonts-lxgw-wenkai fonts-noto-color-emoji |

@@ -1,5 +1,5 @@
 #TRSS Yunzai Docker 安装脚本 作者：时雨🌌星空
-NAME=v1.0.0;VERSION=202405290
+NAME=v1.0.0 VERSION=202406200
 R="[1;31m" G="[1;32m" Y="[1;33m" C="[1;36m" B="[1;m" O="[m"
 echo "$B———————————————————————————
 $R TRSS$Y Yunzai$G Docker$C Script$O
@@ -13,7 +13,7 @@ DIR="${DIR:-$HOME/Yunzai}"
 CMD="${CMD:-tsyz}"
 CMDPATH="${CMDPATH:-/usr/local/bin}"
 DKNAME="${DKNAME:-Yunzai}"
-DKURL="${DKURL:-docker.nju.edu.cn}"
+DKURL="${DKURL:-docker.m.daocloud.io}"
 GITURL="${GITURL:-https://gitee.com/TimeRainStarSky/Yunzai}"
 APTURL="${APTURL:-mirrors.ustc.edu.cn}"
 APTDEP="${APTDEP:-chromium fonts-lxgw-wenkai fonts-noto-color-emoji}"
@@ -53,11 +53,12 @@ $R! 下载失败，5秒后切换镜像源$O"
   sleep 5
   ((N++))
   case "$N" in
-    1)DKURL="docker.nju.edu.cn";;
+    1)DKURL="docker.m.daocloud.io";;
     2)DKURL="mirror.ccs.tencentyun.com";;
-    3)DKURL="mirror.baidubce.com";;
-    4)DKURL="dockerproxy.com";;
-    5)DKURL="docker.m.daocloud.io";;
+    3)DKURL="dockerhub.timeweb.cloud";;
+    4)DKURL="mirror.baidubce.com";;
+    5)DKURL="docker.nju.edu.cn";;
+    6)DKURL="dockerproxy.com";;
     *)DKURL="docker.io";N=0
   esac
 done
