@@ -9,6 +9,8 @@ log_object: true
 url: http://localhost:2536
 # 服务器端口
 port: 2536
+# 服务器缺省跳转地址
+redirect: https://github.com/TimeRainStarSky/Yunzai
 
 # 自动更新时间
 update_time: 1440
