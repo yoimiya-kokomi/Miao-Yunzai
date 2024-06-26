@@ -105,7 +105,7 @@ export default class MysInfo {
     }
 
     let matchUid = (msg = '') => {
-      let ret = /([1-9]|18)[0-9]{8}/g.exec(msg)
+      let ret = /(18|[1-9])[0-9]{8}/g.exec(msg)
       if (!ret) return false
       return ret[0]
     }
