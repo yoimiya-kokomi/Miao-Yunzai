@@ -101,7 +101,7 @@ export class user extends plugin {
   /** 绑定uid */
   saveUid() {
     if (!this.e.msg) return
-    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
+    let uid = this.e.msg.match(/(18|[1-9])[0-9]{8}/g)
     if (!uid) {
       this.reply("原神UID输入错误", false, { at: true })
       return
@@ -114,7 +114,7 @@ export class user extends plugin {
   /** 绑定星铁uid */
   saveSrUid() {
     if (!this.e.msg) return
-    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
+    let uid = this.e.msg.match(/(18|[1-9])[0-9]{8}/g)
     if (!uid) {
       this.reply("星铁UID输入错误", false, { at: true })
       return
