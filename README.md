@@ -8,7 +8,7 @@
 
 ## 使用方法
 
-[！点击阅读Miao-Yunzai文档了解更多](https://ningmengchongshui.github.io/Miao-Yunzai-Docs/)
+[ ! 点击阅读Yunzai文档了解更多](https://yunzai-org.github.io/docs/)
 
 > 必要环境 Windows/Linux + Chrome/Chromium/Edge
 
