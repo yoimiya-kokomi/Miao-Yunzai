@@ -12,7 +12,7 @@ export class exchange extends plugin {
       priority: 1000,
       rule: [
         {
-          reg: /^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3)?(直播|前瞻)?兑换码$/,
+          reg: /^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3|绝区零|zzz)?(直播|前瞻)?兑换码$/,
           fnc: 'getCode'
         },
         {
@@ -24,13 +24,16 @@ export class exchange extends plugin {
   }
 
   async getCode() {
-    let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3)?(直播|前瞻)?兑换码$/)
+    let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3|绝区零|zzz)?(直播|前瞻)?兑换码$/)
     this.uid = '75276550'
     if (reg[1] == '*' || ['星铁', '崩铁'].includes(reg[2])) {
       this.uid = '80823548'
     }
     if (['崩三', '崩坏三', '崩坏3'].includes(reg[2])) {
       this.uid = '73565430'
+    }
+    if (['绝区零', 'zzz'].includes(reg[2])) {
+      this.uid = '152039149'
     }
     this.now = parseInt(Date.now() / 1000)
     let actid = await this.getActId()
@@ -135,7 +138,6 @@ export class exchange extends plugin {
       }
       let structured_content = post.structured_content
       let result = structured_content.match(/{\"link\":\"https:\/\/webstatic.mihoyo.com\/bbs\/event\/live\/index.html\?act_id=(.*?)\\/)
-      if (result) {
         return result[1]
       }
     }
