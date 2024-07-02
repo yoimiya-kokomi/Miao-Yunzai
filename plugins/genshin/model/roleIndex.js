@@ -354,8 +354,6 @@ export default class RoleIndex extends base {
   }
 
   roleCardData(res) {
-    this.initFile()
-
     let stats = res.stats
     let line = [
       [
@@ -635,20 +633,5 @@ export default class RoleIndex extends base {
       gamelevel: resIndex?.role?.level ?? 0,
       gamefwq: resIndex?.role?.region
     }
-  }
-
-  initFile() {
-    if (imgFile['刻晴']) return imgFile
-    let path = './plugins/genshin/resources/img/gacha/'
-    let character = fs.readdirSync(path + 'character/')
-    let weapon = fs.readdirSync(path + 'weapon/')
-
-    let nameSet = (v) => {
-      let name = v.split('.')
-      imgFile[name[0]] = v
-    }
-    character.forEach(v => nameSet(v))
-    weapon.forEach(v => nameSet(v))
-    return imgFile
   }
 }
