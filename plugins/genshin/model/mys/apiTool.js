@@ -76,7 +76,7 @@ export default class apiTool {
         /** 幻想真境剧诗 */
         role_combat: {
           url: `${hostRecord}game_record/app/genshin/api/role_combat`,
-          query: `role_id=${this.uid}&need_detail=true&server=${this.server}`
+          query: `role_id=${this.uid}&need_detail=${data.need_detail || false}&server=${this.server}`
         },
         /** 角色详情 */
         character: {
