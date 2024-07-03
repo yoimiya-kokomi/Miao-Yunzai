@@ -3,7 +3,6 @@ import lodash from 'lodash'
 import base from './base.js'
 import MysInfo from './mys/mysInfo.js'
 import { Character } from '#miao.models'
-import { role } from '../apps/role.js'
 
 export default class Abyss extends base {
   constructor (e) {
