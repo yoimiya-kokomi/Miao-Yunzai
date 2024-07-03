@@ -3,11 +3,52 @@ import lodash from 'lodash'
 import base from './base.js'
 import MysInfo from './mys/mysInfo.js'
 import { Character } from '#miao.models'
+import { role } from '../apps/role.js'
 
 export default class Abyss extends base {
   constructor (e) {
     super(e)
     this.model = 'abyss'
+  }
+
+  /** 幻想真境剧诗 */
+  async getCombat() {
+    let ApiData = {
+      index: '',
+      role_combat: ''
+    }
+
+    let res = await MysInfo.get(this.e, ApiData, '');
+  
+    /** 同步请求 */
+    this.e.apiSync = true;
+  
+    if (!res || res[0].retcode !== 0 || res[1].retcode !== 0) return false;
+  
+    if (res[1].data.has_detail_data === 'false') {
+      await this.e.reply(`uid${this.e.uid}，幻想真境剧诗数据还没更新，请稍后再试`);
+      return false;
+    }
+
+    let resIndex = res[0].data
+    let CombatData = res[1].data;
+
+    let detail = CombatData.data[0].detail
+    let stat = CombatData.data[0].stat
+    let schedule = CombatData.data[0].schedule
+
+    let data = {
+      ...this.screenData,
+      saveId: this.e.uid,
+      quality: 100,
+      uid: this.e.uid,
+      role: resIndex.role,
+      detail,
+      stat,
+      schedule,
+    };
+  
+    return data;
   }
 
   async getAbyss () {
