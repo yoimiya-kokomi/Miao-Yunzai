@@ -28,7 +28,7 @@ export class role extends plugin {
         reg: '^#(宝箱|成就|尘歌壶|家园|探索|探险|声望|探险度|探索度)[ |0-9]*$',
         fnc: 'roleExplore',
       }, {
-        reg: '^#(幻想真境剧诗|剧诗)[ |0-9]*$',
+        reg: '^#(幻想真境剧诗|剧诗)$',
         fnc: 'combat'
       }]
     })
