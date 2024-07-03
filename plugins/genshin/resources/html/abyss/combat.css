@@ -420,3 +420,39 @@ body {
   .copyright {
     z-index: 1;
   }
+  .bg5 {
+    background-image: url(../../img/other/bg5.png);
+    width: 100%;
+    height: 70px;
+    /*filter: brightness(1.1);*/
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg4 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg4.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg3 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg3.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg2 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg3.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg1 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg3.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
