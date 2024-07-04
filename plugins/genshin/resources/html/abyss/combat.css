@@ -1,0 +1,458 @@
+body {
+    width: 562px;
+  }
+  
+  .container {
+    padding: 0;
+    padding-bottom: 30px;
+    background: rgb(21, 18, 20);
+    position: relative;
+    background-size: contain;
+  }
+  
+  .container::before {
+    content: '';
+    width: 100%;
+    height: 290px;
+    background-image: url('../../img/combat/page-top.png');
+    position: absolute;
+    background-size: contain;
+    top: 0;
+    z-index: 0;
+  }
+  
+  .container::after {
+    content: '';
+    width: 100%;
+    height: 280px;
+    background-image: url('../../img/combat/page-bottom.png');
+    position: absolute;
+    background-size: contain;
+    bottom: 0;
+    z-index: 0;
+  }
+  
+  .top {
+    display: -webkit-flex;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: 18px;
+    padding-top: 15px;
+    margin-bottom: 5px;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .role-image {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    margin-left: 20px;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid white;
+  }
+  
+  .role-text {
+    color: rgba(245, 245, 245);
+    margin-left: 10px;
+  }
+  
+  .role-text p {
+    margin: 5px 0;
+  }
+  
+  .role-text span {
+    font-size: 10px;
+    background-color: rgb(234, 182, 26);
+    padding: 3px;
+    border-radius: 3px;
+    margin-left: 5px;
+    color: rgba(8, 8, 8);
+  }
+  
+  .paneal_box {
+    background-image: url('../../img/combat/panel.png');
+    background-size: cover;
+    width: 565px;
+    height: 430px;
+    left: 12px;
+    position: relative;
+    display: flex;
+    z-index: 1;
+  }
+  
+  .paneal {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 83%;
+    height: 65%;
+    color: rgb(108, 73, 30);
+    position: absolute;
+    left: 45px;
+    bottom: 38px;
+    padding: 5px;
+    font-size: 22px;
+  }
+  
+  .paneal-title {
+    margin-left: auto;
+    margin-right: auto;
+    color: rgb(255, 255, 255);
+    font-size: 26px;
+    font-weight: bold;
+    margin-top: 33px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 30px;
+  }
+  
+  .paneal-title .heraldry {
+    margin-left: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid rgb(228, 190, 144);
+    background-size: cover;
+  }
+  
+  .paneal-title .heraldry.h0 {
+    background-image: url('../../img/combat/heraldry-0.png');
+  }
+  
+  .paneal-title .heraldry.h3 {
+    background-image: url('../../img/combat/heraldry-3.png');
+  }
+  
+  .paneal .paneal_txt {
+    width: 100%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 10px;
+    position: relative;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+  }
+  
+  .paneal .paneal_txt:not(:last-child)::after {
+    content: " ";
+    background: rgba(255, 255, 255, 0.835);
+    width: 90%;
+    height: 2px;
+    left: 5%;
+    bottom: 0;
+    position: absolute;
+  }
+  
+  .paneal .paneal_txt strong {
+    display: flex;
+    margin-left: auto;
+    text-align: right;
+    -webkit-box-align: center;
+    align-items: center;
+  }
+  .right-aligned {
+    text-align: right;
+  }
+  .paneal .paneal_txt .medals {
+    background: rgba(164, 162, 159, 0.543);
+    border-radius: 15px;
+    padding: 2px;
+    margin-left: auto;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+  }
+  
+  .medal-1 {
+    width: 20px;
+    height: 20px;
+    background-image: url('../../img/combat/medal-active.png');
+    background-size: cover;
+  }
+  
+  .medal-0 {
+    width: 20px;
+    height: 20px;
+    background-image: url('../../img/combat/medal-default.png');
+    background-size: cover;
+  }
+  
+  .flower {
+    width: 20px;
+    height: 20px;
+    background-image: url('../../img/combat/flower.png');
+    background-size: cover;
+    margin-right: 5px;
+  }
+  
+  .data_box {
+    width: 100%;
+    background: rgb(33, 29, 31);
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    position: relative;
+    padding-top: 30px;
+    padding-bottom: 20px;
+  }
+  
+  .data_box::after {
+    content: '';
+    background-image: url('../../img/combat/rounds.png');
+    background-size: cover;
+    width: 100%;
+    height: 150px;
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+    position: absolute;
+    bottom: 0;
+    z-index: 1;
+  }
+  
+  .data_box::before {
+    content: '';
+    background-image: url('../../img/combat/rounds.png');
+    background-size: cover;
+    width: 100%;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+  }
+  
+  .data_box .round {
+    width: 90%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    background: rgb(237, 232, 230);
+    z-index: 2;
+    margin-bottom: 15px;
+    padding: 20px;
+  }
+  
+  .data_box .round::before {
+    content: '';
+    background-image: url('../../img/combat/round-top.png');
+    background-size: cover;
+    width: 100%;
+    height: 80px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+  }
+  
+  .data_box .round::after {
+    content: '';
+    background-image: url('../../img/combat/round-bottom.png');
+    background-size: cover;
+    width: 100%;
+    height: 80px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+  }
+  
+  .data_box .round>* {
+    margin-bottom: 5px;
+  }
+  
+  .data_box .round .round_title {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    margin-right: auto;
+    font-size: 20px;
+    z-index: 3;
+  }
+  
+  .data_box .round .round_title span {
+    margin-right: 5px;
+    background-color: rgba(164, 162, 159, 0.543);
+    border-radius: 50%;
+  }
+  
+  .data_box .round .round_time {
+    margin-right: auto;
+    font-size: 16px;
+    z-index: 3;
+  }
+  
+  .data_box .round .round_avatars {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    z-index: 3;
+  }
+  
+  .data_box .round .round_avatars .round_avatar {
+    width: 80px;
+    height: 100px;
+    background-color: rgb(250, 235, 215);
+    margin-right: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .data_box .round .round_avatars .round_avatar img {
+    width: 100%;
+    height: 80px;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  .data_box .round .round_avatars .round_avatar .type {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 4;
+    font-size: 12px;
+    padding: 3px;
+    border-radius: 3px;
+  }
+  
+  .type.t2 {
+    background-color: rgb(232, 105, 83);
+  }
+  
+  .type.t3 {
+    background-color: rgb(23, 144, 220);
+  }
+  
+  .data_box .round .round_avatars .round_avatar .level {
+    width: 100%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+  }
+  
+  .data_box .round .round_avatars .round_avatar .element {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  
+  .data_box .round .round_buffs {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.835);
+    border-radius: 3px;
+    float: left;
+    z-index: 3;
+    padding: 5px;
+    margin-top: 10px;
+  }
+  
+  .data_box .round .round_buffs img {
+    width: 20px;
+    height: 20px;
+    float: left;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    background-color: rgba(41, 40, 40, 0.8);
+    border-radius: 50%;
+    margin-left: 5px;
+  }
+  
+  .copyright {
+    z-index: 1;
+  }
+  .bg5 {
+    background-image: url(../../img/other/bg5.png);
+    width: 100%;
+    height: 70px;
+    /*filter: brightness(1.1);*/
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg4 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg4.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg3 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg3.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg2 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg3.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+  .bg1 {
+    width: 100%;
+    height: 70px;
+    background-image: url(../../img/other/bg3.png);
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }

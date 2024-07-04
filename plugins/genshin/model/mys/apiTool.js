@@ -73,6 +73,10 @@ export default class apiTool {
           url: `${hostRecord}game_record/app/genshin/api/spiralAbyss`,
           query: `role_id=${this.uid}&schedule_type=${data.schedule_type || 1}&server=${this.server}`
         },
+        role_combat: {
+          url: `${hostRecord}game_record/app/genshin/api/role_combat`,
+          query: `role_id=${this.uid}&need_detail=true&server=${this.server}`
+        },
         /** 角色详情 */
         character: {
           url: `${hostRecord}game_record/app/genshin/api/character`,
@@ -96,6 +100,10 @@ export default class apiTool {
         /** 养成计算器 */
         compute: {
           url: `${host}event/e20200928calculate/v3/batch_compute`,
+          body: data.body
+        },
+        computeList: {
+          url: `${host}event/e20200928calculate/v1/${data.type || 'avatar'}/list`,
           body: data.body
         },
         blueprintCompute: {

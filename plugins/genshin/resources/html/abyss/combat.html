@@ -1,0 +1,81 @@
+{{extend defaultLayout}}
+
+{{block 'css'}}
+<link rel="stylesheet" type="text/css" href="{{pluResPath}}html/abyss/combat.css" />
+{{/block}}
+
+{{block 'main'}}
+{{set difficulty = {1: '轻简', 2: '普通', 3: '困难'} }}
+{{set type = { 2: '试用', 3: '助演'} }}
+<div class="top">
+  <div class="role-image"
+  style="background-image: url('{{role.game_head_icon || role.AvatarUrl}}')"></div>
+  <div class="role-text">
+    <p>{{role.nickname}}<span>Lv.{{role.level}}</span></p>
+    <p>UID: {{uid}}</p>
+  </div>
+</div>
+
+<div class="paneal_box">
+  <div class="paneal-title">{{difficulty[stat.difficulty_id]}}模式<span
+      class="heraldry h{{stat.heraldry}}">{{stat.start_time}}</span></div>
+  <div class="paneal">
+    <div class="paneal_txt">
+      最佳记录<strong>第{{stat.max_round_id}}幕</strong>
+    </div>
+    <div class="paneal_txt">明星挑战星章
+      <div class="medals">
+        {{each stat.get_medal_round_list medal}}
+        <span class="medal-{{medal}}"></span>
+        {{/each}}
+      </div>
+    </div>
+    <div class="paneal_txt">
+      消耗「幻剧之花」<strong><span class="flower"></span>{{stat.coin_num}}</strong>
+    </div>
+    <div class="paneal_txt">
+      触发场外观众声援<strong>{{stat.avatar_bonus_num}}次</strong>
+    </div>
+    <div class="paneal_txt">
+      助演角色支援其他玩家<strong>{{stat.rent_cnt}}次</strong>
+    </div>
+  </div>
+</div>
+
+<div class="data_box">
+  {{each detail.rounds_data round }}
+  <div class="round">
+    <div class="round_title"><span class="medal-{{round.is_get_medal?1:0}}"></span>第{{round.round_id}}幕</div>
+    <span class="round_time">{{round.finish}}</span>
+    <div class="round_avatars">
+      {{each round.avatars avatar}}
+      <div class="round_avatar">
+        <div class="bg{{avatar.rarity}}" style="height: 80px;">
+          <img src="{{_miao_path}}/meta-gs/character/{{avatar.name}}/imgs/face.webp">
+          <span class="element" style="background-image:url('{{pluResPath}}img/element/{{avatar.element}}.png')"></span>
+          {{if avatar.avatar_type>1 }}
+          <span class="type t{{avatar.avatar_type}}">{{type[avatar.avatar_type]}}</span>
+          {{/if}}
+        </div>
+        <div class="level">LV.{{avatar.level}}</div>
+      </div>
+      {{/each}}
+    </div>
+    {{if round.buffs.length>0}}
+    <div class="round_buffs">
+      {{each round.buffs buff}}
+      <img src="{{buff.icon}}">
+      {{/each}}
+    </div>
+    {{/if}}
+    {{if round.choice_cards.length>0}}
+    <div class="round_buffs">
+      {{each round.choice_cards card}}
+      <img src="{{card.icon}}">
+      {{/each}}
+    </div>
+    {{/if}}
+  </div>
+  {{/each}}
+</div>
+{{/block}}

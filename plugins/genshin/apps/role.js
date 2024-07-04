@@ -26,7 +26,10 @@ export class role extends plugin {
         fnc: 'weapon'
       }, {
         reg: '^#(宝箱|成就|尘歌壶|家园|探索|探险|声望|探险度|探索度)[ |0-9]*$',
-        fnc: 'roleExplore'
+        fnc: 'roleExplore',
+      }, {
+        reg: '^#(幻想真境剧诗|剧诗)$',
+        fnc: 'combat'
       }]
     })
 
@@ -37,6 +40,7 @@ export class role extends plugin {
         { text: "探索", callback: `${this.prefix}探索` },
         { text: "武器", callback: `${this.prefix}武器` },
         { text: "深渊", callback: `${this.prefix}深渊` },
+        { text: "剧诗", callback: `${this.prefix}剧诗` },
       ])
     }})
   }
@@ -73,6 +77,13 @@ export class role extends plugin {
     }
   }
 
+  /**幻想真境剧诗 */
+  async combat(){
+    let data = await new Abyss(this.e).getCombat()
+    if (!data) return
+    
+    this.reply([await this.renderImg('genshin', 'html/abyss/combat', data, { retType: "base64" }), this.button])
+  }
   /** 深渊 */
   async abyss() {
     let data = await new Abyss(this.e).getAbyss()
