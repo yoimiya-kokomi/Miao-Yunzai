@@ -8,7 +8,7 @@ import DailyCache from './DailyCache.js'
 export default class MysInfo {
   static tips = '请先#绑定Cookie\n发送【Cookie帮助】查看配置教程'
 
-  constructor(e) {
+  constructor (e) {
     if (e) {
       this.e = e
       this.userId = String(e.user_id)
@@ -54,12 +54,14 @@ export default class MysInfo {
       e.noTips = true
       return false
     }
-
-    if (!['1', '2', '3', '5', '6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8))) {
+    const game = e?.game || (e?.isSr ? 'sr' : 'gs')
+    const index = game === 'zzz' ? -7 : -8
+    const uidPrefix = String(mysInfo.uid).slice(0, index)
+    if (!['1', '2', '3', '5', '6', '7', '8', '18', '9'].includes(uidPrefix)) {
       // e.reply('只支持查询国服uid')
       return false
     }
-    if (!['6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8)) && api === 'useCdk') {
+    if (!['6', '7', '8', '18', '9'].includes(uidPrefix) && api === 'useCdk') {
       e.reply('兑换码使用只支持国际服uid')
       return false
     }
@@ -82,9 +84,10 @@ export default class MysInfo {
    */
   static async getUid (e, matchMsgUid = true) {
     let user = await NoteUser.create(e)
+    const game = e?.game || (e?.isSr ? 'sr' : 'gs')
     if (e.uid && matchMsgUid) {
       /** 没有绑定的自动绑定 */
-      return user.autoRegUid(e.uid, e)
+      return user.autoRegUid(e.uid, game)
     }
 
     let { msg = '', at = '' } = e
@@ -94,7 +97,7 @@ export default class MysInfo {
     /** at用户 */
     if (at) {
       let atUser = await NoteUser.create(at)
-      uid = atUser.getUid(e)
+      uid = atUser.getUid(game)
       if (uid) return String(uid)
       if (e.noTips !== true) {
         e.reply(['尚未绑定uid', segment.button([
@@ -111,11 +114,11 @@ export default class MysInfo {
     }
 
     // 消息携带UID、当前用户UID、群名片携带UID 依次获取
-    uid = matchUid(msg) || user.getUid(e) || matchUid(e.sender.card)
-    if (!matchMsgUid) uid = user.getUid(e)
+    uid = matchUid(msg) || user.getUid(game) || matchUid(e.sender.card)
+    if (!matchMsgUid) uid = user.getUid(game)
     if (uid) {
       /** 没有绑定的自动绑定 */
-      return user.autoRegUid(uid, e)
+      return user.autoRegUid(uid, game)
     }
 
     if (e.noTips !== true) {
@@ -260,13 +263,11 @@ export default class MysInfo {
   static async initCache (force = false, clearData = false) {
     // 检查缓存标记
     const cache = DailyCache.create()
-    if (!force && await cache.get('cache-ready') || this.initing)
-      return true
+    if (!force && await cache.get('cache-ready') || this.initing) { return true }
     this.initing = true
     await DailyCache.clearOutdatedData()
 
-    if (clearData)
-      await MysUser.clearCache()
+    if (clearData) { await MysUser.clearCache() }
 
     // 先初始化用户CK，减少一些公共CK中ltuid无法识别的情况
     await MysInfo.initUserCk()

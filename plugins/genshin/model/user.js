@@ -13,7 +13,7 @@ import { Player } from '#miao.models'
 import { UserGameDB, sequelize } from './db/index.js'
 
 export default class User extends base {
-  constructor(e) {
+  constructor (e) {
     super(e)
     this.model = 'bingCk'
     /** 绑定的uid */
@@ -28,17 +28,17 @@ export default class User extends base {
   }
 
   // 获取当前user实例
-  async user() {
+  async user () {
     return await NoteUser.create(this.e)
   }
 
-  async resetCk() {
+  async resetCk () {
     let user = await this.user()
     await user.initCache()
   }
 
   /** 绑定ck */
-  async bing() {
+  async bing () {
     let user = await this.user()
     let set = gsCfg.getConfig('mys', 'set')
 
@@ -174,12 +174,18 @@ export default class User extends base {
         { text: '*更新面板', callback: '*更新面板' }
       ])
     }
+    if (mys.hasGame('zzz')) {
+      msg.push(
+        '绝区零支持：',
+        '无'
+      )
+    }
     msg = await common.makeForwardMsg(this.e, [[msg.join('\n'), segment.button(...button)]], '绑定成功：使用命令说明')
     await this.e.reply(msg)
   }
 
   /** 删除绑定ck */
-  async delCk() {
+  async delCk () {
     let game
     if (this.e.game) {
       game = this.e.game
@@ -203,8 +209,14 @@ export default class User extends base {
   }
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
-  async bingUid() {
-    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
+  async bingUid () {
+    const game = this.e.game || 'gs'
+    let index = '9,10'
+    if (game === 'zzz') {
+      index = 8
+    }
+    let reg = new RegExp(`[0-9]{${index}}`, 'g')
+    let uid = this.e.msg.match(reg)
     if (!uid) return
     uid = uid[0]
     let user = await this.user()
@@ -212,7 +224,7 @@ export default class User extends base {
     return await this.showUid()
   }
 
-  async delUid(index) {
+  async delUid (index) {
     let user = await this.user()
     let game = this.e
     let uidList = user.getUidList(game)
@@ -233,7 +245,7 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid_bak() {
+  async showUid_bak () {
     let user = await this.user()
     let msg = []
     let typeMap = { ck: 'CK Uid', reg: '绑定 Uid' }
@@ -258,28 +270,24 @@ export default class User extends base {
   }
 
   /** #uid */
-  async showUid() {
+  async showUid () {
     let user = await this.user()
-    let uids = [{
-      key: 'gs',
-      name: '原神'
-    }, {
-      key: 'sr',
-      name: '星穹铁道'
-    }]
+    let uids = [{ key: 'gs', name: '原神' }, { key: 'sr', name: '星穹铁道' }, { key: 'zzz', name: '绝区零' }]
     lodash.forEach(uids, (ds) => {
       ds.uidList = user.getUidList(ds.key)
       ds.uid = user.getUid(ds.key)
-      lodash.forEach(ds.uidList, (uidDs) => {
-        let player = Player.create(uidDs.uid, ds.key)
-        if (player) {
-          uidDs.name = player.name
-          uidDs.level = player.level
-          let imgs = player?.faceImgs || {}
-          uidDs.face = imgs.face
-          uidDs.banner = imgs.banner
-        }
-      })
+      if (ds.key !== 'zzz') {
+        lodash.forEach(ds.uidList, (uidDs) => {
+          let player = Player.create(uidDs.uid, ds.key)
+          if (player) {
+            uidDs.name = player.name
+            uidDs.level = player.level
+            let imgs = player?.faceImgs || {}
+            uidDs.face = imgs.face
+            uidDs.banner = imgs.banner
+          }
+        })
+      }
     })
     return this.e.reply([await this.e.runtime.render('genshin', 'html/user/uid-list', { uids }, { retType: 'base64' }), segment.button([
       { text: '绑定UID', input: '#绑定uid' },
@@ -304,9 +312,9 @@ export default class User extends base {
   }
 
   /** 切换uid */
-  async toggleUid(index) {
+  async toggleUid (index) {
     let user = await this.user()
-    let game = this.e
+    let game = this.e.game || 'gs'
     let uidList = user.getUidList(game)
     if (index > uidList.length) {
       return await this.e.reply(['uid序号输入错误', segment.button([
@@ -320,7 +328,7 @@ export default class User extends base {
   }
 
   /** 加载V2ck */
-  async loadOldDataV2() {
+  async loadOldDataV2 () {
     let file = [
       './data/MysCookie/NoteCookie.json',
       './data/NoteCookie/NoteCookie.json',
@@ -370,7 +378,7 @@ export default class User extends base {
   }
 
   /** 加载V3ck */
-  async loadOldDataV3() {
+  async loadOldDataV3 () {
     let dir = './data/MysCookie/'
     if (!fs.existsSync(dir)) {
       return false
@@ -402,7 +410,7 @@ export default class User extends base {
     }
   }
 
-  async loadOldUid() {
+  async loadOldUid () {
     // 从DB中导入
     await sequelize.query('delete from UserGames where userId is null or data is null', {})
     let games = await UserGameDB.findAll()
@@ -444,7 +452,7 @@ export default class User extends base {
     console.log('load Uid Data Done...')
   }
 
-  async loadOldData(data) {
+  async loadOldData (data) {
     let count = 0
     if (!lodash.isPlainObject(data)) {
       return
@@ -503,7 +511,7 @@ export default class User extends base {
   }
 
   /** 我的ck */
-  async myCk() {
+  async myCk () {
     let user = await this.user()
     if (!user.hasCk) {
       this.e.reply(['当前尚未绑定Cookie', segment.button([
@@ -517,7 +525,7 @@ export default class User extends base {
     }
   }
 
-  async checkCkStatus() {
+  async checkCkStatus () {
     let user = await this.user()
     if (!user.hasCk) {
       await this.e.reply(`\n未绑定CK，当前绑定uid：${user.uid || '无'}`, false, { at: true })
@@ -553,7 +561,7 @@ export default class User extends base {
     ])], false, { at: true })
   }
 
-  async userAdmin() {
+  async userAdmin () {
     this.model = 'userAdmin'
     await MysInfo.initCache()
     let stat = await MysUser.getStatData()
@@ -565,7 +573,7 @@ export default class User extends base {
     }
   }
 
-  async bindNoteUser() {
+  async bindNoteUser () {
     let user = await this.user()
     let id = user.qq
     let { e } = this

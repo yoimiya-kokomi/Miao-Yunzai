@@ -7,7 +7,8 @@
 {{block 'main'}}
 {{ set gameMap = {
 gs:{mark:'#'},
-sr:{mark:'*'}
+sr:{mark:'*'},
+zzz:{mark:'%'}
 }; }}
 
 
@@ -38,7 +39,9 @@ sr:{mark:'*'}
                 {{if uid.name && uid.level}}
                 <div class="name">{{uid.name}} Lv.{{uid.level}}</div>
                 {{else}}
+                {{if game.key!=='zzz'}}
                 <div class="no-info">暂无uid信息，可通过更新面板获取信息</div>
+                {{/if}}
                 {{/if}}
               </div>
             </div>
@@ -48,7 +51,7 @@ sr:{mark:'*'}
       {{/each}}
       {{else}}
       <div class="no-uid">暂无uid，请发送CK或通过
-        <nobr>{{mark}}绑定123456789</nobr>
+        <nobr>{{mark}}绑定12345678{{game.key!=='zzz'?'9':''}}</nobr>
         来绑定UID
       </div>
       {{/if}}
