@@ -55,11 +55,15 @@ export default class MysInfo {
       return false
     }
 
-    if (!['1', '2', '3', '5', '6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8))) {
+    const game = e?.game || (e?.isSr ? 'sr' : 'gs')
+    const index = game === 'zzz' ? -7 : -8
+    const uidPrefix = String(mysInfo.uid).slice(0, index)
+
+    if (!['1', '2', '3', '5', '6', '7', '8', '18', '9'].includes(uidPrefix)) {
       // e.reply('只支持查询国服uid')
       return false
     }
-    if (!['6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8)) && api === 'useCdk') {
+    if (!['6', '7', '8', '18', '9'].includes(uidPrefix) && api === 'useCdk') {
       e.reply('兑换码使用只支持国际服uid')
       return false
     }
@@ -105,7 +109,7 @@ export default class MysInfo {
     }
 
     let matchUid = (msg = '') => {
-      let ret = /([1-9]|18)[0-9]{8}/g.exec(msg)
+      let ret = /([1-9]|18)[0-9]{7,8}/g.exec(msg)
       if (!ret) return false
       return ret[0]
     }
@@ -176,7 +180,7 @@ export default class MysInfo {
     e.uid = mysInfo.uid
 
     let user = e.user?.getMysUser()
-    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option, e.isSr, user.device)
+    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option, e.isSr, e.iszzz, user.device)
 
     let res
     if (lodash.isObject(api)) {

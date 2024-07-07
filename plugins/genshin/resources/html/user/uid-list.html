@@ -7,13 +7,14 @@
 {{block 'main'}}
 {{ set gameMap = {
 gs:{mark:'#'},
-sr:{mark:'*'}
+sr:{mark:'*'},
+zzz:{mark:'%'}
 }; }}
 
 
 <div class="uid-list">
   {{each uids game}}
-  {{set mark = game.key==='gs'? '#':'*'}}
+  {{set mark = game.key==='gs'? '#': game.key=== 'sr' ? '*':'%'}}
   <div class="game-cont">
     <div class="game-title">
       <strong>{{mark}}{{game.name}}</strong>
@@ -48,7 +49,7 @@ sr:{mark:'*'}
       {{/each}}
       {{else}}
       <div class="no-uid">暂无uid，请发送CK或通过
-        <nobr>{{mark}}绑定123456789</nobr>
+        <nobr>{{mark}}绑定123456789{{game.key!=='zzz'?'9':''}}</nobr>
         来绑定UID
       </div>
       {{/if}}
@@ -59,7 +60,7 @@ sr:{mark:'*'}
 </div>
 
 <ul class="tips">
-  <li>原神及通用命令以#开头，星铁命令以*开头。发送CK可绑定CK对应uid</li>
+  <li>原神及通用命令以#开头，星铁命令以*开头，绝区零命令以%开头，发送CK可绑定CK对应uid</li>
   <li>游戏信息来自面板数据，如无信息或不准确请更新面板</li>
   <li>
     <nobr>#删除uid1</nobr>

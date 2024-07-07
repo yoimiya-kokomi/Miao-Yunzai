@@ -328,9 +328,9 @@ export default class MysUser extends BaseModel {
 
     if (!res) return err(msg)
     let playerList = res?.data?.list || []
-    playerList = playerList.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
+    playerList = playerList.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global', 'nap_cn', 'nap_global'].includes(v.game_biz))
     if (!playerList || playerList.length <= 0) {
-      return err('该账号尚未绑定原神或星穹角色')
+      return err('该账号尚未绑定原神、星穹或绝区零角色')
     }
 
     this.gsUids = []
@@ -338,7 +338,7 @@ export default class MysUser extends BaseModel {
 
     /** 米游社默认展示的角色 */
     for (let val of playerList) {
-      this.addUid(val.game_uid, ['hk4e_cn', 'hk4e_global'].includes(val.game_biz) ? 'gs' : 'sr')
+      this.addUid(val.game_uid, ['hk4e_cn', 'hk4e_global'].includes(val.game_biz) ? 'gs' : ['nap_cn', 'nap_global'].includes(val.game_biz)? 'zzz' : 'sr')
     }
     await this.save()
     return { status: 0, msg: '' }
@@ -430,7 +430,11 @@ export default class MysUser extends BaseModel {
       return true
     }
     uid = '' + uid
-    if (/\d{9,10}/.test(uid)) {
+    let reg = /^\d{9,10}$/
+    if (game === 'zzz') {
+      reg = /^\d{8}$/
+    }
+    if (reg.test(uid)) {
       let gameKey = this.gameKey(game)
       let uids = this.uids[gameKey]
       if (!uids.includes(uid)) {

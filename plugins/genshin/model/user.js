@@ -25,6 +25,11 @@ export default class User extends base {
       /** 绑定的uid */
       this.uidKey = `Yz:srJson:mys:qq-uid:${this.userId}`
     }
+
+    if (this.e.iszzz) {
+      /** 绑定的uid */
+      this.uidKey = `Yz:zzzJson:mys:qq-uid:${this.userId}`
+    }
   }
 
   // 获取当前user实例
@@ -174,6 +179,19 @@ export default class User extends base {
         { text: '*更新面板', callback: '*更新面板' }
       ])
     }
+    if (mys.hasGame('zzz')) {
+      msg.push(
+        '绝区零支持：',
+        '【%uid】当前绑定ck uid列表',
+        '【%删除ck】删除当前绑定ck',
+        '【%体力】查询当前燃料燃料',
+      )
+      button.push([
+        { text: '%uid', callback: '%uid' },
+        { text: '%删除ck', callback: '%删除ck' },
+        { text: '%体力', callback: '%体力' }
+      ])
+    }
     msg = await common.makeForwardMsg(this.e, [[msg.join('\n'), segment.button(...button)]], '绑定成功：使用命令说明')
     await this.e.reply(msg)
   }
@@ -181,8 +199,10 @@ export default class User extends base {
   /** 删除绑定ck */
   async delCk() {
     let game
-    if (this.e.game) {
-      game = this.e.game
+    if (this.e.game = `sr`) {
+      game = 'sr'
+    } else if (this.e.game = `zzz`){
+      game = 'zzz'
     } else {
       game = 'gs'
     }
@@ -204,7 +224,7 @@ export default class User extends base {
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
   async bingUid() {
-    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
+    let uid = this.e.msg.match(/(?:[1-9]|18)[0-9]{7}(?:[0-9])?/g);
     if (!uid) return
     uid = uid[0]
     let user = await this.user()
@@ -237,12 +257,12 @@ export default class User extends base {
     let user = await this.user()
     let msg = []
     let typeMap = { ck: 'CK Uid', reg: '绑定 Uid' }
-    lodash.forEach({ gs: '原神 (#uid)', sr: '星穹铁道 (*uid)' }, (gameName, game) => {
+    lodash.forEach({ gs: '原神 (#uid)', sr: '星穹铁道 (*uid)', zzz: '绝区零（%uid）'}, (gameName, game) => {
       let uidList = user.getUidList(game)
       let currUid = user.getUid(game)
       msg.push(`【${gameName}】`)
       if (uidList.length === 0) {
-        msg.push(`暂无，通过${game === 'gs' ? '#' : '*'}绑定123456789来绑定UID`)
+        msg.push(`暂无，通过${game === 'gs' ? '#' : game === 'sr' ? '*': '%'}绑定123456789来绑定UID`)
         return true
       }
       lodash.forEach(uidList, (ds, idx) => {
@@ -266,20 +286,25 @@ export default class User extends base {
     }, {
       key: 'sr',
       name: '星穹铁道'
+    },{
+      key: 'zzz',
+      name: '绝区零'
     }]
     lodash.forEach(uids, (ds) => {
       ds.uidList = user.getUidList(ds.key)
       ds.uid = user.getUid(ds.key)
-      lodash.forEach(ds.uidList, (uidDs) => {
-        let player = Player.create(uidDs.uid, ds.key)
-        if (player) {
-          uidDs.name = player.name
-          uidDs.level = player.level
-          let imgs = player?.faceImgs || {}
-          uidDs.face = imgs.face
-          uidDs.banner = imgs.banner
-        }
-      })
+      if (ds.key !== 'zzz') {
+        lodash.forEach(ds.uidList, (uidDs) => {
+          let player = Player.create(uidDs.uid, ds.key)
+          if (player) {
+            uidDs.name = player.name
+            uidDs.level = player.level
+            let imgs = player?.faceImgs || {}
+            uidDs.face = imgs.face
+            uidDs.banner = imgs.banner
+          }
+        })
+      }
     })
     return this.e.reply([await this.e.runtime.render('genshin', 'html/user/uid-list', { uids }, { retType: 'base64' }), segment.button([
       { text: '绑定UID', input: '#绑定uid' },
@@ -465,7 +490,7 @@ export default class User extends base {
           type: /America Server|Europe Server|Asia Server/.test(region) ? 'hoyolab' : 'mys'
         }
         let tmp = ltuids[ltuid]
-        let game = region === '星穹列车' ? 'sr' : 'gs'
+        let game = region === '星穹列车' ? 'sr' : region === '新艾利都' ? 'zzz' : 'gs'
         tmp.uids[game] = tmp.uids[game] || []
         let gameUids = tmp.uids[game]
         if (!gameUids.includes(uid + '')) {

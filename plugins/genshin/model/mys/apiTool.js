@@ -11,14 +11,18 @@ export default class apiTool {
    * @param {区服} server
    * @param {是否为星穹铁道或其他游戏? type(bool or string)} isSr
    */
-  constructor(uid, server, isSr = false) {
+  constructor(uid, server, isSr = false, iszzz = false) {
     this.uid = uid
     this.isSr = isSr
     this.server = server
     this.game = 'genshin'
     if (isSr) this.game = 'honkaisr'
+    if (iszzz) this.game ='zenless'
     if (typeof isSr !== 'boolean') {
       this.game = isSr
+    }
+    if (typeof iszzz !== 'boolean'){
+      this.game = iszzz
     }
   }
 
@@ -227,6 +231,65 @@ export default class apiTool {
         detail: {
           url: `${host}event/rpgcalc/avatar/detail`,
           query: `game=hkrpg&lang=zh-cn&item_id=${data.avatar_id}&tab_from=${data.tab_from}&change_target_level=0&uid=${this.uid}&region=${this.server}`
+        }
+      },
+      zenless: {
+        ...(['prod_gf_cn'].includes(this.server) ? {
+          UserGame: {
+            url: `${host}binding/api/getUserGameRolesByCookie`,
+            query: `game_biz=nap_cn&region=${this.server}&game_uid=${this.uid}`
+          },
+          /** 体力接口fp参数用于避开验证码 */
+          getFp: {
+            url: `${hostPublicData}device-fp/api/getFp`,
+            body: {
+              seed_id: data.seed_id,
+              device_id: data.deviceId.toUpperCase(),
+              platform: '1',
+              seed_time: new Date().getTime() + '',
+              ext_fields: `{"proxyStatus":"0","accelerometer":"-0.159515x-0.830887x-0.682495","ramCapacity":"3746","IDFV":"${data.deviceId.toUpperCase()}","gyroscope":"-0.191951x-0.112927x0.632637","isJailBreak":"0","model":"iPhone12,5","ramRemain":"115","chargeStatus":"1","networkType":"WIFI","vendor":"--","osVersion":"17.0.2","batteryStatus":"50","screenSize":"414×896","cpuCores":"6","appMemory":"55","romCapacity":"488153","romRemain":"157348","cpuType":"CPU_TYPE_ARM64","magnetometer":"-84.426331x-89.708435x-37.117889"}`,
+              app_name: 'bbs_cn',
+              device_fp: '38d7ee834d1e9'
+            }
+          }
+        } : {
+          UserGame: {
+            url: `${host}binding/api/getUserGameRolesByCookie`,
+            query: `game_biz=nap_global&region=${this.server}&game_uid=${this.uid}`
+          },
+          /** 体力接口fp参数用于避开验证码 */
+          getFp: {
+            url: `${hostPublicData}device-fp/api/getFp`,
+            body: {
+              seed_id: data.seed_id,
+              device_id: data.deviceId.toUpperCase(),
+              platform: '5',
+              seed_time: new Date().getTime() + '',
+              ext_fields: `{"userAgent":"Mozilla/5.0 (Linux; Android 11; J9110 Build/55.2.A.4.332; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.179 Mobile Safari/537.36 miHoYoBBSOversea/2.55.0","browserScreenSize":"387904","maxTouchPoints":"5","isTouchSupported":"1","browserLanguage":"zh-CN","browserPlat":"Linux aarch64","browserTimeZone":"Asia/Shanghai","webGlRender":"Adreno (TM) 640","webGlVendor":"Qualcomm","numOfPlugins":"0","listOfPlugins":"unknown","screenRatio":"2.625","deviceMemory":"4","hardwareConcurrency":"8","cpuClass":"unknown","ifNotTrack":"unknown","ifAdBlock":"0","hasLiedLanguage":"0","hasLiedResolution":"1","hasLiedOs":"0","hasLiedBrowser":"0","canvas":"${randomRange()}","webDriver":"0","colorDepth":"24","pixelRatio":"2.625","packageName":"unknown","packageVersion":"2.27.0","webgl":"${randomRange()}"}`,
+              app_name: 'nap_global',
+              device_fp: '38d7f2364db95'
+            }
+          }
+        }),
+        /** 首页宝箱 */
+        index: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/index`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 角色详情 */
+        character: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/avatar/basic`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 树脂 */
+        dailyNote: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/note`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 邦布 */
+        buddy: {
+          url: `${host}event/game_record_zzz/api/zzz/buddy/info`,
+          query: `role_id=${this.uid}&server=${this.server}`
         }
       }
     }

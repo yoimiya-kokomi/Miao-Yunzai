@@ -11,14 +11,16 @@ export default class MysApi {
    * @param option 其他参数
    * @param option.log 是否显示日志
    * @param isSr 是否星铁
+   * @param iszzz 是否绝区零
    * @param device 设备device_id
    */
-  constructor(uid, cookie, option = {}, isSr = false, device = '') {
+  constructor(uid, cookie, option = {}, isSr = false, iszzz = false, device = '') {
     this.uid = uid
     this.cookie = cookie
     this.isSr = isSr
+    this.iszzz = iszzz
     this.server = this.getServer()
-    this.apiTool = new apiTool(uid, this.server, isSr)
+    this.apiTool = new apiTool(uid, this.server, isSr, iszzz)
     /** 5分钟缓存 */
     this.cacheCd = 300
 
@@ -49,24 +51,30 @@ export default class MysApi {
     return { url, headers, body }
   }
 
-  getServer() {
-    switch (String(this.uid).slice(0, -8)) {
-      case '1':
-      case '2':
-        return this.isSr ? 'prod_gf_cn' : 'cn_gf01' // 官服
-      case '5':
-        return this.isSr ? 'prod_qd_cn' : 'cn_qd01' // B服
-      case '6':
-        return this.isSr ? 'prod_official_usa' : 'os_usa' // 美服
-      case '7':
-        return this.isSr ? 'prod_official_euro' : 'os_euro' // 欧服
-      case '8':
-      case '18':
-        return this.isSr ? 'prod_official_asia' : 'os_asia' // 亚服
-      case '9':
-        return this.isSr ? 'prod_official_cht' : 'os_cht' // 港澳台服
+  getServer()  {
+    const _uid = String(this.uid)
+    if (this.game == 'zzz' && _uid.length < 10) {
+      return 'prod_gf_cn' // 官服
     }
-    return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
+
+    switch (_uid.slice(0, -8)) {
+      case '5':
+        return this.isSr? 'prod_qd_cn': this.iszzz? 'prod_qd_cn' : 'cn_qd01' // B服
+      case '6':
+      case '10':
+        return this.isSr? 'prod_official_usa': this.iszzz? 'prod_gf_us' : 'os_usa'// 美服
+      case '7':
+      case '13':
+        return this.isSr? 'prod_official_euro': this.iszzz? 'prod_gf_eu' : 'os_euro'// 欧服
+      case '8':
+      case '15':
+      case '18':
+        return this.isSr? 'prod_official_asia': this.iszzz? 'prod_gf_jp' : 'os_asia'// 亚服
+      case '9':
+      case '17':
+        return this.isSr? 'prod_official_cht': this.iszzz? 'prod_gf_sg' : 'os_cht'// 港澳台服
+    }
+    return this.isSr? 'prod_gf_cn' : this.iszzz? 'prod_gf_cn' : 'cn_gf01' // 官服
   }
 
   async getData(type, data = {}, cached = false) {
