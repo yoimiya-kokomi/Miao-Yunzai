@@ -98,7 +98,7 @@ export class user extends plugin {
     }
 
     if (/^#?绝区零绑定uid$/i.test(this.e.msg)) {
-      this.setContext("savezzzUid")
+      this.setContext("saveZzzUid")
       this.reply("请发送绑定的绝区零uid", false, { at: true })
       return true
     }
@@ -133,7 +133,7 @@ export class user extends plugin {
   }
 
   /** 绑定绝区零uid */
-  savezzzUid() {
+  saveZzzUid() {
     if (!this.e.msg) return
     let uid = this.e.msg.match(/([1-9]|18)[0-9]{7}/g)
     if (!uid) {
@@ -141,10 +141,10 @@ export class user extends plugin {
       return
     }
     this.e.msg = "#绝区零绑定" + this.e.msg
-    this.e.iszzz = true
+    this.e.isZzz = true
     this.e.game = 'zzz'
     this.bingUid()
-    this.finish("savezzzUid")
+    this.finish("saveZzzUid")
   }
 
   /** 未登录ck */

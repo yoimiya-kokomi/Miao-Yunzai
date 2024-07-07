@@ -11,18 +11,18 @@ export default class apiTool {
    * @param {区服} server
    * @param {是否为星穹铁道或其他游戏? type(bool or string)} isSr
    */
-  constructor(uid, server, isSr = false, iszzz = false) {
+  constructor(uid, server, isSr = false, isZzz = false) {
     this.uid = uid
     this.isSr = isSr
     this.server = server
     this.game = 'genshin'
     if (isSr) this.game = 'honkaisr'
-    if (iszzz) this.game ='zenless'
+    if (isZzz) this.game ='zenless'
     if (typeof isSr !== 'boolean') {
       this.game = isSr
     }
-    if (typeof iszzz !== 'boolean'){
-      this.game = iszzz
+    if (typeof isZzz !== 'boolean'){
+      this.game = isZzz
     }
   }
 

@@ -180,7 +180,7 @@ export default class MysInfo {
     e.uid = mysInfo.uid
 
     let user = e.user?.getMysUser()
-    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option, e.isSr, e.iszzz, user.device)
+    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option, e.isSr, e.isZzz, user.device)
 
     let res
     if (lodash.isObject(api)) {

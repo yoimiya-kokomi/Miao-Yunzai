@@ -67,7 +67,7 @@ export default class BaseModel {
     return this.gameKey(game) === 'sr'
   }
 
-  iszzz (game = 'gs') {
+  isZzz (game = 'gs') {
     return this.gameKey(game) === 'zzz'
   }
 }

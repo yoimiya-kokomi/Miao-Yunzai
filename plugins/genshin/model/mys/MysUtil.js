@@ -22,7 +22,7 @@ const MysUtil = {
   getGameKey (game) {
     // 兼容e的处理
     if (game.user_id) {
-      return game.isSr ? 'sr' : game.iszzz? 'zzz' : 'gs'
+      return game.isSr ? 'sr' : game.isZzz? 'zzz' : 'gs'
     }
     return ['sr', 'star'].includes(game) ? 'sr' : game === 'zzz' ? 'zzz' : 'gs'
   },

@@ -62,7 +62,7 @@ export default class base {
         game: 'sr',
       }
     }
-    if (this.e?.iszzz) {
+    if (this.e?.isZzz) {
       return {
         ...data,
         tplFile: `./plugins/genshin/resources/Zenless/html/${this.model}/${this.model}.html`,

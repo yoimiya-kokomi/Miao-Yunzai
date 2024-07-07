@@ -11,16 +11,16 @@ export default class MysApi {
    * @param option 其他参数
    * @param option.log 是否显示日志
    * @param isSr 是否星铁
-   * @param iszzz 是否绝区零
+   * @param isZzz 是否绝区零
    * @param device 设备device_id
    */
-  constructor(uid, cookie, option = {}, isSr = false, iszzz = false, device = '') {
+  constructor(uid, cookie, option = {}, isSr = false, isZzz = false, device = '') {
     this.uid = uid
     this.cookie = cookie
     this.isSr = isSr
-    this.iszzz = iszzz
+    this.isZzz = isZzz
     this.server = this.getServer()
-    this.apiTool = new apiTool(uid, this.server, isSr, iszzz)
+    this.apiTool = new apiTool(uid, this.server, isSr, isZzz)
     /** 5分钟缓存 */
     this.cacheCd = 300
 
@@ -59,22 +59,22 @@ export default class MysApi {
 
     switch (_uid.slice(0, -8)) {
       case '5':
-        return this.isSr? 'prod_qd_cn': this.iszzz? 'prod_qd_cn' : 'cn_qd01' // B服
+        return this.isSr? 'prod_qd_cn': this.isZzz? 'prod_qd_cn' : 'cn_qd01' // B服
       case '6':
       case '10':
-        return this.isSr? 'prod_official_usa': this.iszzz? 'prod_gf_us' : 'os_usa'// 美服
+        return this.isSr? 'prod_official_usa': this.isZzz? 'prod_gf_us' : 'os_usa'// 美服
       case '7':
       case '13':
-        return this.isSr? 'prod_official_euro': this.iszzz? 'prod_gf_eu' : 'os_euro'// 欧服
+        return this.isSr? 'prod_official_euro': this.isZzz? 'prod_gf_eu' : 'os_euro'// 欧服
       case '8':
       case '15':
       case '18':
-        return this.isSr? 'prod_official_asia': this.iszzz? 'prod_gf_jp' : 'os_asia'// 亚服
+        return this.isSr? 'prod_official_asia': this.isZzz? 'prod_gf_jp' : 'os_asia'// 亚服
       case '9':
       case '17':
-        return this.isSr? 'prod_official_cht': this.iszzz? 'prod_gf_sg' : 'os_cht'// 港澳台服
+        return this.isSr? 'prod_official_cht': this.isZzz? 'prod_gf_sg' : 'os_cht'// 港澳台服
     }
-    return this.isSr? 'prod_gf_cn' : this.iszzz? 'prod_gf_cn' : 'cn_gf01' // 官服
+    return this.isSr? 'prod_gf_cn' : this.isZzz? 'prod_gf_cn' : 'cn_gf01' // 官服
   }
 
   async getData(type, data = {}, cached = false) {
