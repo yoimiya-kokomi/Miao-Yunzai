@@ -1,7 +1,7 @@
 import md5 from 'md5'
 import fetch from 'node-fetch'
 import cfg from '../../../../lib/config/config.js'
-import apiTool from './apiTool.js'
+import ApiTool from './apiTool.js'
 
 let HttpsProxyAgent = ''
 export default class MysApi {
@@ -9,20 +9,19 @@ export default class MysApi {
    * @param uid 游戏uid
    * @param cookie 米游社cookie
    * @param option 其他参数
+   * @param option 其他参数
    * @param option.log 是否显示日志
-   * @param isSr 是否星铁
-   * @param device 设备device_id
    */
-  constructor(uid, cookie, option = {}, isSr = false, device = '') {
+  constructor (uid, cookie, option = { game: 'gs', device: '' }) {
     this.uid = uid
     this.cookie = cookie
-    this.isSr = isSr
-    this.server = this.getServer()
-    this.apiTool = new apiTool(uid, this.server, isSr)
+    this.game = option.game || 'gs'
+    this.server = this.getServer(uid, this.game)
+    this.apiTool = new ApiTool(uid, this.server, this.game)
     /** 5分钟缓存 */
     this.cacheCd = 300
 
-    this._device = device
+    this._device = option.device || this.device
     this.option = {
       log: true,
       ...option
@@ -30,12 +29,12 @@ export default class MysApi {
   }
 
   /* eslint-disable quotes */
-  get device() {
+  get device () {
     if (!this._device) this._device = `Yz-${md5(this.uid).substring(0, 5)}`
     return this._device
   }
 
-  getUrl(type, data = {}) {
+  getUrl (type, data = {}) {
     let urlMap = this.apiTool.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
 
@@ -49,27 +48,45 @@ export default class MysApi {
     return { url, headers, body }
   }
 
-  getServer() {
-    switch (String(this.uid).slice(0, -8)) {
-      case '1':
-      case '2':
-        return this.isSr ? 'prod_gf_cn' : 'cn_gf01' // 官服
-      case '5':
-        return this.isSr ? 'prod_qd_cn' : 'cn_qd01' // B服
-      case '6':
-        return this.isSr ? 'prod_official_usa' : 'os_usa' // 美服
-      case '7':
-        return this.isSr ? 'prod_official_euro' : 'os_euro' // 欧服
-      case '8':
-      case '18':
-        return this.isSr ? 'prod_official_asia' : 'os_asia' // 亚服
-      case '9':
-        return this.isSr ? 'prod_official_cht' : 'os_cht' // 港澳台服
+  getServer (uid, game = 'gs') {
+    let server = {
+      gs: {
+        1: 'cn_gf01',
+        2: 'cn_gf01',
+        3: 'cn_gf01',
+        5: 'cn_qd01',
+        6: 'os_usa',
+        7: 'os_euro',
+        8: 'os_asia',
+        18: 'os_asia',
+        9: 'os_cht'
+      },
+      sr: {
+        1: 'prod_gf_cn',
+        2: 'prod_gf_cn',
+        5: 'prod_qd_cn',
+        6: 'prod_official_usa',
+        7: 'prod_official_euro',
+        8: 'prod_official_asia',
+        9: 'prod_official_cht'
+      },
+      zzz: {
+        1: 'prod_gf_cn',
+        2: 'prod_gf_cn',
+        5: 'prod_qd_cn',
+        6: 'prod_official_usa',
+        7: 'prod_official_euro',
+        8: 'prod_official_asia',
+        9: 'prod_official_cht'
+      }
     }
-    return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
+
+    uid = String(uid).slice(0, game === 'zzz' ? -7 : -8)
+    server = server[game]
+    return server[uid] ?? server[1]
   }
 
-  async getData(type, data = {}, cached = false) {
+  async getData (type, data = {}, cached = false) {
     if (!this._device_fp && !data?.Getfp && !data?.headers?.['x-rpc-device_fp']) {
       this._device_fp = await this.getData('getFp', {
         seed_id: this.generateSeed(16),
@@ -137,7 +154,7 @@ export default class MysApi {
     return res
   }
 
-  getHeaders(query = '', body = '') {
+  getHeaders (query = '', body = '') {
     const cn = {
       app_version: '2.40.1',
       User_Agent: `Mozilla/5.0 (Linux; Android 12; ${this.device}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.73 Mobile Safari/537.36 miHoYoBBS/2.40.1`,
@@ -169,7 +186,7 @@ export default class MysApi {
     }
   }
 
-  getDs(q = '', b = '') {
+  getDs (q = '', b = '') {
     let n = ''
     if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
       n = 'xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs'
@@ -182,24 +199,24 @@ export default class MysApi {
     return `${t},${r},${DS}`
   }
 
-  getGuid() {
-    function S4() {
+  getGuid () {
+    function S4 () {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
     }
 
     return (S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
   }
 
-  cacheKey(type, data) {
+  cacheKey (type, data) {
     return 'Yz:genshin:mys:cache:' + md5(this.uid + type + JSON.stringify(data))
   }
 
-  async cache(res, cacheKey) {
+  async cache (res, cacheKey) {
     if (!res || res.retcode !== 0) return
     redis.setEx(cacheKey, this.cacheCd, JSON.stringify(res))
   }
 
-  async getAgent() {
+  async getAgent () {
     let proxyAddress = cfg.bot.proxyAddress
     if (!proxyAddress) return null
     if (proxyAddress === 'http://0.0.0.0:0') return null
@@ -221,7 +238,7 @@ export default class MysApi {
     return null
   }
 
-  generateSeed(length = 16) {
+  generateSeed (length = 16) {
     const characters = '0123456789abcdef'
     let result = ''
     for (let i = 0; i < length; i++) {
@@ -231,7 +248,7 @@ export default class MysApi {
   }
 }
 
-export function randomRange() {
+export function randomRange () {
   let randomStr = ''
   let charStr = 'abcdef0123456789'
   for (let i = 0; i < 64; i++) {

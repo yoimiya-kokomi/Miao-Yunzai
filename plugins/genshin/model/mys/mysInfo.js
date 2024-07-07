@@ -179,7 +179,9 @@ export default class MysInfo {
     e.uid = mysInfo.uid
 
     let user = e.user?.getMysUser()
-    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option, e.isSr, user.device)
+    option.device = user.device
+    option.game = e?.game || (e?.isSr ? 'sr' : 'gs')
+    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option)
 
     let res
     if (lodash.isObject(api)) {
