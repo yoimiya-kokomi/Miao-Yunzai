@@ -50,7 +50,7 @@ export default class base {
       genshinLayout: layoutPath + 'genshin.html',
       defaultLayout: layoutPath + 'default.html'
     }
-    if (this.e?.isSr) {
+    if (this.game = 'sr') {
       let char = Character.get('黑天鹅', 'sr')
       return {
         ...data,
@@ -60,6 +60,17 @@ export default class base {
         srtempFile: 'StarRail/',
         headImg: char?.imgs?.banner,
         game: 'sr',
+      }
+    }
+    if (this.game = 'zzz') {
+      return {
+        ...data,
+        tplFile: `./plugins/genshin/resources/ZZZero/html/${this.model}/${this.model}.html`,
+        /** 绝对路径 */
+        pluResPath: `${this._path}/plugins/genshin/resources/ZZZero/`,
+        zzztempFile: 'ZZZero/',
+        headImg: ``,
+        game: 'zzz',
       }
     }
     let char = Character.get('闲云', 'gs')
