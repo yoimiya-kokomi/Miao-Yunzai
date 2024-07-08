@@ -55,12 +55,9 @@ export default class MysInfo {
       return false
     }
 
-    if (!['1', '2', '3', '5', '6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8))) {
-      // e.reply('只支持查询国服uid')
-      return false
-    }
-    if (!['6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8)) && api === 'useCdk') {
-      e.reply('兑换码使用只支持国际服uid')
+    const game = e?.game || (e?.isSr ? 'sr' : 'gs')
+    if ((game == 'zzz' || !['6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8))) && api === 'useCdk') {
+      e.reply('兑换码使用只支持原神、星铁国际服uid')
       return false
     }
 
@@ -82,9 +79,10 @@ export default class MysInfo {
    */
   static async getUid (e, matchMsgUid = true) {
     let user = await NoteUser.create(e)
+    const game = e?.game || (e?.isSr ? 'sr' : 'gs')
     if (e.uid && matchMsgUid) {
       /** 没有绑定的自动绑定 */
-      return user.autoRegUid(e.uid, e)
+      return user.autoRegUid(e.uid, game)
     }
 
     let { msg = '', at = '' } = e
@@ -94,7 +92,7 @@ export default class MysInfo {
     /** at用户 */
     if (at) {
       let atUser = await NoteUser.create(at)
-      uid = atUser.getUid(e)
+      uid = atUser.getUid(game)
       if (uid) return String(uid)
       if (e.noTips !== true) {
         e.reply(['尚未绑定uid', segment.button([
@@ -105,17 +103,17 @@ export default class MysInfo {
     }
 
     let matchUid = (msg = '') => {
-      let ret = /([1-9]|18)[0-9]{8}/g.exec(msg)
+      let ret = (game == 'zzz' ? /(1[0-9]|[1-9])[0-9]{8}|[1-9][0-9]{7}/g : /(18|[1-9])[0-9]{8}/g).exec(msg)
       if (!ret) return false
       return ret[0]
     }
 
     // 消息携带UID、当前用户UID、群名片携带UID 依次获取
-    uid = matchUid(msg) || user.getUid(e) || matchUid(e.sender.card)
-    if (!matchMsgUid) uid = user.getUid(e)
+    uid = matchUid(msg) || user.getUid(game) || matchUid(e.sender.card)
+    if (!matchMsgUid) uid = user.getUid(game)
     if (uid) {
       /** 没有绑定的自动绑定 */
-      return user.autoRegUid(uid, e)
+      return user.autoRegUid(uid, game)
     }
 
     if (e.noTips !== true) {
@@ -176,7 +174,9 @@ export default class MysInfo {
     e.uid = mysInfo.uid
 
     let user = e.user?.getMysUser()
-    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option, e.isSr, user.device)
+    option.device = user.device
+    option.game = e?.game || (e?.isSr ? 'sr' : 'gs')
+    let mysApi = new MysApi(mysInfo.uid, mysInfo.ckInfo.ck, option)
 
     let res
     if (lodash.isObject(api)) {
