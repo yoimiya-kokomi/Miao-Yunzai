@@ -75,10 +75,10 @@ export default class MysApi {
         1: 'prod_gf_cn',
         2: 'prod_gf_cn',
         5: 'prod_qd_cn',
-        6: 'prod_official_usa',
-        7: 'prod_official_euro',
-        8: 'prod_official_asia',
-        9: 'prod_official_cht'
+        10: 'prod_gf_us',
+        13: 'prod_gf_jp',
+        15: 'prod_gf_eu',
+        17: 'prod_gf_sg'
       }
     }
 
