@@ -62,6 +62,17 @@ export default class base {
         game: 'sr',
       }
     }
+    if (this.game = 'zzz') {
+      return {
+        ...data,
+        tplFile: `./plugins/genshin/resources/ZZZero/html/${this.model}/${this.model}.html`,
+        /** 绝对路径 */
+        pluResPath: `${this._path}/plugins/genshin/resources/ZZZero/`,
+        zzztempFile: 'ZZZero/',
+        headImg: ``,
+        game: 'zzz',
+      }
+    }
     let char = Character.get('闲云', 'gs')
     return {
       ...data,
