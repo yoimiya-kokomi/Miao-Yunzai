@@ -164,7 +164,7 @@ class GsCfg {
   }
 
   getMsgUid(msg) {
-    let ret = /([1-9]|18)[0-9]{8}/g.exec(msg)
+    let ret = /(18|[1-9])[0-9]{8}/g.exec(msg)
     if (!ret) return false
     return ret[0]
   }
@@ -179,7 +179,7 @@ class GsCfg {
    * @return uid 游戏uid
    */
   getRole(msg, filterMsg = '', isSr = false) {
-    let alias = msg.replace(/#|老婆|老公|([1-9]|18)[0-9]{8}/g, '').trim()
+    let alias = msg.replace(/#|老婆|老公|(18|[1-9])[0-9]{8}/g, '').trim()
     if (filterMsg) {
       alias = alias.replace(new RegExp(filterMsg, 'g'), '').trim()
     }
@@ -260,7 +260,7 @@ class GsCfg {
 
   // 仅供内部调用
   _getRole(msg, filterMsg = '', isSr = false) {
-    let alias = msg.replace(/#|老婆|老公|([1-9]|18)[0-9]{8}/g, '').trim()
+    let alias = msg.replace(/#|老婆|老公|(18|[1-9])[0-9]{8}/g, '').trim()
     if (filterMsg) {
       alias = alias.replace(new RegExp(filterMsg, 'g'), '').trim()
     }

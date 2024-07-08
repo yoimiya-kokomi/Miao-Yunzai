@@ -1,6 +1,6 @@
 import { Data } from '#miao'
 
-const games = [{ key: 'gs', name: '原神' }, { key: 'sr', name: '星穹铁道' }]
+const games = [{ key: 'gs', name: '原神' }, { key: 'sr', name: '星穹铁道' }, { key: 'zzz', name: '绝区零' }]
 
 const MysUtil = {
   // 获取标准ltuid
@@ -21,10 +21,18 @@ const MysUtil = {
   // 获取标准gameKey
   getGameKey (game) {
     // 兼容e的处理
-    if (game.user_id) {
-      return game.isSr ? 'sr' : 'gs'
+    if (game.game) {
+      game = game.game
     }
-    return ['sr', 'star'].includes(game) ? 'sr' : 'gs'
+    switch (game) {
+      case 'sr':
+      case 'star':
+        return 'sr'
+      case 'zzz':
+        return 'zzz'
+      default:
+        return 'gs'
+    }
   },
 
   // 生成设备guid

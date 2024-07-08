@@ -174,6 +174,12 @@ export default class User extends base {
         { text: '*更新面板', callback: '*更新面板' }
       ])
     }
+    if (mys.hasGame('zzz')) {
+      msg.push(
+        '绝区零支持：',
+        '无'
+      )
+    }
     msg = await common.makeForwardMsg(this.e, [[msg.join('\n'), segment.button(...button)]], '绑定成功：使用命令说明')
     await this.e.reply(msg)
   }
@@ -204,7 +210,7 @@ export default class User extends base {
 
   /** 绑定uid，若有ck的话优先使用ck-uid */
   async bingUid() {
-    let uid = this.e.msg.match(/([1-9]|18)[0-9]{8}/g)
+    let uid = this.e.msg.match((this.e.game == 'zzz' ? /(1[0-9]|[1-9])[0-9]{8}|[1-9][0-9]{7}/g : /(18|[1-9])[0-9]{8}/g))
     if (!uid) return
     uid = uid[0]
     let user = await this.user()
@@ -266,18 +272,26 @@ export default class User extends base {
     }, {
       key: 'sr',
       name: '星穹铁道'
+    }, {
+      key: 'zzz',
+      name: '绝区零'
     }]
     lodash.forEach(uids, (ds) => {
       ds.uidList = user.getUidList(ds.key)
       ds.uid = user.getUid(ds.key)
       lodash.forEach(ds.uidList, (uidDs) => {
-        let player = Player.create(uidDs.uid, ds.key)
-        if (player) {
-          uidDs.name = player.name
-          uidDs.level = player.level
-          let imgs = player?.faceImgs || {}
-          uidDs.face = imgs.face
-          uidDs.banner = imgs.banner
+        if (ds.key !== 'zzz') {
+          let player = Player.create(uidDs.uid, ds.key)
+          if (player) {
+            uidDs.name = player.name
+            uidDs.level = player.level
+            let imgs = player?.faceImgs || {}
+            uidDs.face = imgs.face
+            uidDs.banner = imgs.banner
+          }
+        } else {
+          uidDs.zzz_face = true
+          uidDs.zzz_banner = true
         }
       })
     })
@@ -306,7 +320,7 @@ export default class User extends base {
   /** 切换uid */
   async toggleUid(index) {
     let user = await this.user()
-    let game = this.e
+    let game = this.e.game || 'gs'
     let uidList = user.getUidList(game)
     if (index > uidList.length) {
       return await this.e.reply(['uid序号输入错误', segment.button([

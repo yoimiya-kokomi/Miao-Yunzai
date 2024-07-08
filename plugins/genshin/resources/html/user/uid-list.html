@@ -7,7 +7,8 @@
 {{block 'main'}}
 {{ set gameMap = {
 gs:{mark:'#'},
-sr:{mark:'*'}
+sr:{mark:'*'},
+zzz:{mark:'%'}
 }; }}
 
 
@@ -26,9 +27,9 @@ sr:{mark:'*'}
         <div class="game-idx">
           <span>{{idx+1}}</span>
         </div>
-        <div class="game-bar" style="background-image:url({{_miao_path}}{{uid.banner}})">
+        <div class="game-bar" style="background-image:url({{if uid.zzz_banner}}{{_res_path}}/ZZZero/img/other/banner.png{{else}}{{_miao_path}}{{uid.banner}}{{/if}})">
           <div class="game-inner">
-            <div class="face" style="background-image:url({{_miao_path}}{{uid.face}})"></div>
+            <div class="face" style="background-image:url({{if uid.zzz_face}}{{_miao_path}}/common/item/face.webp{{else}}{{_miao_path}}{{uid.face}}{{/if}})"></div>
             <div class="info">
               <div class="uid-info">
                 <div class="uid shadow">{{uid.uid}}<span>{{uid.uid}}</span></div>
@@ -38,7 +39,11 @@ sr:{mark:'*'}
                 {{if uid.name && uid.level}}
                 <div class="name">{{uid.name}} Lv.{{uid.level}}</div>
                 {{else}}
+                {{if game.key!=='zzz'}}
                 <div class="no-info">暂无uid信息，可通过更新面板获取信息</div>
+                {{else}}
+                <div class="no-info">暂无uid信息</div>
+                {{/if}}
                 {{/if}}
               </div>
             </div>
