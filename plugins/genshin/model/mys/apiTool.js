@@ -7,9 +7,9 @@ import { randomRange } from './mysApi.js'
 export default class apiTool {
   /**
    *
-   * @param {用户uid} uid
-   * @param {区服} server
-   * @param {游戏} game
+   * @param  uid 用户uid
+   * @param  server 区服
+   * @param  game 游戏
    */
   constructor (uid, server, game) {
     this.uid = uid
@@ -226,7 +226,18 @@ export default class apiTool {
           query: `game=hkrpg&lang=zh-cn&item_id=${data.avatar_id}&tab_from=${data.tab_from}&change_target_level=0&uid=${this.uid}&region=${this.server}`
         }
       },
-      zzz: { }
+      zzz: {
+        /** 首页 */
+        index: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/index`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 体力**/
+        dailyNote: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/note`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        }
+      }
     }
 
     if (this.server.startsWith('os')) {
