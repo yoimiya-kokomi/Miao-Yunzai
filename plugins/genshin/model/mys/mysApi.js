@@ -1,7 +1,13 @@
 import md5 from 'md5'
 import fetch from 'node-fetch'
 import cfg from '../../../../lib/config/config.js'
-import apiTool from './apiTool.js'
+import ApiTool from './apiTool.js'
+
+const game_region = {
+  gs: ['cn_gf01', 'cn_qd01', 'os_usa', 'os_euro', 'os_asia', 'os_cht'],
+  sr: ['prod_gf_cn', 'prod_qd_cn', 'prod_official_usa', 'prod_official_euro', 'prod_official_asia', 'prod_official_cht'],
+  zzz: ['prod_gf_cn', 'prod_gf_cn', 'prod_gf_us', 'prod_gf_eu', 'prod_gf_jp', 'prod_gf_sg']
+}
 
 let HttpsProxyAgent = ''
 export default class MysApi {
@@ -13,16 +19,16 @@ export default class MysApi {
    * @param isSr 是否星铁
    * @param device 设备device_id
    */
-  constructor(uid, cookie, option = {}, isSr = false, device = '') {
+  constructor(uid, cookie, option = { game: 'gs', device: '' }) {
     this.uid = uid
     this.cookie = cookie
-    this.isSr = isSr
-    this.server = this.getServer()
-    this.apiTool = new apiTool(uid, this.server, isSr)
+    this.game = option.game || 'gs'
+    this.server = this.getServer(uid, this.game)
+    this.apiTool = new ApiTool(uid, this.server, this.game)
     /** 5分钟缓存 */
     this.cacheCd = 300
 
-    this._device = device
+    this._device = option.device || this.device
     this.option = {
       log: true,
       ...option
@@ -50,23 +56,38 @@ export default class MysApi {
   }
 
   getServer() {
-    switch (String(this.uid).slice(0, -8)) {
-      case '1':
-      case '2':
-        return this.isSr ? 'prod_gf_cn' : 'cn_gf01' // 官服
-      case '5':
-        return this.isSr ? 'prod_qd_cn' : 'cn_qd01' // B服
-      case '6':
-        return this.isSr ? 'prod_official_usa' : 'os_usa' // 美服
-      case '7':
-        return this.isSr ? 'prod_official_euro' : 'os_euro' // 欧服
-      case '8':
-      case '18':
-        return this.isSr ? 'prod_official_asia' : 'os_asia' // 亚服
-      case '9':
-        return this.isSr ? 'prod_official_cht' : 'os_cht' // 港澳台服
+    const _uid = String(this.uid)
+    if (this.game == 'zzz') {
+      if (_uid.length < 10) {
+        return game_region[this.game][0] // 官服
+      }
+
+      switch (_uid.slice(0, -8)) {
+        case '10':
+          return game_region[this.game][2]// 美服
+        case '15':
+          return game_region[this.game][3]// 欧服
+        case '13':
+          return game_region[this.game][4]// 亚服
+        case '17':
+          return game_region[this.game][5]// 港澳台服
+      }
+    } else {
+      switch (_uid.slice(0, -8)) {
+        case '5':
+          return game_region[this.game][1] // B服
+        case '6':
+          return game_region[this.game][2]// 美服
+        case '7':
+          return game_region[this.game][3]// 欧服
+        case '8':
+        case '18':
+          return game_region[this.game][4]// 亚服
+        case '9':
+          return game_region[this.game][5]// 港澳台服
+      }
     }
-    return this.isSr ? 'prod_gf_cn' : 'cn_gf01'
+    return game_region[this.game][0] // 官服
   }
 
   async getData(type, data = {}, cached = false) {

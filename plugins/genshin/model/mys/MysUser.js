@@ -328,9 +328,9 @@ export default class MysUser extends BaseModel {
 
     if (!res) return err(msg)
     let playerList = res?.data?.list || []
-    playerList = playerList.filter(v => ['hk4e_cn', 'hkrpg_cn', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
+    playerList = playerList.filter(v => ['hk4e_cn', 'hkrpg_cn', 'nap_cn', 'nap_global', 'hk4e_global', 'hkrpg_global'].includes(v.game_biz))
     if (!playerList || playerList.length <= 0) {
-      return err('该账号尚未绑定原神或星穹角色')
+      return err('该账号尚未绑定原神、星穹或绝区零 角色')
     }
 
     this.gsUids = []
@@ -338,10 +338,27 @@ export default class MysUser extends BaseModel {
 
     /** 米游社默认展示的角色 */
     for (let val of playerList) {
-      this.addUid(val.game_uid, ['hk4e_cn', 'hk4e_global'].includes(val.game_biz) ? 'gs' : 'sr')
+      this.addUid(val.game_uid, this.getGameKey(val.game_biz))
     }
     await this.save()
     return { status: 0, msg: '' }
+  }
+
+  // 根据game_biz 判断是哪个游戏
+  getGameKey(gameBiz) {
+    switch (gameBiz) {
+      case 'hk4e_cn':
+      case 'hk4e_global':
+        return 'gs'
+      case 'hkrpg_cn':
+      case 'hkrpg_global':
+        return 'sr'
+      case 'nap_global':
+      case 'nap_cn':
+        return 'zzz'
+      default:
+        return 'gs'
+    }
   }
 
   async getGameRole(serv = 'mys') {
