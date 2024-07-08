@@ -447,7 +447,7 @@ export default class MysUser extends BaseModel {
       return true
     }
     uid = '' + uid
-    if (/\d{9,10}/.test(uid)) {
+    if (/\d{8,10}/.test(uid)) {
       let gameKey = this.gameKey(game)
       let uids = this.uids[gameKey]
       if (!uids.includes(uid)) {
