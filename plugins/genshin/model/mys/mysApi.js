@@ -16,6 +16,7 @@ export default class MysApi {
     this.uid = uid
     this.cookie = cookie
     this.game = option.game || 'gs'
+    this.isSr = this.game === 'sr'
     this.server = this.getServer(uid, this.game)
     this.apiTool = new ApiTool(uid, this.server, this.game)
     /** 5分钟缓存 */
