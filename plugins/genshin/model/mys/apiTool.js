@@ -19,15 +19,13 @@ export default class apiTool {
   }
 
   getUrlMap = (data = {}) => {
-    let host, host_nap, hostRecord, hostPublicData
+    let host, hostRecord, hostPublicData
     if (/cn_|_cn/.test(this.server)) {
       host = 'https://api-takumi.mihoyo.com/'
-      host_nap = 'https://act-nap-api.mihoyo.com/'
       hostRecord = 'https://api-takumi-record.mihoyo.com/'
       hostPublicData = 'https://public-data-api.mihoyo.com/'
     } else {
       host = 'https://sg-public-api.hoyolab.com/'
-      host_nap = 'https://sg-act-nap-api.hoyolab.com/'
       hostRecord = 'https://bbs-api-os.hoyolab.com/'
       hostPublicData = 'https://sg-public-data-api.hoyoverse.com/'
     }
@@ -247,26 +245,6 @@ export default class apiTool {
               app_name: 'bbs_cn',
               device_fp: '38d7ee834d1e9'
             }
-          },
-          /** 首页宝箱 */
-          index: {
-            url: `${hostRecord}event/game_record_zzz/api/zzz/index`,
-            query: `role_id=${this.uid}&server=${this.server}`
-          },
-          /** 角色详情 */
-          character: {
-            url: `${hostRecord}event/game_record_zzz/api/zzz/avatar/basic`,
-            query: `role_id=${this.uid}&server=${this.server}`
-          },
-          /** 树脂 */
-          dailyNote: {
-            url: `${hostRecord}event/game_record_zzz/api/zzz/note`,
-            query: `role_id=${this.uid}&server=${this.server}`
-          },
-          /** 邦布 */
-          buddy: {
-            url: `${hostRecord}event/game_record_zzz/api/zzz/buddy/info`,
-            query: `role_id=${this.uid}&server=${this.server}`
           }
         } : {
           UserGame: {
@@ -286,28 +264,28 @@ export default class apiTool {
               app_name: 'bbs_oversea',
               device_fp: '38d7f2352506c'
             }
-          },
-          /** 首页宝箱 */
-          index: {
-            url: `${host_nap}event/game_record_zzz/api/zzz/index`,
-            query: `role_id=${this.uid}&server=${this.server}`
-          },
-          /** 角色详情 */
-          character: {
-            url: `${host_nap}event/game_record_zzz/api/zzz/avatar/basic`,
-            query: `role_id=${this.uid}&server=${this.server}`
-          },
-          /** 树脂 */
-          dailyNote: {
-            url: `${host_nap}event/game_record_zzz/api/zzz/note`,
-            query: `role_id=${this.uid}&server=${this.server}`
-          },
-          /** 邦布 */
-          buddy: {
-            url: `${host_nap}event/game_record_zzz/api/zzz/buddy/info`,
-            query: `lang=zh-cn&role_id=${this.uid}&server=${this.server}`
           }
-        })
+        }),
+        /** 首页宝箱 */
+        index: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/index`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 角色详情 */
+        character: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/avatar/basic`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 树脂 */
+        dailyNote: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/note`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 邦布 */
+        buddy: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/buddy/info`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        }
       }
     }
 
@@ -325,6 +303,17 @@ export default class apiTool {
       urlMap.gs.ys_ledger.query = `lang=zh-cn&month=${data.month}&uid=${this.uid}&region=${this.server}`
       urlMap.gs.useCdk.url = 'https://sg-hk4e-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey'
       urlMap.gs.useCdk.query = `uid=${this.uid}&region=${this.server}&lang=zh-cn&cdkey=${data.cdk}&game_biz=hk4e_global`
+    }
+
+    if (this.game == 'zzz' && /_us|_eu|_jp|_sg/.test(this.server)) {
+      urlMap.zzz.index.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/index'// 首页宝箱
+      urlMap.zzz.index.query = `role_id=${this.uid}&server=${this.server}`
+      urlMap.zzz.character.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/avatar/basic'// 角色详情
+      urlMap.zzz.character.query = `role_id=${this.uid}&server=${this.server}`
+      urlMap.zzz.dailyNote.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/note'// 树脂
+      urlMap.zzz.dailyNote.query = `role_id=${this.uid}&server=${this.server}`
+      urlMap.zzz.buddy.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/buddy/info'// 邦布
+      urlMap.zzz.buddy.query = `lang=zh-cn&role_id=${this.uid}&server=${this.server}`
     }
     return urlMap[this.game]
   }
