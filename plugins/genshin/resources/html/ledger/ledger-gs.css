@@ -19,7 +19,7 @@ body {
 }
 .container {
   width: 580px;
-  height: 610px;
+  height: 650px;
   background-image: url(../../img/other/bg.webp);
   background-size: 100% 100%;
   overflow: hidden;

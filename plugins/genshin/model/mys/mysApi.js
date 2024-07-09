@@ -176,10 +176,10 @@ export default class MysApi {
       Referer: 'https://act.hoyolab.com/'
     }
     let client
-    if (/os_|official/.test(this.server)) {
-      client = os
-    } else {
+    if (/cn_|_cn/.test(this.server)) {
       client = cn
+    } else {
+      client = os
     }
     return {
       'x-rpc-app_version': client.app_version,
@@ -192,9 +192,9 @@ export default class MysApi {
 
   getDs(q = '', b = '') {
     let n = ''
-    if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
+    if (/cn_|_cn/.test(this.server)) {
       n = 'xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs'
-    } else if (/os_|official/.test(this.server)) {
+    } else {
       n = 'okr4obncj8bw5a65hbnn5oo6ixjc3l9w'
     }
     let t = Math.round(new Date().getTime() / 1000)
@@ -225,7 +225,7 @@ export default class MysApi {
     if (!proxyAddress) return null
     if (proxyAddress === 'http://0.0.0.0:0') return null
 
-    if (!/os_|official/.test(this.server)) return null
+    if (/cn_|_cn/.test(this.server)) return null
 
     if (HttpsProxyAgent === '') {
       HttpsProxyAgent = await import('https-proxy-agent').catch((err) => {
@@ -250,14 +250,4 @@ export default class MysApi {
     }
     return result
   }
-}
-
-export function randomRange() {
-  let randomStr = ''
-  let charStr = 'abcdef0123456789'
-  for (let i = 0; i < 64; i++) {
-    let index = Math.round(Math.random() * (charStr.length - 1))
-    randomStr += charStr.substring(index, index + 1)
-  }
-  return randomStr
 }
