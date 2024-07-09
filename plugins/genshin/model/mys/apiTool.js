@@ -262,6 +262,26 @@ export default class apiTool {
             }
           }
         }),
+        /** 首页宝箱 */
+        index: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/index`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 角色详情 */
+        character: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/avatar/basic`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 树脂 */
+        dailyNote: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/note`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        },
+        /** 邦布 */
+        buddy: {
+          url: `${hostRecord}event/game_record_zzz/api/zzz/buddy/info`,
+          query: `role_id=${this.uid}&server=${this.server}`
+        }
       }
     }
 

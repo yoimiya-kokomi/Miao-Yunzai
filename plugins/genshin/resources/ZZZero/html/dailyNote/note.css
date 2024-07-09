@@ -1,0 +1,221 @@
+body {
+    width: 696px;
+    height: 394px;
+  }
+
+  .container {
+    width: 100%;
+    height: 100%;
+    background-image: url('../../img/dailyNote/note-bg.png');
+    background-size: cover;
+    position: relative;
+  }
+  
+  .note-data {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    width: 667px;
+    height: 281px;
+    background-image: url('../../img/dailyNote/note-bg-1.png');
+    background-size: cover;
+    margin-top: 65px;
+  }
+  
+  .header h1 {
+    position: absolute;
+    letter-spacing: 0.12em;
+    right: 120px;
+    top: 50px;
+    font-size: 25px;
+    color: rgb(214, 181, 60);
+  }
+  
+  .header h1 span {
+    font-size: 15px
+  }
+  
+  .header .date {
+    position: absolute;
+    right: 120px;
+    top: 30px;
+    font-size: 13px;
+    color: #F56C6C;
+  }
+  
+  .energy {
+    position: absolute;
+    border-radius: 20px;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    width: 290px;
+    height: 283px;
+    padding: 20px;
+    left: 25px;
+    top: 100px
+  }
+  
+  .energy img {
+    position: absolute;
+    width: 100px;
+    height: 100px
+  }
+  
+  .energy p {
+    position: absolute;
+    font-size: 25px;
+    font-weight: bold;
+    color: rgb(140, 143, 150);
+    left: 125px;
+    top: 30px
+  }
+  
+  .energy .num {
+    position: absolute;
+    font-size: 25px;
+    left: 125px;
+    top: 65px;
+    font-weight: bold;
+    color: rgb(140, 143, 150);
+  }
+  
+  .energy .num strong {
+    font-size: 45px
+  }
+  
+  
+  .energy .status {
+    background-color: rgba(45, 43, 39, 0.612);
+    position: absolute;
+    border-radius: 30px;
+    width: 250px;
+    height: 110px;
+    top: 135px
+  }
+  
+  .energy .status .status-title {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 10px;
+    text-align: center;
+    -webkit-box-flex: 0;
+    -webkit-flex: none;
+    -ms-flex: none;
+    flex: none;
+    margin-top: 20px;
+    color: rgb(140, 143, 150);
+  }
+  
+  .energy .status .status-date {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 20px;
+    margin-top: 15px;
+    text-align: center;
+    -webkit-box-flex: 0;
+    -webkit-flex: none;
+    -ms-flex: none;
+    flex: none;
+    color: #F39000;
+  }
+  
+  .energy .status .status-reserve {
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 10px;
+    text-align: center;
+    -webkit-box-flex: 0;
+    -webkit-flex: none;
+    -ms-flex: none;
+    flex: none;
+    color: #A28B6C;
+  }
+  
+  
+  .energy .status .time {
+    display: inline-block;
+    padding: 10px 10px;
+    line-height: 20px;
+    font-weight: bold;
+    font-size: 20px;
+    margin: 0 10px;
+    text-align: center;
+    border-radius: 30px;
+    background: rgb(169, 131, 79);
+    color: #EEE5D7;
+  }
+  
+  .energy .status .status-whole {
+    font-weight: bold;
+    font-size: 25px;
+    text-align: center;
+    -webkit-box-flex: 0;
+    -webkit-flex: none;
+    -ms-flex: none;
+    flex: none;
+    color: #F56C6C;
+    margin-top: 36px;
+  }
+  
+  .states {
+    position: absolute;
+    border-radius: 20px;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    width: 320px;
+    height: 250px;
+    left: 335px;
+    top: 100px;
+    font-size: 28px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+  
+  .item {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    color: #4A5366;
+    position: relative;
+    font-weight: bold;
+  }
+  
+  .img-line {
+    position: relative;
+    background-image: url('../../img/dailyNote/line.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    margin: 20px 0;
+    width: 100%;
+    height: 10px;
+  }
+  
+  .item .title {
+    color: rgb(140, 143, 150);
+    margin-left: 10px;
+  }
+  
+  .item .title span {
+    position: absolute;
+    z-index: 2;
+    right: 10px;
+    top: 8px;
+    color: rgb(229, 230, 231);
+  }

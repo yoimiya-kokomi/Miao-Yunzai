@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+  <link rel="shortcut icon" href="#"/>
+  <link rel="stylesheet" type="text/css" href="{{_res_path}}ZZZero/html/buddy/buddy.css"/>
+</head>
+
+<body {{ if list.length
+<=8}}class="list8" {{/if}}>
+<div class="container" id="container">
+  <div class="main_box">
+    <div class="base_info">
+      <div class="uid">ID: {{uid}}</div>
+    
+    </div>
+    <div class="item_box">
+      {{each list val}}
+      <div class="item">
+        <div class="role_box">
+          {{ if val.star>1}}
+          <span class="life life{{val.star}}">
+              {{val.star}}
+            </span>
+          {{/if}}
+          <div class="bg{{val.rarity}}"></div>
+          <img class="role_img" src="{{pluResPath}}ZZZero/img/buddy/{{val.name}}.png" onerror="whenError(this)"/>
+          <div class="desc">Lv.{{val.level}}</div>
+          <img class="fill_img" src="{{pluResPath}}ZZZero/img/other/fill.png"/>
+        </div>
+        <div class="role_name">{{val.name}}</div>
+      </div>
+      {{/each}}
+    </div>
+    <div class="tips">*仅显现已拥有的邦布</div>
+  </div>
+</div>
+</body>
+<script type="text/javascript">
+</script>
+
+</html>
