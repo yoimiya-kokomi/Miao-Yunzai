@@ -40,7 +40,7 @@ export default class DailyCache extends BaseModel {
       key = 'sys:config'
     } else {
       game = MysUtil.getGameKey(game)
-      let serv = /(1[0-9]|[6-9])[0-9]{8}/i.test(uid) ? servs[1] : servs[0]
+      let serv = /^(1[0-9]|[6-9])|^hoyo|^os/i.test(uid) ? servs[1] : servs[0]
       key = `${game}:${serv}`
     }
     const date = moment().format('MM-DD')
