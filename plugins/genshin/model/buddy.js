@@ -6,8 +6,6 @@ export default class Buddy extends base {
       super(e)
       this.model = 'Buddy'
     }
-    
-    /** 生成体力图片 */
   
     async getData () {
       let device_fp = await MysInfo.get(this.e, 'getFp')

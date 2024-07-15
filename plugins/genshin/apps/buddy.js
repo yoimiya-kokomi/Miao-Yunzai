@@ -1,6 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import Buddy from '../model/buddy.js'
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 
 export class buddy extends plugin {
   constructor () {
@@ -17,7 +16,6 @@ export class buddy extends plugin {
 
   }
 
-  /** #体力 */
   async note () {
     let data = await new Buddy(this.e).getData()
     if (!data) return
