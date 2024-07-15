@@ -1,6 +1,5 @@
 import plugin from '../../../lib/plugins/plugin.js'
 import Note from '../model/noteZzz.js'
-import puppeteer from '../../../lib/puppeteer/puppeteer.js'
 
 export class dailyNote extends plugin {
   constructor () {
