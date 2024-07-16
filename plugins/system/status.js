@@ -30,7 +30,7 @@ export class status extends plugin {
       `系统版本：${process.platform} ${process.arch} ${process.version}`+
       this.botTime() + await this.count()
 
-    return this.reply(msg)
+    return this.reply(Bot.makeForwardArray(msg))
   }
 
   botTime() {
