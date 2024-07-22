@@ -6,6 +6,7 @@ import lodash from 'lodash'
 import moment from 'moment'
 import fs from 'node:fs'
 import common from '../../../lib/common/common.js'
+import { Character } from '#miao.models'
 
 export default class Ledger extends base {
   constructor(e) {
@@ -132,9 +133,8 @@ export default class Ledger extends base {
     ledgerInfo.group_by = JSON.stringify(ledgerInfo.month_data.group_by)
     ledgerInfo.color = JSON.stringify(ledgerInfo.color)
 
-    let icon = ''
-    if(this.e.isSr)
-      icon = lodash.sample(fs.readdirSync(`${this._path}/plugins/genshin/resources/StarRail/img/role`).filter(file => file.endsWith('.webp')))
+    let iconChar = lodash.sample(['希儿', '白露', '艾丝妲', '布洛妮娅', '姬子', '卡芙卡', '克拉拉', '停云', '佩拉', '黑塔', '希露瓦', '银狼'])
+    let char = Character.get(iconChar, 'gs')
 
     let week = [
       '星期日',
@@ -149,7 +149,8 @@ export default class Ledger extends base {
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
-      day, icon, 
+      day,
+      icon: char.imgs?.face, 
       srday: `${week[moment().day()]}`,
       nowDay: moment(new Date()).format('YYYY年MM月DD日'),
       ...ledgerInfo,
