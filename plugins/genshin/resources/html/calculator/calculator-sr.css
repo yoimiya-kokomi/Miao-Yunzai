@@ -86,8 +86,8 @@ body {
   position: relative;
 }
 .role_img {
-  width: 100%;
-  height: 100%;
+  width: 95px;
+  height: 95px;
 }
 .role_name {
   margin-top: 20px;
