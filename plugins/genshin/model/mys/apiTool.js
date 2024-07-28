@@ -307,9 +307,9 @@ export default class apiTool {
 
     if (this.game == 'zzz' && /_us|_eu|_jp|_sg/.test(this.server)) {
       urlMap.zzz.index.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/index'// 首页宝箱
-      urlMap.zzz.index.query = `role_id=${this.uid}&server=${this.server}`
+      urlMap.zzz.index.query = `lang=zh-cn&role_id=${this.uid}&server=${this.server}`
       urlMap.zzz.character.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/avatar/basic'// 角色详情
-      urlMap.zzz.character.query = `role_id=${this.uid}&server=${this.server}`
+      urlMap.zzz.character.query = `lang=zh-cn&role_id=${this.uid}&server=${this.server}`
       urlMap.zzz.dailyNote.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/note'// 树脂
       urlMap.zzz.dailyNote.query = `role_id=${this.uid}&server=${this.server}`
       urlMap.zzz.buddy.url = 'https://sg-act-nap-api.hoyolab.com/event/game_record_zzz/api/zzz/buddy/info'// 邦布
