@@ -11,7 +11,7 @@ export class add extends plugin {
       name: "添加消息",
       dsc: "添加消息",
       event: "message",
-      priority: 50000,
+      priority: Infinity,
       rule: [
         {
           reg: "^#(全局)?添加",
