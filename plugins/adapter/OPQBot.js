@@ -17,11 +17,12 @@ Bot.adapter.push(new class OPQBotAdapter {
     const ReqId = Math.round(Math.random()*10**16)
     const request = { BotUin: String(id), CgiCmd, CgiRequest, ReqId }
     Bot[id].ws.sendMsg(request)
+    const error = Error()
     return new Promise((resolve, reject) =>
       this.echo[ReqId] = {
-        request, resolve, reject,
+        request, resolve, reject, error,
         timeout: setTimeout(() => {
-          reject(Object.assign(request, { timeout: this.timeout }))
+          reject(Object.assign(error, request, { timeout: this.timeout }))
           delete this.echo[ReqId]
           Bot.makeLog("error", ["请求超时", request], id)
           Bot[id].ws.terminate()
@@ -329,7 +330,9 @@ Bot.adapter.push(new class OPQBotAdapter {
     } else if (data.ReqId && this.echo[data.ReqId]) {
       if (data.CgiBaseResponse?.Ret !== 0)
         this.echo[data.ReqId].reject(Object.assign(
-          this.echo[data.ReqId].request, { error: data }
+          this.echo[data.ReqId].error,
+          this.echo[data.ReqId].request,
+          { error: data },
         ))
       else
         this.echo[data.ReqId].resolve(data)

@@ -18,11 +18,12 @@ Bot.adapter.push(new class ComWeChatAdapter {
     const echo = ulid()
     const request = { action, params, echo }
     ws.sendMsg(request)
+    const error = Error()
     return new Promise((resolve, reject) =>
       this.echo[echo] = {
-        request, resolve, reject,
+        request, resolve, reject, error,
         timeout: setTimeout(() => {
-          reject(Object.assign(request, { timeout: this.timeout }))
+          reject(Object.assign(error, request, { timeout: this.timeout }))
           delete this.echo[echo]
           Bot.makeLog("error", ["请求超时", request], data.self_id)
           ws.terminate()
@@ -467,7 +468,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
     } else if (data.echo && this.echo[data.echo]) {
       if (data.retcode !== 0)
         this.echo[data.echo].reject(Object.assign(
-          this.echo[data.echo].request, { error: data }
+          this.echo[data.echo].error,
+          this.echo[data.echo].request,
+          { error: data },
         ))
       else
         this.echo[data.echo].resolve(data.data ? new Proxy(data, {
