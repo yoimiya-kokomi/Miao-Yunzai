@@ -43,7 +43,7 @@ export class master extends plugin {
 
   async verify() {
     this.finish("verify")
-    if (this.e.msg.trim().toUpperCase() == code[this.e.user_id]) {
+    if (this.e.msg?.trim().toUpperCase() == code[this.e.user_id]) {
       await this.edit(file, "masterQQ", this.e.user_id)
       await this.edit(file, "master", `${this.e.self_id}:${this.e.user_id}`)
       await this.reply(`[${this.e.user_id}] 设置主人完成`, true)
