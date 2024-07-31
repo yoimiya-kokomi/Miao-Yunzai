@@ -32,7 +32,7 @@
     "oicq": "link:lib/modules/oicq",
     "pm2": "^5.4.2",
     "puppeteer": "*",
-    "redis": "^4.6.15",
+    "redis": "^4.7.0",
     "sequelize": "^6.37.3",
     "sqlite3": "5.1.6",
     "strip-ansi": "^7.1.0",

@@ -11,7 +11,7 @@ class Start extends plugin {
       event: "message",
       rule: [
         {
-          reg: "^#开机$",
+          reg: /^#开机$/,
           fnc: "start"
         }
       ]
@@ -141,7 +141,7 @@ export class Restart extends plugin {
   async stop(time) {
     if (temp.priority) return false
     temp.priority = PluginsLoader.priority
-    PluginsLoader.priority = [{ class: Start }]
+    PluginsLoader.priority = [{ plugin: new Start, class: Start }]
     if (typeof time === "number") return temp.stop_time = time
     temp.stop_time = Date.now()
     return this.reply(`关机成功，本次运行时长${Bot.getTimeDiff(temp.start_time)}`)
