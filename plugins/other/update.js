@@ -5,6 +5,7 @@ import { Restart } from "./restart.js"
 let uping = false
 
 export class update extends plugin {
+  typeName = "TRSS-Yunzai"
   constructor() {
     super({
       name: "更新",
@@ -27,7 +28,6 @@ export class update extends plugin {
         }
       ]
     })
-    this.typeName = "TRSS-Yunzai"
   }
 
   get quiet() {
@@ -40,14 +40,15 @@ export class update extends plugin {
   }
 
   init() {
-    this.e = {
+    const p = new update
+    p.e = {
       isMaster: true,
       logFnc: "[自动更新]",
       msg: "#全部静更新",
       reply: msg => Bot.sendMasterMsg(msg),
     }
     if (cfg.bot.update_time)
-      this.autoUpdate()
+      p.autoUpdate()
 
     this.task = []
     if (cfg.bot.update_cron)
@@ -55,7 +56,7 @@ export class update extends plugin {
         this.task.push({
           name: "定时更新",
           cron: i,
-          fnc: () => this.updateAll(),
+          fnc: () => p.updateAll(),
         })
   }
 
