@@ -40,15 +40,14 @@ export class update extends plugin {
   }
 
   init() {
-    const p = new update
-    p.e = {
+    this.e = {
       isMaster: true,
       logFnc: "[自动更新]",
       msg: "#全部静更新",
       reply: msg => Bot.sendMasterMsg(msg),
     }
     if (cfg.bot.update_time)
-      p.autoUpdate()
+      this.autoUpdate()
 
     this.task = []
     if (cfg.bot.update_cron)
@@ -56,15 +55,14 @@ export class update extends plugin {
         this.task.push({
           name: "定时更新",
           cron: i,
-          fnc: () => p.updateAll(),
+          fnc: () => this.updateAll(),
         })
   }
 
   autoUpdate() {
-    setTimeout(() => {
-      this.updateAll()
-      this.autoUpdate()
-    }, cfg.bot.update_time*60000)
+    setTimeout(() =>
+      this.updateAll().finally(this.autoUpdate.bind(this))
+    , cfg.bot.update_time*60000)
   }
 
   async update() {
