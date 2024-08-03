@@ -134,7 +134,7 @@ export class exchange extends plugin {
         this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
       } else if (this.uid == '152039148') {
         date.setDate(date.getDate() + 1)
-        this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
+        this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`
       } else {
         date.setDate(date.getDate() + 3)
         this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
