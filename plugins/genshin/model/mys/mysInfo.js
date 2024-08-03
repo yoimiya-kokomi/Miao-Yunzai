@@ -55,9 +55,8 @@ export default class MysInfo {
       return false
     }
 
-    const game = e?.game || (e?.isSr ? 'sr' : 'gs')
-    if ((game == 'zzz' || !['6', '7', '8', '18', '9'].includes(String(mysInfo.uid).slice(0, -8))) && api === 'useCdk') {
-      e.reply('兑换码使用只支持原神、星铁国际服uid')
+    if (!/^(1[0-9]|[6-9])[0-9]{8}/i.test(mysInfo.uid) && api === 'useCdk') {
+      e.reply('兑换码使用只支持原神、星铁、绝区零国际服uid')
       return false
     }
 

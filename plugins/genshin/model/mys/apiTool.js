@@ -31,8 +31,8 @@ export default class apiTool {
     }
     let urlMap = {
       gs: {
-        /** 体力接口fp参数用于避开验证码 */
         ...(['cn_gf01', 'cn_qd01'].includes(this.server) ? {
+          /** 体力接口fp参数用于避开验证码 */
           getFp: {
             url: `${hostPublicData}device-fp/api/getFp`,
             body: {
@@ -44,8 +44,14 @@ export default class apiTool {
               app_name: 'bbs_cn',
               device_fp: '38d7ee834d1e9'
             }
+          },
+          /**使用兑换码 目前仅限国际服,来自于国服的uid请求已在mysInfo.js的init方法提前拦截 */
+          useCdk: {
+            url: 'PLACE_HOLDER',
+            query: null
           }
         } : {
+          /** 体力接口fp参数用于避开验证码 */
           getFp: {
             url: `${hostPublicData}device-fp/api/getFp`,
             body: {
@@ -58,6 +64,10 @@ export default class apiTool {
               app_name: 'bbs_oversea',
               device_fp: '38d7f2352506c'
             }
+          },
+          useCdk: {
+            url: 'https://sg-hk4e-api.hoyolab.com/common/apicdkey/api/webExchangeCdkeyHyl',
+            query: `cdkey=${data.cdk}&game_biz=hk4e_global&lang=zh-cn&region=${this.server}&t=${new Date().getTime() + ''}&uid=${this.uid}`
           }
         }),
         /** 首页宝箱 */
@@ -136,11 +146,6 @@ export default class apiTool {
         action_cardList: {
           url: `${hostRecord}game_record/app/genshin/api/gcg/cardList`,
           query: `limit=999&need_action=true&need_avatar=false&need_stats=true&offset=0&role_id=${this.uid}&server=${this.server}`
-        },
-        /**使用兑换码 目前仅限国际服,来自于国服的uid请求已在myinfo.js的init方法提前拦截 */
-        useCdk: {
-          url: 'PLACE_HOLDER',
-          query: null
         }
       },
       sr: {
@@ -161,6 +166,11 @@ export default class apiTool {
               app_name: 'bbs_cn',
               device_fp: '38d7ee834d1e9'
             }
+          },
+          /**使用兑换码 目前仅限国际服,来自于国服的uid请求已在mysInfo.js的init方法提前拦截 */
+          useCdk: {
+            url: 'PLACE_HOLDER',
+            query: null
           }
         } : {
           UserGame: {
@@ -180,6 +190,10 @@ export default class apiTool {
               app_name: 'bbs_oversea',
               device_fp: '38d7f2352506c'
             }
+          },
+          useCdk: {
+            url: 'https://sg-hkrpg-api.hoyolab.com/common/apicdkey/api/webExchangeCdkeyHyl',
+            query: `cdkey=${data.cdk}&game_biz=hkrpg_global&lang=zh-cn&region=${this.server}&t=${new Date().getTime() + ''}&uid=${this.uid}`
           }
         }),
         /** 首页宝箱 */
@@ -245,6 +259,11 @@ export default class apiTool {
               app_name: 'bbs_cn',
               device_fp: '38d7ee834d1e9'
             }
+          },
+          /**使用兑换码 目前仅限国际服,来自于国服的uid请求已在mysInfo.js的init方法提前拦截 */
+          useCdk: {
+            url: 'PLACE_HOLDER',
+            query: null
           }
         } : {
           UserGame: {
@@ -264,6 +283,10 @@ export default class apiTool {
               app_name: 'bbs_oversea',
               device_fp: '38d7f2352506c'
             }
+          },
+          useCdk: {
+            url: 'https://public-operation-nap.hoyolab.com/common/apicdkey/api/webExchangeCdkeyHyl',
+            query: `cdkey=${data.cdk}&game_biz=nap_global&lang=zh-cn&region=${this.server}&t=${new Date().getTime() + ''}&uid=${this.uid}`
           }
         }),
         /** 首页宝箱 */
@@ -301,8 +324,6 @@ export default class apiTool {
       urlMap.gs.blueprintCompute.body = { lang: 'zh-cn', ...data.body }
       urlMap.gs.ys_ledger.url = 'https://sg-hk4e-api.hoyolab.com/event/ysledgeros/month_info'// 支持了国际服札记
       urlMap.gs.ys_ledger.query = `lang=zh-cn&month=${data.month}&uid=${this.uid}&region=${this.server}`
-      urlMap.gs.useCdk.url = 'https://sg-hk4e-api.hoyoverse.com/common/apicdkey/api/webExchangeCdkey'
-      urlMap.gs.useCdk.query = `uid=${this.uid}&region=${this.server}&lang=zh-cn&cdkey=${data.cdk}&game_biz=hk4e_global`
     }
 
     if (this.game == 'zzz' && /_us|_eu|_jp|_sg/.test(this.server)) {
