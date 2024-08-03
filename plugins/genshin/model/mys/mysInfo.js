@@ -56,7 +56,7 @@ export default class MysInfo {
     }
 
     if (!/^(1[0-9]|[6-9])[0-9]{8}/i.test(mysInfo.uid) && api === 'useCdk') {
-      e.reply('兑换码使用只支持原神、星铁、绝区零国际服uid')
+      e.reply('兑换码使用只支持国际服uid')
       return false
     }
 
