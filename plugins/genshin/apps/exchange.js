@@ -16,7 +16,7 @@ export class exchange extends plugin {
           fnc: 'getCode'
         },
         {
-          reg: '^#(兑换码使用|cdk-u).+',
+          reg: '^#(原神|星铁|绝区零)?(兑换码使用|cdk-u).+',
           fnc: 'useCode'
         }
       ]
@@ -149,9 +149,9 @@ export class exchange extends plugin {
 
   // 兑换码使用
   async useCode() {
-    const cdkCode = this.e.msg.replace(/#(兑换码使用|cdk-u)/, '').trim()
+    const cdkCode = this.e.msg.replace(/#(原神|星铁|绝区零)?(兑换码使用|cdk-u)/, '').trim()
     const res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
-    if (res) {
+    if (res.retcode == 0) {
       this.e.reply(`${res.data.msg}`)
     }
   }
