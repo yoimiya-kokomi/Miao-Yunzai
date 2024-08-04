@@ -151,7 +151,7 @@ export class exchange extends plugin {
   async useCode() {
     const cdkCode = this.e.msg.replace(/#(原神|星铁|绝区零)?(兑换码使用|cdk-u)/, '').trim()
     const res = await MysInfo.get(this.e, 'useCdk', { cdk: cdkCode })
-    if (res) {
+    if (res.retcode == 0) {
       this.e.reply(`${res.data.msg}`)
     }
   }
