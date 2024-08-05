@@ -1,0 +1,12 @@
+--- a/lib/appenders/console.js
++++ b/lib/appenders/console.js
+@@ -1,6 +1,8 @@
+ // eslint-disable-next-line no-console
+ const consoleLog = console.log.bind(console);
++const rep = { "": "^N", "": "^O", "": "␇" }
++const reg = new RegExp(Object.keys(rep).join("|"), "g")
+
+ function consoleAppender(layout, timezoneOffset) {
+   return (loggingEvent) => {
+-    consoleLog(layout(loggingEvent, timezoneOffset));
++    consoleLog(layout(loggingEvent, timezoneOffset).replace(reg, i => rep[i]))
