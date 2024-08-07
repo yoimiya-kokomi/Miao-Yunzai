@@ -2,7 +2,7 @@
 achievement: 1240
 
 # 角色数
-avatar: 84
+avatar: 85
 
 # 等级
 level: 60
@@ -11,16 +11,16 @@ level: 60
 magic_chest: 251
 
 # 华丽宝箱
-luxurious_chest: 268
+luxurious_chest: 275
 
 # 珍贵宝箱
-precious_chest: 705
+precious_chest: 729
 
 # 精致宝箱
-exquisite_chest: 2322
+exquisite_chest: 2383
 
 # 普通宝箱
-common_chest: 3000
+common_chest: 3059
 
 # 传送点
 way_point: 455
