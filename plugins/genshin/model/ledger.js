@@ -16,7 +16,7 @@ export default class Ledger extends base {
     if (this.e.msg?.includes('星琼'))
       this.e.isSr = true
 
-    this.color = ['#73a9c6', '#d56565', '#70b2b4', '#bd9a5a', '#739970', '#7a6da7', '#597ea0']
+    this.color = ['#73a9c6', '#d56565', '#70b2b4', '#bd9a5a', '#739970', '#7a6da7', '#597ea0','#ffb6c1']
     this.action = {
       "other": 0,
       "adventure_reward": 1,
@@ -24,7 +24,8 @@ export default class Ledger extends base {
       "daily_reward": 3,
       "abyss_reward": 4,
       "mail_reward": 5,
-      "event_reward": 6
+      "event_reward": 6,
+      "combat_reward": 7
     }
   }
 
