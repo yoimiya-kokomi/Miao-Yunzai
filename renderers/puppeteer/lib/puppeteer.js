@@ -74,7 +74,7 @@ export default class Puppeteer extends Renderer {
           await redis.del(this.browserMacKey)
         }
       }
-    } catch (err) {}
+    } catch {}
 
     if (!this.browser || !connectFlag) {
       // 如果没有实例，初始化puppeteer
@@ -159,11 +159,11 @@ export default class Puppeteer extends Renderer {
       return false
     const pageHeight = data.multiPageHeight || 4000
 
-    let savePath = this.dealTpl(name, data)
+    const savePath = this.dealTpl(name, data)
     if (!savePath) return false
 
     let buff = ""
-    let start = Date.now()
+    const start = Date.now()
 
     let ret = []
     this.shoting.push(name)
@@ -183,20 +183,20 @@ export default class Puppeteer extends Renderer {
 
     try {
       const page = await this.browser.newPage()
-      let pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
+      const pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
       await page.goto(`file://${_path}${lodash.trim(savePath, ".")}`, pageGotoParams)
-      let body = await page.$("#container") || await page.$("body")
+      const body = await page.$("#container") || await page.$("body")
 
       // 计算页面高度
       const boundingBox = await body.boundingBox()
       // 分页数
       let num = 1
 
-      let randData = {
+      const randData = {
         type: data.imgType || "jpeg",
         omitBackground: data.omitBackground || false,
         quality: data.quality || 90,
-        path: data.path || ""
+        path: data.path || "",
       }
 
       if (data.multiPage) {
@@ -204,12 +204,14 @@ export default class Puppeteer extends Renderer {
         num = Math.round(boundingBox.height / pageHeight) || 1
       }
 
-      if (data.imgType === "png") {
+      if (data.imgType === "png")
         delete randData.quality
-      }
 
       if (!data.multiPage) {
         buff = await body.screenshot(randData)
+        if (!Buffer.isBuffer(buff))
+          buff = Buffer.from(buff)
+
         this.renderNum++
         /** 计算图片大小 */
         const kb = (buff.length / 1024).toFixed(2) + "KB"
@@ -224,23 +226,25 @@ export default class Puppeteer extends Renderer {
           })
         }
         for (let i = 1; i <= num; i++) {
-          if (i !== 1 && i === num) {
+          if (i !== 1 && i === num)
             await page.setViewport({
               width: boundingBox.width,
               height: parseInt(boundingBox.height) - pageHeight * (num - 1)
             })
-          }
-          if (i !== 1 && i <= num) {
+
+          if (i !== 1 && i <= num)
             await page.evaluate(pageHeight => window.scrollBy(0, pageHeight), pageHeight)
-          }
-          if (num === 1) {
+
+          if (num === 1)
             buff = await body.screenshot(randData)
-          } else {
+          else
             buff = await page.screenshot(randData)
-          }
-          if (num > 2) {
+          if (!Buffer.isBuffer(buff))
+            buff = Buffer.from(buff)
+
+          if (num > 2)
             await new Promise(resolve => setTimeout(resolve, 200))
-          }
+
           this.renderNum++
 
           /** 计算图片大小 */
