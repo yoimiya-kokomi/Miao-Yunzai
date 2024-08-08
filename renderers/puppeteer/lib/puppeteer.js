@@ -213,6 +213,9 @@ export default class Puppeteer extends Renderer {
 
       if (!data.multiPage) {
         buff = await body.screenshot(randData)
+        if (!Buffer.isBuffer(buff))
+          buff = Buffer.from(buff)
+
         this.renderNum++
         /** 计算图片大小 */
         const kb = (buff.length / 1024).toFixed(2) + "KB"
@@ -227,23 +230,25 @@ export default class Puppeteer extends Renderer {
           })
         }
         for (let i = 1; i <= num; i++) {
-          if (i !== 1 && i === num) {
+          if (i !== 1 && i === num)
             await page.setViewport({
               width: boundingBox.width,
               height: parseInt(boundingBox.height) - pageHeight * (num - 1)
             })
-          }
-          if (i !== 1 && i <= num) {
+
+          if (i !== 1 && i <= num)
             await page.evaluate(pageHeight => window.scrollBy(0, pageHeight), pageHeight)
-          }
-          if (num === 1) {
+
+          if (num === 1)
             buff = await body.screenshot(randData)
-          } else {
+          else
             buff = await page.screenshot(randData)
-          }
-          if (num > 2) {
+          if (!Buffer.isBuffer(buff))
+            buff = Buffer.from(buff)
+
+          if (num > 2)
             await Bot.sleep(200)
-          }
+
           this.renderNum++
 
           /** 计算图片大小 */
