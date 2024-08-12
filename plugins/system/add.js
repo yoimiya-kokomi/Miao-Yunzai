@@ -3,7 +3,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import lodash from "lodash"
 
-let messageMap = {}
+export const messageMap = {}
 
 export class add extends plugin {
   constructor() {
@@ -50,21 +50,18 @@ export class add extends plugin {
     this.isGlobal = Boolean(this.e.msg.match(/^#全局/))
     await this.getGroupId()
 
-    if (!this.group_id) {
-      await this.reply("请先在群内触发消息，确定添加的群")
-      return
-    }
+    if (!this.group_id)
+      return this.reply("请先在群内触发消息，确定添加的群")
 
     await this.initMessageMap()
 
     if (!this.checkAuth()) return false
     /** 获取关键词 */
     this.getKeyWord()
-    if (!this.e.keyWord) {
-      await this.reply("添加错误：没有关键词")
-      return
-    }
+    if (!this.keyWord)
+      return this.reply("添加错误：没有关键词")
 
+    this.e.keyWord = this.keyWord
     this.e.message = []
     this.setContext("addContext")
 
@@ -73,7 +70,6 @@ export class add extends plugin {
 
   /** 获取群号 */
   async getGroupId() {
-    /** 添加全局消息，存入到机器人文件中 */
     if (this.isGlobal) {
       this.group_id = "global"
       return this.group_id
@@ -81,18 +77,11 @@ export class add extends plugin {
 
     if (this.e.isGroup) {
       this.group_id = this.e.group_id
-      redis.setEx(this.grpKey, 3600 * 24 * 30, String(this.group_id))
+      redis.setEx(this.grpKey, 2592000, String(this.group_id))
       return this.group_id
     }
 
-    // redis获取
-    let groupId = await redis.get(this.grpKey)
-    if (groupId) {
-      this.group_id = groupId
-      return this.group_id
-    }
-
-    return false
+    return this.group_id = await redis.get(this.grpKey)
   }
 
   checkAuth() {
@@ -125,8 +114,7 @@ export class add extends plugin {
   /** 获取添加关键词 */
   getKeyWord() {
     this.e.isGlobal = Boolean(this.e.msg.match(/^#全局/))
-    this.keyWord = this.e.raw_message.replace(/#(全局)?(添加|删除)/, "").trim()
-    this.e.keyWord = this.trimAlias(this.keyWord)
+    this.keyWord = this.trimAlias(this.e.raw_message.replace(/#(全局)?(添加|删除)/, "").trim())
   }
 
   /** 过滤别名 */
@@ -162,10 +150,8 @@ export class add extends plugin {
     }
 
     this.finish("addContext")
-    if (!context.message?.length) {
-      this.reply("添加错误：没有添加内容")
-      return
-    }
+    if (!context.message?.length)
+      return this.reply("添加错误：没有添加内容")
 
     if (!messageMap[this.group_id])
       messageMap[this.group_id] = new Map()
@@ -177,17 +163,16 @@ export class add extends plugin {
     else
       message = [context.message]
     messageMap[this.group_id].set(this.keyWord, message)
-
     if (message.length > 1)
-      this.keyWord += String(message.length)
+      this.keyWord += `(${message.length})`
 
     await this.saveJson()
     return this.reply(`添加成功：${this.keyWord}`)
   }
 
   async saveJson() {
-    let obj = {}
-    for (let [k, v] of messageMap[this.group_id])
+    const obj = {}
+    for (const [k, v] of messageMap[this.group_id])
       obj[k] = v
 
     await fs.writeFile(`${this.path}${this.group_id}.json`, JSON.stringify(obj, "", "\t"))
@@ -205,6 +190,13 @@ export class add extends plugin {
     return data.url
   }
 
+  getKeyWordMsg(keyWord) {
+    return [
+      ...messageMap[this.group_id].get(keyWord) || [],
+      ...messageMap.global.get(keyWord) || [],
+    ]
+  }
+
   async getMessage() {
     if (!this.e.raw_message) return false
     this.isGlobal = false
@@ -216,33 +208,33 @@ export class add extends plugin {
     await this.initGlobalMessageMap()
 
     this.keyWord = this.trimAlias(this.e.raw_message.trim())
-    let keyWord = this.keyWord
 
-    let num = 0
-    if (isNaN(keyWord)) {
-      num = keyWord.charAt(keyWord.length-1)
-
-      if (!isNaN(num) && !messageMap[this.group_id].has(keyWord) && !messageMap.global.has(keyWord)) {
-        keyWord = lodash.trimEnd(keyWord, num).trim()
-        num--
+    let msg = this.getKeyWordMsg(this.keyWord)
+    if (!msg.length) {
+      const index = this.keyWord.match(/\d+$/)?.[0]
+      if (index) for (let i=0; i<index.length; i++) {
+        const keyWord = this.keyWord.slice(0, this.keyWord.length - index.length+i)
+        msg = this.getKeyWordMsg(keyWord)
+        if (msg.length) {
+          const n = index.slice(-i)
+          msg = msg[n-1]
+          if (msg) {
+            this.keyWord = `${keyWord}(${n})`
+            break
+          }
+        }
       }
+    } else {
+      msg = msg[lodash.random(0, msg.length-1)]
     }
-
-    let msg = [
-      ...messageMap[this.group_id].get(keyWord) || [],
-      ...messageMap.global.get(keyWord) || [],
-    ]
     if (lodash.isEmpty(msg)) return false
 
-    if (!msg[num])
-      num = lodash.random(0, msg.length-1)
-
-    msg = [...msg[num]]
+    msg = [...msg]
     for (const i in msg)
       if (msg[i].file && await Bot.fsStat(`${this.path}${msg[i].file}`))
         msg[i] = { ...msg[i], file: `${this.path}${msg[i].file}` }
 
-    logger.mark(`[发送消息]${this.e.logText} ${this.keyWord}`)
+    logger.mark(`[发送消息]${this.e.logText}[${this.keyWord}]`)
     const groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
     return this.reply(msg, Boolean(groupCfg.addReply), {
       at: Boolean(groupCfg.addAt),
@@ -292,65 +284,31 @@ export class add extends plugin {
     await this.initMessageMap()
 
     this.getKeyWord()
-    if (!this.keyWord) {
-      await this.reply("删除错误：没有关键词")
-      return false
-    }
+    if (!this.keyWord)
+      return this.reply("删除错误：没有关键词")
 
-    this.keyWord = this.trimAlias(this.keyWord)
-    let keyWord = this.keyWord
-
-    let num = false
-    let index = 0
-    if (isNaN(keyWord)) {
-      num = keyWord.charAt(keyWord.length-1)
-
-      if (!isNaN(num) && !messageMap[this.group_id].has(keyWord)) {
-        keyWord = lodash.trimEnd(keyWord, num).trim()
-        index = num-1
-      } else {
-        num = false
-      }
-    }
-
-    let arr = messageMap[this.group_id].get(keyWord)
-    if (!arr) {
-      // await this.reply(`暂无此消息：${keyWord}`)
-      return false
-    }
-
-    let tmp = []
-    if (num) {
-      if (!arr[index]) {
-        // await this.reply(`暂无此消息：${keyWord}${num}`)
-        return false
-      }
-
-      tmp = arr[index]
-      arr.splice(index, 1)
-
-      if (arr.length <= 0) {
-        messageMap[this.group_id].delete(keyWord)
-      } else {
-        messageMap[this.group_id].set(keyWord, arr)
-      }
+    if (messageMap[this.group_id].has(this.keyWord)) {
+      messageMap[this.group_id].delete(this.keyWord)
+      await this.saveJson()
+      return this.reply(`删除成功：${this.keyWord}`)
     } else {
-      if (this.e.msg.includes("删除全部")) {
-        tmp = arr
-        arr = []
-      } else {
-        tmp = arr.pop()
-      }
-
-      if (arr.length <= 0) {
-        messageMap[this.group_id].delete(keyWord)
-      } else {
-        messageMap[this.group_id].set(keyWord, arr)
+      const index = this.keyWord.match(/\d+$/)?.[0]
+      if (index) for (let i=0; i<index.length; i++) {
+        const keyWord = this.keyWord.slice(0, this.keyWord.length - index.length+i)
+        const msg = messageMap[this.group_id].get(keyWord)
+        if (msg) {
+          const n = index.slice(-i)-1
+          if (msg[n]) {
+            msg.splice(n, 1)
+            if (!msg.length)
+              messageMap[this.group_id].delete(keyWord)
+            await this.saveJson()
+            return this.reply(`删除成功：${keyWord}(${n+1})`)
+          }
+        }
       }
     }
-
-    await this.saveJson()
-    return this.reply(`删除成功：${this.keyWord}`)
+    return this.reply("删除错误：没有添加此关键词")
   }
 
   async list() {
@@ -373,10 +331,8 @@ export class add extends plugin {
 
     let list = messageMap[this.group_id]
 
-    if (lodash.isEmpty(list)) {
-      await this.reply("暂无消息")
-      return
-    }
+    if (lodash.isEmpty(list))
+      return this.reply("暂无消息")
 
     let arr = []
     if (type == "list")
