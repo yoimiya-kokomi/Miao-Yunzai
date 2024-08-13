@@ -9,6 +9,7 @@ class Start extends plugin {
       name: "开机",
       dsc: "#开机",
       event: "message",
+      priority: -Infinity,
       rule: [
         {
           reg: /^#开机$/,

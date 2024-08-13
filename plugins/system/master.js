@@ -8,6 +8,7 @@ export class master extends plugin {
       name: "设置主人",
       dsc: "设置主人",
       event: "message",
+      priority: -Infinity,
       rule: [
         {
           reg: "^#设置主人$",

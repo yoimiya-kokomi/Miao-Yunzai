@@ -1,25 +1,23 @@
-import cfg from '../../lib/config/config.js'
+import cfg from "../../lib/config/config.js"
 
 export class disPri extends plugin {
-  constructor () {
+  constructor() {
     super({
-      name: '禁止私聊',
-      dsc: '对私聊禁用做处理当开启私聊禁用时只接收cookie以及抽卡链接',
-      event: 'message.private'
+      name: "禁止私聊",
+      dsc: "对私聊禁用做处理当开启私聊禁用时只接收cookie以及抽卡链接",
+      event: "message.private",
+      priority: -Infinity,
     })
-    this.priority = 0
   }
 
-  async accept () {
-    if (!cfg.other?.disablePrivate) return
-
-    if (this.e.isMaster) return
+  async accept() {
+    if (!cfg.other?.disablePrivate || this.e.isMaster) return
 
     /** 发送日志文件，xlsx，json */
     if (this.e.file) {
       if (!/(.*)\.txt|xlsx|json/ig.test(this.e.file?.name)) {
         this.sendTips()
-        return 'return'
+        return "return"
       } else {
         return false
       }
@@ -32,48 +30,41 @@ export class disPri extends plugin {
     if (!Array.isArray(disableAdopt)) {
       disableAdopt = []
     }
-    disableAdopt = disableAdopt.filter(str => str != null && str !== '');
-    let disableReg = `(.*)(${disableAdopt.join('|')})(.*)`
+    disableAdopt = disableAdopt.filter(str => str != null && str !== "");
+    let disableReg = `(.*)(${disableAdopt.join("|")})(.*)`
     if (this.e.raw_message) {
       if (!new RegExp(wordReg).test(this.e.raw_message) && (disableAdopt.length === 0 || !new RegExp(disableReg).test(this.e.raw_message))) {
         this.sendTips()
-        return 'return'
+        return "return"
       }
     }
   }
 
-  async sendTips () {
-    /** 冷却cd 10s */
-    let cd = 10
-
-    if (this.e.user_id == cfg.qq) return
+  async sendTips() {
+    if (this.e.user_id == this.e.self_id) return
 
     /** cd */
-    let key = `Yz:disablePrivate:${this.e.user_id}`
+    const key = `Yz:disablePrivate:${this.e.user_id}`
     if (await redis.get(key)) return
 
     this.e.reply(cfg.other.disableMsg)
-
-    redis.setEx(key, cd, '1')
+    redis.setEx(key, 10, "1")
   }
 }
 
 export class disFriPoke extends plugin {
-  constructor () {
+  constructor() {
     super({
-      name: '禁止私聊',
-      dsc: '对私聊禁用做处理当开启私聊禁用时只接收cookie以及抽卡链接',
-      event: 'notice.friend.poke'
+      name: "禁止私聊",
+      dsc: "对私聊禁用做处理当开启私聊禁用时只接收cookie以及抽卡链接",
+      event: "notice.friend.poke",
+      priority: -Infinity,
     })
-    this.priority = 0
   }
 
-  async accept () {
-    if (!cfg.other?.disablePrivate) return
-
-    if (this.e.isMaster) return
-
+  async accept() {
+    if (!cfg.other?.disablePrivate || this.e.isMaster) return
     this.e.reply(cfg.other.disableMsg)
-    return 'return'
+    return "return"
   }
 }

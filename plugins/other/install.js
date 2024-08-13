@@ -36,6 +36,7 @@ export class install extends plugin {
       name: "安装插件",
       dsc: "#安装插件 #安装TRSS-Plugin",
       event: "message",
+      priority: -Infinity,
       rule: [
         {
           reg: `^#安装(插件|${Object.keys(map).join("|")})(-[Pp]lugin)?$`,

@@ -4,6 +4,7 @@ export class botOperate extends plugin {
       name: "botOperate",
       dsc: "Bot 操作",
       event: "message",
+      priority: -Infinity,
       rule: [
         {
           reg: "^#(Bot|机器人)验证.+:.+$",

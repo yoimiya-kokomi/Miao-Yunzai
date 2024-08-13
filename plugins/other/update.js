@@ -11,7 +11,7 @@ export class update extends plugin {
       name: "更新",
       dsc: "#更新 #强制更新",
       event: "message",
-      priority: 4000,
+      priority: -Infinity,
       rule: [
         {
           reg: "^#更新日志",

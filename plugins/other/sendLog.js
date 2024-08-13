@@ -8,6 +8,7 @@ export class sendLog extends plugin {
       name: "发送日志",
       dsc: "发送最近100条运行日志",
       event: "message",
+      priority: -Infinity,
       rule: [
         {
           reg: "^#(运行|错误)*日志[0-9]*(.*)",
