@@ -9,7 +9,6 @@ class Start extends plugin {
       name: "开机",
       dsc: "#开机",
       event: "message",
-      priority: -Infinity,
       rule: [
         {
           reg: /^#开机$/,
@@ -35,7 +34,7 @@ export class Restart extends plugin {
       name: "进程管理",
       dsc: "#重启 #关机 #停止",
       event: "message",
-      priority: 10,
+      priority: -Infinity,
       rule: [
         {
           reg: "^#重启$",
@@ -59,13 +58,13 @@ export class Restart extends plugin {
   key = "Yz:restart"
 
   init() {
-    Bot.once("online", () => this.restartMsg())
+    Bot.once("online", this.restartMsg.bind(this))
     this.e = {
       reply: msg => Bot.sendMasterMsg(msg),
       isMaster: true,
     }
     if (cfg.bot.restart_time)
-      setTimeout(() => this.restart(), cfg.bot.restart_time*60000)
+      setTimeout(this.restart.bind(this), cfg.bot.restart_time*60000)
 
     this.task = []
     if (cfg.bot.restart_cron)
@@ -73,14 +72,14 @@ export class Restart extends plugin {
         this.task.push({
           name: "定时重启",
           cron: i,
-          fnc: () => this.restart(),
+          fnc: this.restart.bind(this),
         })
     if (cfg.bot.stop_cron)
       for (const i of Array.isArray(cfg.bot.stop_cron) ? cfg.bot.stop_cron : [cfg.bot.stop_cron])
         this.task.push({
           name: "定时关机",
           cron: i,
-          fnc: () => this.stop(),
+          fnc: this.stop.bind(this),
         })
     if (cfg.bot.start_cron)
       for (const i of Array.isArray(cfg.bot.start_cron) ? cfg.bot.start_cron : [cfg.bot.start_cron])

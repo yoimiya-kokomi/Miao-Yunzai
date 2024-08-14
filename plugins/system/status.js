@@ -7,7 +7,6 @@ export class status extends plugin {
       name: "状态统计",
       dsc: "#状态",
       event: "message",
-      priority: -Infinity,
       rule: [
         {
           reg: "^#(状态|统计)",
