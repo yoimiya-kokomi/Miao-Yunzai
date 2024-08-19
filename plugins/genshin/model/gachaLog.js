@@ -217,7 +217,7 @@ export default class GachaLog extends base {
     let logUrl = "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog?"
     /** 国际服 */
     if (!["cn_gf01", "cn_qd01"].includes(param.region)) {
-      logUrl = "https://hk4e-api-os.hoyoverse.com/gacha_info/api/getGachaLog?"
+      logUrl = "https://public-operation-hk4e-sg.hoyoverse.com/gacha_info/api/getGachaLog?"
     }
 
     let logParam = new URLSearchParams({
@@ -230,9 +230,9 @@ export default class GachaLog extends base {
       ...param
     }).toString()
     if (this.e.isSr) {
-      logUrl = "https://api-takumi.mihoyo.com/common/gacha_record/api/getGachaLog?"
+      logUrl = "https://public-operation-hkrpg.mihoyo.com/common/gacha_record/api/getGachaLog?"
       if (!["prod_gf_cn", "prod_qd_cn"].includes(param.region)) {
-        logUrl = "https://api-os-takumi.mihoyo.com/common/gacha_record/api/getGachaLog?"
+        logUrl = "https://public-operation-hkrpg-sg.hoyoverse.com/common/gacha_record/api/getGachaLog?"
       }
       logParam = new URLSearchParams({
         authkey_ver: 1,
