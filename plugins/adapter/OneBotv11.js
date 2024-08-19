@@ -748,6 +748,10 @@ Bot.adapter.push(new class OneBotv11Adapter {
       getSystemMsg: () => data.bot.request_list,
       setFriendAddRequest: (flag, approve, remark) => this.setFriendAddRequest(data, flag, approve, remark),
       setGroupAddRequest: (flag, sub_type, approve, reason) => this.setGroupAddRequest(data, flag, sub_type, approve, reason),
+
+      cookies: {},
+      getCookies(domain) { return this.cookies[domain] },
+      getCsrfToken() { return this.bkn },
     }
     data.bot = Bot[data.self_id]
 
@@ -770,6 +774,14 @@ Bot.adapter.push(new class OneBotv11Adapter {
         return this.app_full_name || `${this.app_name} v${this.app_version}`
       },
     }
+
+    for (const i of ["aq", "connect", "docs", "game", "gamecenter", "haoma", "id", "kg", "mail", "mma", "office", "openmobile", "qqweb", "qun", "qzone", "ti", "v", "vip", "y"]) {
+      const domain = `${i}.qq.com`
+      if (!(data.bot.cookies[domain] = (
+        await data.bot.sendApi("get_cookies", { domain }).catch(i => i.error)
+      ).cookies)) break
+    }
+    data.bot.bkn = (await data.bot.sendApi("get_csrf_token").catch(i => i.error)).token
 
     data.bot.getFriendMap()
     data.bot.getGroupMemberMap()
