@@ -92,12 +92,7 @@ export default class Abyss extends base {
 
   abyssData (data) {
     let startTime = moment.unix(data.start_time)
-    let time = Number(startTime.month()) + 1
-    if (startTime.date() >= 15) {
-      time = time + '月下'
-    } else {
-      time = time + '月上'
-    }
+    let time = Number(startTime.month()) + 1 + '月'
 
     let totalStar = 0
     let star = []

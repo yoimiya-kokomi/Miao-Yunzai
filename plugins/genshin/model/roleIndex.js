@@ -268,12 +268,7 @@ export default class RoleIndex extends base {
     }
 
     let startTime = moment(resAbyss.startTime)
-    let time = Number(startTime.month()) + 1
-    if (startTime.day() >= 15) {
-      time = time + '月下'
-    } else {
-      time = time + '月上'
-    }
+    let time = Number(startTime.month()) + 1 + '月'
 
     let totalStar = 0
     let star = []
