@@ -31,7 +31,8 @@ export default class RoleIndex extends base {
       来歆山: 11,
       沉玉谷·南陵: 12,
       沉玉谷·上谷: 13,
-      旧日之海: 14
+      旧日之海: 14,
+      纳塔: 15
     }
 
     this.all_chest = 0
@@ -201,8 +202,8 @@ export default class RoleIndex extends base {
     let explor = []
     let explor2 = []
 
-    let expArr = ['枫丹', '须弥', '层岩巨渊', '渊下宫', '稻妻']
-    let expArr2 = ['雪山', '璃月', '蒙德']
+    let expArr = ['纳塔', '枫丹', '须弥', '层岩巨渊', '渊下宫']
+    let expArr2 = ['稻妻', '雪山', '璃月', '蒙德']
 
     for (let val of expArr) {
       let tmp = {
@@ -394,6 +395,7 @@ export default class RoleIndex extends base {
     }
 
     explor2 = explor2.concat([
+      { lable: '火神瞳', num: stats.pyroculus_number },
       { lable: '水神瞳', num: stats.hydroculus_number },
       { lable: '草神瞳', num: stats.dendroculus_number },
       { lable: '雷神瞳', num: stats.electroculus_number },
@@ -527,7 +529,7 @@ export default class RoleIndex extends base {
         { lable: '雷神瞳', num: stats.electroculus_number, extra: this.lable.electroculus },
         { lable: '草神瞳', num: stats.dendroculus_number, extra: this.lable.dendroculus },
         { lable: '水神瞳', num: stats.hydroculus_number, extra: this.lable.hydroculus },
-        { lable: '火神瞳', num: `${dsz}`, extra: 0 },
+        { lable: '火神瞳', num: stats.pyroculus_number, extra: this.lable.pyroculus },
         { lable: '冰神瞳', num: `${dsz}`, extra: 0 }
       ],
     ]
@@ -582,17 +584,18 @@ export default class RoleIndex extends base {
         }
       }
 
-      if (['雪山', '稻妻', '层岩巨渊', '须弥', '枫丹', '沉玉谷'].includes(val.name)) {
+      if (['雪山', '稻妻', '层岩巨渊', '须弥', '枫丹', '沉玉谷', '纳塔'].includes(val.name)) {
         if (val.offerings[0].name.includes('流明石')) {
           val.offerings[0].name = '流明石'
         }
-
+        if (val.offerings[0].name == '桓那兰那的梦之树') {
+          val.offerings[0].name = '梦之树'
+        }
         if (val.offerings[0].name.includes('露景泉')) {
           val.offerings[0].name = '露景泉'
         }
-
-        if (val.offerings[0].name == '桓那兰那的梦之树') {
-          val.offerings[0].name = '梦之树'
+        if (val.offerings[0].name.includes('煅石之火')) {
+          val.offerings[0].name = '煅石之火'
         }
 
         tmp.line.push({
