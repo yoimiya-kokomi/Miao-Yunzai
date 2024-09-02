@@ -144,6 +144,10 @@ body {
   .paneal-title .heraldry.h3 {
     background-image: url('../../img/combat/heraldry-3.png');
   }
+
+  .paneal-title .heraldry.h4 {
+    background-image: url('../../img/combat/heraldry-4.png');
+  }
   
   .paneal .paneal_txt {
     width: 100%;
