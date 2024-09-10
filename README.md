@@ -202,7 +202,7 @@ websocket_url = ["ws://localhost:2536/ComWeChat"]
 
 <details><summary>GSUIDCore</summary><blockquote>
 
-下载运行 [GenshinUID 插件](http://docs.gsuid.gbots.work/#/AdapterList)，GSUIDCore 连接地址 修改为：
+下载运行 [GenshinUID 插件](https://docs.sayu-bot.com/LinkBots/AdapterList.html)，GSUIDCore 连接地址 修改为：
 
 ```
 ws://localhost:2536/GSUIDCore
