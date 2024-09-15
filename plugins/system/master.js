@@ -1,5 +1,6 @@
 import fs from "node:fs/promises"
 import { ulid } from "ulid"
+import YAML from "yaml"
 const code = {}
 const file = "config/config/other.yaml"
 export class master extends plugin {
@@ -31,16 +32,15 @@ export class master extends plugin {
   }
 
   async edit(file, key, value) {
-    let data = await fs.readFile(file, "utf8")
-    if (data.match(RegExp(`- "?${value}"?`)))
-      return
-    value = `${key}:\n  - "${value}"`
-    if (data.match(RegExp(`${key}:`)))
-      data = data.replace(RegExp(`${key}:`), value)
-    else
-      data = `${data}\n${value}`
-    return fs.writeFile(file, data, "utf8")
-  }
+    const doc = YAML.parseDocument(await fs.readFile(file, "utf8"))
+    const values = doc.get(key)
+    if (values) {
+      if (values.items.some(item => item.value == value))
+        return
+      values.add(value)
+    } else doc.set(key, [value])
+    return fs.writeFile(file, doc.toString(), "utf8")
+}
 
   master() {
     if (this.e.isMaster)
