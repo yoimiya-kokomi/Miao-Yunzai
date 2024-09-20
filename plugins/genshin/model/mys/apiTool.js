@@ -70,6 +70,7 @@ export default class apiTool {
           url: `${hostRecord}game_record/app/genshin/api/spiralAbyss`,
           query: `role_id=${this.uid}&schedule_type=${data.schedule_type || 1}&server=${this.server}`
         },
+        /** 幻想真境剧诗 */
         role_combat: {
           url: `${hostRecord}game_record/app/genshin/api/role_combat`,
           query: `role_id=${this.uid}&need_detail=true&server=${this.server}`
