@@ -62,7 +62,9 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         i = { type: "text", text: i }
 
       if (i.file) {
-        i.file = await Bot.Buffer(i.file, { http: true })
+        i.file = await Bot.Buffer(i.file, {
+          http: true, size: 10485760,
+        })
         if (Buffer.isBuffer(i.file))
           i.file = `base64://${i.file.toString("base64")}`
       }

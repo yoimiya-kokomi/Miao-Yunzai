@@ -33,9 +33,11 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   async makeFile(file, opts) {
-    file = await Bot.Buffer(file, { http: true, ...opts })
+    file = await Bot.Buffer(file, {
+      http: true, size: 10485760, ...opts,
+    })
     if (Buffer.isBuffer(file))
-      file = `base64://${file.toString("base64")}`
+      return `base64://${file.toString("base64")}`
     return file
   }
 

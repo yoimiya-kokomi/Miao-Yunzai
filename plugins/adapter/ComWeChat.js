@@ -33,7 +33,9 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async uploadFile(data, file) {
-    file = await Bot.fileType(file, { http: true })
+    file = await Bot.fileType(file, {
+      http: true, size: 10485760,
+    })
     const opts = { name: file.name }
 
     if (Buffer.isBuffer(file.buffer)) {

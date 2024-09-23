@@ -38,7 +38,9 @@ Bot.adapter.push(new class OPQBotAdapter {
   async uploadFile(id, type, file) {
     const opts = { CommandId: this.CommandId[type] }
 
-    file = await Bot.Buffer(file, { http: true })
+    file = await Bot.Buffer(file, {
+      http: true, size: 10485760,
+    })
     if (Buffer.isBuffer(file))
       opts.Base64Buf = file.toString("base64")
     else if (file.match(/^https?:\/\//))
