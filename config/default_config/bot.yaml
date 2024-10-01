@@ -35,3 +35,5 @@ skip_login: false
 sign_api_addr:
 # 传入的QQ版本(如:8.9.63、8.9.68)
 ver:
+# 滑动验证自动获取ticket API地址
+slider_ticket_addr: https://HanXuan-GT.HF.Space/captcha/slider
