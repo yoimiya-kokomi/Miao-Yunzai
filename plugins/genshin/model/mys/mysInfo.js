@@ -401,7 +401,7 @@ export default class MysInfo {
         break
       case 10102:
         if (res.message === 'Data is not public for the user') {
-          if (!isTask) this.e.reply([`\nUID:${this.uid}，米游社数据未公开`, this.mysButton], false, { at: this.userId })
+          if (!isTask) this.e.reply([`UID:${this.uid}，米游社数据未公开`, this.mysButton], false, { at: this.userId })
         } else {
           if (!isTask) this.e.reply([`UID:${this.uid}，请先去米游社绑定角色`, this.mysButton])
         }
