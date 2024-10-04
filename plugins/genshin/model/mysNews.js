@@ -273,6 +273,9 @@ export default class MysNews extends base {
   }
 
   replyMsg(img, title) {
+    if (!Array.isArray(img)) {
+      img = [img];
+    }
     if (!img || img.length <= 0) return false
     if (title) img = [title, ...img]
     if (img.length <= 2) return img
