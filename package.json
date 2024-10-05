@@ -33,7 +33,7 @@
     "pm2": "^5.4.2",
     "puppeteer": "*",
     "redis": "^4.7.0",
-    "sequelize": "^6.37.3",
+    "sequelize": "^6.37.4",
     "sqlite3": "5.1.6",
     "strip-ansi": "^7.1.0",
     "ulid": "^2.3.0",
@@ -43,7 +43,7 @@
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.6.0"
   },

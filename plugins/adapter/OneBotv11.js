@@ -136,7 +136,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       message_id = [message_id]
     const msgs = []
     for (const i of message_id)
-      msgs.push(await data.bot.sendApi("delete_msg", { message_id: i }))
+      msgs.push(await data.bot.sendApi("delete_msg", { message_id: i }).catch(i => i))
     return msgs
   }
 
@@ -637,7 +637,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       kick: reject_add_request => this.setGroupKick(i, i.user_id, reject_add_request),
       get is_friend() { return data.bot.fl.has(user_id) },
       get is_owner() { return i.role === "owner" },
-      get is_admin() { return i.role === "admin" },
+      get is_admin() { return i.role === "admin" || this.is_owner },
     }
   }
 
@@ -700,7 +700,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       quit: is_dismiss => this.setGroupLeave(i, is_dismiss),
       fs: this.getGroupFs(i),
       get is_owner() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role === "owner" },
-      get is_admin() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role === "admin" },
+      get is_admin() { return data.bot.gml.get(group_id)?.get(data.self_id)?.role === "admin" || this.is_owner },
     }
   }
 
