@@ -4,6 +4,8 @@ log_level: info
 log_length: 10000
 # 对象日志格式
 log_object: true
+# 日志ID对齐
+log_align: "  TRSSYz  "
 # 插件加载超时
 plugin_load_timeout: 60
 

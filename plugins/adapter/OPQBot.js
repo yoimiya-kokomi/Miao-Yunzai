@@ -99,7 +99,7 @@ Bot.adapter.push(new class OPQBotAdapter {
   }
 
   sendFriendMsg(data, msg, event) {
-    Bot.makeLog("info", `发送好友消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.user_id}`)
+    Bot.makeLog("info", `发送好友消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.user_id}`, true)
     return this.sendMsg(
       msg => this.sendApi(data.self_id,
       "MessageSvc.PbSendMsg", {
@@ -113,7 +113,7 @@ Bot.adapter.push(new class OPQBotAdapter {
   }
 
   sendMemberMsg(data, msg, event) {
-    Bot.makeLog("info", `发送群员消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}, ${data.user_id}`)
+    Bot.makeLog("info", `发送群员消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}, ${data.user_id}`, true)
     return this.sendMsg(
       msg => this.sendApi(data.self_id,
       "MessageSvc.PbSendMsg", {
@@ -128,7 +128,7 @@ Bot.adapter.push(new class OPQBotAdapter {
   }
   
   sendGroupMsg(data, msg) {
-    Bot.makeLog("info", `发送群消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `发送群消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}`, true)
     let ReplyTo
     if (data.message_id && data.seq && data.time)
       ReplyTo = {
@@ -248,7 +248,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     data = this.makeMessage(id, data)
     data.message_type = "private"
 
-    Bot.makeLog("info", `好友消息：[${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
+    Bot.makeLog("info", `好友消息：[${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.user_id}`, true)
     Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
 
@@ -261,7 +261,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     data.group_name = data.event.MsgHead.GroupInfo.GroupName
 
     data.reply = msg => this.sendGroupMsg(data, msg)
-    Bot.makeLog("info", `群消息：[${data.group_name}, ${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+    Bot.makeLog("info", `群消息：[${data.group_name}, ${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
     Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
 

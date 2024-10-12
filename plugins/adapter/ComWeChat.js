@@ -101,7 +101,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async sendFriendMsg(data, msg) {
     const message = await this.makeMsg(data, msg, msg => this.sendFriendMsg(data, msg))
-    Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`)
+    Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`, true)
     return data.bot.sendApi("send_message", {
       detail_type: "private",
       user_id: data.user_id,
@@ -111,7 +111,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
   async sendGroupMsg(data, msg) {
     const message = await this.makeMsg(data, msg, msg => this.sendGroupMsg(data, msg))
-    Bot.makeLog("info", `发送群消息：${this.makeLog(message)}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `发送群消息：${this.makeLog(message)}`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("send_message", {
       detail_type: "group",
       group_id: data.group_id,
@@ -328,10 +328,10 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     switch (data.message_type) {
       case "private":
-        Bot.makeLog("info", `好友消息：${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `好友消息：${data.raw_message}`, `${data.self_id} <= ${data.user_id}`, true)
         break
       case "group":
-        Bot.makeLog("info", `群消息：${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群消息：${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         break
       default:
         Bot.makeLog("warn", `未知消息：${logger.magenta(data.raw)}`, data.self_id)
@@ -349,24 +349,24 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     switch (data.detail_type) {
       case "private_message_delete":
-        Bot.makeLog("info", `好友消息撤回：${data.message_id}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `好友消息撤回：${data.message_id}`, `${data.self_id} <= ${data.user_id}`, true)
         data.sub_type = "recall"
         break
       case "group_message_delete":
-        Bot.makeLog("info", `群消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`)
+        Bot.makeLog("info", `群消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`, true)
         data.sub_type = "recall"
         break
       case "wx.get_private_file":
-        Bot.makeLog("info", `私聊文件：${data.file_name} ${data.file_length} ${data.md5}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `私聊文件：${data.file_name} ${data.file_length} ${data.md5}`, `${data.self_id} <= ${data.user_id}`, true)
         break
       case "wx.get_group_file":
-        Bot.makeLog("info", `群文件：${data.file_name} ${data.file_length} ${data.md5}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群文件：${data.file_name} ${data.file_length} ${data.md5}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         break
       case "wx.get_private_redbag":
-        Bot.makeLog("info", `好友红包`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `好友红包`, `${data.self_id} <= ${data.user_id}`, true)
         break
       case "wx.get_group_redbag":
-        Bot.makeLog("info", `群红包`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群红包`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         break
       case "wx.get_private_poke":
         data.operator_id = data.from_user_id
@@ -376,13 +376,13 @@ Bot.adapter.push(new class ComWeChatAdapter {
       case "wx.get_group_poke":
         data.operator_id = data.from_user_id
         data.target_id = data.user_id
-        Bot.makeLog("info", `群拍一拍：${data.operator_id} => ${data.target_id}`, `${data.self_id} <= ${data.group_id}`)
+        Bot.makeLog("info", `群拍一拍：${data.operator_id} => ${data.target_id}`, `${data.self_id} <= ${data.group_id}`, true)
         break
       case "wx.get_private_card":
-        Bot.makeLog("info", `好友用户名片：${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `好友用户名片：${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`, `${data.self_id} <= ${data.user_id}`, true)
         break
       case "wx.get_group_card":
-        Bot.makeLog("info", `群用户名片：${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群用户名片：${data.v3} ${data.v4} ${data.nickname} ${data.head_url} ${data.province} ${data.city} ${data.sex}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         break
       default:
         Bot.makeLog("warn", `未知通知：${logger.magenta(data.raw)}`, data.self_id)
@@ -402,7 +402,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
 
     switch (data.detail_type) {
       case "wx.friend_request":
-        Bot.makeLog("info", `加好友请求：${data.v3} ${data.v4} ${data.nickname} ${data.content} ${data.province} ${data.city}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `加好友请求：${data.v3} ${data.v4} ${data.nickname} ${data.content} ${data.province} ${data.city}`, `${data.self_id} <= ${data.user_id}`, true)
         data.sub_type = "add"
         break
       default:

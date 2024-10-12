@@ -101,7 +101,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
   sendFriendMsg(data, msg) {
     return this.sendMsg(msg, message => {
-      Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`)
+      Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`, true)
       data.bot.sendApi("send_msg", {
         user_id: data.user_id,
         message,
@@ -111,7 +111,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
   sendGroupMsg(data, msg) {
     return this.sendMsg(msg, message => {
-      Bot.makeLog("info", `发送群消息：${this.makeLog(message)}`, `${data.self_id} => ${data.group_id}`)
+      Bot.makeLog("info", `发送群消息：${this.makeLog(message)}`, `${data.self_id} => ${data.group_id}`, true)
       return data.bot.sendApi("send_msg", {
         group_id: data.group_id,
         message,
@@ -121,7 +121,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
   sendGuildMsg(data, msg) {
     return this.sendMsg(msg, message => {
-      Bot.makeLog("info", `发送频道消息：${this.makeLog(message)}`, `${data.self_id}] => ${data.guild_id}-${data.channel_id}`)
+      Bot.makeLog("info", `发送频道消息：${this.makeLog(message)}`, `${data.self_id}] => ${data.guild_id}-${data.channel_id}`, true)
       return data.bot.sendApi("send_guild_channel_msg", {
         guild_id: data.guild_id,
         channel_id: data.channel_id,
@@ -199,7 +199,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   async sendFriendForwardMsg(data, msg) {
-    Bot.makeLog("info", `发送好友转发消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.user_id}`)
+    Bot.makeLog("info", `发送好友转发消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.user_id}`, true)
     return data.bot.sendApi("send_private_forward_msg", {
       user_id: data.user_id,
       messages: await this.makeForwardMsg(msg),
@@ -207,7 +207,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   async sendGroupForwardMsg(data, msg) {
-    Bot.makeLog("info", `发送群转发消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `发送群转发消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("send_group_forward_msg", {
       group_id: data.group_id,
       messages: await this.makeForwardMsg(msg),
@@ -394,7 +394,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   sendLike(data, times) {
-    Bot.makeLog("info", `点赞：${times}次`, `${data.self_id} => ${data.user_id}`)
+    Bot.makeLog("info", `点赞：${times}次`, `${data.self_id} => ${data.user_id}`, true)
     return data.bot.sendApi("send_like", {
       user_id: data.user_id,
       times,
@@ -402,7 +402,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   setGroupName(data, group_name) {
-    Bot.makeLog("info", `设置群名：${group_name}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `设置群名：${group_name}`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("set_group_name", {
       group_id: data.group_id,
       group_name,
@@ -410,7 +410,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   async setGroupAvatar(data, file) {
-    Bot.makeLog("info", `设置群头像：${file}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `设置群头像：${file}`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("set_group_portrait", {
       group_id: data.group_id,
       file: await this.makeFile(file),
@@ -418,7 +418,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   setGroupAdmin(data, user_id, enable) {
-    Bot.makeLog("info", `${enable ? "设置" : "取消"}群管理员：${user_id}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `${enable ? "设置" : "取消"}群管理员：${user_id}`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("set_group_admin", {
       group_id: data.group_id,
       user_id,
@@ -427,7 +427,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   setGroupCard(data, user_id, card) {
-    Bot.makeLog("info", `设置群名片：${card}`, `${data.self_id} => ${data.group_id}, ${user_id}`)
+    Bot.makeLog("info", `设置群名片：${card}`, `${data.self_id} => ${data.group_id}, ${user_id}`, true)
     return data.bot.sendApi("set_group_card", {
       group_id: data.group_id,
       user_id,
@@ -436,7 +436,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   setGroupTitle(data, user_id, special_title, duration) {
-    Bot.makeLog("info", `设置群头衔：${special_title} ${duration}`, `${data.self_id} => ${data.group_id}, ${user_id}`)
+    Bot.makeLog("info", `设置群头衔：${special_title} ${duration}`, `${data.self_id} => ${data.group_id}, ${user_id}`, true)
     return data.bot.sendApi("set_group_special_title", {
       group_id: data.group_id,
       user_id,
@@ -446,14 +446,14 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   sendGroupSign(data) {
-    Bot.makeLog("info", "群打卡", `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", "群打卡", `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("send_group_sign", {
       group_id: data.group_id,
     })
   }
 
   setGroupBan(data, user_id, duration) {
-    Bot.makeLog("info", `禁言群成员：${duration}秒`, `${data.self_id} => ${data.group_id}, ${user_id}`)
+    Bot.makeLog("info", `禁言群成员：${duration}秒`, `${data.self_id} => ${data.group_id}, ${user_id}`, true)
     return data.bot.sendApi("set_group_ban", {
       group_id: data.group_id,
       user_id,
@@ -462,7 +462,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   setGroupWholeKick(data, enable) {
-    Bot.makeLog("info", `${enable ? "开启" : "关闭"}全员禁言`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `${enable ? "开启" : "关闭"}全员禁言`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("set_group_whole_ban", {
       group_id: data.group_id,
       enable,
@@ -470,7 +470,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   setGroupKick(data, user_id, reject_add_request) {
-    Bot.makeLog("info", `踢出群成员${reject_add_request ? "拒绝再次加群" : ""}`, `${data.self_id} => ${data.group_id}, ${user_id}`)
+    Bot.makeLog("info", `踢出群成员${reject_add_request ? "拒绝再次加群" : ""}`, `${data.self_id} => ${data.group_id}, ${user_id}`, true)
     return data.bot.sendApi("set_group_kick", {
       group_id: data.group_id,
       user_id,
@@ -479,7 +479,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   setGroupLeave(data, is_dismiss) {
-    Bot.makeLog("info", is_dismiss ? "解散" : "退群", `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", is_dismiss ? "解散" : "退群", `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("set_group_leave", {
       group_id: data.group_id,
       is_dismiss,
@@ -495,7 +495,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   async sendFriendFile(data, file, name = path.basename(file)) {
-    Bot.makeLog("info", `发送好友文件：${name}(${file})`, `${data.self_id} => ${data.user_id}`)
+    Bot.makeLog("info", `发送好友文件：${name}(${file})`, `${data.self_id} => ${data.user_id}`, true)
     return data.bot.sendApi("upload_private_file", {
       user_id: data.user_id,
       file: await this.makeFile(file, { file: true }),
@@ -504,7 +504,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   async sendGroupFile(data, file, folder, name = path.basename(file)) {
-    Bot.makeLog("info", `发送群文件：${folder||""}/${name}(${file})`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `发送群文件：${folder||""}/${name}(${file})`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("upload_group_file", {
       group_id: data.group_id,
       folder,
@@ -514,7 +514,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   deleteGroupFile(data, file_id, busid) {
-    Bot.makeLog("info", `删除群文件：${file_id}(${busid})`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `删除群文件：${file_id}(${busid})`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("delete_group_file", {
       group_id: data.group_id,
       file_id,
@@ -523,7 +523,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   }
 
   createGroupFileFolder(data, name) {
-    Bot.makeLog("info", `创建群文件夹：${name}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `创建群文件夹：${name}`, `${data.self_id} => ${data.group_id}`, true)
     return data.bot.sendApi("create_group_file_folder", {
       group_id: data.group_id,
       name,
@@ -797,7 +797,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
     switch (data.message_type) {
       case "private": {
         const name = data.sender.card || data.sender.nickname || data.bot.fl.get(data.user_id)?.nickname
-        Bot.makeLog("info", `好友消息：${name ? `[${name}] ` : ""}${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `好友消息：${name ? `[${name}] ` : ""}${data.raw_message}`, `${data.self_id} <= ${data.user_id}`, true)
         break
       } case "group": {
         const group_name = data.group_name || data.bot.gl.get(data.group_id)?.group_name
@@ -806,12 +806,12 @@ Bot.adapter.push(new class OneBotv11Adapter {
           const user = data.bot.gml.get(data.group_id)?.get(data.user_id) || data.bot.fl.get(data.user_id)
           if (user) user_name = user?.card || user?.nickname
         }
-        Bot.makeLog("info", `群消息：${user_name ? `[${group_name ? `${group_name}, ` : ""}${user_name}] ` : ""}${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群消息：${user_name ? `[${group_name ? `${group_name}, ` : ""}${user_name}] ` : ""}${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         break
       } case "guild":
         data.message_type = "group"
         data.group_id = `${data.guild_id}-${data.channel_id}`
-        Bot.makeLog("info", `频道消息：[${data.sender.nickname}] ${Bot.String(data.message)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `频道消息：[${data.sender.nickname}] ${Bot.String(data.message)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         Object.defineProperty(data, "friend", { get() { return this.member || {}}})
         break
       default:
@@ -824,37 +824,37 @@ Bot.adapter.push(new class OneBotv11Adapter {
   async makeNotice(data) {
     switch (data.notice_type) {
       case "friend_recall":
-        Bot.makeLog("info", `好友消息撤回：${data.message_id}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `好友消息撤回：${data.message_id}`, `${data.self_id} <= ${data.user_id}`, true)
         break
       case "group_recall":
-        Bot.makeLog("info", `群消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`)
+        Bot.makeLog("info", `群消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`, true)
         break
       case "group_increase":
-        Bot.makeLog("info", `群成员增加：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`)
+        Bot.makeLog("info", `群成员增加：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`, true)
         if (data.user_id === data.self_id)
           data.bot.getGroupMemberMap()
         else
           data.bot.pickGroup(data.group_id).getMemberMap()
         break
       case "group_decrease":
-        Bot.makeLog("info", `群成员减少：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`)
+        Bot.makeLog("info", `群成员减少：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`, true)
         if (data.user_id === data.self_id)
           data.bot.getGroupMemberMap()
         else
           data.bot.pickGroup(data.group_id).getMemberMap()
         break
       case "group_admin":
-        Bot.makeLog("info", `群管理员变动：${data.sub_type}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群管理员变动：${data.sub_type}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         data.set = data.sub_type === "set"
         break
       case "group_upload":
-        Bot.makeLog("info", `群文件上传：${Bot.String(data.file)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群文件上传：${Bot.String(data.file)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         break
       case "group_ban":
-        Bot.makeLog("info", `群禁言：${data.operator_id} => ${data.user_id} ${data.sub_type} ${data.duration}秒`, `${data.self_id} <= ${data.group_id}`)
+        Bot.makeLog("info", `群禁言：${data.operator_id} => ${data.user_id} ${data.sub_type} ${data.duration}秒`, `${data.self_id} <= ${data.group_id}`, true)
         break
       case "friend_add":
-        Bot.makeLog("info", "好友添加", `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", "好友添加", `${data.self_id} <= ${data.user_id}`, true)
         data.bot.getFriendMap()
         break
       case "notify":
@@ -866,25 +866,25 @@ Bot.adapter.push(new class OneBotv11Adapter {
           case "poke":
             data.operator_id = data.user_id
             if (data.group_id)
-              Bot.makeLog("info", `群戳一戳：${data.operator_id} => ${data.target_id}`, `${data.self_id} <= ${data.group_id}`)
+              Bot.makeLog("info", `群戳一戳：${data.operator_id} => ${data.target_id}`, `${data.self_id} <= ${data.group_id}`, true)
             else
               Bot.makeLog("info", `好友戳一戳：${data.operator_id} => ${data.target_id}`, data.self_id)
             break
           case "honor":
-            Bot.makeLog("info", `群荣誉：${data.honor_type}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+            Bot.makeLog("info", `群荣誉：${data.honor_type}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
             break
           case "title":
-            Bot.makeLog("info", `群头衔：${data.title}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+            Bot.makeLog("info", `群头衔：${data.title}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
             break
           default:
             Bot.makeLog("warn", `未知通知：${logger.magenta(data.raw)}`, data.self_id)
         }
         break
       case "group_card":
-        Bot.makeLog("info", `群名片更新：${data.card_old} => ${data.card_new}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `群名片更新：${data.card_old} => ${data.card_new}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         break
       case "offline_file":
-        Bot.makeLog("info", `离线文件：${Bot.String(data.file)}`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `离线文件：${Bot.String(data.file)}`, `${data.self_id} <= ${data.user_id}`, true)
         break
       case "client_status":
         Bot.makeLog("info", `客户端${data.online ? "上线" : "下线"}：${Bot.String(data.client)}`, data.self_id)
@@ -893,27 +893,27 @@ Bot.adapter.push(new class OneBotv11Adapter {
         break
       case "essence":
         data.notice_type = "group_essence"
-        Bot.makeLog("info", `群精华消息：${data.operator_id} => ${data.sender_id} ${data.sub_type} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`)
+        Bot.makeLog("info", `群精华消息：${data.operator_id} => ${data.sender_id} ${data.sub_type} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`, true)
         break
       case "guild_channel_recall":
-        Bot.makeLog("info", `频道消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}`)
+        Bot.makeLog("info", `频道消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}`, true)
         break
       case "message_reactions_updated":
         data.notice_type = "guild_message_reactions_updated"
-        Bot.makeLog("info", `频道消息表情贴：${data.message_id} ${Bot.String(data.current_reactions)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `频道消息表情贴：${data.message_id} ${Bot.String(data.current_reactions)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`, true)
         break
       case "channel_updated":
         data.notice_type = "guild_channel_updated"
-        Bot.makeLog("info", `子频道更新：${Bot.String(data.old_info)} => ${Bot.String(data.new_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `子频道更新：${Bot.String(data.old_info)} => ${Bot.String(data.new_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`, true)
         break
       case "channel_created":
         data.notice_type = "guild_channel_created"
-        Bot.makeLog("info", `子频道创建：${Bot.String(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `子频道创建：${Bot.String(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`, true)
         data.bot.getGroupMap()
         break
       case "channel_destroyed":
         data.notice_type = "guild_channel_destroyed"
-        Bot.makeLog("info", `子频道删除：${Bot.String(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`)
+        Bot.makeLog("info", `子频道删除：${Bot.String(data.channel_info)}`, `${data.self_id} <= ${data.guild_id}-${data.channel_id}, ${data.user_id}`, true)
         data.bot.getGroupMap()
         break
       default:
@@ -937,12 +937,12 @@ Bot.adapter.push(new class OneBotv11Adapter {
   makeRequest(data) {
     switch (data.request_type) {
       case "friend":
-        Bot.makeLog("info", `加好友请求：${data.comment}(${data.flag})`, `${data.self_id} <= ${data.user_id}`)
+        Bot.makeLog("info", `加好友请求：${data.comment}(${data.flag})`, `${data.self_id} <= ${data.user_id}`, true)
         data.sub_type = "add"
         data.approve = approve => data.bot.setFriendAddRequest(data.flag, approve)
         break
       case "group":
-        Bot.makeLog("info", `加群请求：${data.sub_type} ${data.comment}(${data.flag})`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+        Bot.makeLog("info", `加群请求：${data.sub_type} ${data.comment}(${data.flag})`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
         data.approve = approve => data.bot.setGroupAddRequest(data.flag, data.sub_type, approve)
         break
       default:

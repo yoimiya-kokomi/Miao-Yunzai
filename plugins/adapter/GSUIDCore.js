@@ -115,7 +115,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
   async sendFriendMsg(data, msg) {
     const content = await this.makeMsg(msg)
-    Bot.makeLog("info", `发送好友消息：${this.makeLog(content)}`, `${data.self_id} => ${data.user_id}`)
+    Bot.makeLog("info", `发送好友消息：${this.makeLog(content)}`, `${data.self_id} => ${data.user_id}`, true)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
@@ -129,7 +129,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
   async sendGroupMsg(data, msg) {
     const target = data.group_id.split("-")
     const content = await this.makeMsg(msg)
-    Bot.makeLog("info", `发送群消息：${this.makeLog(content)}`, `${data.self_id} => ${data.group_id}`)
+    Bot.makeLog("info", `发送群消息：${this.makeLog(content)}`, `${data.self_id} => ${data.group_id}`, true)
     data.bot.sendApi({
       bot_id: data.bot.bot_id,
       bot_self_id: data.bot.bot_self_id,
@@ -275,7 +275,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
 
     if (raw.user_type === "direct") {
       data.message_type = "private"
-      Bot.makeLog("info", `好友消息：${data.raw_message}`, `${data.self_id} <= ${data.user_id}`)
+      Bot.makeLog("info", `好友消息：${data.raw_message}`, `${data.self_id} <= ${data.user_id}`, true)
     } else {
       data.message_type = "group"
       data.group_id = `${raw.user_type}-${raw.group_id}`
@@ -290,7 +290,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
       if (!gml.has(data.user_id))
         gml.set(data.user_id, data.sender)
 
-      Bot.makeLog("info", `群消息：${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`)
+      Bot.makeLog("info", `群消息：${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
     }
 
     Bot.em(`${data.post_type}.${data.message_type}`, data)
