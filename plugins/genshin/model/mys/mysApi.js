@@ -153,6 +153,8 @@ export default class MysApi {
 
     res.api = type
 
+    if(res.api === 'character' && res.data?.list) res.data.avatars = res.data?.list
+
     if (cached) this.cache(res, cacheKey)
 
     return res
