@@ -77,7 +77,7 @@ export default class apiTool {
         },
         /** 角色详情 */
         character: {
-          url: `${hostRecord}game_record/app/genshin/api/character`,
+          url: `${hostRecord}game_record/app/genshin/api/character/list`,
           body: { role_id: this.uid, server: this.server }
         },
         /** 树脂 */
