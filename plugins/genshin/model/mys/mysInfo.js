@@ -439,6 +439,9 @@ export default class MysInfo {
     if (res.retcode !== 0) {
       logger.mark(`[mys接口报错]${JSON.stringify(res)}，uid：${this.uid}`)
     }
+    
+    if(type === 'character' && res.data?.list) res.data.avatars = res.data?.list
+    
     // 添加请求记录
     if (!isTask) await this.ckUser.addQueryUid(this.uid)
     return res
