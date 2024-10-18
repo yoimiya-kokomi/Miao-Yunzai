@@ -29,7 +29,7 @@ export class mysNews extends plugin {
           fnc: 'mysUrl'
         },
         {
-          reg: '^#?(原(神|石)|星(铁|琼)|(崩坏三|崩三|水晶)|(绝区(零)|zzz|菲林|邦布(券)))?(预估|盘点)$',
+          reg: '^#?(原(神|石)|星(铁|琼)|崩坏三|崩三|水晶|绝区(零)|zzz|菲林)?(预估|盘点)$',
           fnc: 'mysEstimate'
         },
         {
@@ -135,9 +135,9 @@ export class mysNews extends plugin {
     let args = ['原石统计汇总', 137101761] /* 数字为通行证ID 可更换 */
     if (/星(琼|铁)/.test(this.e.msg))
       args = ['星琼统计汇总', 137101761]
-    if (/(绝区(零)|zzz|菲林|邦布(券))/.test(this.e.msg))
+    if (/绝区(零)|zzz|菲林/.test(this.e.msg))
       args = ['菲林统计汇总', 137101761]
-    if (/(崩坏三|崩三|水晶)/.test(this.e.msg))
+    if (/崩坏三|崩三|水晶/.test(this.e.msg))
       args = ['可获取水晶', 73779489] /* 暂未找到正在更新的作者 */
     let data = await new MysNews(this.e).mysEstimate(...args)
     if (!data) return
