@@ -19,7 +19,7 @@ export class gcLog extends plugin {
           fnc: "logUrl"
         },
         {
-          reg: "^#json文件导入记录$",
+          reg: "^#?(原神|星铁)?(强制)?导入记录(json)?$",
           fnc: "logJson"
         },
         {
@@ -76,13 +76,6 @@ export class gcLog extends plugin {
   }
 
   accept() {
-    if (this.e.file) {
-      let name = this.e.file?.name
-      if (/(.*)(18|[1-9])[0-9]{8}(.*).json/ig.test(name)) {
-        this.e.msg = "#json文件导入记录"
-        return true
-      }
-    }
     if (this.e.msg && /^#?(角色|武器)统计$/g.test(this.e.msg)) {
       this.e.msg = this.e.msg.replace("统计", "池统计")
       return true
@@ -121,14 +114,23 @@ export class gcLog extends plugin {
     return new ExportLog(this.e).exportJson()
   }
 
-  async logJson() {
-    if (!this.e.file)
-      return this.e.reply("请发送Json文件")
+  logJson() {
+    if (this.e.isGroup && !this.e.msg.includes("强制")) {
+      return this.reply("建议私聊导入，若你确认要在此导入，请发送【#强制导入记录】", false, { at: true })
+    }
 
+    this.setContext("logJsonFile")
+    return this.reply("请发送Json文件")
+  }
+
+  async logJsonFile() {
+    if (!this.e.file) return false
+
+    this.finish("logJsonFile")
     await new ExportLog(this.e).logJson()
 
     if (this.e.isGroup)
-      this.e.reply("已收到文件，请撤回", false, { at: true })
+      this.reply("已收到文件，请撤回", false, { at: true })
   }
 
   help() {

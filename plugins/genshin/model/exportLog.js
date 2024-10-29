@@ -182,12 +182,11 @@ export default class ExportLog extends base {
 
   /** json导入抽卡记录 */
   async logJson() {
-    let uid = /(18|[1-9])[0-9]{8}/g.exec(this.e.file.name)[0]
-    let textPath = `${this.path}${this.e.file.name}`
+    const textPath = `${this.path}${this.e.file.name || this.e.user_id}`
     /** 获取文件下载链接 */
-    let fileUrl = await this.e.friend.getFileUrl(this.e.file.fid)
+    const fileUrl = this.e.file.url || await this.e.friend.getFileUrl(this.e.file.fid)
 
-    let ret = await common.downFile(fileUrl, textPath)
+    const ret = await common.downFile(fileUrl, textPath)
     if (!ret) {
       this.e.reply('下载json文件错误')
       return false
@@ -219,7 +218,7 @@ export default class ExportLog extends base {
       let typeName = this.typeName(this.game)
       if (!typeName[type]) continue
       let gachLog = new GachaLog(this.e)
-      gachLog.uid = uid
+      gachLog.uid = json.info.uid
       gachLog.type = type
       gachLog.writeJson(data[type])
 
