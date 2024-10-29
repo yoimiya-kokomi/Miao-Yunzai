@@ -849,6 +849,14 @@ Bot.adapter.push(new class OneBotv11Adapter {
         break
       case "group_upload":
         Bot.makeLog("info", `群文件上传：${Bot.String(data.file)}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
+        Bot.em("message.group.normal", {
+          ...data,
+          post_type: "message",
+          message_type: "group",
+          sub_type: "normal",
+          message: [{ ...data.file, type: "file" }],
+          raw_message: `[文件：${data.file.name}]`,
+        })
         break
       case "group_ban":
         Bot.makeLog("info", `群禁言：${data.operator_id} => ${data.user_id} ${data.sub_type} ${data.duration}秒`, `${data.self_id} <= ${data.group_id}`, true)
@@ -885,6 +893,14 @@ Bot.adapter.push(new class OneBotv11Adapter {
         break
       case "offline_file":
         Bot.makeLog("info", `离线文件：${Bot.String(data.file)}`, `${data.self_id} <= ${data.user_id}`, true)
+        Bot.em("message.private.friend", {
+          ...data,
+          post_type: "message",
+          message_type: "private",
+          sub_type: "friend",
+          message: [{ ...data.file, type: "file" }],
+          raw_message: `[文件：${data.file.name}]`,
+        })
         break
       case "client_status":
         Bot.makeLog("info", `客户端${data.online ? "上线" : "下线"}：${Bot.String(data.client)}`, data.self_id)
