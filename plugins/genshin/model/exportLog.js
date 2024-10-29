@@ -182,9 +182,18 @@ export default class ExportLog extends base {
 
   /** json导入抽卡记录 */
   async logJson() {
-    const textPath = `${this.path}${this.e.file.name || this.e.user_id}`
+    const textPath = `${this.path}${this.e.file.name || `${this.e.user_id}.json`}`
     /** 获取文件下载链接 */
-    const fileUrl = this.e.file.url || await this.e.friend.getFileUrl(this.e.file.fid)
+    let fileUrl = this.e.file.url
+    if (/https?:\/\//.test(fileUrl)) {
+    } else if (this.e.group?.getFileUrl) {
+      fileUrl = await this.e.group.getFileUrl(this.e.file.fid)
+    } else if (this.e.friend?.getFileUrl) {
+      fileUrl = await this.e.friend.getFileUrl(this.e.file.fid)
+    } else {
+      this.e.reply('文件链接获取失败')
+      return false
+    }
 
     const ret = await common.downFile(fileUrl, textPath)
     if (!ret) {
