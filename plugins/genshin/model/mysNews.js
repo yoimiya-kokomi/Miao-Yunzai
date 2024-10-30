@@ -104,7 +104,6 @@ export default class MysNews extends base {
         break
       // 公告列表
       case 'getNewsList':
-        host += 'post/wapi/getNewsList?'
         host = 'https://bbs-api-static.miyoushe.com/painter/wapi/getNewsList?'
         break
       case 'emoticon':
