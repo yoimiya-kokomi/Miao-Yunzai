@@ -138,7 +138,9 @@ export class mysNews extends plugin {
     if (/绝区(零)|zzz|菲林/.test(this.e.msg))
       args = ['菲林统计汇总', 137101761]
     if (/崩坏三|崩三|水晶/.test(this.e.msg))
-      args = ['可获取水晶', 73779489] /* 暂未找到正在更新的作者 */
+      args = ['水晶统计', 80216695]
+    /*  args = ['水晶量', 51369902]  */
+    /* 自行选择水晶预估作者 */
     let data = await new MysNews(this.e).mysEstimate(...args)
     if (!data) return
     await this.reply(data)
