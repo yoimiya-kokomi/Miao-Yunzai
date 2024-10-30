@@ -114,35 +114,6 @@ export default class GachaLog extends base {
     return params
   }
 
-  async downFile() {
-    this.creatFile()
-
-    let textPath = `${this.path}output_log.txt`
-
-    // 获取文件下载链接
-    let fileUrl = await this.e.friend.getFileUrl(this.e.file.fid)
-
-    let ret = await common.downFile(fileUrl, textPath)
-    if (!ret) {
-      this.e.reply("下载日志文件错误")
-      return false
-    }
-
-    // 读取txt文件
-    let txt = fs.readFileSync(textPath, "utf-8")
-
-    let url = txt.match(/auth_appid=webview_gacha(.*)hk4e_cn/)
-
-    /** 删除文件 */
-    fs.unlink(textPath, () => { })
-
-    if (!url || !url[0]) {
-      return false
-    }
-
-    return url[0]
-  }
-
   async checkUrl(param) {
     if (!param.region) {
       let res = await this.logApi({

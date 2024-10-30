@@ -1,8 +1,8 @@
 # 成就
-achievement: 1358
+achievement: 1365
 
 # 角色数
-avatar: 88
+avatar: 89
 
 # 等级
 level: 60
@@ -17,13 +17,13 @@ luxurious_chest: 300
 precious_chest: 793
 
 # 精致宝箱
-exquisite_chest: 2544
+exquisite_chest: 2548
 
 # 普通宝箱
-common_chest: 3194
+common_chest: 3196
 
 # 传送点
-way_point: 501
+way_point: 505
 
 # 秘境
 domain: 61

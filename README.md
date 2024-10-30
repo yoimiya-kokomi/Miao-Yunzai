@@ -8,8 +8,6 @@
 
 ## 使用方法
 
-[ ! 点击阅读Yunzai文档了解更多](https://yunzai-org.github.io/docs/)
-
 > 必要环境 Windows/Linux + Chrome/Chromium/Edge
 
 > 必要环境 Node.js>16.14.0 + Redis>5.0.0
