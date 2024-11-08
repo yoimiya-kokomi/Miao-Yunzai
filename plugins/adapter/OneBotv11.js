@@ -102,7 +102,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
   sendFriendMsg(data, msg) {
     return this.sendMsg(msg, message => {
       Bot.makeLog("info", `发送好友消息：${this.makeLog(message)}`, `${data.self_id} => ${data.user_id}`, true)
-      data.bot.sendApi("send_msg", {
+      return data.bot.sendApi("send_msg", {
         user_id: data.user_id,
         message,
       })
