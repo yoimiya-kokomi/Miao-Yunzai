@@ -30,7 +30,7 @@
     "node-fetch": "link:lib/modules/node-fetch",
     "node-schedule": "^2.1.1",
     "oicq": "link:lib/modules/oicq",
-    "pm2": "^5.4.2",
+    "pm2": "^5.4.3",
     "puppeteer": "*",
     "redis": "^4.7.0",
     "sequelize": "^6.37.5",
@@ -38,7 +38,7 @@
     "strip-ansi": "^7.1.0",
     "ulid": "^2.3.0",
     "ws": "^8.18.0",
-    "yaml": "^2.6.0"
+    "yaml": "^2.6.1"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
