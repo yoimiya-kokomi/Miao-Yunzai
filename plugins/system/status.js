@@ -1,4 +1,5 @@
 import cfg from "../../lib/config/config.js"
+import PluginsLoader from "../../lib/plugins/loader.js"
 import moment from "moment"
 
 export class status extends plugin {
@@ -27,17 +28,24 @@ export class status extends plugin {
       `—— TRSS Yunzai v${cfg.package.version} ——\n`+
       `运行时间：${Bot.getTimeDiff()}\n`+
       `内存使用：${(process.memoryUsage().rss/1024/1024).toFixed(2)}MB\n`+
-      `系统版本：${process.platform} ${process.arch} ${process.version}`+
+      `系统版本：${process.platform} ${process.arch} ${process.version}\n\n`+
       this.botTime() + await this.count()
 
-    return this.reply(Bot.makeForwardArray(msg))
+    return this.reply(Bot.makeForwardArray([msg, this.pluginTime()]))
   }
 
   botTime() {
-    let msg = "\n\n账号在线时长"
+    let msg = "账号在线时长"
     for (const i of Bot.uin)
       if (Bot[i]?.stat?.start_time)
         msg += `\n${Bot.getTimeDiff(Bot[i].stat.start_time*1000)} ${i}`
+    return msg
+  }
+
+  pluginTime() {
+    let msg = "插件加载用时"
+    for (const i in PluginsLoader.load_time)
+      msg += `\n${Bot.getTimeDiff(0, PluginsLoader.load_time[i])} ${i}`
     return msg
   }
 
