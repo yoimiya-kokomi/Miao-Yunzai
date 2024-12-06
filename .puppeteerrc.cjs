@@ -1,16 +1,16 @@
-const os = require("os")
+const arch = require("os").arch()
 const { existsSync } = require("fs")
 const { execSync } = require("child_process")
-const arch = os.arch()
 
 let skipDownload = false
 let executablePath
 
-if (process.platform == "linux" || process.platform == "android")
+if (["linux", "android"].includes(process.platform))
   for (const item of [
     "chromium",
     "chromium-browser",
     "chrome",
+    "google-chrome",
   ]) try {
     const chromiumPath = execSync(`command -v ${item}`).toString().trim()
     if (chromiumPath && existsSync(chromiumPath)) {
@@ -20,9 +20,6 @@ if (process.platform == "linux" || process.platform == "android")
   } catch (err) {}
 
 if (!executablePath) for (const item of [
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-  "/usr/bin/chrome",
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
   "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
