@@ -62,6 +62,9 @@ export default class GachaLog extends base {
 
     this.e.reply("链接发送成功，数据获取中……")
 
+    // 是否全量更新抽卡记录
+    this.fetchFullLog = await this.isFetchFullLog()
+
     /** 制作合并消息 */
     let MakeMsg = []
     let tmpMsg = ""
@@ -78,6 +81,10 @@ export default class GachaLog extends base {
     MakeMsg.push(tmpMsg)
     MakeMsg.push(`\n抽卡记录更新完成，您还可回复\n【${this?.e?.isSr ? "*" : "#"}全部记录】统计全部抽卡数据\n【${this?.e?.isSr ? "*光锥" : "#武器"}记录】统计${this?.e?.isSr ? "星铁光锥" : "武器"}池数据\n【${this?.e?.isSr ? "*" : "#"}角色统计】按卡池统计数据\n【${this?.e?.isSr ? "*" : "#"}导出记录】导出记录数据`)
     await this.e.reply(MakeMsg)
+
+    if (this.fetchFullLog) {
+      await this.setFetchFullLog(false)
+    }
 
     this.isLogUrl = true
 
@@ -225,6 +232,22 @@ export default class GachaLog extends base {
     return await res.json()
   }
 
+  async setFetchFullLog(flag) {
+    const redisKey = `Yz:settings:fetchFullLog:${this.userId}`
+    if (flag) {
+      await redis.set(redisKey, 1, { EX: 600 })
+      return this.e.reply("已开启全量更新抽卡记录，在10分钟内您的首次抽卡记录将全量更新，用于修复在官方记录有效期内可能发生的数据错误")
+    } else {
+      await redis.del(redisKey)
+      return this.e.reply("已关闭全量更新抽卡记录")
+    }
+  }
+
+  async isFetchFullLog() {
+    const redisKey = `Yz:settings:fetchFullLog:${this.userId}`
+    return !!(await redis.get(redisKey))
+  }
+
   /** 更新抽卡记录 */
   async updateLog() {
     /** 获取authkey */
@@ -247,6 +270,8 @@ export default class GachaLog extends base {
     /** 第一次获取增加提示 */
     if (lodash.isEmpty(logJson.list) && this.type === 301) {
       await this.e.reply(`开始获取${this.typeName}记录，首次获取数据较多，请耐心等待...`)
+    } else if (this.fetchFullLog && this.type === 301) {
+      await this.e.reply(`开始获取${this.typeName}记录，全量更新获取数据较多，请耐心等待...`)
     }
 
     let logRes = await this.getAllLog(logJson.ids, authkey)
@@ -258,7 +283,11 @@ export default class GachaLog extends base {
     /** 数据合并 */
     let num = logRes.list.length
     if (num > 0) {
-      all = logRes.list.concat(logJson.list)
+      if (this.fetchFullLog) {
+        all = this.mergeGachaData(logRes.list, logJson.list)
+      } else {
+        all = logRes.list.concat(logJson.list)
+      }
 
       /** 保存json */
       this.writeJson(all)
@@ -268,8 +297,30 @@ export default class GachaLog extends base {
     return { num }
   }
 
+  // 合并抽卡记录
+  mergeGachaData(remoteList, localList) {
+    if (remoteList.length === 0) return localList
+    if (localList.length === 0) return remoteList
+    // 远程记录的最后一条数据id
+    const remoteLastId = remoteList[remoteList.length - 1].id;
+    if (!remoteLastId) {
+      // 可能是mhy数据又出错了
+      return remoteList.concat(localList);
+    }
+    const findIdx = localList.findIndex((item) => item.id === remoteLastId);
+    if (findIdx === -1) {
+      return remoteList.concat(localList);
+    }
+    // 截取本地数据并合并
+    return remoteList.concat(localList.slice(findIdx + 1));
+  }
+
   /** 递归获取所有数据 */
   async getAllLog(ids, authkey, page = 1, endId = 0) {
+
+    /** 延迟下防止武器记录获取失败 */
+    await common.sleep(1000)
+
     let res = await this.logApi({
       gacha_type: this.type,
       page,
@@ -277,9 +328,6 @@ export default class GachaLog extends base {
       authkey,
       region: this.getServer()
     })
-
-    /** 延迟下防止武器记录获取失败 */
-    await common.sleep(1000)
 
     if (res.retcode != 0) {
       return { hasErr: true, list: [] }
@@ -292,7 +340,7 @@ export default class GachaLog extends base {
 
     let list = []
     for (let val of res.data.list) {
-      if (ids.get(String(val.id))) {
+      if (!this.fetchFullLog && ids.get(String(val.id))) {
         logger.mark(`${this.e.logFnc}[UID:${this.uid}] 获取${this.typeName}记录完成，暂无新记录`)
         return { hasErr: false, list }
       } else {
