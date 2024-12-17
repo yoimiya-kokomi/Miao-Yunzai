@@ -41,7 +41,12 @@ export class gcLog extends plugin {
         {
           reg: "^#?(原神|星铁)?(抽卡|抽奖|角色|武器|集录|常驻|up|新手|光锥)池*统计$",
           fnc: "logCount"
-        }
+        },
+        {
+          // #设置全量更新抽卡记录
+          reg: "^#?设置全量(更新|获取)(抽卡|祈愿)记录\s*(开|关|on|off)?$",
+          fnc: "setFetchFullLog"
+        },
       ]
     })
 
@@ -159,4 +164,10 @@ export class gcLog extends plugin {
 
     this.reply([await this.renderImg("genshin", `html/gacha/log-count`, data, { retType: "base64" }), this.button])
   }
+
+  async setFetchFullLog() {
+    let isOff = this.e.msg.includes("关") || this.e.msg.includes("off")
+    await new GachaLog(this.e).setFetchFullLog(!isOff)
+  }
+
 }
