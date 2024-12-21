@@ -136,7 +136,7 @@ export class exchange extends plugin {
         date.setDate(date.getDate() + 1)
         this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`
       } else {
-        date.setDate(date.getDate() + 3)
+        date.setDate(date.getDate() + 5)
         this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
       }
       let structured_content = post.structured_content
