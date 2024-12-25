@@ -1,0 +1,14 @@
+# 服务器地址
+url: http://localhost:2536
+# 服务器端口
+port: 2536
+# 服务器缺省跳转地址
+redirect: https://github.com/TimeRainStarSky/Yunzai
+# 服务器鉴权
+auth:
+# Authorization: Bearer <access_token>
+https:
+# url: https://localhost:2537
+# port: 2537
+# key: config/localhost.key
+# cert: config/localhost.crt

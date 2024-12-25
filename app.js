@@ -8,7 +8,7 @@ switch (process.env.app_type || process.argv[2]) {
     const cfg = (await import("./lib/config/config.js")).default
     const fetch = (await import("node-fetch")).default
     try {
-      await fetch(`http://localhost:${cfg.bot.port}/exit`)
+      await fetch(`http://localhost:${cfg.server.port}/exit`, { headers: cfg.server.auth || undefined })
     } catch {}
     process.exit()
   } default: {

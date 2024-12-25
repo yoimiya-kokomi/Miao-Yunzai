@@ -9,19 +9,6 @@ log_align: "  TRSSYz  "
 # 插件加载超时
 plugin_load_timeout: 60
 
-# 服务器地址
-url: http://localhost:2536
-# 服务器端口
-port: 2536
-# 服务器缺省跳转地址
-redirect: https://github.com/TimeRainStarSky/Yunzai
-# HTTPS 设置
-https:
-  url: https://localhost:2537
-  port: 2537
-  key: # config/localhost.key
-  cert: # config/localhost.crt
-
 # 自动更新时间
 update_time: 1440
 # 自动重启时间
