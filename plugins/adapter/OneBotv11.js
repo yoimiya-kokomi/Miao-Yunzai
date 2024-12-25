@@ -719,7 +719,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       getInfo: this.getGroupInfo.bind(this, i),
       getAvatarUrl() { return this.avatar || `https://p.qlogo.cn/gh/${group_id}/${group_id}/0` },
       getChatHistory: this.getGroupMsgHistory.bind(this, i),
-      getGroupHonorInfo: this.getGroupHonorInfo.bind(this, i),
+      getHonorInfo: this.getGroupHonorInfo.bind(this, i),
       getEssence: this.getEssenceMsg.bind(this, i),
       getMemberArray: this.getMemberArray.bind(this, i),
       getMemberList: this.getMemberList.bind(this, i),
