@@ -149,7 +149,7 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
     return {
       ...i,
-      sendMsg: msg => this.sendFriendMsg(i, msg),
+      sendMsg: this.sendFriendMsg.bind(this, i),
     }
   }
 
@@ -177,8 +177,8 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
     }
     return {
       ...i,
-      sendMsg: msg => this.sendGroupMsg(i, msg),
-      pickMember: user_id => this.pickMember(id, group_id, user_id),
+      sendMsg: this.sendGroupMsg.bind(this, i),
+      pickMember: this.pickMember.bind(this, id, group_id),
     }
   }
 
@@ -195,10 +195,10 @@ Bot.adapter.push(new class GSUIDCoreAdapter {
         id: this.id,
         name: this.name,
       },
-      pickFriend: user_id => this.pickFriend(data.self_id, user_id),
+      pickFriend: this.pickFriend.bind(this, data.self_id),
       get pickUser() { return this.pickFriend },
-      pickMember: (group_id, user_id) => this.pickMember(data.self_id, group_id, user_id),
-      pickGroup: group_id => this.pickGroup(data.self_id, group_id),
+      pickMember: this.pickMember.bind(this, data.self_id),
+      pickGroup: this.pickGroup.bind(this, data.self_id),
       fl: new Map,
       gl: new Map,
       gml: new Map,

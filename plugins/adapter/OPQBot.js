@@ -98,7 +98,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     return send(message)
   }
 
-  sendFriendMsg(data, msg, event) {
+  sendFriendMsg(data, msg) {
     Bot.makeLog("info", `发送好友消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.user_id}`, true)
     return this.sendMsg(
       msg => this.sendApi(data.self_id,
@@ -112,7 +112,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     )
   }
 
-  sendMemberMsg(data, msg, event) {
+  sendMemberMsg(data, msg) {
     Bot.makeLog("info", `发送群员消息：${this.makeLog(msg)}`, `${data.self_id} => ${data.group_id}, ${data.user_id}`, true)
     return this.sendMsg(
       msg => this.sendApi(data.self_id,
@@ -159,8 +159,8 @@ Bot.adapter.push(new class OPQBotAdapter {
     }
     return {
       ...i,
-      sendMsg: msg => this.sendFriendMsg(i, msg),
-      getAvatarUrl: () => `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
+      sendMsg: this.sendFriendMsg.bind(this, i),
+      getAvatarUrl() { return `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}` },
     }
   }
 
@@ -175,7 +175,7 @@ Bot.adapter.push(new class OPQBotAdapter {
     return {
       ...this.pickFriend(id, user_id),
       ...i,
-      sendMsg: msg => this.sendMemberMsg(i, msg),
+      sendMsg: this.sendMemberMsg.bind(this, i),
     }
   }
 
@@ -188,9 +188,9 @@ Bot.adapter.push(new class OPQBotAdapter {
     }
     return {
       ...i,
-      sendMsg: msg => this.sendGroupMsg(i, msg),
-      pickMember: user_id => this.pickMember(id, group_id, user_id),
-      getAvatarUrl: () => `https://p.qlogo.cn/gh/${group_id}/${group_id}/0`,
+      sendMsg: this.sendGroupMsg.bind(this, i),
+      pickMember: this.pickMember(this, id, group_id),
+      getAvatarUrl() { return `https://p.qlogo.cn/gh/${group_id}/${group_id}/0` },
     }
   }
 
@@ -248,6 +248,9 @@ Bot.adapter.push(new class OPQBotAdapter {
     data = this.makeMessage(id, data)
     data.message_type = "private"
 
+    if (!Bot[id].fl.has(data.user_id))
+      Bot[id].fl.set(data.user_id, data.sender)
+
     Bot.makeLog("info", `好友消息：[${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.user_id}`, true)
     Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
@@ -260,7 +263,16 @@ Bot.adapter.push(new class OPQBotAdapter {
     data.group_id = data.event.MsgHead.GroupInfo.GroupCode
     data.group_name = data.event.MsgHead.GroupInfo.GroupName
 
-    data.reply = msg => this.sendGroupMsg(data, msg)
+    if (!Bot[id].gl.has(data.group_id))
+      Bot[id].gl.set(data.group_id, { group_id: data.group_id, group_name: data.group_name })
+    let gml = Bot[id].gml.get(data.group_id)
+    if (!gml) {
+      gml = new Map
+      Bot[id].gml.set(data.group_id, gml)
+    }
+    if (!gml.has(data.user_id))
+      gml.set(data.user_id, data.sender)
+
     Bot.makeLog("info", `群消息：[${data.group_name}, ${data.sender.nickname}] ${data.raw_message}`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
     Bot.em(`${data.post_type}.${data.message_type}`, data)
   }
@@ -295,13 +307,13 @@ Bot.adapter.push(new class OPQBotAdapter {
       },
       stat: { start_time: Date.now()/1000 },
 
-      pickFriend: user_id => this.pickFriend(id, user_id),
+      pickFriend: this.pickFriend.bind(this, id),
       get pickUser() { return this.pickFriend },
       getFriendMap() { return this.fl },
       fl: new Map,
 
-      pickMember: (group_id, user_id) => this.pickMember(id, group_id, user_id),
-      pickGroup: group_id => this.pickGroup(id, group_id),
+      pickMember: this.pickMember.bind(this, id),
+      pickGroup: this.pickGroup.bind(this, id),
       getGroupMap() { return this.gl },
       gl: new Map,
       gml: new Map,

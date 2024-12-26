@@ -137,9 +137,11 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async getFriendMap(data) {
+    const map = new Map
     for (const i of (await this.getFriendArray(data)))
-      data.bot.fl.set(i.user_id, i)
-    return data.bot.fl
+      map.set(i.user_id, i)
+    data.bot.fl = map
+    return map
   }
 
   getFriendInfo(data) {
@@ -160,9 +162,11 @@ Bot.adapter.push(new class ComWeChatAdapter {
   }
 
   async getGroupMap(data) {
+    const map = new Map
     for (const i of (await this.getGroupArray(data)))
-      data.bot.gl.set(i.group_id, i)
-    return data.bot.gl
+      map.set(i.group_id, i)
+    data.bot.gl = map
+    return map
   }
 
   getGroupInfo(data) {
@@ -188,7 +192,16 @@ Bot.adapter.push(new class ComWeChatAdapter {
     const map = new Map
     for (const i of (await this.getMemberArray(data)))
       map.set(i.user_id, i)
+    data.bot.gml.set(data.group_id, map)
     return map
+  }
+
+  async getGroupMemberMap(data) {
+    for (const [group_id] of await this.getGroupMap(data)) {
+      if (group_id === "filehelper")
+        continue
+      await this.getMemberMap({ ...data, group_id }).catch(() => {})
+    }
   }
 
   getMemberInfo(data) {
@@ -206,16 +219,16 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
     return {
       ...i,
-      sendMsg: msg => this.sendFriendMsg(i, msg),
+      sendMsg: this.sendFriendMsg.bind(this, i),
       sendFile: (file, name) => this.sendFriendMsg(i, segment.file(file, name)),
-      getInfo: () => this.getFriendInfo(i),
-      getAvatarUrl: async () => (await this.getFriendInfo(i))["wx.avatar"],
+      getInfo: this.getFriendInfo.bind(this, i),
+      async getAvatarUrl() { return this["wx.avatar"] || (await this.getFriendInfo(i))["wx.avatar"] },
     }
   }
 
   pickMember(data, group_id, user_id) {
     const i = {
-      ...data.bot.fl.get(user_id),
+      ...data.bot.gml.get(group_id)?.get(user_id),
       ...data,
       group_id,
       user_id,
@@ -223,7 +236,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return {
       ...this.pickFriend(i, user_id),
       ...i,
-      getInfo: () => this.getMemberInfo(i),
+      getInfo: this.getMemberInfo.bind(this, i),
       getAvatarUrl: async () => (await this.getMemberInfo(i))["wx.avatar"],
     }
   }
@@ -236,14 +249,14 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
     return {
       ...i,
-      sendMsg: msg => this.sendGroupMsg(i, msg),
+      sendMsg: this.sendGroupMsg.bind(this, i),
       sendFile: (file, name) => this.sendGroupMsg(i, segment.file(file, name)),
-      getInfo: () => this.getGroupInfo(i),
-      getAvatarUrl: async () => (await this.getGroupInfo(i))["wx.avatar"],
-      getMemberArray: () => this.getMemberArray(i),
-      getMemberList: () => this.getMemberList(i),
-      getMemberMap: () => this.getMemberMap(i),
-      pickMember: user_id => this.pickMember(i, i.group_id, user_id),
+      getInfo: this.getGroupInfo.bind(this, i),
+      async getAvatarUrl() { return this["wx.avatar"] || (await this.getGroupInfo(i))["wx.avatar"] },
+      getMemberArray: this.getMemberArray.bind(this, i),
+      getMemberList: this.getMemberList.bind(this, i),
+      getMemberMap: this.getMemberMap.bind(this, i),
+      pickMember: this.pickMember.bind(this, i, group_id),
     }
   }
 
@@ -254,7 +267,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     Bot[data.self_id] = {
       adapter: this,
       ws: ws,
-      sendApi: (action, params) => this.sendApi(data, ws, action, params),
+      sendApi: this.sendApi.bind(this, data, ws),
       stat: { ...data.status, start_time: data.time },
 
       info: {},
@@ -262,18 +275,19 @@ Bot.adapter.push(new class ComWeChatAdapter {
       get nickname() { return this.info.user_name },
       get avatar() { return this.info["wx.avatar"] },
 
-      pickFriend: user_id => this.pickFriend(data, user_id),
+      pickFriend: this.pickFriend.bind(this, data),
       get pickUser() { return this.pickFriend },
-      getFriendArray: () => this.getFriendArray(data),
-      getFriendList: () => this.getFriendList(data),
-      getFriendMap: () => this.getFriendMap(data),
+      getFriendArray: this.getFriendArray.bind(this, data),
+      getFriendList: this.getFriendList.bind(this, data),
+      getFriendMap: this.getFriendMap.bind(this, data),
       fl: new Map,
 
-      pickMember: (group_id, user_id) => this.pickMember(data, group_id, user_id),
-      pickGroup: group_id => this.pickGroup(data, group_id),
-      getGroupArray: () => this.getGroupArray(data),
-      getGroupList: () => this.getGroupList(data),
-      getGroupMap: () => this.getGroupMap(data),
+      pickMember: this.pickMember.bind(this, data),
+      pickGroup: this.pickGroup.bind(this, data),
+      getGroupArray: this.getGroupArray.bind(this, data),
+      getGroupList: this.getGroupList.bind(this, data),
+      getGroupMap: this.getGroupMap.bind(this, data),
+      getGroupMemberMap: this.getGroupMemberMap.bind(this, data),
       gl: new Map,
       gml: new Map,
     }
@@ -290,7 +304,7 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
 
     data.bot.getFriendMap()
-    data.bot.getGroupMap()
+    data.bot.getGroupMemberMap()
 
     Bot.makeLog("mark", `${this.name}(${this.id}) ${data.bot.version.impl}-${data.bot.version.version} 已连接`, data.self_id)
     Bot.em(`connect.${data.self_id}`, data)
