@@ -29,7 +29,7 @@ export class mysNews extends plugin {
           fnc: 'mysUrl'
         },
         {
-          reg: '^#(原(神|石)|星(铁|琼))?(预估|盘点)$',
+          reg: '^#?(原(神|石)|星(铁|琼)|崩坏三|崩三|水晶|绝区(零)|zzz|菲林)?(预估|盘点)$',
           fnc: 'mysEstimate'
         },
         {
@@ -132,9 +132,15 @@ export class mysNews extends plugin {
   }
 
   async mysEstimate() {
-    let args = ['版本原石', 218945821]
+    let args = ['原石统计汇总', 137101761] /* 数字为通行证ID 可更换 */
     if (/星(琼|铁)/.test(this.e.msg))
-      args = ['可获取星琼', 73779489]
+      args = ['星琼统计汇总', 137101761]
+    if (/绝区(零)|zzz|菲林/.test(this.e.msg))
+      args = ['菲林统计汇总', 137101761]
+    if (/崩坏三|崩三|水晶/.test(this.e.msg))
+      args = ['水晶统计', 80216695]
+    /*  args = ['水晶量', 51369902]  */
+    /* 自行选择水晶预估作者 */
     let data = await new MysNews(this.e).mysEstimate(...args)
     if (!data) return
     await this.reply(data)
