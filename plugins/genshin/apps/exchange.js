@@ -115,13 +115,8 @@ export class exchange extends plugin {
     }
 
     for (const p of ret.data.list) {
-      let post
-      try {
-        post = p.post.post
-      } catch (e) {
-        logger.error('活动数据获取异常')
-        logger.error(e)
-      }
+      // Not every posts have post.post
+      let post = p?.post?.post
       if (!post) {
         continue
       }

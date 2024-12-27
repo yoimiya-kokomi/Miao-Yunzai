@@ -80,6 +80,11 @@ export default class apiTool {
           url: `${hostRecord}game_record/app/genshin/api/character/list`,
           body: { role_id: this.uid, server: this.server }
         },
+        /** 角色面板 */
+        characterDetail: {
+          url: `${hostRecord}game_record/app/genshin/api/character/detail`,
+          body: { role_id: this.uid, server: this.server, character_ids: data.character_ids}
+        },
         /** 树脂 */
         dailyNote: {
           url: `${hostRecord}game_record/app/genshin/api/dailyNote`,
@@ -197,6 +202,7 @@ export default class apiTool {
           url: `${hostRecord}game_record/app/hkrpg/api/challenge`,
           query: `role_id=${this.uid}&schedule_type=${data.schedule_type || 1}&server=${this.server}`
         },
+        /** 角色面板 */
         avatarInfo: {
           url: `${hostRecord}game_record/app/hkrpg/api/avatar/info`,
           query: `need_wiki=true&role_id=${this.uid}&server=${this.server}`

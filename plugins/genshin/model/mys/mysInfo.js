@@ -25,7 +25,24 @@ export default class MysInfo {
     }
     // ck对应MysUser对象
     this.ckUser = null
-    this.auth = ['dailyNote', 'bbs_sign_info', 'bbs_sign_home', 'bbs_sign', 'ys_ledger', 'compute', 'avatarSkill', 'detail', 'blueprint', 'UserGame', 'deckList', 'avatar_cardList', 'action_cardList', 'avatarInfo', 'role_combat']
+    this.auth = [
+      'dailyNote',
+      'bbs_sign_info',
+      'bbs_sign_home',
+      'bbs_sign',
+      'ys_ledger',
+      'compute',
+      'avatarSkill',
+      'detail',
+      'blueprint',
+      'UserGame',
+      'deckList',
+      'avatar_cardList',
+      'action_cardList',
+      'avatarInfo',
+      'role_combat',
+      'characterDetail'
+    ]
 
     this.gtest = false
     this.mysButton = segment.button([
