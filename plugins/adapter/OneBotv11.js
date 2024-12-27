@@ -579,6 +579,12 @@ Bot.adapter.push(new class OneBotv11Adapter {
     }
   }
 
+  deleteFriend(data) {
+    Bot.makeLog("info", "删除好友", `${data.self_id} => ${data.user_id}`, true)
+    return data.bot.sendApi("delete_friend", { user_id: data.user_id })
+      .finally(this.getFriendMap.bind(this, data))
+  }
+
   setFriendAddRequest(data, flag, approve, remark) {
     return data.bot.sendApi("set_friend_add_request", {
       flag,
@@ -594,6 +600,22 @@ Bot.adapter.push(new class OneBotv11Adapter {
       approve,
       reason,
     })
+  }
+
+  getGroupHonorInfo(data) {
+    return data.bot.sendApi("get_group_honor_info", { group_id: data.group_id })
+  }
+
+  getEssenceMsg(data) {
+    return data.bot.sendApi("get_essence_msg_list", { group_id: data.group_id })
+  }
+
+  setEssenceMsg(data, message_id) {
+    return data.bot.sendApi("set_essence_msg", { message_id })
+  }
+
+  deleteEssenceMsg(data, message_id) {
+    return data.bot.sendApi("delete_essence_msg", { message_id })
   }
 
   pickFriend(data, user_id) {
@@ -614,7 +636,7 @@ Bot.adapter.push(new class OneBotv11Adapter {
       getAvatarUrl() { return this.avatar || `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}` },
       getChatHistory: this.getFriendMsgHistory.bind(this, i),
       thumbUp: this.sendLike.bind(this, i),
-      delete: this.deleteFriend.bind(this, data, user_id)
+      delete: this.deleteFriend.bind(this, i),
     }
   }
 
@@ -697,6 +719,8 @@ Bot.adapter.push(new class OneBotv11Adapter {
       getInfo: this.getGroupInfo.bind(this, i),
       getAvatarUrl() { return this.avatar || `https://p.qlogo.cn/gh/${group_id}/${group_id}/0` },
       getChatHistory: this.getGroupMsgHistory.bind(this, i),
+      getGroupHonorInfo: this.getGroupHonorInfo.bind(this, i),
+      getEssence: this.getEssenceMsg.bind(this, i),
       getMemberArray: this.getMemberArray.bind(this, i),
       getMemberList: this.getMemberList.bind(this, i),
       getMemberMap: this.getMemberMap.bind(this, i),
@@ -765,7 +789,8 @@ Bot.adapter.push(new class OneBotv11Adapter {
       setFriendAddRequest: this.setFriendAddRequest.bind(this, data),
       setGroupAddRequest: this.setGroupAddRequest.bind(this, data),
 
-      deleteFriend: user_id => this.deleteFriend.bind(this, data, user_id),
+      setEssenceMessage: this.setEssenceMsg.bind(this, data),
+      removeEssenceMessage: this.deleteEssenceMsg.bind(this, data),
 
       cookies: {},
       getCookies(domain) { return this.cookies[domain] },
@@ -806,14 +831,6 @@ Bot.adapter.push(new class OneBotv11Adapter {
 
     Bot.makeLog("mark", `${this.name}(${this.id}) ${data.bot.version.version} 已连接`, data.self_id)
     Bot.em(`connect.${data.self_id}`, data)
-  }
-
-  async deleteFriend(data, user_id) {
-    Bot.makeLog("info", "删除好友", `${data.self_id} => ${user_id}`, true)
-    return await data.bot.sendApi("delete_friend", { user_id }).then(i => {
-      this.getFriendMap(data).catch(err => logger.error(err))
-      return i
-    }).catch(i => i.error)
   }
 
   makeMessage(data) {
