@@ -55,7 +55,7 @@ export class update extends plugin {
         this.task.push({
           name: "定时更新",
           cron: i,
-          fnc: () => this.updateAll(),
+          fnc: this.updateAll.bind(this),
         })
   }
 
