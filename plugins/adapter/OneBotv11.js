@@ -818,11 +818,12 @@ Bot.adapter.push(new class OneBotv11Adapter {
       },
     }
 
-    for (const i of ["aq", "connect", "docs", "game", "gamecenter", "haoma", "id", "kg", "mail", "mma", "office", "openmobile", "qqweb", "qun", "qzone", "ti", "v", "vip", "y"]) {
+    if (data.bot.cookies["qun.qq.com"] = (
+      await data.bot.sendApi("get_cookies", { domain: "qun.qq.com" }).catch(i => i.error)
+    ).cookies) for (const i of ["aq", "connect", "docs", "game", "gamecenter", "haoma", "id", "kg", "mail", "mma", "office", "openmobile", "qqweb", "qzone", "ti", "v", "vip", "y"]) {
       const domain = `${i}.qq.com`
-      if (!(data.bot.cookies[domain] = (
-        await data.bot.sendApi("get_cookies", { domain }).catch(i => i.error)
-      ).cookies)) break
+      data.bot.cookies[domain] = await data.bot.sendApi("get_cookies", { domain })
+        .then(i => i.cookies).catch(i => i.error)
     }
     data.bot.bkn = (await data.bot.sendApi("get_csrf_token").catch(i => i.error)).token
 
