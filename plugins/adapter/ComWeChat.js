@@ -144,10 +144,12 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return map
   }
 
-  getFriendInfo(data) {
-    return data.bot.sendApi("get_user_info", {
+  async getFriendInfo(data) {
+    const info = (await data.bot.sendApi("get_user_info", {
       user_id: data.user_id,
-    })
+    })).data
+    data.bot.fl.set(data.user_id, info)
+    return info
   }
 
   async getGroupArray(data) {
@@ -169,10 +171,12 @@ Bot.adapter.push(new class ComWeChatAdapter {
     return map
   }
 
-  getGroupInfo(data) {
-    return data.bot.sendApi("get_group_info", {
+  async getGroupInfo(data) {
+    const info = (await data.bot.sendApi("get_group_info", {
       group_id: data.group_id,
-    })
+    })).data
+    data.bot.gl.set(data.group_id, info)
+    return info
   }
 
   async getMemberArray(data) {
@@ -204,11 +208,18 @@ Bot.adapter.push(new class ComWeChatAdapter {
     }
   }
 
-  getMemberInfo(data) {
-    return data.bot.sendApi("get_group_member_info", {
+  async getMemberInfo(data) {
+    const info = (await data.bot.sendApi("get_group_member_info", {
       group_id: data.group_id,
       user_id: data.user_id,
-    })
+    })).data
+    let gml = data.bot.gml.get(data.group_id)
+    if (!gml) {
+      gml = new Map
+      data.bot.gml.set(data.group_id, gml)
+    }
+    gml.set(data.user_id, info)
+    return info
   }
 
   pickFriend(data, user_id) {
