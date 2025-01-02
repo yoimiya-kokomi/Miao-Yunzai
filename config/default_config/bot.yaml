@@ -8,6 +8,8 @@ log_object: true
 log_align: "  TRSSYz  "
 # 插件加载超时
 plugin_load_timeout: 60
+# 监听文件变化
+file_watch: true
 
 # 自动更新时间
 update_time: 1440
