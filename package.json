@@ -19,12 +19,12 @@
   },
   "dependencies": {
     "art-template": "^4.13.2",
-    "chalk": "^5.3.0",
-    "chokidar": "^3.6.0",
-    "https-proxy-agent": "7.0.4",
+    "chalk": "^5.4.1",
+    "chokidar": "^4.0.3",
+    "https-proxy-agent": "7.0.6",
     "icqq": "^0.6.10",
-    "image-size": "^1.1.1",
-    "inquirer": "^9.2.16",
+    "image-size": "^1.2.0",
+    "inquirer": "^12.3.1",
     "lodash": "^4.17.21",
     "log4js": "^6.9.1",
     "md5": "^2.3.0",
@@ -32,26 +32,34 @@
     "node-fetch": "^3.3.2",
     "node-schedule": "^2.1.1",
     "oicq": "^2.3.1",
-    "pm2": "^5.3.1",
+    "pm2": "^5.4.3",
     "puppeteer": "*",
-    "redis": "^4.6.13",
-    "sequelize": "^6.37.1",
+    "redis": "^4.7.0",
+    "sequelize": "^6.37.5",
     "sqlite3": "5.1.6",
     "ws": "^8.18.0",
-    "yaml": "^2.4.1"
+    "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "eslint": "^9.18.0",
     "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.1.1",
-    "express": "^4.19.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^17.15.1",
+    "eslint-plugin-promise": "^7.2.1",
+    "express": "^4.21.2",
     "express-art-template": "^1.0.1"
   },
   "imports": {
-    "#yunzai":"./lib/index.js",
+    "#yunzai": "./lib/index.js",
     "#miao": "./plugins/miao-plugin/components/index.js",
     "#miao.models": "./plugins/miao-plugin/models/index.js"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "classic-level",
+      "log4js",
+      "puppeteer",
+      "sqlite3"
+    ]
   }
 }
