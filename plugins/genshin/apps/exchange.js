@@ -25,7 +25,7 @@ export class exchange extends plugin {
 
   async getCode() {
     let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3|绝区零)?(直播|前瞻)?兑换码$/)
-    this.uid = '75276550'
+    this.uid = '75276539'
     if (reg[1] == '*' || ['星铁', '崩铁'].includes(reg[2])) {
       this.uid = '80823548'
     }
