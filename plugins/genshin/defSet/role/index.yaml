@@ -1,8 +1,8 @@
 # 成就
-achievement: 1428
+achievement: 1458
 
 # 角色数
-avatar: 91
+avatar: 94
 
 # 等级
 level: 60
@@ -17,16 +17,16 @@ luxurious_chest: 312
 precious_chest: 820
 
 # 精致宝箱
-exquisite_chest: 2630
+exquisite_chest: 2633
 
 # 普通宝箱
-common_chest: 3261
+common_chest: 3262
 
 # 传送点
-way_point: 540
+way_point: 541
 
 # 秘境
-domain: 61
+domain: 62
 
 # 风神瞳
 anemoculus: 66
