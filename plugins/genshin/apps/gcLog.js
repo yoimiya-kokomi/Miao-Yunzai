@@ -3,6 +3,7 @@ import fs from "node:fs"
 import GachaLog from "../model/gachaLog.js"
 import ExportLog from "../model/exportLog.js"
 import LogCount from "../model/logCount.js"
+import ExportLogV2 from "../model/exportLogV2.js"
 
 const _path = process.cwd() + "/plugins/genshin"
 
@@ -19,7 +20,7 @@ export class gcLog extends plugin {
           fnc: "logUrl"
         },
         {
-          reg: "^#?(原神|星铁)?(强制)?导入记录(json)?$",
+          reg: "^#?(原神|星铁)?(强制)?导入记录(json)?(v2|v4)?$",
           fnc: "logJson"
         },
         {
@@ -27,7 +28,7 @@ export class gcLog extends plugin {
           fnc: "getLog"
         },
         {
-          reg: "^#?(原神|星铁)?(强制)?导出记录(json)?$",
+          reg: "^#?(原神|星铁)?(强制)?导出记录(json)?(v2|v3|v4)?$",
           fnc: "exportLog"
         },
         {
@@ -115,16 +116,22 @@ export class gcLog extends plugin {
     if (this.e.isGroup && !this.e.msg.includes("强制")) {
       return this.reply("建议私聊导出，若你确认要在此导出，请发送【#强制导出记录】", false, { at: true })
     }
-
-    return new ExportLog(this.e).exportJson()
+    if (this.e.msg.includes("v2")) {
+      return new ExportLogV2(this.e).exportJson()
+    }else {
+      return new ExportLog(this.e).exportJson()
+    }
   }
 
   logJson() {
     if (this.e.isGroup && !this.e.msg.includes("强制")) {
       return this.reply("建议私聊导入，若你确认要在此导入，请发送【#强制导入记录】", false, { at: true })
     }
-
-    this.setContext("logJsonFile")
+    if (this.e.msg.includes("v2")) {
+      this.setContext("logJsonFile_v2")
+    } else {
+      this.setContext("logJsonFile")
+    }
     return this.reply("请发送Json文件")
   }
 
@@ -133,6 +140,16 @@ export class gcLog extends plugin {
 
     this.finish("logJsonFile")
     await new ExportLog(this.e).logJson()
+
+    if (this.e.isGroup)
+      this.reply("已收到文件，请撤回", false, { at: true })
+  }
+
+  async logJsonFile_v2() {
+    if (!this.e.file) return false
+
+    this.finish("logJsonFile_v2")
+    await new ExportLogV2(this.e).logJson()
 
     if (this.e.isGroup)
       this.reply("已收到文件，请撤回", false, { at: true })

@@ -6,7 +6,7 @@ import moment from 'moment'
 import GachaLog from './gachaLog.js'
 import lodash from 'lodash'
 
-export default class ExportLog extends base {
+export default class ExportLogV2 extends base {
   constructor(e) {
     super(e)
     this.model = 'gachaLog'
@@ -24,7 +24,6 @@ export default class ExportLog extends base {
         gs: [
           { type: 301, typeName: '角色活动' },
           { type: 302, typeName: '武器活动' },
-          { type: 500, typeName: '集录' },
           { type: 200, typeName: '常驻' }
         ],
         sr: [
@@ -42,7 +41,6 @@ export default class ExportLog extends base {
         gs: {
           301: '角色',
           302: '武器',
-          500: '集录',
           200: '常驻'
         },
         sr: {
@@ -77,20 +75,21 @@ export default class ExportLog extends base {
     }
     let data = {
       info: {
+        uid: this.uid,
+        lang: list[0].lang,
         export_time: moment().format('YYYY-MM-DD HH:mm:ss'),
         export_timestamp: moment().format('X'),
         export_app: yunzaiName,
         export_app_version: cfg.package.version,
-        version: "v4.0"
       },
-      [this.e.game == 'sr' ? 'hkrpg' : 'hk4e']: [
-        {
-          uid: this.uid,
-          lang: list[0].lang,
-          timezone: moment(list[0].time).utcOffset() / 60,
-          list
-        }
-      ]
+      list
+    }
+
+    if (this.e.isSr) {
+      data.info.srgf_version = 'v1.0'
+      data.info.region_time_zone = moment(list[0].time).utcOffset() / 60
+    } else {
+      data.info.uigf_version = 'v2.3'
     }
 
     let saveFile = `${this.path}${this.uid}/${this.uid}.json`
@@ -208,17 +207,18 @@ export default class ExportLog extends base {
       this.e.reply(`${this.e.file.name},json格式错误`)
       return false
     }
-    
-    if (lodash.isEmpty(json) || json[this.game === 'sr' ? 'hkrpg': 'hk4e']) {
+
+    if (lodash.isEmpty(json) || !json.list) {
       this.e.reply('json文件内容错误：非统一祈愿记录标准')
       return false
     }
 
-    if (json.hkrpg) {
+    if (json.info.srgf_version) {
       this.e.isSr = true
       this.game = 'sr'
     }
-    let data = this.dealJson(json[this.game == 'sr' ? 'hkrpg' : 'hk4e'][0].list)
+
+    let data = this.dealJson(json.list)
     if (!data) return false
 
     /** 保存json */
@@ -227,7 +227,7 @@ export default class ExportLog extends base {
       let typeName = this.typeName(this.game)
       if (!typeName[type]) continue
       let gachLog = new GachaLog(this.e)
-      gachLog.uid = json[this.game == 'sr' ? 'hkrpg' : 'hk4e'][0].uid
+      gachLog.uid = json.info.uid
       gachLog.type = type
       gachLog.writeJson(data[type])
 
