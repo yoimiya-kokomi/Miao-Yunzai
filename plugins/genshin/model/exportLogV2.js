@@ -24,6 +24,7 @@ export default class ExportLogV2 extends base {
         gs: [
           { type: 301, typeName: '角色活动' },
           { type: 302, typeName: '武器活动' },
+          { type: 500, typeName: '集录' },
           { type: 200, typeName: '常驻' }
         ],
         sr: [
@@ -41,6 +42,7 @@ export default class ExportLogV2 extends base {
         gs: {
           301: '角色',
           302: '武器',
+          500: '集录',
           200: '常驻'
         },
         sr: {
