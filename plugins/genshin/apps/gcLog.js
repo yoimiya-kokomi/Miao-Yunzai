@@ -28,7 +28,7 @@ export class gcLog extends plugin {
           fnc: "getLog"
         },
         {
-          reg: "^#?(原神|星铁)?(强制)?导出记录(json)?(v2|v3|v4)?$",
+          reg: "^#?(原神|星铁)?(强制)?导出记录(json)?(v2|v4)?$",
           fnc: "exportLog"
         },
         {
