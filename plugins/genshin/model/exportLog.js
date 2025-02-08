@@ -24,6 +24,7 @@ export default class ExportLog extends base {
         gs: [
           { type: 301, typeName: '角色活动' },
           { type: 302, typeName: '武器活动' },
+          { type: 500, typeName: '集录' },
           { type: 200, typeName: '常驻' }
         ],
         sr: [
@@ -41,6 +42,7 @@ export default class ExportLog extends base {
         gs: {
           301: '角色',
           302: '武器',
+          500: '集录',
           200: '常驻'
         },
         sr: {
@@ -73,23 +75,43 @@ export default class ExportLog extends base {
     } else {
       yunzaiName = _.capitalize(yunzaiName)
     }
-    let data = {
-      info: {
-        uid: this.uid,
-        lang: list[0].lang,
-        export_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-        export_timestamp: moment().format('X'),
-        export_app: yunzaiName,
-        export_app_version: cfg.package.version,
-      },
-      list
+    let basic = {
+      export_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+      export_timestamp: moment().format('X'),
+      export_app: yunzaiName,
+      export_app_version: cfg.package.version,
     }
-
-    if (this.e.isSr) {
-      data.info.srgf_version = 'v1.0'
-      data.info.region_time_zone = moment(list[0].time).utcOffset() / 60
-    } else {
-      data.info.uigf_version = 'v2.3'
+    let data = ''
+    if(this.e.uigfver === 'v2') {
+      data = {
+        info: {
+          uid: this.uid,
+          lang: list[0].lang,
+          ...basic
+        },
+        list
+      }
+      if (this.e.isSr) {
+        data.info.srgf_version = 'v1.0'
+        data.info.region_time_zone = moment(list[0].time).utcOffset() / 60
+      } else {
+        data.info.uigf_version = 'v2.3'
+      }
+    } else if(this.e.uigfver === 'v4'){
+      data = {
+        info: {
+          ...basic,
+          version: "v4.0"
+        },
+        [this.e.game == 'sr' ? 'hkrpg' : 'hk4e']: [
+          {
+            uid: this.uid,
+            lang: list[0].lang,
+            timezone: moment(list[0].time).utcOffset() / 60,
+            list
+          }
+        ]
+      }
     }
 
     let saveFile = `${this.path}${this.uid}/${this.uid}.json`
@@ -208,17 +230,109 @@ export default class ExportLog extends base {
       return false
     }
 
-    if (lodash.isEmpty(json) || !json.list) {
+    if (lodash.isEmpty(json) || (!json.list && !json.hkrpg && !json.hk4e)) {
       this.e.reply('json文件内容错误：非统一祈愿记录标准')
       return false
     }
 
-    if (json.info.srgf_version) {
+    if (json.info.srgf_version || json.hkrpg) {
       this.e.isSr = true
       this.game = 'sr'
     }
 
-    let data = this.dealJson(json.list)
+  
+    let list = json.list ? json.list : json[this.game === 'sr' ? 'hkrpg' : 'hk4e'][0].list;
+
+    if (list && list.length > 0 && (!list[0].name || !list[0].item_type || !list[0].rank_type)) {
+      // 定义配置映射：hk4e 与 hkrpg 的参数设置
+      const configMapping = {
+        hk4e: {
+          configUrl: 'https://api-takumi.mihoyo.com/event/platsimulator/config?gids=2&game=hk4e',
+          configFile: './temp/hk4e_config.json',
+          roleIdLength: 8,
+          weaponIdLength: 5,
+          roleDataKey: 'all_avatar',
+          weaponDataKey: 'all_weapon',
+          rankKey: 'level',
+          unknownRole: '未知角色',
+          unknownWeapon: '未知武器'
+        },
+        hkrpg: {
+          configUrl: 'https://api-takumi.mihoyo.com/event/rpgsimulator/config?game=hkrpg',
+          configFile: './temp/hkrpg_config.json',
+          roleIdLength: 4,
+          weaponIdLength: 5,
+          roleDataKey: 'avatar',
+          weaponDataKey: 'equipment',
+          rankKey: 'rarity',
+          unknownRole: '未知角色',
+          unknownWeapon: '未知光锥'
+        }
+      };
+    
+      const mapping = this.e.isSr ? configMapping.hkrpg : configMapping.hk4e;
+    
+      const configRet = await common.downFile(mapping.configUrl, mapping.configFile);
+      if (!configRet) {
+        this.e.reply('获取配置文件失败');
+        return false;
+      }
+      let configData = {};
+      try {
+        configData = JSON.parse(fs.readFileSync(mapping.configFile, 'utf8'));
+      } catch (err) {
+        this.e.reply('解析配置文件失败');
+        return false;
+      }
+      fs.unlink(mapping.configFile, () => {});
+    
+      const roleList = configData.data[mapping.roleDataKey] || [];
+      const weaponList = configData.data[mapping.weaponDataKey] || [];
+    
+      const getId = (obj) => String(obj.id || obj.item_id);
+      const getName = (obj) => obj.name || obj.item_name;
+    
+      list.forEach(record => {
+        const idStr = String(record.item_id);
+        if (idStr.length === mapping.roleIdLength) {
+          record.item_type = "角色";
+          const configRole = roleList.find(a => getId(a) === idStr);
+          if (configRole) {
+            record.name = getName(configRole);
+            record.rank_type = String(configRole[mapping.rankKey]);
+          } else {
+            record.name = record.name || mapping.unknownRole;
+            record.rank_type = record.rank_type || "";
+          }
+        } else if (idStr.length === mapping.weaponIdLength) {
+          if (this.e.isSr) {
+            // hkrpg的武器标识为“光锥”
+            record.item_type = "光锥";
+            const configWeapon = weaponList.find(w => getId(w) === idStr);
+            if (configWeapon) {
+              record.name = getName(configWeapon);
+              record.rank_type = String(configWeapon[mapping.rankKey]);
+            } else {
+              record.name = record.name || mapping.unknownWeapon;
+              record.rank_type = record.rank_type || "";
+            }
+          } else {
+            // hk4e的武器标识为“武器”
+            record.item_type = "武器";
+            const configWeapon = weaponList.find(w => getId(w) === idStr);
+            if (configWeapon) {
+              record.name = getName(configWeapon);
+              record.rank_type = String(configWeapon[mapping.rankKey]);
+            } else {
+              record.name = record.name || mapping.unknownWeapon;
+              record.rank_type = record.rank_type || "";
+            }
+          }
+        }
+      });
+    }    
+    
+    let data = this.dealJson(list)
     if (!data) return false
 
     /** 保存json */
@@ -227,7 +341,8 @@ export default class ExportLog extends base {
       let typeName = this.typeName(this.game)
       if (!typeName[type]) continue
       let gachLog = new GachaLog(this.e)
-      gachLog.uid = json.info.uid
+      // uid 可能存放在 info 或 hk4e/hkrpg 内
+      gachLog.uid = json.info.uid ? json.info.uid : json[this.game === 'sr' ? 'hkrpg' : 'hk4e'][0].uid
       gachLog.type = type
       gachLog.writeJson(data[type])
 
@@ -243,13 +358,18 @@ export default class ExportLog extends base {
   dealJson(list) {
     let data = {}
 
-    /** 必要字段 */
+     /** 必要字段 */
     let reqField = ['gacha_type', 'item_type', 'name', 'time']
+    let reqFieldv4 = ['gacha_type', 'item_id', 'time']
 
     for (let v of reqField) {
-      if (!list[0][v]) {
-        this.e.reply(`json文件内容错误：缺少必要字段${v}`)
-        return false
+      for (let f of reqFieldv4) {
+        if (!list[0][v]) {
+          if (!list[0][f]) {
+            this.e.reply(`json文件内容错误：缺少必要字段 ${v}`)
+            return false
+          }
+        }
       }
     }
 
