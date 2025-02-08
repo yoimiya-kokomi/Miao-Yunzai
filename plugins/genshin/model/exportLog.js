@@ -247,7 +247,6 @@ export default class ExportLog extends base {
       const configMapping = {
         hk4e: {
           configUrl: 'https://api-takumi.mihoyo.com/event/platsimulator/config?gids=2&game=hk4e',
-          configFile: './temp/hk4e_config.json',
           roleIdLength: 8,
           weaponIdLength: 5,
           roleDataKey: 'all_avatar',
@@ -258,7 +257,6 @@ export default class ExportLog extends base {
         },
         hkrpg: {
           configUrl: 'https://api-takumi.mihoyo.com/event/rpgsimulator/config?game=hkrpg',
-          configFile: './temp/hkrpg_config.json',
           roleIdLength: 4,
           weaponIdLength: 5,
           roleDataKey: 'avatar',
@@ -271,24 +269,20 @@ export default class ExportLog extends base {
     
       const mapping = this.e.isSr ? configMapping.hkrpg : configMapping.hk4e;
     
-      const configRet = await common.downFile(mapping.configUrl, mapping.configFile);
-      if (!configRet) {
-        this.e.reply('获取配置文件失败');
-        return false;
-      }
       let configData = {};
       try {
-        configData = JSON.parse(fs.readFileSync(mapping.configFile, 'utf8'));
-      } catch (err) {
-        this.e.reply('解析配置文件失败');
+        const response = await fetch(mapping.configUrl);
+        if (!response.ok) {
+          throw new Error('获取配置文件失败');
+        }
+        configData = await response.json();
+      } catch (error) {
+        this.e.reply('获取或解析配置文件失败');
         return false;
       }
-      fs.unlink(mapping.configFile, () => {});
-    
-      // 分别获取角色与武器列表
+  
       const roleList = configData.data[mapping.roleDataKey] || [];
       const weaponList = configData.data[mapping.weaponDataKey] || [];
-    
       const getId = (obj) => String(obj.id || obj.item_id);
       const getName = (obj) => obj.name || obj.item_name;
     
