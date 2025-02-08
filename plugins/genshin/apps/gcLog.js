@@ -1,8 +1,8 @@
 import plugin from "../../../lib/plugins/plugin.js"
 import fs from "node:fs"
 import GachaLog from "../model/gachaLog.js"
-import ExportLog from "../model/exportLog.js"
 import LogCount from "../model/logCount.js"
+import ExportLog from "../model/exportLog.js"
 
 const _path = process.cwd() + "/plugins/genshin"
 
@@ -27,7 +27,7 @@ export class gcLog extends plugin {
           fnc: "getLog"
         },
         {
-          reg: "^#?(原神|星铁)?(强制)?导出记录(json)?$",
+          reg: "^#?(原神|星铁)?(强制)?导出记录(json)?(v2|v4)?$",
           fnc: "exportLog"
         },
         {
@@ -115,7 +115,11 @@ export class gcLog extends plugin {
     if (this.e.isGroup && !this.e.msg.includes("强制")) {
       return this.reply("建议私聊导出，若你确认要在此导出，请发送【#强制导出记录】", false, { at: true })
     }
-
+    if (this.e.msg.includes("v2")) {
+      this.e.uigfver = 'v2'
+    }else {
+      this.e.uigfver = 'v4'
+    }
     return new ExportLog(this.e).exportJson()
   }
 
@@ -123,7 +127,7 @@ export class gcLog extends plugin {
     if (this.e.isGroup && !this.e.msg.includes("强制")) {
       return this.reply("建议私聊导入，若你确认要在此导入，请发送【#强制导入记录】", false, { at: true })
     }
-
+    
     this.setContext("logJsonFile")
     return this.reply("请发送Json文件")
   }
