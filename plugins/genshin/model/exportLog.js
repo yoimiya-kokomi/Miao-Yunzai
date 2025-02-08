@@ -244,7 +244,6 @@ export default class ExportLog extends base {
     let list = json.list ? json.list : json[this.game === 'sr' ? 'hkrpg' : 'hk4e'][0].list;
 
     if (list && list.length > 0 && (!list[0].name || !list[0].item_type || !list[0].rank_type)) {
-      // 定义配置映射：hk4e 与 hkrpg 的参数设置
       const configMapping = {
         hk4e: {
           configUrl: 'https://api-takumi.mihoyo.com/event/platsimulator/config?gids=2&game=hk4e',
@@ -306,7 +305,6 @@ export default class ExportLog extends base {
           }
         } else if (idStr.length === mapping.weaponIdLength) {
           if (this.e.isSr) {
-            // hkrpg的武器标识为“光锥”
             record.item_type = "光锥";
             const configWeapon = weaponList.find(w => getId(w) === idStr);
             if (configWeapon) {
@@ -317,7 +315,6 @@ export default class ExportLog extends base {
               record.rank_type = record.rank_type || "";
             }
           } else {
-            // hk4e的武器标识为“武器”
             record.item_type = "武器";
             const configWeapon = weaponList.find(w => getId(w) === idStr);
             if (configWeapon) {
@@ -341,7 +338,6 @@ export default class ExportLog extends base {
       let typeName = this.typeName(this.game)
       if (!typeName[type]) continue
       let gachLog = new GachaLog(this.e)
-      // uid 可能存放在 info 或 hk4e/hkrpg 内
       gachLog.uid = json.info.uid ? json.info.uid : json[this.game === 'sr' ? 'hkrpg' : 'hk4e'][0].uid
       gachLog.type = type
       gachLog.writeJson(data[type])
