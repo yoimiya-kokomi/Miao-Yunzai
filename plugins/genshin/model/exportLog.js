@@ -7,6 +7,7 @@ import GachaLog from './gachaLog.js'
 import lodash from 'lodash'
 
 export default class ExportLog extends base {
+  static configCache = {}
   constructor(e) {
     super(e)
     this.model = 'gachaLog'
@@ -271,20 +272,24 @@ export default class ExportLog extends base {
     
       const mapping = this.e.isSr ? configMapping.hkrpg : configMapping.hk4e;
     
-      const configRet = await common.downFile(mapping.configUrl, mapping.configFile);
-      if (!configRet) {
-        this.e.reply('获取配置文件失败');
-        return false;
-      }
-      let configData = {};
-      try {
-        configData = JSON.parse(fs.readFileSync(mapping.configFile, 'utf8'));
-      } catch (err) {
-        this.e.reply('解析配置文件失败');
-        return false;
-      }
-      fs.unlink(mapping.configFile, () => {});
+      if (!ExportLog.configCache[mapping.configFile]) {
+        const configRet = await common.downFile(mapping.configUrl, mapping.configFile);
+        if (!configRet) {
+          this.e.reply('获取配置文件失败');
+          return false;
+        }
     
+        try {
+          const configData = JSON.parse(fs.readFileSync(mapping.configFile, 'utf8'));
+          ExportLog.configCache[mapping.configFile] = configData;
+          fs.unlink(mapping.configFile, () => {});
+        } catch (err) {
+          this.e.reply('解析配置文件失败');
+          return false;
+        }
+      }
+    
+      const configData = ExportLog.configCache[mapping.configFile];
       const roleList = configData.data[mapping.roleDataKey] || [];
       const weaponList = configData.data[mapping.weaponDataKey] || [];
     
