@@ -355,11 +355,9 @@ export default class ExportLog extends base {
 
     for (let v of reqField) {
       for (let f of reqFieldv4) {
-        if (!list[0][v]) {
-          if (!list[0][f]) {
+        if (!list[0][v] && !list[0][f]) {
             this.e.reply(`json文件内容错误：缺少必要字段 ${v}`)
             return false
-          }
         }
       }
     }
