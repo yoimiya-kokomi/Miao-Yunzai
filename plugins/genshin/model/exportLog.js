@@ -281,16 +281,16 @@ export default class ExportLog extends base {
         return false;
       }
   
-      const roleList = configData.data[mapping.roleDataKey] || [];
-      const weaponList = configData.data[mapping.weaponDataKey] || [];
       const getId = (obj) => String(obj.id || obj.item_id);
       const getName = (obj) => obj.name || obj.item_name;
+      const roleList = new Map(configData.data[mapping.roleDataKey].map(i => [getId(i), i]));
+      const weaponList = new Map(configData.data[mapping.weaponDataKey].map(i => [getId(i), i]));
     
       list.forEach(record => {
         const idStr = String(record.item_id);
         if (idStr.length === mapping.roleIdLength) {
           record.item_type = "角色";
-          const configRole = roleList.find(a => getId(a) === idStr);
+          const configRole = roleList.get(idStr);
           if (configRole) {
             record.name = getName(configRole);
             record.rank_type = String(configRole[mapping.rankKey]);
@@ -301,7 +301,7 @@ export default class ExportLog extends base {
         } else if (idStr.length === mapping.weaponIdLength) {
           if (this.e.isSr) {
             record.item_type = "光锥";
-            const configWeapon = weaponList.find(w => getId(w) === idStr);
+            const configWeapon = weaponList.get(idStr);
             if (configWeapon) {
               record.name = getName(configWeapon);
               record.rank_type = String(configWeapon[mapping.rankKey]);
@@ -311,7 +311,7 @@ export default class ExportLog extends base {
             }
           } else {
             record.item_type = "武器";
-            const configWeapon = weaponList.find(w => getId(w) === idStr);
+            const configWeapon = weaponList.get(idStr);
             if (configWeapon) {
               record.name = getName(configWeapon);
               record.rank_type = String(configWeapon[mapping.rankKey]);
