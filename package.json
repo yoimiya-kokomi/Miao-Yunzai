@@ -18,7 +18,7 @@
     "ksr": "node ./lib/tools/ksr.js"
   },
   "dependencies": {
-    "art-template": "^4.13.2",
+    "art-template": "4.13.2",
     "chalk": "^5.4.1",
     "chokidar": "^4.0.3",
     "https-proxy-agent": "7.0.6",
