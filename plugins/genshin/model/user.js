@@ -134,7 +134,8 @@ export default class User extends base {
         '【#原石】查看原石札记',
         '【#原石统计】原石统计数据',
         '【#练度统计】角色列表数据',
-        '【#面板】【#更新面板】面板信息'
+        '【#面板】【#更新面板】面板信息',
+        ''
       )
       button.push([
         { text: '#uid', callback: '#uid' },
@@ -159,7 +160,8 @@ export default class User extends base {
         '【*星琼】查看星琼月历',
         '【*星琼统计】星琼统计数据',
         '【*练度统计】角色列表数据',
-        '【*面板】【*更新面板】面板信息'
+        '【*面板】【*更新面板】面板信息',
+        ''
       )
       button.push([
         { text: '*uid', callback: '*uid' },
@@ -177,8 +179,28 @@ export default class User extends base {
     if (mys.hasGame('zzz')) {
       msg.push(
         '绝区零支持：',
-        '无'
+        '【%uid】当前绑定ck uid列表',
+        '【%删除ck】删除当前绑定ck',
+        '【%体力】查询当前电量',
+        '【%菲林】查看菲林月历',
+        '【%菲林统计】菲林统计数据',
+        '【%练度统计】角色列表数据',
+        '【%面板】【%更新面板】面板信息',
+        ''
       )
+      button.push([
+        { text: '%uid', callback: '%uid' },
+        { text: '%我的ck', callback: '%我的ck' },
+        { text: '%删除ck', callback: '%删除ck' }
+      ], [
+        { text: '%体力', callback: '%体力' },
+        { text: '%菲林', callback: '%菲林' },
+        { text: '%菲林统计', callback: '%菲林统计' }
+      ], [
+        { text: '%练度统计', callback: '%练度统计' },
+        { text: '%面板', callback: '%面板' },
+        { text: '%更新面板', callback: '%更新面板' }
+      ])
     }
     msg = await common.makeForwardMsg(this.e, [[msg.join('\n'), segment.button(...button)]], '绑定成功：使用命令说明')
     await this.e.reply(msg)
@@ -224,7 +246,7 @@ export default class User extends base {
     let uidList = user.getUidList(game)
     if (index > uidList.length) {
       return await this.e.reply(['uid序号输入错误', segment.button([
-        { text: '删除uid', input: '#删除uid' }
+        { text: '删除uid', input: '%删除uid' }
       ])])
     }
     index = Number(index) - 1
