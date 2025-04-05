@@ -735,6 +735,10 @@ export default class GachaLog extends base {
       迪希雅: {
         start: "2023-03-01 06:00:00",
         end: "2023-03-21 17:59:59"
+      },
+      梦见月瑞希: {
+        start: "2025-02-12 06:00:00",
+        end: "2025-03-04 17:59:59"
       }
     }
     if (lodash.keys(role5join).includes(this.role.name)) {
