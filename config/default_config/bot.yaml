@@ -31,6 +31,9 @@ online_msg_exp: 86400
 # 是否跳过登录ICQQ
 skip_login: false
 
+# 是否启用串行加载插件
+serial_load: false
+
 # 签名API地址(如:http://127.0.0.1:8080/sign?key=114514)
 sign_api_addr:
 # 传入的QQ版本(如:8.9.63、8.9.68)
