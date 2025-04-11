@@ -29,7 +29,7 @@ online_msg: true
 online_msg_exp: 86400
 
 # 是否跳过登录ICQQ
-skip_login: true
+skip_login: false
 
 # 是否启用串行加载插件
 serial_load: false
