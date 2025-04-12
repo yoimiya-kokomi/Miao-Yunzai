@@ -5,7 +5,6 @@ import fs from "node:fs"
 import common from "../../../lib/common/common.js"
 import gsCfg from "./gsCfg.js"
 import { Character, Weapon } from "#miao.models"
-import { start } from "node:repl"
 
 export default class GachaLog extends base {
   constructor(e) {
