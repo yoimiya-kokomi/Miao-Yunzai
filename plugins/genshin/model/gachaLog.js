@@ -724,36 +724,75 @@ export default class GachaLog extends base {
       return false
     }
     let role5join = {
-      刻晴: {
-        start: "2021-02-17 18:00:00",
-        end: "2021-03-02 15:59:59"
-      },
-      提纳里: {
-        start: "2022-08-24 06:00:00",
-        end: "2022-09-09 17:59:59"
-      },
-      迪希雅: {
-        start: "2023-03-01 06:00:00",
-        end: "2023-03-21 17:59:59"
-      },
-      梦见月瑞希: {
-        start: "2025-02-12 06:00:00",
-        end: "2025-03-04 17:59:59"
-      }
+      刻晴: [
+        {
+            start: "2021-02-17 18:00:00",
+            end: "2021-03-02 15:59:59"
+        }
+      ],
+      提纳里: [
+        {
+            start: "2022-08-24 06:00:00",
+            end: "2022-09-09 17:59:59"
+        }
+      ],
+      迪希雅: [
+        {
+            start: "2023-03-01 06:00:00",
+            end: "2023-03-21 17:59:59"
+        }
+      ],
+      梦见月瑞希: [
+        {
+            start: "2025-02-12 06:00:00",
+            end: "2025-03-04 17:59:59"
+        }
+      ],
+      希儿: [
+        {
+            start: "2023-04-26 06:00:00",
+            end: "2025-05-17 17:59:59"
+        },
+        {
+            start: "2023-10-27 12:00:00",
+            end: "2023-11-14 14:59:59"
+        }
+      ],
+      刃: [
+        {
+            start: "2023-07-19 06:00:00",
+            end: "2023-08-09 11:59:59"
+        },
+        {
+            start: "2023-12-27 06:00:00",
+            end: "2024-01-17 11:59:59"
+        }
+      ],
+      符玄: [
+        {
+            start: "2023-09-20 12:00:00",
+            end: "2023-10-10 14:59:59"
+        },
+        {
+            start: "2024-05-29 12:00:00",
+            end: "2024-06-18 14:59:59"
+        }
+      ]
     }
-    if (lodash.keys(role5join).includes(this.role.name)) {
-      let start = new Date(role5join[this.role.name].start).getTime()
-      let end = new Date(role5join[this.role.name].end).getTime()
-      let logTime = new Date(this.role.time).getTime()
-
-      if (logTime < start || logTime > end) {
+    if (role5join[this.role.name]) {
+        for (const period of role5join[this.role.name]) {
+          const start = new Date(period.start).getTime()
+          const end = new Date(period.end).getTime()
+          const logTime = new Date(this.role.time).getTime()
+          
+          if (logTime >= start && logTime <= end) {
+            return true
+          }
+        }
         return false
-      } else {
-        return true
       }
+      return true
     }
-    return true
-  }
 
   /** 渲染数据 */
   randData(data) {
