@@ -751,7 +751,7 @@ export default class GachaLog extends base {
       希儿: [
         {
             start: "2023-04-26 06:00:00",
-            end: "2025-05-17 17:59:59"
+            end: "2023-05-17 17:59:59"
         },
         {
             start: "2023-10-27 12:00:00",
