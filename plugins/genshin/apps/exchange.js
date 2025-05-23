@@ -26,21 +26,31 @@ export class exchange extends plugin {
   async getCode() {
     let reg = this.e.msg.match(/^(#|\*)?(原神|星铁|崩铁|崩三|崩坏三|崩坏3|绝区零)?(直播|前瞻)?兑换码$/)
     this.uid = '75276539'
+    this.gid = '2'
     if (reg[1] == '*' || ['星铁', '崩铁'].includes(reg[2])) {
       this.uid = '80823548'
+      this.gid = '6'
     }
     if (['崩三', '崩坏三', '崩坏3'].includes(reg[2])) {
       this.uid = '73565430'
+      this.gid = '1'
     }
     if (reg[2] == '绝区零') {
       this.uid = '152039148'
+      this.gid = '8'
     }
     this.now = parseInt(Date.now() / 1000)
     let actid = await this.getActId()
+    let isBackupAct = false
+    if (!actid) {
+      actid = await this.getBackupActId()
+      isBackupAct = true
+    }
     if (!actid) {
       logger.info('[兑换码] 未获取到actId')
       return true
     }
+    
     this.actId = actid
 
     /** index info */
@@ -48,6 +58,7 @@ export class exchange extends plugin {
     if (!index || !index.data) {
       return true
     }
+
     if (index.data === null) {
       return await this.reply(`错误：\n${index.message}`)
     }
@@ -60,6 +71,12 @@ export class exchange extends plugin {
     }
 
     let code = await this.getData('code')
+    let time
+    if (isBackupAct) {
+      time = await this.getTimeStamp()
+    } else {
+      time = this.deadline
+    }
     if (!code || !code.data?.code_list) {
       logger.info('[兑换码] 未获取到兑换码')
       return true
@@ -74,7 +91,7 @@ export class exchange extends plugin {
       }
     }
 
-    let msg = [`兑换码过期时间: \n${this.deadline}`, ...codes]
+    let msg = [`兑换码过期时间: \n${time}`, ...codes]
     msg = await common.makeForwardMsg(this.e, msg, `${title}-直播兑换码`)
     await this.reply(msg)
   }
@@ -84,6 +101,7 @@ export class exchange extends plugin {
       index: `https://api-takumi.mihoyo.com/event/miyolive/index`,
       code: `https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode?version=${this.code_ver}&time=${this.now}`,
       actId: `https://bbs-api.mihoyo.com/painter/api/user_instant/list?offset=0&size=20&uid=${this.uid}`,
+      nav: `https://bbs-api.miyoushe.com/apihub/api/home/new?gids=${this.gid}&parts=1%2C3%2C4`
     }
 
     let response
@@ -149,5 +167,33 @@ export class exchange extends plugin {
     if (res.retcode == 0) {
       this.e.reply(`${res.data.msg}`)
     }
+  }
+
+  async getBackupActId() {
+    const res = await this.getData('nav')
+    if (res.retcode !== 0) return null
+      const navMatch = res.data?.navigator?.find(item => 
+      item.name.match(/前瞻|特别节目/) && 
+      item.app_path.includes('act_id=')
+    )
+
+    if (navMatch) {
+      const actId = navMatch.app_path.match(/act_id=([a-zA-Z0-9]+)/)[1]
+      return actId
+    }
+  }
+  
+  async getTimeStamp(){
+    let code = await this.getData('code')
+    let timestamp = code.data.code_list[0].to_get_time
+    const date = new Date(timestamp * 1000)
+    const s = this.gid === '2'? 3 : (this.gid === '1' || this.gid === '6') ? 1 : 2 
+    date.setDate(date.getDate() + s)
+    const y = date.getFullYear()
+    const m = (date.getMonth() + 1).toString().padStart(2, '0')
+    const d = date.getDate().toString().padStart(2, '0')
+    const t = (this.gid === '2' || this.gid === '1') ? '12:00:00' : '23:59:59'
+    const time = `${y}-${m}-${d} ${t}`
+    return time
   }
 }
