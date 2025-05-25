@@ -113,7 +113,7 @@ export class gcLog extends plugin {
   /** 导出记录 */
   exportLog() {
     if (this.e.isGroup && !this.e.msg.includes("强制")) {
-      return this.reply("建议私聊导出，若你确认要在此导出，请发送【#强制导出记录】", false, { at: true })
+      return this.reply(`建议私聊导出，若你确认要在此导出，请发送【${this.e.game === 'sr' ? '*' : '#'}强制导出记录】`, false, { at: true })
     }
     if (this.e.msg.includes("v2")) {
       this.e.uigfver = 'v2'
@@ -125,7 +125,7 @@ export class gcLog extends plugin {
 
   logJson() {
     if (this.e.isGroup && !this.e.msg.includes("强制")) {
-      return this.reply("建议私聊导入，若你确认要在此导入，请发送【#强制导入记录】", false, { at: true })
+      return this.reply(`建议私聊导入，若你确认要在此导入，请发送【${this.e.game === 'sr' ? '*' : '#'}强制导入记录】`, false, { at: true })
     }
     
     this.setContext("logJsonFile")

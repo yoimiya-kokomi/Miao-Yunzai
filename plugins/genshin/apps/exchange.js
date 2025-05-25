@@ -144,7 +144,7 @@ export class exchange extends plugin {
         this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`
       } else if (this.uid == '73565430') {
         date.setDate(date.getDate() + 5)
-        this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 12:00:00`
+        this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`
       } else if (this.uid == '152039148') {
         date.setDate(date.getDate() + 1)
         this.deadline = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} 23:59:59`
@@ -192,7 +192,7 @@ export class exchange extends plugin {
     const y = date.getFullYear()
     const m = (date.getMonth() + 1).toString().padStart(2, '0')
     const d = date.getDate().toString().padStart(2, '0')
-    const t = (this.gid === '2' || this.gid === '1') ? '12:00:00' : '23:59:59'
+    const t = this.gid === '2' ? '12:00:00' : '23:59:59'
     const time = `${y}-${m}-${d} ${t}`
     return time
   }
