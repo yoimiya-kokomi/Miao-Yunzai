@@ -10,6 +10,12 @@ const sequelize = new Sequelize({
   storage: dbPath,
   logging: false
 })
+try {
+  await sequelize.authenticate();
+  logger.info(`[${logger.green('DB 数据库')}] > [${logger.green('连接成功')}]`);
+} catch (error) {
+  logger.error(`[${logger.red('DB 数据库')}] > [${logger.red('连接错误')}]`, error);
+}
 
 await sequelize.authenticate()
 
@@ -23,4 +29,7 @@ export default class BaseModel extends Model {
     model.COLUMNS = columns
   }
 }
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error(`[${logger.red('DB 异常')}]`, reason);
+});
 export { sequelize }
