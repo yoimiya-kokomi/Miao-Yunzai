@@ -11,7 +11,11 @@ const sequelize = new Sequelize({
   logging: false
 })
 
-await sequelize.authenticate()
+try {
+  await sequelize.authenticate()
+} catch (err) {
+  logger.error("数据库认证错误", err)
+}
 
 export default class BaseModel extends Model {
   static Types = DataTypes
