@@ -1,14 +1,14 @@
-import base from './base.js'
-import MysInfo from './mys/mysInfo.js'
+import base from "./base.js"
+import MysInfo from "./mys/mysInfo.js"
 
 export default class Deck extends base {
   constructor(e) {
     super(e)
-    this.model = 'deck'
+    this.model = "deck"
   }
 
   async getIndex(id, list = false) {
-    let res = await MysInfo.get(this.e, 'deckList')
+    let res = await MysInfo.get(this.e, "deckList")
     if (res?.retcode !== 0) return false
 
     let Data
@@ -21,7 +21,7 @@ export default class Deck extends base {
         return false
       }
     } else {
-      this.model = 'deckList'
+      this.model = "deckList"
       Data = res.data.deck_list
     }
 
@@ -33,26 +33,25 @@ export default class Deck extends base {
       saveId: this.e.uid,
       nickname: res.data.nickname,
       level: res.data.level,
-      Data
+      Data,
     }
     return data
   }
   async getcard(id) {
     let res = {}
-    for (let api of ['basicInfo', 'avatar_cardList', 'action_cardList']) {
-      if ((id == 2 && api == 'avatar_cardList') || (id == 1 && api == 'action_cardList')) continue
+    for (let api of ["basicInfo", "avatar_cardList", "action_cardList"]) {
+      if ((id == 2 && api == "avatar_cardList") || (id == 1 && api == "action_cardList")) continue
       res[api] = (await MysInfo.get(this.e, api)).data
     }
-    this.model = 'deckCard'
+    this.model = "deckCard"
 
     let data = {
       quality: 80,
       ...this.screenData,
       uid: this.e.uid,
       saveId: this.e.uid,
-      ...res
+      ...res,
     }
     return data
   }
-
 }

@@ -1,62 +1,65 @@
-import plugin from '../../../lib/plugins/plugin.js'
-import common from '../../../lib/common/common.js'
-import fs from 'node:fs'
-import gsCfg from '../model/gsCfg.js'
-import YAML from 'yaml'
-import lodash from 'lodash'
+import plugin from "../../../lib/plugins/plugin.js"
+import common from "../../../lib/common/common.js"
+import fs from "node:fs"
+import gsCfg from "../model/gsCfg.js"
+import YAML from "yaml"
+import lodash from "lodash"
 
 export class abbrSet extends plugin {
   constructor(e) {
     super({
-      name: '别名设置',
-      dsc: '角色别名设置',
-      event: 'message',
+      name: "别名设置",
+      dsc: "角色别名设置",
+      event: "message",
       priority: 600,
       rule: [
         {
-          reg: '^#(星铁)?(设置|配置)(.*)(别名|昵称)$',
-          fnc: 'abbr'
+          reg: "^#(星铁)?(设置|配置)(.*)(别名|昵称)$",
+          fnc: "abbr",
         },
         {
-          reg: '^#(星铁)?删除(别名|昵称)(.*)$',
-          fnc: 'delAbbr'
+          reg: "^#(星铁)?删除(别名|昵称)(.*)$",
+          fnc: "delAbbr",
         },
         {
-          reg: '^#(星铁)?(.*)(别名|昵称)$',
-          fnc: 'abbrList'
-        }
-      ]
+          reg: "^#(星铁)?(.*)(别名|昵称)$",
+          fnc: "abbrList",
+        },
+      ],
     })
     this.isSr = false
-    this.file = './plugins/genshin/config/role.name.yaml'
+    this.file = "./plugins/genshin/config/role.name.yaml"
   }
 
   async init() {
     if (!fs.existsSync(this.file)) {
-      fs.writeFileSync(this.file, `神里绫华:
+      fs.writeFileSync(
+        this.file,
+        `神里绫华:
   - 龟龟
-  - 小乌龟`)
+  - 小乌龟`,
+      )
     }
   }
 
   async abbr() {
-    if (!await this.checkAuth()) return
-    let role = gsCfg.getRole(this.e.msg, '#|星铁|设置|配置|别名|昵称', this.e.isSr)
+    if (!(await this.checkAuth())) return
+    let role = gsCfg.getRole(this.e.msg, "#|星铁|设置|配置|别名|昵称", this.e.isSr)
     if (!role) return false
     this.e.role = role
     this.isSr = this.e.isSr
-    this.setContext('setAbbr')
+    this.setContext("setAbbr")
 
     await this.reply(`请发送${role.alias}别名，多个用空格隔开`)
   }
 
   async checkAuth() {
     if (!this.e.isGroup && !this.e.isMaster) {
-      await this.reply('禁止私聊设置角色别名')
+      await this.reply("禁止私聊设置角色别名")
       return false
     }
 
-    let abbrSetAuth = gsCfg.getConfig('mys', 'set').abbrSetAuth
+    let abbrSetAuth = gsCfg.getConfig("mys", "set").abbrSetAuth
     /** 所有人都允许 */
     if (abbrSetAuth === 0) return true
     /** 主人默认允许 */
@@ -70,7 +73,7 @@ export class abbrSet extends plugin {
         return false
       }
       if (!this.e.member.is_admin) {
-        this.e.reply('暂无权限，只有管理员才能操作')
+        this.e.reply("暂无权限，只有管理员才能操作")
         return false
       }
     }
@@ -80,17 +83,17 @@ export class abbrSet extends plugin {
 
   async setAbbr() {
     if (!this.e.msg || this.e.at || this.e.img) {
-      await this.reply('设置错误：请发送正确内容')
+      await this.reply("设置错误：请发送正确内容")
       return
     }
 
     let { setAbbr = {} } = this.getContext()
-    this.finish('setAbbr')
+    this.finish("setAbbr")
 
     let role = setAbbr.role
-    let setName = this.e.msg.split(' ')
+    let setName = this.e.msg.split(" ")
 
-    let nameArr = gsCfg.getConfig('role', 'name')
+    let nameArr = gsCfg.getConfig("role", "name")
 
     if (!nameArr[role.name]) {
       nameArr[role.name] = []
@@ -98,7 +101,7 @@ export class abbrSet extends plugin {
 
     let ret = []
     for (let name of setName) {
-      name = name.replace(/#|星铁|设置|配置|别名|昵称/g, '')
+      name = name.replace(/#|星铁|设置|配置|别名|昵称/g, "")
       if (!name) continue
       /** 重复添加 */
       if (nameArr[role.name].includes(name) || gsCfg.roleNameToID(name, this.isSr)) {
@@ -109,15 +112,15 @@ export class abbrSet extends plugin {
       ret.push(name)
     }
     if (ret.length <= 0) {
-      await this.reply('设置失败：别名错误或已存在')
+      await this.reply("设置失败：别名错误或已存在")
       return
     }
 
     this.save(nameArr)
 
-    gsCfg[this.isSr ? 'sr_nameID' : 'nameID'] = false
+    gsCfg[this.isSr ? "sr_nameID" : "nameID"] = false
 
-    await this.reply(`设置别名成功：${ret.join('、')}`)
+    await this.reply(`设置别名成功：${ret.join("、")}`)
   }
 
   save(data) {
@@ -126,34 +129,34 @@ export class abbrSet extends plugin {
   }
 
   async delAbbr() {
-    let role = gsCfg.getRole(this.e.msg, '#|星铁|删除|别名|昵称', this.e.isSr)
+    let role = gsCfg.getRole(this.e.msg, "#|星铁|删除|别名|昵称", this.e.isSr)
     if (!role) return false
 
-    let nameArr = gsCfg.getConfig('role', 'name')
+    let nameArr = gsCfg.getConfig("role", "name")
 
     if (!nameArr[role.name]) {
-      await this.reply('默认别名设置，不能删除！')
+      await this.reply("默认别名设置，不能删除！")
       return true
     }
 
-    nameArr[role.name] = nameArr[role.name].filter((v) => {
+    nameArr[role.name] = nameArr[role.name].filter(v => {
       if (v == role.alias) return false
       return v
     })
 
     this.save(nameArr)
-    gsCfg[this.e.isSr ? 'sr_nameID' : 'nameID'] = false
+    gsCfg[this.e.isSr ? "sr_nameID" : "nameID"] = false
 
     await this.reply(`删除${role.name}别名成功：${role.alias}`)
   }
 
   async abbrList() {
-    let role = gsCfg.getRole(this.e.msg, '#|星铁|别名|昵称', this.e.isSr)
+    let role = gsCfg.getRole(this.e.msg, "#|星铁|别名|昵称", this.e.isSr)
 
     if (!role) return false
 
-    let name = gsCfg.getdefSet('role', this.e.isSr ? 'sr_name' : 'name')[role.roleId]
-    let nameUser = gsCfg.getConfig('role', 'name')[role.name] ?? []
+    let name = gsCfg.getdefSet("role", this.e.isSr ? "sr_name" : "name")[role.roleId]
+    let nameUser = gsCfg.getConfig("role", "name")[role.name] ?? []
 
     let list = lodash.uniq([...name, ...nameUser])
 
@@ -163,7 +166,11 @@ export class abbrSet extends plugin {
       msg.push(`${num}.${list[i]}`)
     }
 
-    msg = await common.makeForwardMsg(this.e, [msg.join("\n")], `${role.name}别名，${list.length}个`)
+    msg = await common.makeForwardMsg(
+      this.e,
+      [msg.join("\n")],
+      `${role.name}别名，${list.length}个`,
+    )
 
     await this.e.reply(msg)
   }

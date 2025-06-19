@@ -1,22 +1,22 @@
-import plugin from '../../lib/plugins/plugin.js'
+import plugin from "../../lib/plugins/plugin.js"
 export class newcomer extends plugin {
-  constructor () {
+  constructor() {
     super({
-		/** 插件名字 */
-      name: '欢迎新人',
-	  /** 插件描述 */
-      dsc: '新人入群欢迎',
+      /** 插件名字 */
+      name: "欢迎新人",
+      /** 插件描述 */
+      dsc: "新人入群欢迎",
       /** https://oicqjs.github.io/oicq/#events */
-	  /** 插件触发事件 */
-      event: 'notice.group.increase',
-      priority: 5000
+      /** 插件触发事件 */
+      event: "notice.group.increase",
+      priority: 5000,
     })
   }
 
   /** 接受到消息都会执行一次 */
-  async accept () {
+  async accept() {
     /** 定义入群欢迎内容 */
-    let msg = '欢迎新人！'
+    let msg = "欢迎新人！"
     /** 冷却cd 30s */
     let cd = 30
 
@@ -25,30 +25,30 @@ export class newcomer extends plugin {
     /** cd */
     let key = `Yz:newcomers:${this.e.group_id}`
     if (await redis.get(key)) return
-    redis.set(key, '1', { EX: cd })
+    redis.set(key, "1", { EX: cd })
 
     /** 回复 */
     await this.reply([
       segment.at(this.e.user_id),
       // segment.image(),
-      msg
+      msg,
     ])
   }
 }
 
 export class outNotice extends plugin {
-  constructor () {
+  constructor() {
     super({
-      name: '退群通知',
-      dsc: 'xx退群了',
-      event: 'notice.group.decrease'
+      name: "退群通知",
+      dsc: "xx退群了",
+      event: "notice.group.decrease",
     })
 
     /** 退群提示词 */
-    this.tips = '退群了'
+    this.tips = "退群了"
   }
 
-  async accept () {
+  async accept() {
     if (this.e.user_id == this.e.bot.uin) return
 
     let name, msg

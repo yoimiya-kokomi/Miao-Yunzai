@@ -1,31 +1,31 @@
-import YAML from 'yaml'
-import chokidar from 'chokidar'
-import fs from 'node:fs'
-import lodash from 'lodash'
-import MysInfo from './mys/mysInfo.js'
-import NoteUser from './mys/NoteUser.js'
-import { Character, Weapon } from '#miao.models'
+import YAML from "yaml"
+import chokidar from "chokidar"
+import fs from "node:fs"
+import lodash from "lodash"
+import MysInfo from "./mys/mysInfo.js"
+import NoteUser from "./mys/NoteUser.js"
+import { Character, Weapon } from "#miao.models"
 
 /** 配置文件 */
 class GsCfg {
   constructor() {
     this.isSr = false
     /** 默认设置 */
-    this.defSetPath = './plugins/genshin/defSet/'
+    this.defSetPath = "./plugins/genshin/defSet/"
     this.defSet = {}
 
     /** 用户设置 */
-    this.configPath = './plugins/genshin/config/'
+    this.configPath = "./plugins/genshin/config/"
     this.config = {}
 
     /** 监听文件 */
     this.watcher = { config: {}, defSet: {} }
 
-    this.ignore = ['mys.pubCk', 'gacha.set', 'bot.help', 'role.name']
+    this.ignore = ["mys.pubCk", "gacha.set", "bot.help", "role.name"]
   }
 
   get element() {
-    return { ...this.getdefSet('element', 'role'), ...this.getdefSet('element', 'weapon') }
+    return { ...this.getdefSet("element", "role"), ...this.getdefSet("element", "weapon") }
   }
 
   /**
@@ -33,16 +33,16 @@ class GsCfg {
    * @param name 配置文件名称
    */
   getdefSet(app, name) {
-    return this.getYaml(app, name, 'defSet')
+    return this.getYaml(app, name, "defSet")
   }
 
   /** 用户配置 */
   getConfig(app, name) {
     if (this.ignore.includes(`${app}.${name}`)) {
-      return this.getYaml(app, name, 'config')
+      return this.getYaml(app, name, "config")
     }
 
-    return { ...this.getdefSet(app, name), ...this.getYaml(app, name, 'config') }
+    return { ...this.getdefSet(app, name), ...this.getYaml(app, name, "config") }
   }
 
   /**
@@ -58,9 +58,7 @@ class GsCfg {
     if (this[type][key]) return this[type][key]
 
     try {
-      this[type][key] = YAML.parse(
-        fs.readFileSync(file, 'utf8')
-      )
+      this[type][key] = YAML.parse(fs.readFileSync(file, "utf8"))
     } catch (error) {
       logger.error(`[${app}][${name}] 格式错误 ${error}`)
       return false
@@ -72,7 +70,7 @@ class GsCfg {
   }
 
   getFilePath(app, name, type) {
-    if (type == 'defSet') {
+    if (type == "defSet") {
       return `${this.defSetPath}${app}/${name}.yaml`
     } else {
       return `${this.configPath}${app}.${name}.yaml`
@@ -80,13 +78,13 @@ class GsCfg {
   }
 
   /** 监听配置文件 */
-  watch(file, app, name, type = 'defSet') {
+  watch(file, app, name, type = "defSet") {
     let key = `${app}.${name}`
 
     if (this.watcher[type][key]) return
 
     const watcher = chokidar.watch(file)
-    watcher.on('change', path => {
+    watcher.on("change", path => {
       delete this[type][key]
       logger.mark(`[修改配置文件][${type}][${app}][${name}]`)
       if (this[`change_${app}${name}`]) {
@@ -98,17 +96,17 @@ class GsCfg {
   }
 
   /** 读取所有用户绑定的ck */
-  async getBingCk(game = 'gs') {
+  async getBingCk(game = "gs") {
     let ck = {}
     let ckQQ = {}
     let noteCk = {}
 
     await NoteUser.forEach(async function (user) {
-      let qq = user.qq + ''
+      let qq = user.qq + ""
       let tmp = {}
-      lodash.forEach(user.mysUsers, (mys) => {
+      lodash.forEach(user.mysUsers, mys => {
         let uids = mys.getUids(game)
-        lodash.forEach(uids, (uid) => {
+        lodash.forEach(uids, uid => {
           let ckData = mys.getCkInfo(game)
           ckData.qq = qq
           if (!ck[uid]) {
@@ -128,15 +126,14 @@ class GsCfg {
    */
   roleIdToName(id) {
     let char = Character.get(id)
-    return char?.name || ''
+    return char?.name || ""
   }
 
   /** 原神角色别名转id */
   roleNameToID(keyword, isSr) {
-    let char = Character.get(keyword, isSr ? 'sr' : 'gs')
+    let char = Character.get(keyword, isSr ? "sr" : "gs")
     return char?.id || false
   }
-
 
   /**
    * 原神角色武器长名称缩写
@@ -145,7 +142,7 @@ class GsCfg {
    */
   shortName(name, isWeapon = false) {
     let obj = (isWeapon ? Weapon : Character).get(name)
-    return obj.abbr || obj.name || ''
+    return obj.abbr || obj.name || ""
   }
 
   /** 公共配置ck文件修改hook */
@@ -154,8 +151,8 @@ class GsCfg {
     await MysInfo.initPubCk()
   }
 
-  getGachaSet(groupId = '') {
-    let config = this.getYaml('gacha', 'set', 'config')
+  getGachaSet(groupId = "") {
+    let config = this.getYaml("gacha", "set", "config")
     let def = config.default
     if (config[groupId]) {
       return { ...def, ...config[groupId] }
@@ -178,35 +175,34 @@ class GsCfg {
    * @return alias 当前别名
    * @return uid 游戏uid
    */
-  getRole(msg, filterMsg = '', isSr = false) {
-    let alias = msg.replace(/#|老婆|老公|(18|[1-9])[0-9]{8}/g, '').trim()
+  getRole(msg, filterMsg = "", isSr = false) {
+    let alias = msg.replace(/#|老婆|老公|(18|[1-9])[0-9]{8}/g, "").trim()
     if (filterMsg) {
-      alias = alias.replace(new RegExp(filterMsg, 'g'), '').trim()
+      alias = alias.replace(new RegExp(filterMsg, "g"), "").trim()
     }
 
     this.isSr = isSr
 
-    let char = Character.get(alias, isSr ? 'sr' : 'gs')
+    let char = Character.get(alias, isSr ? "sr" : "gs")
     if (!char) {
       return false
     }
 
     /** 获取uid */
-    let uid = this.getMsgUid(msg) || ''
+    let uid = this.getMsgUid(msg) || ""
 
     return {
       roleId: char.id,
       uid,
       alias,
       game: char.game,
-      name: char.name
+      name: char.name,
     }
   }
 
-
   cpCfg(app, name) {
-    if (!fs.existsSync('./plugins/genshin/config')) {
-      fs.mkdirSync('./plugins/genshin/config')
+    if (!fs.existsSync("./plugins/genshin/config")) {
+      fs.mkdirSync("./plugins/genshin/config")
     }
 
     let set = `./plugins/genshin/config/${app}.${name}.yaml`
@@ -217,13 +213,13 @@ class GsCfg {
 
   // 仅供内部调用
   _getAbbr() {
-    if (this[this.isSr ? 'sr_nameID' : 'nameID']) return
+    if (this[this.isSr ? "sr_nameID" : "nameID"]) return
 
     this.nameID = new Map()
     this.sr_nameID = new Map()
-    let nameArr = this.getdefSet('role', 'name')
-    let sr_nameArr = this.getdefSet('role', 'sr_name')
-    let nameArrUser = this.getConfig('role', 'name')
+    let nameArr = this.getdefSet("role", "name")
+    let sr_nameArr = this.getdefSet("role", "sr_name")
+    let nameArrUser = this.getConfig("role", "name")
 
     let nameID = {}
 
@@ -248,80 +244,78 @@ class GsCfg {
     }
   }
 
-
   // 仅供内部调用
   _roleNameToID(keyword, isSr) {
     if (isSr) this.isSr = isSr
     if (!isNaN(keyword)) keyword = Number(keyword)
     this._getAbbr()
-    let roelId = this[this.isSr ? 'sr_nameID' : 'nameID'].get(String(keyword))
+    let roelId = this[this.isSr ? "sr_nameID" : "nameID"].get(String(keyword))
     return roelId || false
   }
 
   // 仅供内部调用
-  _getRole(msg, filterMsg = '', isSr = false) {
-    let alias = msg.replace(/#|老婆|老公|(18|[1-9])[0-9]{8}/g, '').trim()
+  _getRole(msg, filterMsg = "", isSr = false) {
+    let alias = msg.replace(/#|老婆|老公|(18|[1-9])[0-9]{8}/g, "").trim()
     if (filterMsg) {
-      alias = alias.replace(new RegExp(filterMsg, 'g'), '').trim()
+      alias = alias.replace(new RegExp(filterMsg, "g"), "").trim()
     }
 
     /** 判断是否命中别名 */
     let roleId = this._roleNameToID(alias)
     if (!roleId) return false
     /** 获取uid */
-    let uid = this.getMsgUid(msg) || ''
+    let uid = this.getMsgUid(msg) || ""
 
     return {
       roleId,
       uid,
       alias,
-      name: this.roleIdToName(roleId)
+      name: this.roleIdToName(roleId),
     }
   }
 
   getWeaponDataByWeaponHash(hash) {
-    console.log('gsCfg.getWeaponDataByWeaponHash() 已废弃')
+    console.log("gsCfg.getWeaponDataByWeaponHash() 已废弃")
     return {}
   }
 
   getAllAbbr() {
-    console.log('gsCfg.getAllAbbr() 已废弃')
+    console.log("gsCfg.getAllAbbr() 已废弃")
     return {}
   }
 
   getBingCkSingle(userId) {
-    console.log('gsCfg.getBingCkSingle() 已废弃')
+    console.log("gsCfg.getBingCkSingle() 已废弃")
     return {}
   }
 
   saveBingCk(userId, data) {
-    console.log('gsCfg.saveBingCk() 已废弃')
+    console.log("gsCfg.saveBingCk() 已废弃")
   }
 
   getElementByRoleName(roleName) {
-    console.log('gsCfg.getElementByRoleName() 已废弃')
-    return ''
+    console.log("gsCfg.getElementByRoleName() 已废弃")
+    return ""
   }
 
   getSkillDataByskillId(skillId, roleName) {
-    console.log('gsCfg.getSkillDataByskillId() 已废弃')
+    console.log("gsCfg.getSkillDataByskillId() 已废弃")
     return {}
   }
 
   fightPropIdToName(propId) {
-    console.log('gsCfg.fightPropIdToName() 已废弃')
-    return ''
+    console.log("gsCfg.fightPropIdToName() 已废弃")
+    return ""
   }
 
   getRoleTalentByTalentId(talentId) {
-    console.log('gsCfg.getRoleTalentByTalentId 已废弃')
+    console.log("gsCfg.getRoleTalentByTalentId 已废弃")
     return {}
   }
 
   getAbbr() {
-    console.log('gsCfg.getAbbr() 已经废弃')
+    console.log("gsCfg.getAbbr() 已经废弃")
   }
-
 }
 
 export default new GsCfg()

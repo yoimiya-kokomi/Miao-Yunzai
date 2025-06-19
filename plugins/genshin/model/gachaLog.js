@@ -15,21 +15,25 @@ export default class GachaLog extends base {
 
     this.urlKey = `${this.prefix}url:`
     /** 绑定的uid */
-    this.uidKey = this.e.isSr ? `Yz:srJson:mys:qq-uid:${this.userId}` : `Yz:genshin:mys:qq-uid:${this.userId}`
-    this.path = this.e.isSr ? `./data/srJson/${this.e.user_id}/` : `./data/gachaJson/${this.e.user_id}/`
+    this.uidKey = this.e.isSr
+      ? `Yz:srJson:mys:qq-uid:${this.userId}`
+      : `Yz:genshin:mys:qq-uid:${this.userId}`
+    this.path = this.e.isSr
+      ? `./data/srJson/${this.e.user_id}/`
+      : `./data/gachaJson/${this.e.user_id}/`
 
     const gsPool = [
       { type: 301, typeName: "角色" },
       { type: 302, typeName: "武器" },
       { type: 500, typeName: "集录" },
-      { type: 200, typeName: "常驻" }
+      { type: 200, typeName: "常驻" },
     ]
 
     const srPool = [
       { type: 11, typeName: "角色" },
       { type: 12, typeName: "光锥" },
       { type: 1, typeName: "常驻" },
-      { type: 2, typeName: "新手" }
+      { type: 2, typeName: "新手" },
     ]
 
     this.pool = e.isSr ? srPool : gsPool
@@ -58,7 +62,7 @@ export default class GachaLog extends base {
     let param = this.dealUrl(url)
     if (!param) return
 
-    if (!await this.checkUrl(param)) return
+    if (!(await this.checkUrl(param))) return
 
     this.e.reply("链接发送成功，数据获取中……")
 
@@ -79,7 +83,9 @@ export default class GachaLog extends base {
       if (i <= 1) await common.sleep(500)
     }
     MakeMsg.push(tmpMsg)
-    MakeMsg.push(`\n抽卡记录更新完成，您还可回复\n【${this?.e?.isSr ? "*" : "#"}全部记录】统计全部抽卡数据\n【${this?.e?.isSr ? "*光锥" : "#武器"}记录】统计${this?.e?.isSr ? "星铁光锥" : "武器"}池数据\n【${this?.e?.isSr ? "*" : "#"}角色统计】按卡池统计数据\n【${this?.e?.isSr ? "*" : "#"}导出记录】导出记录数据`)
+    MakeMsg.push(
+      `\n抽卡记录更新完成，您还可回复\n【${this?.e?.isSr ? "*" : "#"}全部记录】统计全部抽卡数据\n【${this?.e?.isSr ? "*光锥" : "#武器"}记录】统计${this?.e?.isSr ? "星铁光锥" : "武器"}池数据\n【${this?.e?.isSr ? "*" : "#"}角色统计】按卡池统计数据\n【${this?.e?.isSr ? "*" : "#"}导出记录】导出记录数据`,
+    )
     await this.e.reply(MakeMsg)
 
     if (this.fetchFullLog) {
@@ -126,13 +132,13 @@ export default class GachaLog extends base {
       let res = await this.logApi({
         size: 6,
         authkey: param.authkey,
-        region: this.e.isSr ? "prod_gf_cn" : "cn_gf01"
+        region: this.e.isSr ? "prod_gf_cn" : "cn_gf01",
       })
       if (!res?.data?.region) {
         res = await this.logApi({
           size: 6,
           authkey: param.authkey,
-          region: this.e.isSr ? "prod_official_usa" : "os_usa"
+          region: this.e.isSr ? "prod_official_usa" : "os_usa",
         })
       }
 
@@ -147,7 +153,7 @@ export default class GachaLog extends base {
     let res = await this.logApi({
       size: 6,
       authkey: param.authkey,
-      region: param.region
+      region: param.region,
     })
 
     if (res.retcode == -109) {
@@ -168,7 +174,9 @@ export default class GachaLog extends base {
         await this.e.reply("输入法限制，链接复制不完整，请更换输入法复制完整链接")
         return false
       }
-      await this.e.reply("链接不完整，请长按全选复制全部内容（可能输入法复制限制），或者复制的不是历史记录页面链接")
+      await this.e.reply(
+        "链接不完整，请长按全选复制全部内容（可能输入法复制限制），或者复制的不是历史记录页面链接",
+      )
       return false
     }
     if (res.retcode != 0) {
@@ -205,12 +213,13 @@ export default class GachaLog extends base {
       page: 1,
       size: 20,
       end_id: 0,
-      ...param
+      ...param,
     }).toString()
     if (this.e.isSr) {
       logUrl = "https://public-operation-hkrpg.mihoyo.com/common/gacha_record/api/getGachaLog?"
       if (!["prod_gf_cn", "prod_qd_cn"].includes(param.region)) {
-        logUrl = "https://public-operation-hkrpg-sg.hoyoverse.com/common/gacha_record/api/getGachaLog?"
+        logUrl =
+          "https://public-operation-hkrpg-sg.hoyoverse.com/common/gacha_record/api/getGachaLog?"
       }
       logParam = new URLSearchParams({
         authkey_ver: 1,
@@ -220,10 +229,10 @@ export default class GachaLog extends base {
         size: 20,
         game_biz: "hkrpg_cn",
         end_id: 0,
-        ...param
+        ...param,
       }).toString()
     }
-    let res = await fetch(logUrl + logParam).catch((err) => {
+    let res = await fetch(logUrl + logParam).catch(err => {
       logger.error(`[获取抽卡记录失败] ${err}`)
     })
     if (!res || !res.ok) {
@@ -236,7 +245,9 @@ export default class GachaLog extends base {
     const redisKey = `Yz:settings:fetchFullLog:${this.userId}`
     if (flag) {
       await redis.set(redisKey, 1, { EX: 600 })
-      return this.e.reply("已开启全量更新抽卡记录，在10分钟内您的首次抽卡记录将全量更新，用于修复在官方记录有效期内可能发生的数据错误")
+      return this.e.reply(
+        "已开启全量更新抽卡记录，在10分钟内您的首次抽卡记录将全量更新，用于修复在官方记录有效期内可能发生的数据错误",
+      )
     } else {
       await redis.del(redisKey)
       return this.e.reply("已关闭全量更新抽卡记录")
@@ -302,22 +313,21 @@ export default class GachaLog extends base {
     if (remoteList.length === 0) return localList
     if (localList.length === 0) return remoteList
     // 远程记录的最后一条数据id
-    const remoteLastId = remoteList[remoteList.length - 1].id;
+    const remoteLastId = remoteList[remoteList.length - 1].id
     if (!remoteLastId) {
       // 可能是mhy数据又出错了
-      return remoteList.concat(localList);
+      return remoteList.concat(localList)
     }
-    const findIdx = localList.findIndex((item) => item.id === remoteLastId);
+    const findIdx = localList.findIndex(item => item.id === remoteLastId)
     if (findIdx === -1) {
-      return remoteList.concat(localList);
+      return remoteList.concat(localList)
     }
     // 截取本地数据并合并
-    return remoteList.concat(localList.slice(findIdx + 1));
+    return remoteList.concat(localList.slice(findIdx + 1))
   }
 
   /** 递归获取所有数据 */
   async getAllLog(ids, authkey, page = 1, endId = 0) {
-
     /** 延迟下防止武器记录获取失败 */
     await common.sleep(1000)
 
@@ -326,7 +336,7 @@ export default class GachaLog extends base {
       page,
       end_id: endId,
       authkey,
-      region: this.getServer()
+      region: this.getServer(),
     })
 
     if (res.retcode != 0) {
@@ -334,7 +344,9 @@ export default class GachaLog extends base {
     }
 
     if (!res?.data?.list || res.data.list.length <= 0) {
-      logger.mark(`${this.e.logFnc}[UID:${this.uid}] 获取${this.typeName}记录完成，共${Number(page) - 1}页`)
+      logger.mark(
+        `${this.e.logFnc}[UID:${this.uid}] 获取${this.typeName}记录完成，共${Number(page) - 1}页`,
+      )
       return { hasErr: false, list: [] }
     }
 
@@ -434,7 +446,9 @@ export default class GachaLog extends base {
       logData.push(data)
     }
     if (logData.length === 0) {
-      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? "*" : "#"}记录帮助，查看配置说明`, false, { at: true })
+      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? "*" : "#"}记录帮助，查看配置说明`, false, {
+        at: true,
+      })
       return true
     }
     for (let i of logData) {
@@ -445,7 +459,7 @@ export default class GachaLog extends base {
     }
     const data = {
       ...logData[0],
-      data: logData
+      data: logData,
     }
     this.e.msg = originalMsg
     return data
@@ -505,20 +519,28 @@ export default class GachaLog extends base {
 
   async getUid() {
     if (!fs.existsSync(this.path)) {
-      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? "*" : "#"}记录帮助，查看配置说明`, false, { at: true })
+      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? "*" : "#"}记录帮助，查看配置说明`, false, {
+        at: true,
+      })
       return false
     }
 
     let logs = fs.readdirSync(this.path)
 
     if (lodash.isEmpty(logs)) {
-      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? "*" : "#"}记录帮助，查看配置说明`, false, { at: true })
+      this.e.reply(`暂无抽卡记录\n${this.e?.isSr ? "*" : "#"}记录帮助，查看配置说明`, false, {
+        at: true,
+      })
       return false
     }
 
     if (!this.uid) {
       this.e.at = false
-      this.uid = this?.e?.isSr ? this.e.user?._games?.sr?.uid : this.e.user?._games?.gs?.uid || await this.e.runtime.getUid(this.e) || await redis.get(this.uidKey)
+      this.uid = this?.e?.isSr
+        ? this.e.user?._games?.sr?.uid
+        : this.e.user?._games?.gs?.uid ||
+          (await this.e.runtime.getUid(this.e)) ||
+          (await redis.get(this.uidKey))
     }
 
     /** 记录有绑定的uid */
@@ -537,7 +559,7 @@ export default class GachaLog extends base {
       let tmp = fs.statSync(json)
       uidArr.push({
         uid,
-        mtimeMs: tmp.mtimeMs
+        mtimeMs: tmp.mtimeMs,
       })
     }
     if (uidArr.length <= 0) {
@@ -618,7 +640,7 @@ export default class GachaLog extends base {
           abbrName: gsCfg.shortName(val.name),
           item_type: val.item_type,
           num: 0,
-          isUp
+          isUp,
         })
       }
       fiveLogNum++
@@ -653,10 +675,12 @@ export default class GachaLog extends base {
     for (let i in fourLog) {
       four.push({
         name: i,
-        num: fourLog[i]
+        num: fourLog[i],
       })
     }
-    four = four.sort((a, b) => { return b.num - a.num })
+    four = four.sort((a, b) => {
+      return b.num - a.num
+    })
 
     if (four.length <= 0) {
       four.push({ name: "无", num: 0 })
@@ -665,22 +689,21 @@ export default class GachaLog extends base {
     let fiveAvg = 0
     let fourAvg = 0
     if (fiveNum > 0) {
-      fiveAvg = Math.round((allNum - noFiveNum) / fiveNum);
+      fiveAvg = Math.round((allNum - noFiveNum) / fiveNum)
     }
     if (fourNum > 0) {
-      fourAvg = Math.round((allNum - noFourNum) / fourNum);
+      fourAvg = Math.round((allNum - noFourNum) / fourNum)
     }
     // 有效抽卡
     let isvalidNum = 0
 
     if (fiveNum > 0 && fiveNum > wai) {
       if (fiveLog.length > 0 && !fiveLog[0].isUp) {
-        isvalidNum = Math.round((allNum - noFiveNum - fiveLog[0].num) / (fiveNum - wai));
+        isvalidNum = Math.round((allNum - noFiveNum - fiveLog[0].num) / (fiveNum - wai))
       } else {
-        isvalidNum = Math.round((allNum - noFiveNum) / (fiveNum - wai));
+        isvalidNum = Math.round((allNum - noFiveNum) / (fiveNum - wai))
       }
     }
-
 
     let upYs = isvalidNum * 160
     if (upYs >= 10000) {
@@ -715,84 +738,98 @@ export default class GachaLog extends base {
       lastTime,
       fiveLog,
       upYs,
-      noWaiRate
+      noWaiRate,
     }
   }
 
   checkIsUp() {
-    if (["莫娜", "七七", "迪卢克", "琴", "姬子", "杰帕德", "彦卿", "白露", "瓦尔特", "克拉拉", "布洛妮娅"].includes(this.role.name)) {
+    if (
+      [
+        "莫娜",
+        "七七",
+        "迪卢克",
+        "琴",
+        "姬子",
+        "杰帕德",
+        "彦卿",
+        "白露",
+        "瓦尔特",
+        "克拉拉",
+        "布洛妮娅",
+      ].includes(this.role.name)
+    ) {
       return false
     }
     let role5join = {
       刻晴: [
         {
-            start: "2021-02-17 18:00:00",
-            end: "2021-03-02 15:59:59"
-        }
+          start: "2021-02-17 18:00:00",
+          end: "2021-03-02 15:59:59",
+        },
       ],
       提纳里: [
         {
-            start: "2022-08-24 06:00:00",
-            end: "2022-09-09 17:59:59"
-        }
+          start: "2022-08-24 06:00:00",
+          end: "2022-09-09 17:59:59",
+        },
       ],
       迪希雅: [
         {
-            start: "2023-03-01 06:00:00",
-            end: "2023-03-21 17:59:59"
-        }
+          start: "2023-03-01 06:00:00",
+          end: "2023-03-21 17:59:59",
+        },
       ],
       梦见月瑞希: [
         {
-            start: "2025-02-12 06:00:00",
-            end: "2025-03-04 17:59:59"
-        }
+          start: "2025-02-12 06:00:00",
+          end: "2025-03-04 17:59:59",
+        },
       ],
       希儿: [
         {
-            start: "2023-04-26 06:00:00",
-            end: "2023-05-17 17:59:59"
+          start: "2023-04-26 06:00:00",
+          end: "2023-05-17 17:59:59",
         },
         {
-            start: "2023-10-27 12:00:00",
-            end: "2023-11-14 14:59:59"
-        }
+          start: "2023-10-27 12:00:00",
+          end: "2023-11-14 14:59:59",
+        },
       ],
       刃: [
         {
-            start: "2023-07-19 06:00:00",
-            end: "2023-08-09 11:59:59"
+          start: "2023-07-19 06:00:00",
+          end: "2023-08-09 11:59:59",
         },
         {
-            start: "2023-12-27 06:00:00",
-            end: "2024-01-17 11:59:59"
-        }
+          start: "2023-12-27 06:00:00",
+          end: "2024-01-17 11:59:59",
+        },
       ],
       符玄: [
         {
-            start: "2023-09-20 12:00:00",
-            end: "2023-10-10 14:59:59"
+          start: "2023-09-20 12:00:00",
+          end: "2023-10-10 14:59:59",
         },
         {
-            start: "2024-05-29 12:00:00",
-            end: "2024-06-18 14:59:59"
-        }
-      ]
+          start: "2024-05-29 12:00:00",
+          end: "2024-06-18 14:59:59",
+        },
+      ],
     }
     if (role5join[this.role.name]) {
-        for (const period of role5join[this.role.name]) {
-          const start = new Date(period.start).getTime()
-          const end = new Date(period.end).getTime()
-          const logTime = new Date(this.role.time).getTime()
-          
-          if (logTime >= start && logTime <= end) {
-            return true
-          }
+      for (const period of role5join[this.role.name]) {
+        const start = new Date(period.start).getTime()
+        const end = new Date(period.end).getTime()
+        const logTime = new Date(this.role.time).getTime()
+
+        if (logTime >= start && logTime <= end) {
+          return true
         }
-        return false
       }
-      return true
+      return false
     }
+    return true
+  }
 
   /** 渲染数据 */
   randData(data) {
@@ -802,106 +839,121 @@ export default class GachaLog extends base {
     let line = []
     let weapon = this.e.isSr ? "光锥" : "武器"
     //最非，最欧
-    let maxValue, minValue;
+    let maxValue, minValue
 
     if (data && data.fiveLog) {
-      const filteredFiveLog = data.fiveLog.filter(item => item.num !== 0);
+      const filteredFiveLog = data.fiveLog.filter(item => item.num !== 0)
 
       if (filteredFiveLog.length > 0) {
-        maxValue = Math.max(...filteredFiveLog.map(item => item.num));
-        minValue = Math.min(...filteredFiveLog.map(item => item.num));
+        maxValue = Math.max(...filteredFiveLog.map(item => item.num))
+        minValue = Math.min(...filteredFiveLog.map(item => item.num))
       } else {
         if (data.fiveLog[0]) {
-          maxValue = data.fiveLog[0];
-          minValue = data.fiveLog[0];
+          maxValue = data.fiveLog[0]
+          minValue = data.fiveLog[0]
         } else {
-          maxValue = 0;
-          minValue = 0;
+          maxValue = 0
+          minValue = 0
         }
       }
     } else {
-      maxValue = 0;
-      minValue = 0;
+      maxValue = 0
+      minValue = 0
     }
 
     if ([301, 11].includes(type)) {
-      line = [[
-        { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
-        { lable: "五星", num: data.fiveNum, unit: "个" },
-        { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
-        { lable: "小保底不歪", num: data.noWaiRate + "%", unit: "" },
-        { lable: "最非", num: maxValue, unit: "抽" }
-      ], [
-        { lable: "未出四星", num: data.noFourNum, unit: "抽" },
-        { lable: "五星常驻", num: data.wai, unit: "个" },
-        { lable: "UP平均", num: data.isvalidNum, unit: "抽" },
-        { lable: `UP花费${this?.e?.isSr ? "星琼" : "原石"}`, num: data.upYs, unit: "" },
-        { lable: "最欧", num: minValue, unit: "抽" }
-      ]]
+      line = [
+        [
+          { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
+          { lable: "五星", num: data.fiveNum, unit: "个" },
+          { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
+          { lable: "小保底不歪", num: data.noWaiRate + "%", unit: "" },
+          { lable: "最非", num: maxValue, unit: "抽" },
+        ],
+        [
+          { lable: "未出四星", num: data.noFourNum, unit: "抽" },
+          { lable: "五星常驻", num: data.wai, unit: "个" },
+          { lable: "UP平均", num: data.isvalidNum, unit: "抽" },
+          { lable: `UP花费${this?.e?.isSr ? "星琼" : "原石"}`, num: data.upYs, unit: "" },
+          { lable: "最欧", num: minValue, unit: "抽" },
+        ],
+      ]
     }
     // 常驻池
     if ([200, 1].includes(type)) {
-      line = [[
-        { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
-        { lable: "五星", num: data.fiveNum, unit: "个" },
-        { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
-        { lable: `五星${weapon}`, num: data.weaponNum, unit: "个" },
-        { lable: "最非", num: maxValue, unit: "抽" }
-      ], [
-        { lable: "未出四星", num: data.noFourNum, unit: "抽" },
-        { lable: "四星", num: data.fourNum, unit: "个" },
-        { lable: "四星平均", num: data.fourAvg, unit: "抽" },
-        { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
-        { lable: "最欧", num: minValue, unit: "抽" }
-      ]]
+      line = [
+        [
+          { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
+          { lable: "五星", num: data.fiveNum, unit: "个" },
+          { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
+          { lable: `五星${weapon}`, num: data.weaponNum, unit: "个" },
+          { lable: "最非", num: maxValue, unit: "抽" },
+        ],
+        [
+          { lable: "未出四星", num: data.noFourNum, unit: "抽" },
+          { lable: "四星", num: data.fourNum, unit: "个" },
+          { lable: "四星平均", num: data.fourAvg, unit: "抽" },
+          { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
+          { lable: "最欧", num: minValue, unit: "抽" },
+        ],
+      ]
     }
     // 武器池
     if ([302, 12].includes(type)) {
-      line = [[
-        { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
-        { lable: "五星", num: data.fiveNum, unit: "个" },
-        { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
-        { lable: `四星${weapon}`, num: data.weaponFourNum, unit: "个" },
-        { lable: "最非", num: maxValue, unit: "抽" }
-      ], [
-        { lable: "未出四星", num: data.noFourNum, unit: "抽" },
-        { lable: "四星", num: data.fourNum, unit: "个" },
-        { lable: "四星平均", num: data.fourAvg, unit: "抽" },
-        { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
-        { lable: "最欧", num: minValue, unit: "抽" }
-      ]]
+      line = [
+        [
+          { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
+          { lable: "五星", num: data.fiveNum, unit: "个" },
+          { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
+          { lable: `四星${weapon}`, num: data.weaponFourNum, unit: "个" },
+          { lable: "最非", num: maxValue, unit: "抽" },
+        ],
+        [
+          { lable: "未出四星", num: data.noFourNum, unit: "抽" },
+          { lable: "四星", num: data.fourNum, unit: "个" },
+          { lable: "四星平均", num: data.fourAvg, unit: "抽" },
+          { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
+          { lable: "最欧", num: minValue, unit: "抽" },
+        ],
+      ]
     }
     // 集录池
     if ([500].includes(type)) {
-      line = [[
-        { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
-        { lable: "五星", num: data.fiveNum, unit: "个" },
-        { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
-        { lable: `四星${weapon}`, num: data.weaponFourNum, unit: "个" },
-        { lable: "最非", num: maxValue, unit: "抽" }
-      ], [
-        { lable: "未出四星", num: data.noFourNum, unit: "抽" },
-        { lable: "四星", num: data.fourNum, unit: "个" },
-        { lable: "四星平均", num: data.fourAvg, unit: "抽" },
-        { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
-        { lable: "最欧", num: minValue, unit: "抽" }
-      ]]
+      line = [
+        [
+          { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
+          { lable: "五星", num: data.fiveNum, unit: "个" },
+          { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
+          { lable: `四星${weapon}`, num: data.weaponFourNum, unit: "个" },
+          { lable: "最非", num: maxValue, unit: "抽" },
+        ],
+        [
+          { lable: "未出四星", num: data.noFourNum, unit: "抽" },
+          { lable: "四星", num: data.fourNum, unit: "个" },
+          { lable: "四星平均", num: data.fourAvg, unit: "抽" },
+          { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
+          { lable: "最欧", num: minValue, unit: "抽" },
+        ],
+      ]
     }
     // 新手池
     if ([100, 2].includes(type)) {
-      line = [[
-        { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
-        { lable: "五星", num: data.fiveNum, unit: "个" },
-        { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
-        { lable: `五星${weapon}`, num: data.weaponNum, unit: "个" },
-        { lable: "最非", num: maxValue, unit: "抽" }
-      ], [
-        { lable: "未出四星", num: data.noFourNum, unit: "抽" },
-        { lable: "四星", num: data.fourNum, unit: "个" },
-        { lable: "四星平均", num: data.fourAvg, unit: "抽" },
-        { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
-        { lable: "最欧", num: minValue, unit: "抽" }
-      ]]
+      line = [
+        [
+          { lable: "未出五星", num: data.noFiveNum, unit: "抽" },
+          { lable: "五星", num: data.fiveNum, unit: "个" },
+          { lable: "五星平均", num: data.fiveAvg, unit: "抽", color: data.fiveColor },
+          { lable: `五星${weapon}`, num: data.weaponNum, unit: "个" },
+          { lable: "最非", num: maxValue, unit: "抽" },
+        ],
+        [
+          { lable: "未出四星", num: data.noFourNum, unit: "抽" },
+          { lable: "四星", num: data.fourNum, unit: "个" },
+          { lable: "四星平均", num: data.fourAvg, unit: "抽" },
+          { lable: "四星最多", num: data.maxFour.num, unit: data.maxFour.name.slice(0, 4) },
+          { lable: "最欧", num: minValue, unit: "抽" },
+        ],
+      ]
     }
     let hasMore = false
     // if (this.e.isGroup && data.fiveLog.length > 48) {
@@ -921,7 +973,7 @@ export default class GachaLog extends base {
       fiveLog: data.fiveLog,
       line,
       hasMore,
-      max
+      max,
     }
   }
 

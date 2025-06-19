@@ -1,15 +1,15 @@
-import cfg from '../../lib/config/config.js'
+import cfg from "../../lib/config/config.js"
 
 export class quit extends plugin {
-  constructor () {
+  constructor() {
     super({
-      name: 'notice',
-      dsc: '自动退群',
-      event: 'notice.group.increase'
+      name: "notice",
+      dsc: "自动退群",
+      event: "notice.group.increase",
     })
   }
 
-  async accept () {
+  async accept() {
     if (this.e.user_id != this.e.bot.uin) return
 
     let other = cfg.other
@@ -26,7 +26,7 @@ export class quit extends plugin {
 
     /** 自动退群 */
     if (Array.from(gl).length <= other.autoQuit && !this.e.group.is_owner) {
-      await this.e.reply('禁止拉群，已自动退出')
+      await this.e.reply("禁止拉群，已自动退出")
       logger.mark(`[自动退群] ${this.e.group_id}`)
       setTimeout(() => {
         this.e.group.quit()

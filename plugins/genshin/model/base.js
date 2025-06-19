@@ -1,15 +1,15 @@
-import fs from 'node:fs'
-import _ from 'lodash'
-import cfg from '../../../lib/config/config.js'
-import { Common, Version } from '#miao'
-import { Character } from '#miao.models'
+import fs from "node:fs"
+import _ from "lodash"
+import cfg from "../../../lib/config/config.js"
+import { Common, Version } from "#miao"
+import { Character } from "#miao.models"
 
 export default class base {
   constructor(e = {}) {
     this.e = e
     this.userId = e?.user_id
-    this.model = 'genshin'
-    this._path = process.cwd().replace(/\\/g, '/')
+    this.model = "genshin"
+    this._path = process.cwd().replace(/\\/g, "/")
   }
 
   get prefix() {
@@ -18,9 +18,9 @@ export default class base {
 
   // 统一封装渲染
   async renderImg(tpl, data, cfg = {}) {
-    return Common.render('genshin', `html/${tpl}`, data, {
+    return Common.render("genshin", `html/${tpl}`, data, {
       ...cfg,
-      e: this.e
+      e: this.e,
     })
   }
 
@@ -31,14 +31,14 @@ export default class base {
    * @param pluResPath 插件资源路径
    */
   get screenData() {
-    const layoutPath = process.cwd() + '/plugins/genshin/resources/html/layout/'
+    const layoutPath = process.cwd() + "/plugins/genshin/resources/html/layout/"
     let yunzaiName = cfg.package.name
-    if (yunzaiName == 'miao-yunzai') {
-      yunzaiName = 'Miao-Yunzai'
-    } else if (yunzaiName == 'yunzai') {
-      yunzaiName = 'Yunzai-Bot'
-    } else if (yunzaiName == 'trss-yunzai') {
-      yunzaiName = 'TRSS-Yunzai'
+    if (yunzaiName == "miao-yunzai") {
+      yunzaiName = "Miao-Yunzai"
+    } else if (yunzaiName == "yunzai") {
+      yunzaiName = "Yunzai-Bot"
+    } else if (yunzaiName == "trss-yunzai") {
+      yunzaiName = "TRSS-Yunzai"
     } else {
       yunzaiName = _.capitalize(yunzaiName)
     }
@@ -47,30 +47,30 @@ export default class base {
       cwd: this._path,
       yzVersion: `v${Version.yunzai}`,
       yzName: yunzaiName,
-      genshinLayout: layoutPath + 'genshin.html',
-      defaultLayout: layoutPath + 'default.html'
+      genshinLayout: layoutPath + "genshin.html",
+      defaultLayout: layoutPath + "default.html",
     }
     if (this.e?.isSr) {
-      let char = Character.get('黑天鹅', 'sr')
+      let char = Character.get("黑天鹅", "sr")
       return {
         ...data,
         tplFile: `./plugins/genshin/resources/StarRail/html/${this.model}/${this.model}.html`,
         /** 绝对路径 */
         pluResPath: `${this._path}/plugins/genshin/resources/StarRail/`,
-        srtempFile: 'StarRail/',
+        srtempFile: "StarRail/",
         headImg: char?.imgs?.banner,
-        game: 'sr',
+        game: "sr",
       }
     }
-    let char = Character.get('闲云', 'gs')
+    let char = Character.get("闲云", "gs")
     return {
       ...data,
       tplFile: `./plugins/genshin/resources/html/${this.model}/${this.model}.html`,
       /** 绝对路径 */
       pluResPath: `${this._path}/plugins/genshin/resources/`,
       headImg: char?.imgs?.banner,
-      srtempFile: '',
-      game: 'gs',
+      srtempFile: "",
+      game: "gs",
     }
   }
 }

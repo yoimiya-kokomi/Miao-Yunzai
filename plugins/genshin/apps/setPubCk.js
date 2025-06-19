@@ -7,7 +7,7 @@ import MysInfo from "../model/mys/mysInfo.js"
 import common from "../../../lib/common/common.js"
 
 export class setPubCk extends plugin {
-  constructor (e) {
+  constructor(e) {
     super({
       name: "配置",
       dsc: "#配置ck",
@@ -17,31 +17,33 @@ export class setPubCk extends plugin {
         {
           reg: /^#配置c(oo)?k(ie)?$|^#*配置公共查询c(oo)?k(ie)?$/i,
           fnc: "setPubCk",
-          permission: "master"
+          permission: "master",
         },
         {
           reg: "^#使用(全部|用户)ck$",
           fnc: "setUserCk",
-          permission: "master"
-        }
-      ]
+          permission: "master",
+        },
+      ],
     })
 
     this.file = "./plugins/genshin/config/mys.pubCk.yaml"
   }
 
   /** 配置公共ck */
-  async setPubCk () {
+  async setPubCk() {
     /** 设置上下文，后续接收到内容会执行doRep方法 */
     this.setContext("pubCk")
     /** 回复 */
     await this.reply("请发送米游社cookie......\n配置后该ck将会加入公共查询池")
   }
 
-  async pubCk () {
+  async pubCk() {
     let msg = this.e.msg
 
-    if (!(/(ltoken|ltoken_v2)/.test(this.e.msg) && /(ltuid|ltmid_v2|account_mid_v2)/.test(this.e.msg))) {
+    if (
+      !(/(ltoken|ltoken_v2)/.test(this.e.msg) && /(ltuid|ltmid_v2|account_mid_v2)/.test(this.e.msg))
+    ) {
       this.e.reply("cookie错误，请发送正确的cookie")
       return true
     }
@@ -50,23 +52,34 @@ export class setPubCk extends plugin {
 
     let ck = msg.replace(/#|"|"/g, "")
     let param = {}
-    ck.split(";").forEach((v) => {
+    ck.split(";").forEach(v => {
       // cookie_token_v2,ltoken_v2值也可能有=
       // let tmp = lodash.trim(v).split("=")
-      let tmp = lodash.trim(v);
-      let index = tmp.indexOf("=");
-      param[tmp.slice(0,index)] = tmp.slice(index+1);
+      let tmp = lodash.trim(v)
+      let index = tmp.indexOf("=")
+      param[tmp.slice(0, index)] = tmp.slice(index + 1)
     })
 
     this.ck = ""
     lodash.forEach(param, (v, k) => {
-      if (["ltoken", "ltuid", "cookie_token", "account_id", "cookie_token_v2", "account_mid_v2", "ltmid_v2", "ltoken_v2"].includes(k)) {
+      if (
+        [
+          "ltoken",
+          "ltuid",
+          "cookie_token",
+          "account_id",
+          "cookie_token_v2",
+          "account_mid_v2",
+          "ltmid_v2",
+          "ltoken_v2",
+        ].includes(k)
+      ) {
         this.ck += `${k}=${v};`
       }
     })
 
     /** 检查ck是否失效 */
-    if (!await this.checkCk()) {
+    if (!(await this.checkCk())) {
       logger.mark(`配置公共cookie错误：${this.checkMsg || "cookie错误"}`)
       await this.e.reply(`配置公共cookie错误：${this.checkMsg || "cookie错误"}`)
       return
@@ -74,7 +87,11 @@ export class setPubCk extends plugin {
 
     this.ltuid = param.ltuid
     // 判断是否是v2版ck
-    if (param.cookie_token_v2 && (param.account_mid_v2 || param.ltoken_v2) && !(/(\d{4,9})/g).test(this.ltuid)) {
+    if (
+      param.cookie_token_v2 &&
+      (param.account_mid_v2 || param.ltoken_v2) &&
+      !/(\d{4,9})/g.test(this.ltuid)
+    ) {
       // 获取米游社通行证id
       let userFullInfo = await this.getUserInfo()
       if (userFullInfo?.data?.user_info) {
@@ -106,7 +123,7 @@ export class setPubCk extends plugin {
   }
 
   /** 检查ck是否可用 */
-  async checkCk () {
+  async checkCk() {
     let url = "https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_cn"
     let res = await fetch(url, { method: "get", headers: { Cookie: this.ck } })
     if (!res.ok) return false
@@ -120,12 +137,12 @@ export class setPubCk extends plugin {
   }
 
   // 获取米游社通行证id
-  async getUserInfo (server = "mys") {
+  async getUserInfo(server = "mys") {
     try {
       const that = this
       let url = {
         mys: "https://bbs-api.mihoyo.com/user/wapi/getUserFullInfo?gids=2",
-        hoyolab: ""
+        hoyolab: "",
       }
       let res = await fetch(url[server], {
         method: "get",
@@ -135,8 +152,8 @@ export class setPubCk extends plugin {
           Connection: "keep-alive",
           Host: "bbs-api.mihoyo.com",
           Origin: "https://m.bbs.mihoyo.com",
-          Referer: " https://m.bbs.mihoyo.com/"
-        }
+          Referer: " https://m.bbs.mihoyo.com/",
+        },
       })
       if (!res.ok) return res
       res = await res.json()
@@ -146,12 +163,12 @@ export class setPubCk extends plugin {
     }
   }
 
-  save (data) {
+  save(data) {
     data = YAML.stringify(data)
     fs.writeFileSync(this.file, data)
   }
 
-  async setUserCk () {
+  async setUserCk() {
     let set = "./plugins/genshin/config/mys.set.yaml"
 
     let config = fs.readFileSync(set, "utf8")

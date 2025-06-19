@@ -1,4 +1,4 @@
-import Puppeteer from './lib/puppeteer.js'
+import Puppeteer from "./lib/puppeteer.js"
 
 /**
  *
