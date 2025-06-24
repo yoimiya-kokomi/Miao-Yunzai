@@ -24,6 +24,7 @@ export default class Puppeteer extends Renderer {
     /** 截图次数 */
     this.renderNum = 0
     this.config = {
+      userDataDir: config.userDataDir || "data/puppeteer",
       headless: config.headless || "new",
       args: config.args || [
         "--disable-gpu",
@@ -40,6 +41,10 @@ export default class Puppeteer extends Renderer {
       this.config.wsEndpoint = config.puppeteerWS || cfg?.bot?.puppeteer_ws
     /** puppeteer超时超时时间 */
     this.puppeteerTimeout = config.puppeteerTimeout || cfg?.bot?.puppeteer_timeout || 0
+    this.pageGotoParams = config.pageGotoParams || {
+      timeout: 120000,
+      waitUntil: "networkidle2",
+    }
   }
 
   /**
@@ -183,7 +188,7 @@ export default class Puppeteer extends Renderer {
 
     try {
       const page = await this.browser.newPage()
-      const pageGotoParams = lodash.extend({ timeout: 120000 }, data.pageGotoParams || {})
+      const pageGotoParams = lodash.extend(this.pageGotoParams, data.pageGotoParams || {})
       await page.goto(`file://${_path}${lodash.trim(savePath, ".")}`, pageGotoParams)
       const body = (await page.$("#container")) || (await page.$("body"))
 
