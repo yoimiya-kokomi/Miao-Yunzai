@@ -2,6 +2,8 @@ import Renderer from "../../../lib/renderer/Renderer.js"
 import os from "node:os"
 import lodash from "lodash"
 import puppeteer from "puppeteer"
+import timers from "node:timers/promises"
+import fs from "node:fs/promises"
 // 暂时保留对原config的兼容
 import cfg from "../../../lib/config/config.js"
 
@@ -83,21 +85,20 @@ export default class Puppeteer extends Renderer {
 
     if (!this.browser || !connectFlag) {
       // 如果没有实例，初始化puppeteer
-      this.browser = await puppeteer.launch(this.config).catch((err, trace) => {
-        let errMsg = err.toString() + (trace ? trace.toString() : "")
-        if (typeof err == "object") {
-          logger.error(JSON.stringify(err))
-        } else {
-          logger.error(err.toString())
-          if (errMsg.includes("Could not find Chromium")) {
-            logger.error(
-              "没有正确安装 Chromium，可以尝试执行安装命令：node node_modules/puppeteer/install.js",
-            )
-          } else if (errMsg.includes("cannot open shared object file")) {
-            logger.error("没有正确安装 Chromium 运行库")
-          }
-        }
+      this.browser = await puppeteer.launch(this.config).catch(async (err, trace) => {
+        const errMsg = err.toString() + (trace ? trace.toString() : "")
         logger.error(err, trace)
+        if (errMsg.includes("Could not find Chromium")) {
+          logger.error(
+            "没有正确安装 Chromium，可以尝试执行安装命令：node node_modules/puppeteer/install.js",
+          )
+        } else if (errMsg.includes("cannot open shared object file")) {
+          logger.error("没有正确安装 Chromium 运行库")
+        } else if (errMsg.includes("your profile directory")) {
+          await fs.rm(this.config.userDataDir, { force: true, recursive: true }).catch(() => {})
+          this.lock = false
+          return this.browserInit()
+        }
       })
     }
 
@@ -244,7 +245,7 @@ export default class Puppeteer extends Renderer {
           else buff = await page.screenshot(randData)
           if (!Buffer.isBuffer(buff)) buff = Buffer.from(buff)
 
-          if (num > 2) await new Promise(resolve => setTimeout(resolve, 200))
+          if (num > 2) await timers.setTimeout(200)
 
           this.renderNum++
 
