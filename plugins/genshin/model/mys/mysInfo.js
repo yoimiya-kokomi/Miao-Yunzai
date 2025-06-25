@@ -41,6 +41,8 @@ export default class MysInfo {
       "action_cardList",
       "avatarInfo",
       "role_combat",
+      "hard_challenge",
+      "hard_challenge_popularity",
       "characterDetail",
     ]
 
