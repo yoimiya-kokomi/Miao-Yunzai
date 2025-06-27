@@ -80,7 +80,8 @@ export default class apiTool {
         /** 幽境危战 */
         hard_challenge: {
           url: `${hostRecord}game_record/app/genshin/api/hard_challenge`,
-          query: `role_id=${this.uid}&server=${this.server}`,
+          query: `role_id=${this.uid}&need_detail=true&server=${this.server}`,
+          // 先只做获取详细信息的（需要ck）
         },
         /** 幽境危战增益角色 */
         hard_challenge_popularity: {

@@ -94,16 +94,15 @@ export default class Puppeteer extends Renderer {
           )
         } else if (errMsg.includes("cannot open shared object file")) {
           logger.error("没有正确安装 Chromium 运行库")
-        } else if (errMsg.includes("your profile directory")) {
+        } else if (errMsg.includes(this.config.userDataDir)) {
           await fs.rm(this.config.userDataDir, { force: true, recursive: true }).catch(() => {})
-          this.lock = false
-          return this.browserInit()
+          return (this.lock = false)
         }
       })
+      if (this.lock === false) return this.browserInit()
     }
 
     this.lock = false
-
     if (!this.browser) {
       logger.error("puppeteer Chromium 启动失败")
       return false
