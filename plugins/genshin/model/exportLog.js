@@ -32,8 +32,8 @@ export default class ExportLog extends base {
         sr: [
           { type: 11, typeName: "角色活动" },
           { type: 12, typeName: "武器活动" },
-          { type: 21, typeName: "联动角色" },
-          { type: 22, typeName: "联动武器" },
+          { type: 21, typeName: "角色联动" },
+          { type: 22, typeName: "武器联动" },
           { type: 2, typeName: "新手活动" },
           { type: 1, typeName: "常驻" },
         ],
@@ -52,8 +52,8 @@ export default class ExportLog extends base {
         sr: {
           11: "角色",
           12: "武器",
-          21: "联动角色",
-          22: "联动武器",
+          21: "角色联动",
+          22: "武器联动",
           2: "新手",
           1: "常驻",
         },

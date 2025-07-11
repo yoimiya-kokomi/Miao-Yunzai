@@ -32,8 +32,8 @@ export default class GachaLog extends base {
     const srPool = [
       { type: 11, typeName: "角色" },
       { type: 12, typeName: "光锥" },
-      { type: 21, typeName: "联动角色" },
-      { type: 22, typeName: "联动光锥" },
+      { type: 21, typeName: "角色联动" },
+      { type: 22, typeName: "光锥联动" },
       { type: 1, typeName: "常驻" },
       { type: 2, typeName: "新手" },
     ]
@@ -439,7 +439,7 @@ export default class GachaLog extends base {
 
   async getAllGcLogData() {
     this.model = "gachaAllLog"
-    const poolList = ["角色", "联动角色", this.e?.isSr ? "光锥" : "武器", "联动光锥", "集录", "常驻"]
+    const poolList = ["角色", "角色联动", this.e?.isSr ? "光锥" : "武器", "光锥联动", "集录", "常驻"]
     const logData = []
     let fiveMaxNum = 0
     const originalMsg = this.e.msg
@@ -518,14 +518,14 @@ export default class GachaLog extends base {
         type = 12
         typeName = "光锥"
         break
-      case "联动角色":
+      case "角色联动":
         type = 21
-        typeName = "联动角色"
+        typeName = "角色联动"
         break
-      case "联动光锥":
-      case "联动武器":
+      case "光锥联动":
+      case "武器联动":
         type = 22
-        typeName = "联动光锥"
+        typeName = "光锥联动"
         break
       case "新手":
         type = this.e.isSr ? 2 : 100
