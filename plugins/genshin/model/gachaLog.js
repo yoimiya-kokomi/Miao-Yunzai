@@ -523,6 +523,7 @@ export default class GachaLog extends base {
         typeName = "联动角色"
         break
       case "联动光锥":
+      case "联动武器":
         type = 22
         typeName = "联动光锥"
         break

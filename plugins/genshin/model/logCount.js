@@ -47,7 +47,7 @@ export default class LogCount extends base {
         { type: 11, typeName: "角色" },
         { type: 12, typeName: "光锥" },
         { type: 21, typeName: "联动角色" },
-        { type: 22, typeName: "联动武器" },
+        { type: 22, typeName: "联动光锥" },
         { type: 1, typeName: "常驻" },
         { type: 2, typeName: "新手" },
       ]
@@ -144,6 +144,7 @@ export default class LogCount extends base {
         this.typeName = "联动角色"
         break
       case "联动光锥":
+      case "联动武器":
         this.type = 22
         this.typeName = "联动光锥"
         break
