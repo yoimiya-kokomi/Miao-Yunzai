@@ -46,6 +46,8 @@ export default class LogCount extends base {
       this.pool = [
         { type: 11, typeName: "角色" },
         { type: 12, typeName: "光锥" },
+        { type: 21, typeName: "联动角色" },
+        { type: 22, typeName: "联动武器" },
         { type: 1, typeName: "常驻" },
         { type: 2, typeName: "新手" },
       ]
@@ -136,6 +138,14 @@ export default class LogCount extends base {
       case "光锥":
         this.type = 12
         this.typeName = "光锥"
+        break
+      case "联动角色":
+        this.type = 21
+        this.typeName = "联动角色"
+        break
+      case "联动光锥":
+        this.type = 22
+        this.typeName = "联动光锥"
         break
       case "新手":
         this.type = this.e.isSr ? 2 : 100
