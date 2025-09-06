@@ -450,7 +450,7 @@ export default class Ledger extends base {
       return Number(item.year) * 100 + Number(item.month)
     })
 
-    let groupBy = lodash(NoteData).map("month_data").map("group_by").flatMap().value()
+    const groupBy = NoteData.flatMap(i => i.month_data.group_by)
 
     if (this.e.isSr)
       groupBy.forEach(item => {
@@ -471,9 +471,7 @@ export default class Ledger extends base {
       }
     }
 
-    pieData = lodash.flatMap(pieData, item => {
-      return item
-    })
+    pieData = lodash.flatMap(pieData, item => item)
     pieData = lodash.orderBy(pieData, ["num"], ["desc"])
 
     data.color = []
