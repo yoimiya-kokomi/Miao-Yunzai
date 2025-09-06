@@ -1,0 +1,11 @@
+# Sequelize 配置
+# https://sequelize.org/docs/v6/getting-started
+
+# mysql, postgres, sqlite, db2, mariadb, mssql
+dialect: sqlite
+
+# SQLite 文件地址
+storage: data/db/data.db
+
+# 日志
+logging: false

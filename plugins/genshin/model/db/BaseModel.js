@@ -1,15 +1,10 @@
 import { Sequelize, DataTypes, Model } from "sequelize"
-import { Data } from "#miao"
+import cfg from "../../../../lib/config/config.js"
+import path from "node:path"
+import fs from "node:fs/promises"
 
-Data.createDir("/data/db", "root")
-let dbPath = process.cwd() + "/data/db/data.db"
-
-// TODO DB自定义
-const sequelize = new Sequelize({
-  dialect: "sqlite",
-  storage: dbPath,
-  logging: false,
-})
+if (cfg.db.dialect === "sqlite") await fs.mkdir(path.dirname(cfg.db.storage), { recursive: true })
+const sequelize = new Sequelize(cfg.db)
 
 try {
   await sequelize.authenticate()
