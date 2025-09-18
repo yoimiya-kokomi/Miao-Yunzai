@@ -1,32 +1,32 @@
 # 成就
-achievement: 1550
+achievement: 1610
 
 # 角色数
-avatar: 102
+avatar: 105
 
 # 等级
 level: 60
 
 # 奇馈宝箱
-magic_chest: 326
+magic_chest: 351
 
 # 华丽宝箱
-luxurious_chest: 336
+luxurious_chest: 354
 
 # 珍贵宝箱
-precious_chest: 878
+precious_chest: 923
 
 # 精致宝箱
-exquisite_chest: 2799
+exquisite_chest: 2944
 
 # 普通宝箱
-common_chest: 3394
+common_chest: 3490
 
 # 传送点
-way_point: 609
+way_point: 660
 
 # 秘境
-domain: 64
+domain: 67
 
 # 风神瞳
 anemoculus: 66
@@ -45,3 +45,6 @@ hydroculus: 271
 
 # 火神瞳
 pyroculus: 271
+
+# 月神瞳
+moonoculus: 112

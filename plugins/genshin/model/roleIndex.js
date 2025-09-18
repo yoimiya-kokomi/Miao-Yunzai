@@ -34,6 +34,7 @@ export default class RoleIndex extends base {
       旧日之海: 14,
       纳塔: 15,
       远古圣山: 16,
+      挪德卡莱: 17
     }
 
     this.all_chest = 0
@@ -481,14 +482,19 @@ export default class RoleIndex extends base {
 
     let line = [
       [
+        { lable: "活跃天数", num: stats.active_day_number, extra: `${daysDifference}` },
+        { lable: "深境螺旋", num: stats.spiral_abyss },
+        { lable: "幻想真境剧诗", num: !stats.role_combat.is_unlock ? "未解锁" : !stats.role_combat.has_data ? "-" : `第${stats.role_combat.max_round_id}幕` },
+        { lable: "幽境危战", num: !stats.hard_challenge.is_unlock ? "未解锁" : !stats.hard_challenge.has_data ? "-" : ['I', 'II', 'III', 'IV', 'V', 'VI'][stats.hard_challenge.difficulty - 1] },
+      ],
+      [
         { lable: "角色数", num: stats.avatar_number, extra: this.lable.avatar },
+        { lable: "满好感角色", num: stats.full_fetter_avatar_num, extra: stats.avatar_number - 1 },
         { lable: "传送点", num: stats.way_point_number, extra: this.lable.way_point },
         { lable: "秘境", num: stats.domain_number, extra: this.lable.domain },
         { lable: "成就", num: stats.achievement_number, extra: this.lable.achievement },
-        { lable: "活跃天数", num: stats.active_day_number, extra: `${daysDifference}` },
       ],
       [
-        { lable: "深境螺旋", num: stats.spiral_abyss },
         {
           lable: "宝箱总数",
           num:
@@ -517,19 +523,20 @@ export default class RoleIndex extends base {
         },
         { lable: "普通宝箱", num: stats.common_chest_number, extra: this.lable.common_chest },
         { lable: "精致宝箱", num: stats.exquisite_chest_number, extra: this.lable.exquisite_chest },
+        { lable: "珍贵宝箱", num: stats.precious_chest_number, extra: this.lable.precious_chest },
       ],
       [
-        { lable: "珍贵宝箱", num: stats.precious_chest_number, extra: this.lable.precious_chest },
         { lable: "华丽宝箱", num: stats.luxurious_chest_number, extra: this.lable.luxurious_chest },
         { lable: "奇馈宝箱", num: stats.magic_chest_number, extra: this.lable.magic_chest },
         { lable: "风神瞳", num: stats.anemoculus_number, extra: this.lable.anemoculus },
         { lable: "岩神瞳", num: stats.geoculus_number, extra: this.lable.geoculus },
+        { lable: "雷神瞳", num: stats.electroculus_number, extra: this.lable.electroculus },
       ],
       [
-        { lable: "雷神瞳", num: stats.electroculus_number, extra: this.lable.electroculus },
         { lable: "草神瞳", num: stats.dendroculus_number, extra: this.lable.dendroculus },
         { lable: "水神瞳", num: stats.hydroculus_number, extra: this.lable.hydroculus },
         { lable: "火神瞳", num: stats.pyroculus_number, extra: this.lable.pyroculus },
+        { lable: "月神瞳", num: stats.moonoculus_number, extra: this.lable.moonoculus },
         { lable: "冰神瞳", num: `${dsz}`, extra: 0 },
       ],
     ]
