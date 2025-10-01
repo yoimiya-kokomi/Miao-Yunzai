@@ -484,7 +484,7 @@ export default class RoleIndex extends base {
       [
         { lable: "活跃天数", num: stats.active_day_number, extra: `${daysDifference}` },
         { lable: "深境螺旋", num: stats.spiral_abyss },
-        { lable: "幻想真境剧诗", num: !stats.role_combat.is_unlock ? "未解锁" : !stats.role_combat.has_data ? "-" : `第${stats.role_combat.max_round_id}幕` },
+        { lable: "幻想真境剧诗", num: !stats.role_combat.is_unlock ? "未解锁" : !stats.role_combat.has_detail_data ? "-" : `第${stats.role_combat.max_round_id}幕${stats.role_combat.tarot_finished_cnt > 0 ? ` 圣牌${stats.role_combat.tarot_finished_cnt}` : ""}` },
         { lable: "幽境危战", num: !stats.hard_challenge.is_unlock ? "未解锁" : !stats.hard_challenge.has_data ? "-" : ['I', 'II', 'III', 'IV', 'V', 'VI'][stats.hard_challenge.difficulty - 1] },
       ],
       [
