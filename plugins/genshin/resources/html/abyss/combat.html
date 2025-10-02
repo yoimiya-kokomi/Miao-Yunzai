@@ -5,7 +5,7 @@
 {{/block}}
 
 {{block 'main'}}
-{{set difficulty = {1: '轻简', 2: '普通', 3: '困难', 4: '卓越'} }}
+{{set difficulty = {1: '轻简', 2: '普通', 3: '困难', 4: '卓越', 5: '月谕'} }}
 {{set type = { 2: '试用', 3: '助演'} }}
 <div class="top">
   <div class="role-image"
@@ -45,7 +45,11 @@
 <div class="data_box">
   {{each detail.rounds_data round }}
   <div class="round">
+    {{if round.is_tarot}}
+    <div class="round_title"><span class="medal-{{round.is_get_medal?1:0}}"></span>圣牌挑战{{round.tarot_serial_no}}</div>
+    {{else}}
     <div class="round_title"><span class="medal-{{round.is_get_medal?1:0}}"></span>第{{round.round_id}}幕</div>
+    {{/if}}
     <span class="round_time">{{round.finish}}</span>
     <div class="round_avatars">
       {{each round.avatars avatar}}
