@@ -503,7 +503,8 @@ export default class RoleIndex extends base {
       ],
       [
         { lable: "角色数", num: stats.avatar_number, extra: this.lable.avatar },
-        { lable: "满好感角色", num: stats.full_fetter_avatar_num, extra: stats.avatar_number - 1 },
+        // 默认奇偶男性女性都拿了
+        { lable: "满好感角色", num: stats.full_fetter_avatar_num, extra: stats.avatar_number - 3 },
         { lable: "传送点", num: stats.way_point_number, extra: this.lable.way_point },
         { lable: "秘境", num: stats.domain_number, extra: this.lable.domain },
         { lable: "成就", num: stats.achievement_number, extra: this.lable.achievement },
