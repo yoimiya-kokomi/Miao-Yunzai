@@ -126,7 +126,9 @@ Bot.adapter.push(
         }
 
         const self_id = String(loginInfo.data.uin || loginInfo.data.user_id)
-        if (Bot[self_id]) {
+        const exists = Boolean(Bot[self_id])
+
+        if (exists) {
           Bot[self_id].ws = ws
           Bot[self_id].sendApi = (action, params) =>
             this.callApi(apiBaseUrl, cfg.milky.access_token, action, params)

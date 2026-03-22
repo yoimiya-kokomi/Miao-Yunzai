@@ -1,0 +1,31 @@
+# Milky 协议配置
+
+# 是否启用
+enable: false
+
+# Milky 服务器地址
+host: 127.0.0.1
+# Milky 服务器端口
+port: 3000
+# URL 前缀
+prefix: ""
+# 鉴权 Token
+access_token: ""
+
+# 事件接收方式: ws (WebSocket) 或 webhook
+connection: ws
+
+# WebHook 设置 (仅当 connection 为 webhook 时有效)
+webhook:
+  # WebHook 路径
+  path: /milky
+
+# WebSocket 设置 (仅当 connection 为 ws 时有效)
+ws:
+  # 心跳间隔 (单位：秒)
+  heartbeat: 30
+  # 断线重连间隔 (单位：秒)
+  reconnect_interval: 10
+
+# HTTP 请求超时 (单位：秒)
+http_timeout: 15
