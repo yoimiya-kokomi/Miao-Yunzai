@@ -68,23 +68,42 @@ http_timeout: 15
 
       if (!config?.enable) return
 
-      const { host, port, prefix = "", connection } = config
+      let { host, port, prefix = "", connection } = config
       this.defaultTimeout = (config.http_timeout || 15) * 1000
 
-      const baseUrl = `http://${host}:${port}${prefix}`
+      let protocol = "http"
+      let wsProtocol = "ws"
+      let cleanHost = host
+
+      if (host.startsWith("https://")) {
+        protocol = "https"
+        wsProtocol = "wss"
+        cleanHost = host.replace("https://", "")
+      } else if (host.startsWith("http://")) {
+        protocol = "http"
+        wsProtocol = "ws"
+        cleanHost = host.replace("http://", "")
+      } else if (port === 443 || config.ssl || config.use_ssl) {
+        protocol = "https"
+        wsProtocol = "wss"
+      }
+
+      const baseUrl = cleanHost.includes(":")
+        ? `${protocol}://${cleanHost}${prefix}`
+        : `${protocol}://${cleanHost}:${port}${prefix}`
       const apiBaseUrl = `${baseUrl}/api`
 
       if (connection === "ws") {
-        setTimeout(() => this.connectWs(config, apiBaseUrl), 12000)
+        const wsUrl = cleanHost.includes(":")
+          ? `${wsProtocol}://${cleanHost}${prefix}/event${config.access_token ? `?access_token=${config.access_token}` : ""}`
+          : `${wsProtocol}://${cleanHost}:${port}${prefix}/event${config.access_token ? `?access_token=${config.access_token}` : ""}`
+        setTimeout(() => this.connectWs(config, apiBaseUrl, wsUrl), 12000)
       } else if (connection === "webhook") {
         setTimeout(() => this.setupWebhook(config, apiBaseUrl), 12000)
       }
     }
 
-    connectWs(config, apiBaseUrl) {
-      const { host, port, prefix = "", access_token } = config
-      const wsUrl = `ws://${host}:${port}${prefix}/event${access_token ? `?access_token=${access_token}` : ""}`
-
+    connectWs(config, apiBaseUrl, wsUrl) {
       const heartbeatInterval = (config.ws?.heartbeat || 30) * 1000
       const reconnectInterval = (config.ws?.reconnect_interval || 10) * 1000
 
