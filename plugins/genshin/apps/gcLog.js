@@ -153,7 +153,7 @@ export class gcLog extends plugin {
   }
 
   async logJsonFile() {
-    if (!this.e.file) return false
+    if (!this.e.file && !/https?:\/\//.test(this.e.msg)) return false
 
     this.finish("logJsonFile")
     await new ExportLog(this.e).logJson()

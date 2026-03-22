@@ -2,6 +2,7 @@ import base from "./base.js"
 import cfg from "../../../lib/config/config.js"
 import common from "../../../lib/common/common.js"
 import fs from "node:fs"
+import path from "node:path"
 import moment from "moment"
 import GachaLog from "./gachaLog.js"
 import lodash from "lodash"
@@ -209,151 +210,215 @@ export default class ExportLog extends base {
     return JSON.parse(fs.readFileSync(json, "utf8"))
   }
 
+  getMessageFileUrl(msg = "") {
+    if (typeof msg !== "string") return ""
+    return msg.match(/https?:\/\/[^\s]+/i)?.[0]?.replace(/[)>】」』"'，。！？；;]+$/g, "") || ""
+  }
+
+  getImportFileName(fileName = "", fileUrl = "") {
+    if (fileName) return fileName
+    if (!fileUrl) return `${this.e.user_id}.json`
+
+    try {
+      const url = new URL(fileUrl)
+      for (const key of ["filename", "fileName", "name"]) {
+        const value = url.searchParams.get(key)
+        if (value) return decodeURIComponent(value)
+      }
+
+      const baseName = decodeURIComponent(path.basename(url.pathname || ""))
+      if (baseName) return baseName
+    } catch {}
+
+    return `${this.e.user_id}.json`
+  }
+
+  normalizeImportFileName(fileName = "") {
+    const baseName = path.basename(fileName).trim()
+    if (!baseName || [".", ".."].includes(baseName)) return `${this.e.user_id}.json`
+
+    const safeName = baseName.replace(/[\\/:*?"<>|]/g, "_")
+    if (!safeName) return `${this.e.user_id}.json`
+    if (path.extname(safeName)) return safeName
+
+    return `${safeName}.json`
+  }
+
+  async getImportSource() {
+    const msgUrl = this.getMessageFileUrl(this.e.msg)
+    let fileUrl = ""
+    let fileName = ""
+
+    if (this.e.file) {
+      fileName = this.e.file.name || ""
+      fileUrl = this.e.file.url || ""
+
+      if (!/https?:\/\//.test(fileUrl)) {
+        if (this.e.group?.getFileUrl && this.e.file.fid) {
+          fileUrl = await this.e.group.getFileUrl(this.e.file.fid)
+        } else if (this.e.friend?.getFileUrl && this.e.file.fid) {
+          fileUrl = await this.e.friend.getFileUrl(this.e.file.fid)
+        }
+      }
+    }
+
+    if (!/https?:\/\//.test(fileUrl) && msgUrl) {
+      fileUrl = msgUrl
+      fileName = this.getImportFileName(fileName, fileUrl)
+    }
+
+    if (!/https?:\/\//.test(fileUrl)) return false
+
+    const importName = this.normalizeImportFileName(this.getImportFileName(fileName, fileUrl))
+
+    return {
+      fileUrl,
+      importName,
+      textPath: `${this.path}${importName}`,
+    }
+  }
+
   /** json导入抽卡记录 */
   async logJson() {
-    const textPath = `${this.path}${this.e.file.name || `${this.e.user_id}.json`}`
-    /** 获取文件下载链接 */
-    let fileUrl = this.e.file.url
-    if (/https?:\/\//.test(fileUrl)) {
-    } else if (this.e.group?.getFileUrl) {
-      fileUrl = await this.e.group.getFileUrl(this.e.file.fid)
-    } else if (this.e.friend?.getFileUrl) {
-      fileUrl = await this.e.friend.getFileUrl(this.e.file.fid)
-    } else {
+    const importSource = await this.getImportSource()
+    if (!importSource) {
       this.e.reply("文件链接获取失败")
       return false
     }
+    const { textPath, fileUrl, importName } = importSource
 
     const ret = await common.downFile(fileUrl, textPath)
     if (!ret) {
       this.e.reply("下载json文件错误")
       return false
     }
-    let json = {}
     try {
-      json = JSON.parse(fs.readFileSync(textPath, "utf8"))
-    } catch (error) {
-      this.e.reply(`${this.e.file.name},json格式错误`)
-      return false
-    }
-
-    if (lodash.isEmpty(json) || (!json.list && !json.hkrpg && !json.hk4e)) {
-      this.e.reply("json文件内容错误：非统一祈愿记录标准")
-      return false
-    }
-
-    if (json.info.srgf_version || json.hkrpg) {
-      this.e.isSr = true
-      this.game = "sr"
-    }
-
-    let list = json.list ? json.list : json[this.game === "sr" ? "hkrpg" : "hk4e"][0].list
-
-    if (list && list.length > 0 && (!list[0].name || !list[0].item_type || !list[0].rank_type)) {
-      const configMapping = {
-        hk4e: {
-          configUrl: "https://api-takumi.mihoyo.com/event/platsimulator/config?gids=2&game=hk4e",
-          roleIdLength: 8,
-          weaponIdLength: 5,
-          roleDataKey: "all_avatar",
-          weaponDataKey: "all_weapon",
-          rankKey: "level",
-          unknownRole: "未知角色",
-          unknownWeapon: "未知武器",
-        },
-        hkrpg: {
-          configUrl: "https://api-takumi.mihoyo.com/event/rpgsimulator/config?game=hkrpg",
-          roleIdLength: 4,
-          weaponIdLength: 5,
-          roleDataKey: "avatar",
-          weaponDataKey: "equipment",
-          rankKey: "rarity",
-          unknownRole: "未知角色",
-          unknownWeapon: "未知光锥",
-        },
-      }
-
-      const mapping = this.e.isSr ? configMapping.hkrpg : configMapping.hk4e
-
-      let configData = {}
+      let json = {}
       try {
-        const response = await fetch(mapping.configUrl)
-        if (!response.ok) {
-          throw new Error("获取配置文件失败")
-        }
-        configData = await response.json()
+        json = JSON.parse(fs.readFileSync(textPath, "utf8"))
       } catch (error) {
-        this.e.reply("获取或解析配置文件失败")
+        this.e.reply(`${importName},json格式错误`)
         return false
       }
 
-      const getId = obj => String(obj.id || obj.item_id)
-      const getName = obj => obj.name || obj.item_name
-      const roleList = new Map(configData.data[mapping.roleDataKey].map(i => [getId(i), i]))
-      const weaponList = new Map(configData.data[mapping.weaponDataKey].map(i => [getId(i), i]))
+      if (lodash.isEmpty(json) || (!json.list && !json.hkrpg && !json.hk4e)) {
+        this.e.reply("json文件内容错误：非统一祈愿记录标准")
+        return false
+      }
 
-      list.forEach(record => {
-        const idStr = String(record.item_id)
-        if (idStr.length === mapping.roleIdLength) {
-          record.item_type = "角色"
-          const configRole = roleList.get(idStr)
-          if (configRole) {
-            record.name = getName(configRole)
-            record.rank_type = String(configRole[mapping.rankKey])
-          } else {
-            record.name = record.name || mapping.unknownRole
-            record.rank_type = record.rank_type || ""
-          }
-        } else if (idStr.length === mapping.weaponIdLength) {
-          if (this.e.isSr) {
-            record.item_type = "光锥"
-            const configWeapon = weaponList.get(idStr)
-            if (configWeapon) {
-              record.name = getName(configWeapon)
-              record.rank_type = String(configWeapon[mapping.rankKey])
-            } else {
-              record.name = record.name || mapping.unknownWeapon
-              record.rank_type = record.rank_type || ""
-            }
-          } else {
-            record.item_type = "武器"
-            const configWeapon = weaponList.get(idStr)
-            if (configWeapon) {
-              record.name = getName(configWeapon)
-              record.rank_type = String(configWeapon[mapping.rankKey])
-            } else {
-              record.name = record.name || mapping.unknownWeapon
-              record.rank_type = record.rank_type || ""
-            }
-          }
+      if (json.info?.srgf_version || json.hkrpg) {
+        this.e.isSr = true
+        this.game = "sr"
+      }
+
+      let list = json.list ? json.list : json[this.game === "sr" ? "hkrpg" : "hk4e"][0].list
+
+      if (list && list.length > 0 && (!list[0].name || !list[0].item_type || !list[0].rank_type)) {
+        const configMapping = {
+          hk4e: {
+            configUrl: "https://api-takumi.mihoyo.com/event/platsimulator/config?gids=2&game=hk4e",
+            roleIdLength: 8,
+            weaponIdLength: 5,
+            roleDataKey: "all_avatar",
+            weaponDataKey: "all_weapon",
+            rankKey: "level",
+            unknownRole: "未知角色",
+            unknownWeapon: "未知武器",
+          },
+          hkrpg: {
+            configUrl: "https://api-takumi.mihoyo.com/event/rpgsimulator/config?game=hkrpg",
+            roleIdLength: 4,
+            weaponIdLength: 5,
+            roleDataKey: "avatar",
+            weaponDataKey: "equipment",
+            rankKey: "rarity",
+            unknownRole: "未知角色",
+            unknownWeapon: "未知光锥",
+          },
         }
-      })
+
+        const mapping = this.e.isSr ? configMapping.hkrpg : configMapping.hk4e
+
+        let configData = {}
+        try {
+          const response = await fetch(mapping.configUrl)
+          if (!response.ok) {
+            throw new Error("获取配置文件失败")
+          }
+          configData = await response.json()
+        } catch (error) {
+          this.e.reply("获取或解析配置文件失败")
+          return false
+        }
+
+        const getId = obj => String(obj.id || obj.item_id)
+        const getName = obj => obj.name || obj.item_name
+        const roleList = new Map(configData.data[mapping.roleDataKey].map(i => [getId(i), i]))
+        const weaponList = new Map(configData.data[mapping.weaponDataKey].map(i => [getId(i), i]))
+
+        list.forEach(record => {
+          const idStr = String(record.item_id)
+          if (idStr.length === mapping.roleIdLength) {
+            record.item_type = "角色"
+            const configRole = roleList.get(idStr)
+            if (configRole) {
+              record.name = getName(configRole)
+              record.rank_type = String(configRole[mapping.rankKey])
+            } else {
+              record.name = record.name || mapping.unknownRole
+              record.rank_type = record.rank_type || ""
+            }
+          } else if (idStr.length === mapping.weaponIdLength) {
+            if (this.e.isSr) {
+              record.item_type = "光锥"
+              const configWeapon = weaponList.get(idStr)
+              if (configWeapon) {
+                record.name = getName(configWeapon)
+                record.rank_type = String(configWeapon[mapping.rankKey])
+              } else {
+                record.name = record.name || mapping.unknownWeapon
+                record.rank_type = record.rank_type || ""
+              }
+            } else {
+              record.item_type = "武器"
+              const configWeapon = weaponList.get(idStr)
+              if (configWeapon) {
+                record.name = getName(configWeapon)
+                record.rank_type = String(configWeapon[mapping.rankKey])
+              } else {
+                record.name = record.name || mapping.unknownWeapon
+                record.rank_type = record.rank_type || ""
+              }
+            }
+          }
+        })
+      }
+
+      let data = this.dealJson(list)
+      if (!data) return false
+
+      /** 保存json */
+      let msg = []
+      for (let type in data) {
+        let typeName = this.typeName(this.game)
+        if (!typeName[type]) continue
+        let gachLog = new GachaLog(this.e)
+        gachLog.uid = json.info?.uid
+          ? json.info.uid
+          : json[this.game === "sr" ? "hkrpg" : "hk4e"][0].uid
+        gachLog.type = type
+        gachLog.writeJson(data[type])
+
+        msg.push(`${typeName[type]}记录：${data[type].length}条`)
+      }
+
+      await this.e.reply(
+        `${importName}，${this.e.isSr ? "星铁" : "原神"}记录导入成功\n${msg.join("\n")}`,
+      )
+    } finally {
+      /** 清理文件 */
+      if (fs.existsSync(textPath)) fs.unlink(textPath, () => {})
     }
-
-    let data = this.dealJson(list)
-    if (!data) return false
-
-    /** 保存json */
-    let msg = []
-    for (let type in data) {
-      let typeName = this.typeName(this.game)
-      if (!typeName[type]) continue
-      let gachLog = new GachaLog(this.e)
-      gachLog.uid = json.info.uid
-        ? json.info.uid
-        : json[this.game === "sr" ? "hkrpg" : "hk4e"][0].uid
-      gachLog.type = type
-      gachLog.writeJson(data[type])
-
-      msg.push(`${typeName[type]}记录：${data[type].length}条`)
-    }
-
-    /** 删除文件 */
-    fs.unlink(textPath, () => {})
-
-    await this.e.reply(
-      `${this.e.file.name}，${this.e.isSr ? "星铁" : "原神"}记录导入成功\n${msg.join("\n")}`,
-    )
   }
 
   dealJson(list) {
