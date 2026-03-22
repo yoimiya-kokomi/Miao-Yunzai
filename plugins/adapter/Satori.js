@@ -13,20 +13,17 @@ Bot.adapter.push(
     ws = null
     heartbeatTimer = null
 
-    constructor() {
-      this.config = cfg.getAllCfg("satori") || {}
+    load() {
+      if (!cfg.satori?.enable) return
 
-      // 检查是否启用适配器
-      if (!this.config.enable) {
-        return
-      }
+      this.httpEndpoint = cfg.satori.http_endpoint || "http://127.0.0.1:5140/satori/v1"
+      this.wsEndpoint = cfg.satori.ws_endpoint || "ws://127.0.0.1:5140/satori/v1/events"
+      this.token = cfg.satori.token && cfg.satori.token.trim() !== "" ? cfg.satori.token : null
+      this.platform = cfg.satori.platform || "satori"
+      this.timeout = cfg.satori.timeout || 60000
+      this.heartbeatInterval = cfg.satori.heartbeat_interval || 10000
 
-      this.httpEndpoint = this.config.http_endpoint || "http://127.0.0.1:5140/satori/v1"
-      this.wsEndpoint = this.config.ws_endpoint || "ws://127.0.0.1:5140/satori/v1/events"
-      this.token = this.config.token && this.config.token.trim() !== "" ? this.config.token : null
-      this.platform = this.config.platform || "satori"
-      this.timeout = this.config.timeout || 60000
-      this.heartbeatInterval = this.config.heartbeat_interval || 10000
+      this.connectWebSocket()
     }
 
     makeLog(msg) {
@@ -738,17 +735,6 @@ Bot.adapter.push(
         clearInterval(this.heartbeatTimer)
         this.heartbeatTimer = null
       }
-    }
-
-    load() {
-      // 检查是否启用适配器
-      if (!this.config.enable) {
-        return
-      }
-
-      setTimeout(() => {
-        this.connectWebSocket()
-      }, 1000)
     }
   })(),
 )

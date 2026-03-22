@@ -12,64 +12,11 @@ Bot.adapter.push(
     version = "1.0.0"
     path = this.name
 
-    constructor() {
-      this.defaultTimeout = 15000
-      this.init()
-    }
+    load() {
+      if (!cfg.milky?.enable) return
 
-    async init() {
-      const configFile = "config/milky.yaml"
-      if (!fs.existsSync(configFile)) {
-        const defaultConfig = `
-# Milky 协议设置
-# 适配 Lagrange.Milky
-
-# 是否启用
-enable: false
-
-# Milky 服务器地址
-host: 127.0.0.1
-# Milky 服务器端口
-port: 3000
-# URL 前缀 (应与 Milky协议端 配置一致)
-prefix: ""
-# 鉴权 Token (应与 Milky协议端 配置一致)
-access_token: ""
-
-# 事件接收方式: ws (WebSocket) 或 webhook
-connection: ws
-
-# Webhook 设置 (仅当 connection 为 webhook 时有效)
-webhook:
-  # Webhook 路径 (应与 Milky协议端 配置一致)
-  path: /milky
-
-# WebSocket 设置 (仅当 connection 为 ws 时有效)
-ws:
-  # 心跳间隔 (单位：秒)
-  heartbeat: 30
-  # 断线重连间隔 (单位：秒)
-  reconnect_interval: 10
-
-# HTTP 请求超时 (单位：秒)
-http_timeout: 15
-`
-        fs.writeFileSync(configFile, defaultConfig.trim())
-        Bot.makeLog("mark", "[Milky] 已自动创建 config/milky.yaml，配置默认值已填入")
-      }
-
-      let config
-      try {
-        config = YAML.parse(fs.readFileSync(configFile, "utf8"))
-      } catch (err) {
-        Bot.makeLog("error", `[Milky] 读取配置文件 ${configFile} 错误: ${err.message}`)
-        return
-      }
-
-      if (!config?.enable) return
-
-      let { host, port, prefix = "", connection } = config
-      this.defaultTimeout = (config.http_timeout || 15) * 1000
+      let { host, port, prefix = "", connection } = cfg.milky
+      this.defaultTimeout = (cfg.milky.http_timeout || 15) * 1000
 
       let protocol = "http"
       let wsProtocol = "ws"
@@ -80,10 +27,8 @@ http_timeout: 15
         wsProtocol = "wss"
         cleanHost = host.replace("https://", "")
       } else if (host.startsWith("http://")) {
-        protocol = "http"
-        wsProtocol = "ws"
         cleanHost = host.replace("http://", "")
-      } else if (port === 443 || config.ssl || config.use_ssl) {
+      } else if (port === 443 || cfg.milky.ssl || cfg.milky.use_ssl) {
         protocol = "https"
         wsProtocol = "wss"
       }
@@ -95,32 +40,32 @@ http_timeout: 15
 
       if (connection === "ws") {
         const wsUrl = cleanHost.includes(":")
-          ? `${wsProtocol}://${cleanHost}${prefix}/event${config.access_token ? `?access_token=${config.access_token}` : ""}`
-          : `${wsProtocol}://${cleanHost}:${port}${prefix}/event${config.access_token ? `?access_token=${config.access_token}` : ""}`
-        setTimeout(() => this.connectWs(config, apiBaseUrl, wsUrl), 12000)
+          ? `${wsProtocol}://${cleanHost}${prefix}/event${cfg.milky.access_token ? `?access_token=${cfg.milky.access_token}` : ""}`
+          : `${wsProtocol}://${cleanHost}:${port}${prefix}/event${cfg.milky.access_token ? `?access_token=${cfg.milky.access_token}` : ""}`
+        setTimeout(() => this.connectWs(apiBaseUrl, wsUrl), 12000)
       } else if (connection === "webhook") {
-        setTimeout(() => this.setupWebhook(config, apiBaseUrl), 12000)
+        setTimeout(() => this.setupWebhook(apiBaseUrl), 12000)
       }
     }
 
-    connectWs(config, apiBaseUrl, wsUrl) {
-      const heartbeatInterval = (config.ws?.heartbeat || 30) * 1000
-      const reconnectInterval = (config.ws?.reconnect_interval || 10) * 1000
+    connectWs(apiBaseUrl, wsUrl) {
+      const heartbeatInterval = (cfg.milky.ws?.heartbeat || 30) * 1000
+      const reconnectInterval = (cfg.milky.ws?.reconnect_interval || 10) * 1000
 
       const connect = () => {
         const ws = new WebSocket(wsUrl)
         let heartbeat = null
 
         ws.on("open", () => {
-          Bot.makeLog("debug", `[Milky] WebSocket 已连接: ${wsUrl}`)
-          this.onConnect(config, ws, apiBaseUrl)
+          Bot.makeLog("debug", `WebSocket 已连接: ${wsUrl}`, "Milky")
+          this.onConnect(ws, apiBaseUrl)
 
           heartbeat = setInterval(() => {
             if (ws.readyState === WebSocket.OPEN) {
               try {
                 ws.ping()
               } catch (err) {
-                Bot.makeLog("error", `[Milky] WebSocket 心跳失败: ${err.message}`)
+                Bot.makeLog("error", `WebSocket 心跳失败: ${err.message}`, "Milky")
               }
             }
           }, heartbeatInterval)
@@ -131,59 +76,71 @@ http_timeout: 15
             const payload = JSON.parse(data)
             this.handleEvent(payload, ws, apiBaseUrl)
           } catch (err) {
-            Bot.makeLog("error", `[Milky] WebSocket 消息解析失败: ${err.message}`)
+            Bot.makeLog("error", `WebSocket 消息解析失败: ${err.message}`, "Milky")
           }
         })
 
         ws.on("close", () => {
           if (heartbeat) clearInterval(heartbeat)
-          Bot.makeLog("warn", `[Milky] WebSocket 已断开，${reconnectInterval / 1000}秒后重连...`)
+          Bot.makeLog("warn", `WebSocket 已断开，${reconnectInterval / 1000}秒后重连...`, "Milky")
           setTimeout(connect, reconnectInterval)
         })
 
         ws.on("error", err => {
-          Bot.makeLog("error", `[Milky] WebSocket 错误: ${err.message}`)
+          Bot.makeLog("error", `WebSocket 错误: ${err.message}`, "Milky")
         })
       }
 
       connect()
     }
 
-    setupWebhook(config, apiBaseUrl) {
-      const path = config.webhook?.path || "/milky"
+    setupWebhook(apiBaseUrl) {
+      const path = cfg.milky.webhook?.path || "/milky"
 
       Bot.express.post(path, (req, res) => {
         try {
           this.handleEvent(req.body, null, apiBaseUrl)
           res.sendStatus(200)
         } catch (err) {
-          Bot.makeLog("error", `[Milky] Webhook 处理失败: ${err.message}`)
+          Bot.makeLog("error", `Webhook 处理失败: ${err.message}`, "Milky")
           res.sendStatus(500)
         }
       })
 
-      Bot.makeLog("mark", `[Milky] Webhook 已设置在路径: ${path}`)
-      this.onConnect(config, null, apiBaseUrl)
+      Bot.makeLog("mark", `Webhook 已设置在路径: ${path}`, "Milky")
+      this.onConnect(null, apiBaseUrl)
     }
 
-    async onConnect(config, ws, apiBaseUrl) {
-      Bot.makeLog("debug", "[Milky] 正在初始化 Bot 信息...")
+    async onConnect(ws, apiBaseUrl) {
+      Bot.makeLog("debug", "正在初始化 Bot 信息...", "Milky")
 
       try {
-        const loginInfo = await this.callApi(apiBaseUrl, config.access_token, "get_login_info")
+        const loginInfo = await this.callApi(apiBaseUrl, cfg.milky.access_token, "get_login_info")
         if (loginInfo.retcode !== 0 || !loginInfo.data) {
-          Bot.makeLog("error", `[Milky] 获取登录信息失败: ${loginInfo.error || loginInfo.wording || "unknown error"}`)
+          Bot.makeLog(
+            "error",
+            `获取登录信息失败: ${loginInfo.error || loginInfo.wording || "unknown error"}`,
+            "Milky",
+          )
           return
         }
 
         const self_id = String(loginInfo.data.uin || loginInfo.data.user_id)
-        const exists = !!Bot[self_id]
-
-        if (!exists) {
+        if (Bot[self_id]) {
+          Bot[self_id].ws = ws
+          Bot[self_id].sendApi = (action, params) =>
+            this.callApi(apiBaseUrl, cfg.milky.access_token, action, params)
+          Bot[self_id].info = loginInfo.data
+          Bot[self_id].nickname = loginInfo.data.nickname
+          if (!Bot[self_id].stat) {
+            Bot[self_id].stat = { start_time: Date.now() / 1000 }
+          }
+        } else {
           Bot[self_id] = {
             adapter: this,
             ws,
-            sendApi: (action, params) => this.callApi(apiBaseUrl, config.access_token, action, params),
+            sendApi: (action, params) =>
+              this.callApi(apiBaseUrl, cfg.milky.access_token, action, params),
             info: loginInfo.data,
             get uin() {
               return this.info?.uin || this.info?.user_id
@@ -192,35 +149,27 @@ http_timeout: 15
             version: {
               id: "Milky",
               name: "Milky",
-              version: `Milky v${this.version}`
+              version: `Milky v${this.version}`,
             },
             stat: {
-              start_time: Date.now() / 1000
+              start_time: Date.now() / 1000,
             },
             fl: new Map(),
             gl: new Map(),
-            gml: new Map()
+            gml: new Map(),
           }
 
           Object.defineProperty(Bot[self_id], "uin", {
             value: self_id,
             writable: true,
             enumerable: true,
-            configurable: true
+            configurable: true,
           })
 
           if (!Bot.uin.includes(self_id)) Bot.uin.push(self_id)
-        } else {
-          Bot[self_id].ws = ws
-          Bot[self_id].sendApi = (action, params) => this.callApi(apiBaseUrl, config.access_token, action, params)
-          Bot[self_id].info = loginInfo.data
-          Bot[self_id].nickname = loginInfo.data.nickname
-          if (!Bot[self_id].stat) {
-            Bot[self_id].stat = { start_time: Date.now() / 1000 }
-          }
         }
 
-        this.attachBotMethods(self_id, apiBaseUrl, config.access_token)
+        this.attachBotMethods(self_id, apiBaseUrl, cfg.milky.access_token)
 
         if (!exists) {
           Bot[self_id].getFriendMap()
@@ -230,7 +179,7 @@ http_timeout: 15
         this.syncImplInfo(self_id, exists ? "reconnect" : "connect")
         Bot.em(`connect.${self_id}`, { self_id, bot: Bot[self_id] })
       } catch (err) {
-        Bot.makeLog("error", `MilkyAdapter v${this.version} 初始化失败: ${err.stack || err.message}`)
+        Bot.makeLog("error", `v${this.version} 初始化失败: ${err.stack || err.message}`, "Milky")
       }
     }
 
@@ -244,7 +193,8 @@ http_timeout: 15
         send_private_msg: (user_id, msg) => this.sendPrivateMsg(ctx({ user_id }), msg),
         send_group_msg: (group_id, msg) => this.sendGroupMsg(ctx({ group_id }), msg),
 
-        send_private_forward_msg: (user_id, msg) => this.sendPrivateForwardMsg(ctx({ user_id }), msg),
+        send_private_forward_msg: (user_id, msg) =>
+          this.sendPrivateForwardMsg(ctx({ user_id }), msg),
         sendFriendForwardMsg: (user_id, msg) => this.sendPrivateForwardMsg(ctx({ user_id }), msg),
         send_group_forward_msg: (group_id, msg) => this.sendGroupForwardMsg(ctx({ group_id }), msg),
         sendGroupForwardMsg: (group_id, msg) => this.sendGroupForwardMsg(ctx({ group_id }), msg),
@@ -262,7 +212,8 @@ http_timeout: 15
         get_group_list: () => this.getGroupList(ctx({})),
         get_group_info: group_id => this.getGroupInfo(ctx({ group_id })),
         get_group_member_list: group_id => this.getMemberList(ctx({ group_id })),
-        get_group_member_info: (group_id, user_id) => this.getMemberInfo(ctx({ group_id, user_id })),
+        get_group_member_info: (group_id, user_id) =>
+          this.getMemberInfo(ctx({ group_id, user_id })),
 
         get_impl_info: () => this.callApi(apiBaseUrl, token, "get_impl_info"),
         get_user_profile: user_id => this.getProfile(ctx({ user_id })),
@@ -270,35 +221,73 @@ http_timeout: 15
 
         send_friend_nudge: user_id => this.sendFriendNudge(ctx({ user_id })),
         send_group_nudge: (group_id, user_id) => this.sendGroupNudge(ctx({ group_id, user_id })),
-        send_group_message_reaction: (group_id, message_seq, reaction, is_add) => this.sendGroupMessageReaction(ctx({ group_id, message_seq }), reaction, is_add),
+        send_group_message_reaction: (group_id, message_seq, reaction, is_add) =>
+          this.sendGroupMessageReaction(ctx({ group_id, message_seq }), reaction, is_add),
 
-        set_group_essence_message: (group_id, message_seq, is_set) => this.setGroupEssenceMessage(ctx({ group_id, message_seq }), is_set),
-        get_group_essence_messages: (group_id, page_index, page_size) => this.getGroupEssenceMessages(ctx({ group_id }), page_index, page_size),
+        set_group_essence_message: (group_id, message_seq, is_set) =>
+          this.setGroupEssenceMessage(ctx({ group_id, message_seq }), is_set),
+        get_group_essence_messages: (group_id, page_index, page_size) =>
+          this.getGroupEssenceMessages(ctx({ group_id }), page_index, page_size),
 
-        send_group_announcement: (group_id, content, image_uri) => this.sendGroupAnnouncement(ctx({ group_id }), content, image_uri),
+        send_group_announcement: (group_id, content, image_uri) =>
+          this.sendGroupAnnouncement(ctx({ group_id }), content, image_uri),
         get_group_announcements: group_id => this.getGroupAnnouncements(ctx({ group_id })),
 
-        accept_friend_request: (initiator_uid, is_filtered) => this.acceptFriendRequest(ctx({}), initiator_uid, is_filtered),
-        reject_friend_request: (initiator_uid, is_filtered, reason) => this.rejectFriendRequest(ctx({}), initiator_uid, is_filtered, reason),
+        accept_friend_request: (initiator_uid, is_filtered) =>
+          this.acceptFriendRequest(ctx({}), initiator_uid, is_filtered),
+        reject_friend_request: (initiator_uid, is_filtered, reason) =>
+          this.rejectFriendRequest(ctx({}), initiator_uid, is_filtered, reason),
 
-        accept_group_request: (notification_seq, notification_type, group_id, is_filtered) => this.acceptGroupRequest(ctx({}), notification_seq, notification_type, group_id, is_filtered),
-        reject_group_request: (notification_seq, notification_type, group_id, is_filtered, reason) => this.rejectGroupRequest(ctx({}), notification_seq, notification_type, group_id, is_filtered, reason),
+        accept_group_request: (notification_seq, notification_type, group_id, is_filtered) =>
+          this.acceptGroupRequest(
+            ctx({}),
+            notification_seq,
+            notification_type,
+            group_id,
+            is_filtered,
+          ),
+        reject_group_request: (
+          notification_seq,
+          notification_type,
+          group_id,
+          is_filtered,
+          reason,
+        ) =>
+          this.rejectGroupRequest(
+            ctx({}),
+            notification_seq,
+            notification_type,
+            group_id,
+            is_filtered,
+            reason,
+          ),
 
-        accept_group_invitation: (group_id, invitation_seq) => this.acceptGroupInvitation(ctx({}), group_id, invitation_seq),
-        reject_group_invitation: (group_id, invitation_seq) => this.rejectGroupInvitation(ctx({}), group_id, invitation_seq),
+        accept_group_invitation: (group_id, invitation_seq) =>
+          this.acceptGroupInvitation(ctx({}), group_id, invitation_seq),
+        reject_group_invitation: (group_id, invitation_seq) =>
+          this.rejectGroupInvitation(ctx({}), group_id, invitation_seq),
 
-        recall_group_message: (group_id, message_seq) => this.recallGroupMsg(ctx({ group_id }), message_seq),
-        recall_private_message: (user_id, message_seq) => this.recallPrivateMsg(ctx({ user_id }), message_seq),
+        recall_group_message: (group_id, message_seq) =>
+          this.recallGroupMsg(ctx({ group_id }), message_seq),
+        recall_private_message: (user_id, message_seq) =>
+          this.recallPrivateMsg(ctx({ user_id }), message_seq),
         delete_msg: message_id => this.deleteMsg(ctx({}), message_id),
-        get_msg: (message_scene, peer_id, message_seq) => this.getMsg(ctx({ message_scene, peer_id, message_seq })),
-        get_history_messages: (message_scene, peer_id, start_message_seq, limit) => this.getHistoryMessages(ctx({ message_scene, peer_id, start_message_seq, limit })),
-        mark_message_as_read: (message_scene, peer_id, message_seq) => this.markMessageAsRead(ctx({}), message_scene, peer_id, message_seq),
+        get_msg: (message_scene, peer_id, message_seq) =>
+          this.getMsg(ctx({ message_scene, peer_id, message_seq })),
+        get_history_messages: (message_scene, peer_id, start_message_seq, limit) =>
+          this.getHistoryMessages(ctx({ message_scene, peer_id, start_message_seq, limit })),
+        mark_message_as_read: (message_scene, peer_id, message_seq) =>
+          this.markMessageAsRead(ctx({}), message_scene, peer_id, message_seq),
 
         set_group_name: (group_id, group_name) => this.setGroupName(ctx({ group_id }), group_name),
-        set_group_card: (group_id, user_id, card) => this.setGroupCard(ctx({ group_id }), user_id, card),
-        set_group_admin: (group_id, user_id, enable) => this.setGroupAdmin(ctx({ group_id }), user_id, enable),
-        set_group_special_title: (group_id, user_id, title) => this.setGroupSpecialTitle(ctx({ group_id }), user_id, title),
-        set_group_ban: (group_id, user_id, duration) => this.setGroupBan(ctx({ group_id }), user_id, duration),
+        set_group_card: (group_id, user_id, card) =>
+          this.setGroupCard(ctx({ group_id }), user_id, card),
+        set_group_admin: (group_id, user_id, enable) =>
+          this.setGroupAdmin(ctx({ group_id }), user_id, enable),
+        set_group_special_title: (group_id, user_id, title) =>
+          this.setGroupSpecialTitle(ctx({ group_id }), user_id, title),
+        set_group_ban: (group_id, user_id, duration) =>
+          this.setGroupBan(ctx({ group_id }), user_id, duration),
         set_group_whole_ban: (group_id, enable) => this.setGroupWholeBan(ctx({ group_id }), enable),
         set_group_kick: (group_id, user_id) => this.setGroupKick(ctx({ group_id }), user_id),
         set_group_leave: group_id => this.setGroupLeave(ctx({ group_id })),
@@ -306,18 +295,22 @@ http_timeout: 15
         send_like: (user_id, times) => this.sendLike(ctx({}), user_id, times),
         delete_friend: user_id => this.deleteFriend(ctx({}), user_id),
 
-        upload_group_file: (group_id, file, folder, name) => this.uploadGroupFile(ctx({ group_id }), file, folder, name),
+        upload_group_file: (group_id, file, folder, name) =>
+          this.uploadGroupFile(ctx({ group_id }), file, folder, name),
         delete_group_file: (group_id, file_id) => this.deleteGroupFile(ctx({ group_id }), file_id),
-        get_group_files: (group_id, folder_id) => this.getGroupFilesList(ctx({ group_id }), folder_id),
-        create_group_folder: (group_id, name) => this.createGroupFileFolder(ctx({ group_id }), name),
-        delete_group_folder: (group_id, folder_id) => this.deleteGroupFileFolder(ctx({ group_id }), folder_id)
+        get_group_files: (group_id, folder_id) =>
+          this.getGroupFilesList(ctx({ group_id }), folder_id),
+        create_group_folder: (group_id, name) =>
+          this.createGroupFileFolder(ctx({ group_id }), name),
+        delete_group_folder: (group_id, folder_id) =>
+          this.deleteGroupFileFolder(ctx({ group_id }), folder_id),
       })
 
       if (!Object.getOwnPropertyDescriptor(bot, "pickUser")) {
         Object.defineProperty(bot, "pickUser", {
           get() {
             return this.pickFriend
-          }
+          },
         })
       }
     }
@@ -331,23 +324,39 @@ http_timeout: 15
           Bot[self_id].version = {
             id: name,
             name: "Milky",
-            version: `${name} v${version}`
+            version: `${name} v${version}`,
           }
           delete Bot[self_id].apk
 
           if (type === "connect") {
-            Bot.makeLog("mark", `MilkyAdapter v${this.version} [${name} v${version}] ${Bot[self_id].nickname}(${self_id}) 已连接`, self_id)
+            Bot.makeLog(
+              "mark",
+              `MilkyAdapter v${this.version} [${name} v${version}] ${Bot[self_id].nickname}(${self_id}) 已连接`,
+              self_id,
+            )
           } else {
-            Bot.makeLog("mark", `MilkyAdapter v${this.version} [${name} v${version}] ${Bot[self_id].nickname}(${self_id}) 已重连`, self_id)
+            Bot.makeLog(
+              "mark",
+              `MilkyAdapter v${this.version} [${name} v${version}] ${Bot[self_id].nickname}(${self_id}) 已重连`,
+              self_id,
+            )
           }
           return
         }
-      } catch { }
+      } catch {}
 
       if (type === "connect") {
-        Bot.makeLog("mark", `MilkyAdapter v${this.version} ${Bot[self_id].nickname}(${self_id}) 已连接`, self_id)
+        Bot.makeLog(
+          "mark",
+          `MilkyAdapter v${this.version} ${Bot[self_id].nickname}(${self_id}) 已连接`,
+          self_id,
+        )
       } else {
-        Bot.makeLog("mark", `MilkyAdapter v${this.version} ${Bot[self_id].nickname}(${self_id}) 已重连`, self_id)
+        Bot.makeLog(
+          "mark",
+          `MilkyAdapter v${this.version} ${Bot[self_id].nickname}(${self_id}) 已重连`,
+          self_id,
+        )
       }
     }
 
@@ -364,7 +373,7 @@ http_timeout: 15
           method: "POST",
           headers,
           body: JSON.stringify(params || {}),
-          signal: controller.signal
+          signal: controller.signal,
         })
 
         let data = null
@@ -372,20 +381,20 @@ http_timeout: 15
           data = await res.json()
         } catch (err) {
           return this.makeApiError(action, `响应解析失败: ${err.message}`, {
-            http_status: res.status
+            http_status: res.status,
           })
         }
 
         if (!res.ok) {
           return this.makeApiError(action, `HTTP ${res.status}`, {
             http_status: res.status,
-            data
+            data,
           })
         }
 
         if (!data || typeof data !== "object") {
           return this.makeApiError(action, "响应格式非法", {
-            http_status: res.status
+            http_status: res.status,
           })
         }
 
@@ -418,17 +427,12 @@ http_timeout: 15
         data: null,
         error,
         wording: error,
-        ...extra
+        ...extra,
       }
     }
 
     async execApi(data, action, params = {}, options = {}) {
-      const {
-        logSuccess = null,
-        logFail = null,
-        logUin = data?.self_id,
-        silent = false
-      } = options
+      const { logSuccess = null, logFail = null, logUin = data?.self_id, silent = false } = options
 
       if (logSuccess) {
         Bot.makeLog("info", logSuccess, logUin, true)
@@ -437,7 +441,7 @@ http_timeout: 15
       const ret = await data.bot.sendApi(action, params)
 
       if (ret.retcode !== 0 && !silent) {
-        Bot.makeLog("error", logFail || `[Milky] ${action} 调用失败: ${JSON.stringify(ret)}`, data.self_id)
+        Bot.makeLog("error", logFail || `${action} 调用失败: ${JSON.stringify(ret)}`, data.self_id)
       }
 
       return ret
@@ -445,23 +449,23 @@ http_timeout: 15
 
     handleEvent(data, ws, apiBaseUrl) {
       if (!data?.event_type) {
-        Bot.makeLog("debug", `[Milky] 收到未知数据: ${JSON.stringify(data)}`)
+        Bot.makeLog("debug", `收到未知数据: ${JSON.stringify(data)}`, "Milky")
         return
       }
 
-      Bot.makeLog("debug", `[Milky] 收到事件: ${data.event_type}`)
+      Bot.makeLog("debug", `收到事件: ${data.event_type}`, "Milky")
 
       const event = {
         ...(data.data || {}),
         event_type: data.event_type,
-        raw: data
+        raw: data,
       }
 
       event.self_id = String(data.self_id || Bot.uin[0])
       event.bot = Bot[event.self_id]
 
       if (!event.bot) {
-        Bot.makeLog("warn", `[Milky] 收到事件但 Bot 尚未初始化: ${event.self_id}`)
+        Bot.makeLog("warn", `收到事件但 Bot 尚未初始化: ${event.self_id}`, "Milky")
         return
       }
 
@@ -506,7 +510,9 @@ http_timeout: 15
       delete data.friend
 
       data.message = this.parseMsg(data.segments)
-      data.raw_message = data.message.map(m => (m.type === "text" ? m.text : `[${m.type}]`)).join("")
+      data.raw_message = data.message
+        .map(m => (m.type === "text" ? m.text : `[${m.type}]`))
+        .join("")
 
       const group_name = data.group_id ? data.bot.gl.get(data.group_id)?.group_name : null
       let user_name = data.bot.fl.get(data.user_id)?.nickname
@@ -514,7 +520,7 @@ http_timeout: 15
       data.sender = {
         user_id: Number(data.user_id),
         nickname: user_name || "",
-        sub_type: data.message_type
+        sub_type: data.message_type,
       }
 
       if (data.message_type === "group") {
@@ -522,7 +528,7 @@ http_timeout: 15
         if (member) {
           Object.assign(data.sender, {
             ...member,
-            user_id: Number(member.user_id)
+            user_id: Number(member.user_id),
           })
           user_name = member.card || member.nickname || user_name
         }
@@ -531,7 +537,11 @@ http_timeout: 15
       const logMsg = data.raw_message.replace(/base64:\/\/([^"]+)/g, "base64://...")
       if (data.message_type === "group") {
         const logUin = `${data.self_id} <= ${data.group_id}, ${data.user_id}`
-        Bot.makeLog("info", `群消息：[${group_name || data.group_id}, ${user_name || data.user_id}] ${logMsg}`, logUin)
+        Bot.makeLog(
+          "info",
+          `群消息：[${group_name || data.group_id}, ${user_name || data.user_id}] ${logMsg}`,
+          logUin,
+        )
       } else {
         const logUin = `${data.self_id} <= ${data.user_id}`
         Bot.makeLog("info", `好友消息：[${user_name || data.user_id}] ${logMsg}`, logUin)
@@ -551,9 +561,19 @@ http_timeout: 15
           data.user_id = String(data.sender_id)
           data.message_id = String(data.message_seq)
           if (data.message_scene === "group") {
-            Bot.makeLog("info", `群消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`, true)
+            Bot.makeLog(
+              "info",
+              `群消息撤回：${data.operator_id} => ${data.user_id} ${data.message_id}`,
+              `${data.self_id} <= ${data.group_id}`,
+              true,
+            )
           } else {
-            Bot.makeLog("info", `好友消息撤回：${data.message_id}`, `${data.self_id} <= ${data.user_id}`, true)
+            Bot.makeLog(
+              "info",
+              `好友消息撤回：${data.message_id}`,
+              `${data.self_id} <= ${data.user_id}`,
+              true,
+            )
           }
           break
 
@@ -563,7 +583,11 @@ http_timeout: 15
           data.user_id = String(data.user_id)
           data.operator_id = data.is_self_send ? data.self_id : data.user_id
           data.target_id = data.is_self_receive ? data.self_id : data.user_id
-          Bot.makeLog("info", `好友戳一戳：[${data.operator_id} => ${data.target_id}]`, data.self_id)
+          Bot.makeLog(
+            "info",
+            `好友戳一戳：[${data.operator_id} => ${data.target_id}]`,
+            data.self_id,
+          )
           break
 
         case "group_nudge":
@@ -573,7 +597,11 @@ http_timeout: 15
           data.operator_id = String(data.sender_id)
           data.target_id = String(data.receiver_id)
           data.user_id = data.operator_id
-          Bot.makeLog("info", `群戳一戳：[${data.group_id}: ${data.operator_id} => ${data.target_id}]`, data.self_id)
+          Bot.makeLog(
+            "info",
+            `群戳一戳：[${data.group_id}: ${data.operator_id} => ${data.target_id}]`,
+            data.self_id,
+          )
           break
 
         case "group_admin_change":
@@ -581,7 +609,12 @@ http_timeout: 15
           data.sub_type = data.is_set ? "set" : "unset"
           data.group_id = String(data.group_id)
           data.user_id = String(data.user_id)
-          Bot.makeLog("info", `群管理员变更：${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`, true)
+          Bot.makeLog(
+            "info",
+            `群管理员变更：${data.user_id} ${data.sub_type}`,
+            `${data.self_id} <= ${data.group_id}`,
+            true,
+          )
           break
 
         case "group_member_increase":
@@ -590,16 +623,30 @@ http_timeout: 15
           data.group_id = String(data.group_id)
           data.user_id = String(data.user_id)
           data.operator_id = String(data.operator_id || data.invitor_id)
-          Bot.makeLog("info", `群成员增加：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`, true)
+          Bot.makeLog(
+            "info",
+            `群成员增加：${data.operator_id} => ${data.user_id} ${data.sub_type}`,
+            `${data.self_id} <= ${data.group_id}`,
+            true,
+          )
           break
 
         case "group_member_decrease":
           data.notice_type = "group_decrease"
-          data.sub_type = data.operator_id ? (data.operator_id == data.user_id ? "leave" : "kick") : "leave"
+          data.sub_type = data.operator_id
+            ? data.operator_id == data.user_id
+              ? "leave"
+              : "kick"
+            : "leave"
           data.group_id = String(data.group_id)
           data.user_id = String(data.user_id)
           data.operator_id = String(data.operator_id || data.user_id)
-          Bot.makeLog("info", `群成员减少：${data.operator_id} => ${data.user_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`, true)
+          Bot.makeLog(
+            "info",
+            `群成员减少：${data.operator_id} => ${data.user_id} ${data.sub_type}`,
+            `${data.self_id} <= ${data.group_id}`,
+            true,
+          )
           break
 
         case "group_mute":
@@ -609,7 +656,12 @@ http_timeout: 15
           data.user_id = String(data.user_id)
           data.operator_id = String(data.operator_id)
           data.duration = data.duration || 0
-          Bot.makeLog("info", `群禁言：${data.operator_id} => ${data.user_id} ${data.sub_type} ${data.duration}秒`, `${data.self_id} <= ${data.group_id}`, true)
+          Bot.makeLog(
+            "info",
+            `群禁言：${data.operator_id} => ${data.user_id} ${data.sub_type} ${data.duration}秒`,
+            `${data.self_id} <= ${data.group_id}`,
+            true,
+          )
           break
 
         case "group_whole_mute":
@@ -618,7 +670,12 @@ http_timeout: 15
           data.group_id = String(data.group_id)
           data.user_id = "0"
           data.operator_id = String(data.operator_id)
-          Bot.makeLog("info", `全员禁言：${data.operator_id} ${data.sub_type}`, `${data.self_id} <= ${data.group_id}`, true)
+          Bot.makeLog(
+            "info",
+            `全员禁言：${data.operator_id} ${data.sub_type}`,
+            `${data.self_id} <= ${data.group_id}`,
+            true,
+          )
           break
 
         case "group_message_reaction":
@@ -627,14 +684,24 @@ http_timeout: 15
           data.user_id = String(data.user_id)
           data.message_id = String(data.message_seq)
           data.likes = [{ emoji_id: String(data.face_id), count: data.is_add ? 1 : 0 }]
-          Bot.makeLog("info", [`群消息回应：${data.message_id}`, data.likes], `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
+          Bot.makeLog(
+            "info",
+            [`群消息回应：${data.message_id}`, data.likes],
+            `${data.self_id} <= ${data.group_id}, ${data.user_id}`,
+            true,
+          )
           break
 
         case "group_name_change":
           data.notice_type = "group_card"
           data.group_id = String(data.group_id)
           data.user_id = String(data.operator_id)
-          Bot.makeLog("info", `群名变更：${data.old_name} => ${data.new_name}`, `${data.self_id} <= ${data.group_id}`, true)
+          Bot.makeLog(
+            "info",
+            `群名变更：${data.old_name} => ${data.new_name}`,
+            `${data.self_id} <= ${data.group_id}`,
+            true,
+          )
           break
 
         case "group_essence_message_change":
@@ -643,7 +710,12 @@ http_timeout: 15
           data.group_id = String(data.group_id)
           data.operator_id = String(data.operator_id)
           data.message_id = String(data.message_seq)
-          Bot.makeLog("info", `群精华消息：${data.operator_id} ${data.sub_type} ${data.message_id}`, `${data.self_id} <= ${data.group_id}`, true)
+          Bot.makeLog(
+            "info",
+            `群精华消息：${data.operator_id} ${data.sub_type} ${data.message_id}`,
+            `${data.self_id} <= ${data.group_id}`,
+            true,
+          )
           break
 
         case "friend_file_upload":
@@ -652,9 +724,14 @@ http_timeout: 15
           data.file = {
             name: data.file_name,
             size: data.file_size,
-            url: data.file_id
+            url: data.file_id,
           }
-          Bot.makeLog("info", `好友文件上传：${data.file_name}`, `${data.self_id} <= ${data.user_id}`, true)
+          Bot.makeLog(
+            "info",
+            `好友文件上传：${data.file_name}`,
+            `${data.self_id} <= ${data.user_id}`,
+            true,
+          )
           break
 
         default:
@@ -681,20 +758,32 @@ http_timeout: 15
         data.user_id = String(data.initiator_id)
         data.comment = data.comment
         data.flag = data.initiator_uid
-        Bot.makeLog("info", `加好友请求：${data.comment}(${data.flag})`, `${data.self_id} <= ${data.user_id}`, true)
-        data.approve = approve => approve
-          ? data.bot.accept_friend_request(data.flag)
-          : data.bot.reject_friend_request(data.flag)
+        Bot.makeLog(
+          "info",
+          `加好友请求：${data.comment}(${data.flag})`,
+          `${data.self_id} <= ${data.user_id}`,
+          true,
+        )
+        data.approve = approve =>
+          approve
+            ? data.bot.accept_friend_request(data.flag)
+            : data.bot.reject_friend_request(data.flag)
       } else if (data.event_type === "group_invitation") {
         data.request_type = "group"
         data.sub_type = "invite"
         data.group_id = String(data.group_id)
         data.user_id = String(data.initiator_id)
         data.flag = String(data.invitation_seq)
-        Bot.makeLog("info", `入群邀请：${data.group_id} 来自 ${data.user_id} (${data.flag})`, `${data.self_id} <= ${data.group_id}`, true)
-        data.approve = approve => approve
-          ? data.bot.accept_group_invitation(data.group_id, data.flag)
-          : data.bot.reject_group_invitation(data.group_id, data.flag)
+        Bot.makeLog(
+          "info",
+          `入群邀请：${data.group_id} 来自 ${data.user_id} (${data.flag})`,
+          `${data.self_id} <= ${data.group_id}`,
+          true,
+        )
+        data.approve = approve =>
+          approve
+            ? data.bot.accept_group_invitation(data.group_id, data.flag)
+            : data.bot.reject_group_invitation(data.group_id, data.flag)
       } else {
         data.request_type = "group"
         data.sub_type = data.event_type === "group_join_request" ? "add" : "invite"
@@ -702,10 +791,24 @@ http_timeout: 15
         data.user_id = String(data.initiator_id)
         data.comment = data.comment
         data.flag = String(data.notification_seq)
-        Bot.makeLog("info", `加群请求：${data.sub_type} ${data.comment}(${data.flag})`, `${data.self_id} <= ${data.group_id}, ${data.user_id}`, true)
-        data.approve = approve => approve
-          ? data.bot.accept_group_request(data.flag, data.sub_type === "add" ? "join_request" : "invited_join_request", data.group_id)
-          : data.bot.reject_group_request(data.flag, data.sub_type === "add" ? "join_request" : "invited_join_request", data.group_id)
+        Bot.makeLog(
+          "info",
+          `加群请求：${data.sub_type} ${data.comment}(${data.flag})`,
+          `${data.self_id} <= ${data.group_id}, ${data.user_id}`,
+          true,
+        )
+        data.approve = approve =>
+          approve
+            ? data.bot.accept_group_request(
+                data.flag,
+                data.sub_type === "add" ? "join_request" : "invited_join_request",
+                data.group_id,
+              )
+            : data.bot.reject_group_request(
+                data.flag,
+                data.sub_type === "add" ? "join_request" : "invited_join_request",
+                data.group_id,
+              )
       }
 
       Bot.em(`${data.post_type}.${data.request_type}.${data.sub_type}`, data)
@@ -825,7 +928,10 @@ http_timeout: 15
             break
 
           case "image":
-            message.push({ type: "image", data: { uri: this.fixUri(i.file || i.url), sub_type: "normal" } })
+            message.push({
+              type: "image",
+              data: { uri: this.fixUri(i.file || i.url), sub_type: "normal" },
+            })
             break
 
           case "record":
@@ -834,7 +940,10 @@ http_timeout: 15
             break
 
           case "video":
-            message.push({ type: "video", data: { uri: this.fixUri(i.file || i.url), thumb_uri: this.fixUri(i.thumb) } })
+            message.push({
+              type: "video",
+              data: { uri: this.fixUri(i.file || i.url), thumb_uri: this.fixUri(i.thumb) },
+            })
             break
 
           case "reply":
@@ -856,8 +965,8 @@ http_timeout: 15
                 emoji_id: i.id,
                 emoji_package_id: i.package_id || 0,
                 key: i.key,
-                summary: i.name
-              }
+                summary: i.name,
+              },
             })
             break
 
@@ -866,8 +975,8 @@ http_timeout: 15
               type: "light_app",
               data: {
                 app_name: i.app_name || "Yunzai",
-                json_payload: i.data
-              }
+                json_payload: i.data,
+              },
             })
             break
 
@@ -876,8 +985,8 @@ http_timeout: 15
               type: "xml",
               data: {
                 service_id: i.service_id || 1,
-                xml_payload: i.data
-              }
+                xml_payload: i.data,
+              },
             })
             break
 
@@ -886,8 +995,8 @@ http_timeout: 15
               type: "light_app",
               data: {
                 app_name: i.app_name || "Yunzai",
-                json_payload: i.data
-              }
+                json_payload: i.data,
+              },
             })
             break
 
@@ -932,15 +1041,17 @@ http_timeout: 15
             segments,
             message: segments,
             avatar_url: `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
-            time: Number(item.time) || Math.floor(Date.now() / 1000)
+            time: Number(item.time) || Math.floor(Date.now() / 1000),
           })
         }
       }
 
-      return [{
-        type: "forward",
-        data: { messages }
-      }]
+      return [
+        {
+          type: "forward",
+          data: { messages },
+        },
+      ]
     }
 
     getTargetLogInfo(data, scene) {
@@ -948,14 +1059,14 @@ http_timeout: 15
         const group_name = data.bot.gl.get(String(data.group_id))?.group_name
         return {
           targetName: group_name || data.group_id,
-          logUin: `${data.self_id} => ${data.group_id}`
+          logUin: `${data.self_id} => ${data.group_id}`,
         }
       }
 
       const user_name = data.bot.fl.get(String(data.user_id))?.nickname
       return {
         targetName: user_name || data.user_id,
-        logUin: `${data.self_id} => ${data.user_id}`
+        logUin: `${data.self_id} => ${data.user_id}`,
       }
     }
 
@@ -964,9 +1075,10 @@ http_timeout: 15
       let res
 
       if (forward.length) {
-        res = scene === "group"
-          ? await this.sendGroupForwardMsg(data, forward)
-          : await this.sendPrivateForwardMsg(data, forward)
+        res =
+          scene === "group"
+            ? await this.sendGroupForwardMsg(data, forward)
+            : await this.sendPrivateForwardMsg(data, forward)
       }
 
       if (!message.length) return res
@@ -975,18 +1087,18 @@ http_timeout: 15
       const { targetName, logUin } = this.getTargetLogInfo(data, scene)
 
       const action = scene === "group" ? "send_group_message" : "send_private_message"
-      const params = scene === "group"
-        ? { group_id: Number(data.group_id), message }
-        : { user_id: Number(data.user_id), message }
+      const params =
+        scene === "group"
+          ? { group_id: Number(data.group_id), message }
+          : { user_id: Number(data.user_id), message }
 
       return this.execApi(data, action, params, {
-        logSuccess: scene === "group"
-          ? `发送群消息：[${targetName}] ${logMsg}`
-          : `发送好友消息：[${targetName}] ${logMsg}`,
-        logFail: scene === "group"
-          ? `[Milky] 发送群消息失败`
-          : `[Milky] 发送好友消息失败`,
-        logUin
+        logSuccess:
+          scene === "group"
+            ? `发送群消息：[${targetName}] ${logMsg}`
+            : `发送好友消息：[${targetName}] ${logMsg}`,
+        logFail: scene === "group" ? `发送群消息失败` : `发送好友消息失败`,
+        logUin,
       })
     }
 
@@ -995,18 +1107,18 @@ http_timeout: 15
       const { targetName, logUin } = this.getTargetLogInfo(data, scene)
 
       const action = scene === "group" ? "send_group_message" : "send_private_message"
-      const params = scene === "group"
-        ? { group_id: Number(data.group_id), message }
-        : { user_id: Number(data.user_id), message }
+      const params =
+        scene === "group"
+          ? { group_id: Number(data.group_id), message }
+          : { user_id: Number(data.user_id), message }
 
       return this.execApi(data, action, params, {
-        logSuccess: scene === "group"
-          ? `发送群合并转发消息：[${targetName}]`
-          : `发送好友合并转发消息：[${targetName}]`,
-        logFail: scene === "group"
-          ? `[Milky] 发送群合并转发消息失败`
-          : `[Milky] 发送好友合并转发消息失败`,
-        logUin
+        logSuccess:
+          scene === "group"
+            ? `发送群合并转发消息：[${targetName}]`
+            : `发送好友合并转发消息：[${targetName}]`,
+        logFail: scene === "group" ? `发送群合并转发消息失败` : `发送好友合并转发消息失败`,
+        logUin,
       })
     }
 
@@ -1038,9 +1150,17 @@ http_timeout: 15
         poke: () => this.sendFriendNudge(i),
         thumbUp: times => this.sendLike(i, user_id, times),
         delete: () => this.deleteFriend(i, user_id),
-        getMsg: message_seq => this.getMsg({ ...i, message_scene: "private", peer_id: Number(user_id), message_seq }),
-        getHistory: (start_message_seq, limit = 20) => this.getHistoryMessages({ ...i, message_scene: "private", peer_id: Number(user_id), start_message_seq, limit }),
-        getAvatarUrl: () => `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`
+        getMsg: message_seq =>
+          this.getMsg({ ...i, message_scene: "private", peer_id: Number(user_id), message_seq }),
+        getHistory: (start_message_seq, limit = 20) =>
+          this.getHistoryMessages({
+            ...i,
+            message_scene: "private",
+            peer_id: Number(user_id),
+            start_message_seq,
+            limit,
+          }),
+        getAvatarUrl: () => `https://q.qlogo.cn/g?b=qq&s=0&nk=${user_id}`,
       }
     }
 
@@ -1061,8 +1181,16 @@ http_timeout: 15
         addEssence: message_seq => this.setGroupEssenceMessage({ ...i, message_seq }, true),
         removeEssence: message_seq => this.setGroupEssenceMessage({ ...i, message_seq }, false),
         getEssence: (page = 0, size = 50) => this.getGroupEssenceMessages(i, page, size),
-        getMsg: message_seq => this.getMsg({ ...i, message_scene: "group", peer_id: Number(group_id), message_seq }),
-        getHistory: (start_message_seq, limit = 20) => this.getHistoryMessages({ ...i, message_scene: "group", peer_id: Number(group_id), start_message_seq, limit }),
+        getMsg: message_seq =>
+          this.getMsg({ ...i, message_scene: "group", peer_id: Number(group_id), message_seq }),
+        getHistory: (start_message_seq, limit = 20) =>
+          this.getHistoryMessages({
+            ...i,
+            message_scene: "group",
+            peer_id: Number(group_id),
+            start_message_seq,
+            limit,
+          }),
         setName: name => this.setGroupName(i, name),
         muteMember: (user_id, duration) => this.setGroupBan(i, user_id, duration),
         kickMember: user_id => this.setGroupKick(i, user_id),
@@ -1074,9 +1202,9 @@ http_timeout: 15
           rm: file_id => this.deleteGroupFile(i, file_id),
           ls: (folder_id = "/") => this.getGroupFilesList(i, folder_id),
           mkdir: name => this.createGroupFileFolder(i, name),
-          rmdir: folder_id => this.deleteGroupFileFolder(i, folder_id)
+          rmdir: folder_id => this.deleteGroupFileFolder(i, folder_id),
         },
-        getAvatarUrl: () => `https://p.qlogo.cn/gh/${group_id}/${group_id}/0`
+        getAvatarUrl: () => `https://p.qlogo.cn/gh/${group_id}/${group_id}/0`,
       }
     }
 
@@ -1103,364 +1231,557 @@ http_timeout: 15
         },
         get is_admin() {
           return this.role === "admin" || this.is_owner
-        }
+        },
       }
     }
 
     async recallGroupMsg(data, message_id) {
-      return this.execApi(data, "recall_group_message", {
-        group_id: Number(data.group_id),
-        message_seq: Number(message_id)
-      }, {
-        logSuccess: `撤回群消息：[${data.group_id}] ${message_id}`,
-        logUin: data.self_id
-      })
+      return this.execApi(
+        data,
+        "recall_group_message",
+        {
+          group_id: Number(data.group_id),
+          message_seq: Number(message_id),
+        },
+        {
+          logSuccess: `撤回群消息：[${data.group_id}] ${message_id}`,
+          logUin: data.self_id,
+        },
+      )
     }
 
     async recallPrivateMsg(data, message_id) {
-      return this.execApi(data, "recall_private_message", {
-        user_id: Number(data.user_id),
-        message_seq: Number(message_id)
-      }, {
-        logSuccess: `撤回好友消息：${message_id}`,
-        logUin: `${data.self_id} => ${data.user_id}`
-      })
+      return this.execApi(
+        data,
+        "recall_private_message",
+        {
+          user_id: Number(data.user_id),
+          message_seq: Number(message_id),
+        },
+        {
+          logSuccess: `撤回好友消息：${message_id}`,
+          logUin: `${data.self_id} => ${data.user_id}`,
+        },
+      )
     }
 
     async deleteMsg(data, message_id) {
-      return this.execApi(data, "recall_group_message", {
-        message_seq: Number(message_id)
-      }, {
-        logSuccess: `撤回消息：${message_id}`,
-        logUin: data.self_id
-      })
+      return this.execApi(
+        data,
+        "recall_group_message",
+        {
+          message_seq: Number(message_id),
+        },
+        {
+          logSuccess: `撤回消息：${message_id}`,
+          logUin: data.self_id,
+        },
+      )
     }
 
     async markMessageAsRead(data, message_scene, peer_id, message_seq) {
-      return this.execApi(data, "mark_message_as_read", {
-        message_scene,
-        peer_id: Number(peer_id),
-        message_seq: Number(message_seq)
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "mark_message_as_read",
+        {
+          message_scene,
+          peer_id: Number(peer_id),
+          message_seq: Number(message_seq),
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async setGroupName(data, group_name) {
-      return this.execApi(data, "set_group_name", {
-        group_id: Number(data.group_id),
-        new_group_name: group_name
-      }, {
-        logSuccess: `设置群名：${group_name}`,
-        logUin: `${data.self_id} => ${data.group_id}`
-      })
+      return this.execApi(
+        data,
+        "set_group_name",
+        {
+          group_id: Number(data.group_id),
+          new_group_name: group_name,
+        },
+        {
+          logSuccess: `设置群名：${group_name}`,
+          logUin: `${data.self_id} => ${data.group_id}`,
+        },
+      )
     }
 
     async setGroupCard(data, user_id, card) {
-      return this.execApi(data, "set_group_member_card", {
-        group_id: Number(data.group_id),
-        user_id: Number(user_id),
-        card
-      }, {
-        logSuccess: `设置群名片：${card}`,
-        logUin: `${data.self_id} => ${data.group_id}, ${user_id}`
-      })
+      return this.execApi(
+        data,
+        "set_group_member_card",
+        {
+          group_id: Number(data.group_id),
+          user_id: Number(user_id),
+          card,
+        },
+        {
+          logSuccess: `设置群名片：${card}`,
+          logUin: `${data.self_id} => ${data.group_id}, ${user_id}`,
+        },
+      )
     }
 
     async setGroupAdmin(data, user_id, enable = true) {
-      return this.execApi(data, "set_group_member_admin", {
-        group_id: Number(data.group_id),
-        user_id: Number(user_id),
-        is_set: enable
-      }, {
-        logSuccess: `${enable ? "设置" : "取消"}群管理员`,
-        logUin: `${data.self_id} => ${data.group_id}, ${user_id}`
-      })
+      return this.execApi(
+        data,
+        "set_group_member_admin",
+        {
+          group_id: Number(data.group_id),
+          user_id: Number(user_id),
+          is_set: enable,
+        },
+        {
+          logSuccess: `${enable ? "设置" : "取消"}群管理员`,
+          logUin: `${data.self_id} => ${data.group_id}, ${user_id}`,
+        },
+      )
     }
 
     async setGroupSpecialTitle(data, user_id, title) {
-      return this.execApi(data, "set_group_member_special_title", {
-        group_id: Number(data.group_id),
-        user_id: Number(user_id),
-        special_title: title
-      }, {
-        logSuccess: `设置群头衔：${title}`,
-        logUin: `${data.self_id} => ${data.group_id}, ${user_id}`
-      })
+      return this.execApi(
+        data,
+        "set_group_member_special_title",
+        {
+          group_id: Number(data.group_id),
+          user_id: Number(user_id),
+          special_title: title,
+        },
+        {
+          logSuccess: `设置群头衔：${title}`,
+          logUin: `${data.self_id} => ${data.group_id}, ${user_id}`,
+        },
+      )
     }
 
     async setGroupBan(data, user_id, duration = 1800) {
-      return this.execApi(data, "set_group_member_mute", {
-        group_id: Number(data.group_id),
-        user_id: Number(user_id),
-        duration: Number(duration)
-      }, {
-        logSuccess: `禁言群成员：${duration}秒`,
-        logUin: `${data.self_id} => ${data.group_id}, ${user_id}`
-      })
+      return this.execApi(
+        data,
+        "set_group_member_mute",
+        {
+          group_id: Number(data.group_id),
+          user_id: Number(user_id),
+          duration: Number(duration),
+        },
+        {
+          logSuccess: `禁言群成员：${duration}秒`,
+          logUin: `${data.self_id} => ${data.group_id}, ${user_id}`,
+        },
+      )
     }
 
     async setGroupWholeBan(data, enable = true) {
-      return this.execApi(data, "set_group_whole_mute", {
-        group_id: Number(data.group_id),
-        is_mute: enable
-      }, {
-        logSuccess: `${enable ? "开启" : "关闭"}全员禁言`,
-        logUin: `${data.self_id} => ${data.group_id}`
-      })
+      return this.execApi(
+        data,
+        "set_group_whole_mute",
+        {
+          group_id: Number(data.group_id),
+          is_mute: enable,
+        },
+        {
+          logSuccess: `${enable ? "开启" : "关闭"}全员禁言`,
+          logUin: `${data.self_id} => ${data.group_id}`,
+        },
+      )
     }
 
     async setGroupKick(data, user_id) {
-      return this.execApi(data, "kick_group_member", {
-        group_id: Number(data.group_id),
-        user_id: Number(user_id)
-      }, {
-        logSuccess: `踢出群成员`,
-        logUin: `${data.self_id} => ${data.group_id}, ${user_id}`
-      })
+      return this.execApi(
+        data,
+        "kick_group_member",
+        {
+          group_id: Number(data.group_id),
+          user_id: Number(user_id),
+        },
+        {
+          logSuccess: `踢出群成员`,
+          logUin: `${data.self_id} => ${data.group_id}, ${user_id}`,
+        },
+      )
     }
 
     async setGroupLeave(data) {
-      return this.execApi(data, "leave_group", {
-        group_id: Number(data.group_id)
-      }, {
-        logSuccess: `退群`,
-        logUin: `${data.self_id} => ${data.group_id}`
-      })
+      return this.execApi(
+        data,
+        "leave_group",
+        {
+          group_id: Number(data.group_id),
+        },
+        {
+          logSuccess: `退群`,
+          logUin: `${data.self_id} => ${data.group_id}`,
+        },
+      )
     }
 
     async sendLike(data, user_id, times = 1) {
-      return this.execApi(data, "send_profile_like", {
-        user_id: Number(user_id),
-        count: times
-      }, {
-        logSuccess: `点赞：${times}次`,
-        logUin: `${data.self_id} => ${user_id}`
-      })
+      return this.execApi(
+        data,
+        "send_profile_like",
+        {
+          user_id: Number(user_id),
+          count: times,
+        },
+        {
+          logSuccess: `点赞：${times}次`,
+          logUin: `${data.self_id} => ${user_id}`,
+        },
+      )
     }
 
     async deleteFriend(data, user_id) {
-      return this.execApi(data, "delete_friend", {
-        user_id: Number(user_id)
-      }, {
-        logSuccess: `删除好友`,
-        logUin: `${data.self_id} => ${user_id}`
-      })
+      return this.execApi(
+        data,
+        "delete_friend",
+        {
+          user_id: Number(user_id),
+        },
+        {
+          logSuccess: `删除好友`,
+          logUin: `${data.self_id} => ${user_id}`,
+        },
+      )
     }
 
     async sendFriendNudge(data) {
-      return this.execApi(data, "send_friend_nudge", {
-        user_id: Number(data.user_id)
-      }, {
-        logSuccess: `发送好友戳一戳`,
-        logUin: `${data.self_id} => ${data.user_id}`
-      })
+      return this.execApi(
+        data,
+        "send_friend_nudge",
+        {
+          user_id: Number(data.user_id),
+        },
+        {
+          logSuccess: `发送好友戳一戳`,
+          logUin: `${data.self_id} => ${data.user_id}`,
+        },
+      )
     }
 
     async sendGroupNudge(data) {
-      return this.execApi(data, "send_group_nudge", {
-        group_id: Number(data.group_id),
-        user_id: Number(data.user_id)
-      }, {
-        logSuccess: `发送群戳一戳`,
-        logUin: `${data.self_id} => ${data.group_id}, ${data.user_id}`
-      })
+      return this.execApi(
+        data,
+        "send_group_nudge",
+        {
+          group_id: Number(data.group_id),
+          user_id: Number(data.user_id),
+        },
+        {
+          logSuccess: `发送群戳一戳`,
+          logUin: `${data.self_id} => ${data.group_id}, ${data.user_id}`,
+        },
+      )
     }
 
     async sendGroupMessageReaction(data, reaction, is_add = true) {
-      return this.execApi(data, "send_group_message_reaction", {
-        group_id: Number(data.group_id),
-        message_seq: Number(data.message_seq),
-        reaction,
-        is_add
-      }, {
-        logSuccess: `${is_add ? "添加" : "删除"}消息回应：${reaction}`,
-        logUin: `${data.self_id} => ${data.group_id}`
-      })
+      return this.execApi(
+        data,
+        "send_group_message_reaction",
+        {
+          group_id: Number(data.group_id),
+          message_seq: Number(data.message_seq),
+          reaction,
+          is_add,
+        },
+        {
+          logSuccess: `${is_add ? "添加" : "删除"}消息回应：${reaction}`,
+          logUin: `${data.self_id} => ${data.group_id}`,
+        },
+      )
     }
 
     async setGroupEssenceMessage(data, is_set = true) {
-      return this.execApi(data, "set_group_essence_message", {
-        group_id: Number(data.group_id),
-        message_seq: Number(data.message_seq),
-        is_set
-      }, {
-        logSuccess: `${is_set ? "设置" : "取消"}群精华消息：${data.message_seq}`,
-        logUin: `${data.self_id} => ${data.group_id}`
-      })
+      return this.execApi(
+        data,
+        "set_group_essence_message",
+        {
+          group_id: Number(data.group_id),
+          message_seq: Number(data.message_seq),
+          is_set,
+        },
+        {
+          logSuccess: `${is_set ? "设置" : "取消"}群精华消息：${data.message_seq}`,
+          logUin: `${data.self_id} => ${data.group_id}`,
+        },
+      )
     }
 
     async getGroupEssenceMessages(data, page_index = 0, page_size = 50) {
-      return this.execApi(data, "get_group_essence_messages", {
-        group_id: Number(data.group_id),
-        page_index,
-        page_size
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "get_group_essence_messages",
+        {
+          group_id: Number(data.group_id),
+          page_index,
+          page_size,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async sendGroupAnnouncement(data, content, image_uri) {
-      return this.execApi(data, "send_group_announcement", {
-        group_id: Number(data.group_id),
-        content,
-        image_uri
-      }, {
-        logSuccess: `发送群公告：${String(content).substring(0, 20)}`,
-        logUin: `${data.self_id} => ${data.group_id}`
-      })
+      return this.execApi(
+        data,
+        "send_group_announcement",
+        {
+          group_id: Number(data.group_id),
+          content,
+          image_uri,
+        },
+        {
+          logSuccess: `发送群公告：${String(content).substring(0, 20)}`,
+          logUin: `${data.self_id} => ${data.group_id}`,
+        },
+      )
     }
 
     async getGroupAnnouncements(data) {
-      return this.execApi(data, "get_group_announcements", {
-        group_id: Number(data.group_id)
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "get_group_announcements",
+        {
+          group_id: Number(data.group_id),
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async acceptFriendRequest(data, initiator_uid, is_filtered = false) {
-      return this.execApi(data, "accept_friend_request", {
-        initiator_uid,
-        is_filtered
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "accept_friend_request",
+        {
+          initiator_uid,
+          is_filtered,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async rejectFriendRequest(data, initiator_uid, is_filtered = false, reason) {
-      return this.execApi(data, "reject_friend_request", {
-        initiator_uid,
-        is_filtered,
-        reason
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "reject_friend_request",
+        {
+          initiator_uid,
+          is_filtered,
+          reason,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
-    async acceptGroupRequest(data, notification_seq, notification_type, group_id, is_filtered = false) {
-      return this.execApi(data, "accept_group_request", {
-        notification_seq,
-        notification_type,
-        group_id: Number(group_id),
-        is_filtered
-      }, {
-        silent: true
-      })
+    async acceptGroupRequest(
+      data,
+      notification_seq,
+      notification_type,
+      group_id,
+      is_filtered = false,
+    ) {
+      return this.execApi(
+        data,
+        "accept_group_request",
+        {
+          notification_seq,
+          notification_type,
+          group_id: Number(group_id),
+          is_filtered,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
-    async rejectGroupRequest(data, notification_seq, notification_type, group_id, is_filtered = false, reason) {
-      return this.execApi(data, "reject_group_request", {
-        notification_seq,
-        notification_type,
-        group_id: Number(group_id),
-        is_filtered,
-        reason
-      }, {
-        silent: true
-      })
+    async rejectGroupRequest(
+      data,
+      notification_seq,
+      notification_type,
+      group_id,
+      is_filtered = false,
+      reason,
+    ) {
+      return this.execApi(
+        data,
+        "reject_group_request",
+        {
+          notification_seq,
+          notification_type,
+          group_id: Number(group_id),
+          is_filtered,
+          reason,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async acceptGroupInvitation(data, group_id, invitation_seq) {
-      return this.execApi(data, "accept_group_invitation", {
-        group_id: Number(group_id),
-        invitation_seq: Number(invitation_seq)
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "accept_group_invitation",
+        {
+          group_id: Number(group_id),
+          invitation_seq: Number(invitation_seq),
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async rejectGroupInvitation(data, group_id, invitation_seq) {
-      return this.execApi(data, "reject_group_invitation", {
-        group_id: Number(group_id),
-        invitation_seq: Number(invitation_seq)
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "reject_group_invitation",
+        {
+          group_id: Number(group_id),
+          invitation_seq: Number(invitation_seq),
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async getMsg(data) {
-      return this.execApi(data, "get_message", {
-        message_scene: data.message_scene,
-        peer_id: data.peer_id,
-        message_seq: data.message_seq
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "get_message",
+        {
+          message_scene: data.message_scene,
+          peer_id: data.peer_id,
+          message_seq: data.message_seq,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async getHistoryMessages(data) {
-      return this.execApi(data, "get_history_messages", {
-        message_scene: data.message_scene,
-        peer_id: data.peer_id,
-        start_message_seq: data.start_message_seq,
-        limit: data.limit
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "get_history_messages",
+        {
+          message_scene: data.message_scene,
+          peer_id: data.peer_id,
+          start_message_seq: data.start_message_seq,
+          limit: data.limit,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async uploadGroupFile(data, file, folder = "/", name) {
-      return this.execApi(data, "upload_group_file", {
-        group_id: Number(data.group_id),
-        file: this.fixUri(file),
-        folder,
-        name
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "upload_group_file",
+        {
+          group_id: Number(data.group_id),
+          file: this.fixUri(file),
+          folder,
+          name,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async deleteGroupFile(data, file_id) {
-      return this.execApi(data, "delete_group_file", {
-        group_id: Number(data.group_id),
-        file_id
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "delete_group_file",
+        {
+          group_id: Number(data.group_id),
+          file_id,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async getGroupFilesList(data, folder_id = "/") {
-      return this.execApi(data, "get_group_files_list", {
-        group_id: Number(data.group_id),
-        folder_id
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "get_group_files_list",
+        {
+          group_id: Number(data.group_id),
+          folder_id,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async createGroupFileFolder(data, name) {
-      return this.execApi(data, "create_group_file_folder", {
-        group_id: Number(data.group_id),
-        name
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "create_group_file_folder",
+        {
+          group_id: Number(data.group_id),
+          name,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async deleteGroupFileFolder(data, folder_id) {
-      return this.execApi(data, "delete_group_file_folder", {
-        group_id: Number(data.group_id),
-        folder_id
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "delete_group_file_folder",
+        {
+          group_id: Number(data.group_id),
+          folder_id,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async getProfile(data) {
-      return this.execApi(data, "get_user_profile", {
-        user_id: Number(data.user_id)
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "get_user_profile",
+        {
+          user_id: Number(data.user_id),
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     async setBio(data, new_bio) {
-      return this.execApi(data, "set_bio", {
-        new_bio
-      }, {
-        silent: true
-      })
+      return this.execApi(
+        data,
+        "set_bio",
+        {
+          new_bio,
+        },
+        {
+          silent: true,
+        },
+      )
     }
 
     formatFriend(friend) {
@@ -1470,7 +1791,7 @@ http_timeout: 15
         user_id: Number(friend.user_id),
         nickname: friend.nickname || "",
         remark: friend.remark || "",
-        sex: friend.sex || "unknown"
+        sex: friend.sex || "unknown",
       }
     }
 
@@ -1481,7 +1802,7 @@ http_timeout: 15
         group_id: Number(group.group_id),
         group_name: group.group_name || "",
         member_count: group.member_count || 0,
-        max_member_count: group.max_member_count || 2000
+        max_member_count: group.max_member_count || 2000,
       }
     }
 
@@ -1503,7 +1824,7 @@ http_timeout: 15
         unfriendly: false,
         title: member.title || "",
         title_expire_time: 0,
-        card_changeable: true
+        card_changeable: true,
       }
     }
 
@@ -1528,9 +1849,14 @@ http_timeout: 15
     }
 
     async getMemberMap(data) {
-      const res = await this.execApi(data, "get_group_member_list", {
-        group_id: Number(data.group_id)
-      }, { silent: true })
+      const res = await this.execApi(
+        data,
+        "get_group_member_list",
+        {
+          group_id: Number(data.group_id),
+        },
+        { silent: true },
+      )
 
       if (res.retcode === 0 && res.data?.members) {
         const map = new Map()
@@ -1545,9 +1871,14 @@ http_timeout: 15
     }
 
     async getFriendInfo(data) {
-      const res = await this.execApi(data, "get_friend_info", {
-        user_id: Number(data.user_id)
-      }, { silent: true })
+      const res = await this.execApi(
+        data,
+        "get_friend_info",
+        {
+          user_id: Number(data.user_id),
+        },
+        { silent: true },
+      )
 
       const friend = res.data?.friend || res.data
       return this.formatFriend(friend)
@@ -1562,9 +1893,14 @@ http_timeout: 15
     }
 
     async getGroupInfo(data) {
-      const res = await this.execApi(data, "get_group_info", {
-        group_id: Number(data.group_id)
-      }, { silent: true })
+      const res = await this.execApi(
+        data,
+        "get_group_info",
+        {
+          group_id: Number(data.group_id),
+        },
+        { silent: true },
+      )
 
       const group = res.data?.group || res.data
       return this.formatGroup(group)
@@ -1579,28 +1915,34 @@ http_timeout: 15
     }
 
     async getMemberInfo(data) {
-      const res = await this.execApi(data, "get_group_member_info", {
-        group_id: Number(data.group_id),
-        user_id: Number(data.user_id)
-      }, { silent: true })
+      const res = await this.execApi(
+        data,
+        "get_group_member_info",
+        {
+          group_id: Number(data.group_id),
+          user_id: Number(data.user_id),
+        },
+        { silent: true },
+      )
 
       const member = res.data?.member || res.data
       return this.formatMember(member)
     }
 
     async getMemberList(data) {
-      const res = await this.execApi(data, "get_group_member_list", {
-        group_id: Number(data.group_id)
-      }, { silent: true })
+      const res = await this.execApi(
+        data,
+        "get_group_member_list",
+        {
+          group_id: Number(data.group_id),
+        },
+        { silent: true },
+      )
 
       if (res.retcode === 0 && res.data?.members) {
         return res.data.members.map(m => this.formatMember(m))
       }
       return []
     }
-
-    load() {
-      // Nothing special for load yet
-    }
-  })()
+  })(),
 )
