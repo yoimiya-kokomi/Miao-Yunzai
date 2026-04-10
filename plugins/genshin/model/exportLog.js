@@ -425,22 +425,34 @@ export default class ExportLog extends base {
     let data = {}
 
     /** 必要字段 */
-    let reqField = ["gacha_type", "item_type", "name", "time"]
-    let reqFieldv4 = ["gacha_type", "item_id", "time"]
+    let reqField = ["id", "gacha_type", "item_type", "name", "time"]
+    let reqFieldv4 = ["id", "gacha_type", "item_id", "time"]
 
-    for (let v of reqField) {
-      for (let f of reqFieldv4) {
-        if (!list[0][v] && !list[0][f]) {
-          this.e.reply(`json文件内容错误：缺少必要字段 ${v}`)
+    const missing = reqField.filter(field => !list[0][field])
+    const missingV4 = reqFieldv4.filter(field => !list[0][field])
+
+    if (missing.length > 0 && missingV4.length > 0) {
+      if (missing.length > 0) {
+        this.e.reply(`json文件内容错误：缺少必要字段 ${missing.join(', ')}`)
           return false
-        }
+      }
+      if (missingV4.length > 0) {
+        this.e.reply(`json文件内容错误：缺少必要字段 ${missingV4.join(", ")}`)
+          return false
       }
     }
 
-    /** 倒序 */
-    if (moment(list[0].time).format("x") < moment(list[list.length - 1].time).format("x")) {
-      list = list.reverse()
-    }
+    /** 按id倒序，避免长整型id转成Number后精度丢失 */
+    list.sort((a, b) => {
+      const idA = a.id
+      const idB = b.id
+
+      if (idA.length !== idB.length) {
+        return idB.length - idA.length
+      }
+
+      return idA === idB ? 0 : idB > idA ? 1 : -1
+    })
 
     for (let v of list) {
       if (this.game === "sr") v.uigf_gacha_type = v.gacha_type

@@ -154,6 +154,7 @@ export default class MysInfo {
 
     let user = await NoteUser.create(e)
     let selfUser = at ? await NoteUser.create(at) : user
+    const game = e?.game || (e?.isSr ? "sr" : "gs")
 
     if (!selfUser.hasCk) {
       if (e.noTips !== true) {
@@ -164,6 +165,11 @@ export default class MysInfo {
         )
       }
       return false
+    }
+
+    let uid = e?.mysSelfUid ? String(e.uid || "") : ""
+    if (uid && selfUser.getUidData(uid, game)?.type === "ck") {
+      return uid
     }
 
     return selfUser.getUid(e)

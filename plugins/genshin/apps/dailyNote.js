@@ -1,7 +1,7 @@
 import plugin from "../../../lib/plugins/plugin.js"
 import Note from "../model/note.js"
 import gsCfg from "../model/gsCfg.js"
-import puppeteer from "../../../lib/puppeteer/puppeteer.js"
+import NoteUser from "../model/mys/NoteUser.js"
 
 gsCfg.cpCfg("mys", "set")
 
@@ -25,10 +25,29 @@ export class dailyNote extends plugin {
 
   /** #体力 */
   async note() {
-    let data = await Note.get(this.e)
-    if (!data) return
+    const game = this.e?.game || (this.e?.isSr ? "sr" : "gs")
+    const user = await NoteUser.create(this.e)
+    const uidList = [...new Set(user.getCkUidList(game).map(ds => String(ds.uid)))]
 
-    /** 生成图片 */
-    this.renderImg("genshin", `html/player/daily-note-${data.game}`, data)
+    if (uidList.length === 0) {
+      let data = await Note.get(this.e)
+      if (!data) return
+      await this.renderImg("genshin", `html/player/daily-note-${data.game}`, data)
+      return true
+    }
+
+    let hasData = false
+    for (const uid of uidList) {
+      let e = Object.create(this.e)
+      e.uid = uid
+      e.mysSelfUid = true
+
+      let data = await Note.get(e)
+      if (!data) continue
+
+      hasData = true
+      await this.renderImg("genshin", `html/player/daily-note-${data.game}`, data)
+    }
+    if (hasData) return true
   }
 }
