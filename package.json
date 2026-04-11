@@ -21,7 +21,7 @@
     "chokidar": "^5.0.0",
     "es-toolkit": "^1.45.1",
     "express": "^4.22.1",
-    "file-type": "^22.0.0",
+    "file-type": "^22.0.1",
     "https-proxy-agent": "^7.0.6",
     "image-size": "^2.0.2",
     "level": "^10.0.0",
@@ -43,7 +43,7 @@
     "yaml": "^2.8.3"
   },
   "devDependencies": {
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.2"
   },
   "imports": {
     "#miao": "./plugins/miao-plugin/components/index.js",

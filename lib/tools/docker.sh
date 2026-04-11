@@ -70,11 +70,11 @@ $Y- 正在构建 Docker 容器$O
 "
 mktmp
 cd "$TMP"
-echo "FROM $DKURL"'/library/node:slim
+echo "FROM $DKURL"'/library/node:trixie-slim
 RUN sed -i "s|deb.debian.org|'"$APTURL"'|g" /etc/apt/sources.list.d/debian.sources\
  && apt update\
  && apt install -y ca-certificates\
- && sed -i "s|http://'"$APTURL"'|https://'"$APTURL"'|;s|bookworm-updates|bookworm-updates bookworm-backports|" /etc/apt/sources.list.d/debian.sources\
+ && sed -i "s|http://'"$APTURL"'|https://'"$APTURL"'|" /etc/apt/sources.list.d/debian.sources\
  && apt update\
  && apt full-upgrade -y\
  && apt install -y curl git valkey-server '"$APTDEP"'\
