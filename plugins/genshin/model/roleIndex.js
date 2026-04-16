@@ -35,6 +35,8 @@ export default class RoleIndex extends base {
       纳塔: 15,
       远古圣山: 16,
       挪德卡莱: 17,
+      风息山: 18,
+      空之神殿: 19,
     }
 
     this.all_chest = 0
@@ -608,7 +610,7 @@ export default class RoleIndex extends base {
         }
       }
 
-      if (["雪山", "稻妻", "层岩巨渊", "须弥", "枫丹", "沉玉谷", "纳塔"].includes(val.name)) {
+      if (["雪山", "稻妻", "层岩巨渊", "须弥", "枫丹", "沉玉谷", "纳塔", "空之神殿"].includes(val.name)) {
         if (val.offerings[0].name.includes("流明石")) {
           val.offerings[0].name = "流明石"
         }
@@ -620,6 +622,9 @@ export default class RoleIndex extends base {
         }
         if (val.offerings[0].name.includes("煅石之火")) {
           val.offerings[0].name = "煅石之火"
+        }
+        if (val.offerings[0].name.includes("摹忆中枢")) {
+          val.offerings[0].name = "摹忆中枢"
         }
 
         tmp.line.push({
