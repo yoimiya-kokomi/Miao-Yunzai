@@ -70,7 +70,7 @@ $Y- 正在构建 Docker 容器$O
 "
 mktmp
 cd "$TMP"
-echo "FROM $DKURL"'/library/node:trixie-slim
+echo "FROM $DKURL"'/library/node:slim
 RUN sed -i "s|deb.debian.org|'"$APTURL"'|g" /etc/apt/sources.list.d/debian.sources\
  && apt update\
  && apt install -y ca-certificates\
