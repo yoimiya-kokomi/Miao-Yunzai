@@ -1147,7 +1147,7 @@ Bot.adapter.push(
             `${data.self_id} <= ${data.group_id}`,
             true,
           )
-          data.bot.pickMember(data.group_id, data.user_id).getInfo()
+          if (data.user_id !== 0) data.bot.pickMember(data.group_id, data.user_id).getInfo()
           break
         case "group_msg_emoji_like":
           Bot.makeLog(
@@ -1179,6 +1179,22 @@ Bot.adapter.push(
                 Bot.makeLog(
                   "info",
                   `好友戳一戳：${data.operator_id} => ${data.target_id}`,
+                  data.self_id,
+                )
+              break
+            case "poke_recall":
+              data.operator_id = data.user_id
+              if (data.group_id)
+                Bot.makeLog(
+                  "info",
+                  `群戳一戳撤回：${data.operator_id} => ${data.target_id}`,
+                  `${data.self_id} <= ${data.group_id}`,
+                  true,
+                )
+              else
+                Bot.makeLog(
+                  "info",
+                  `好友戳一戳撤回：${data.operator_id} => ${data.target_id}`,
                   data.self_id,
                 )
               break
