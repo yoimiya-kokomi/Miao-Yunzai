@@ -20,7 +20,7 @@
     "chalk": "^5.6.2",
     "chokidar": "^5.0.0",
     "compression": "^1.8.1",
-    "es-toolkit": "^1.46.1",
+    "es-toolkit": "^1.47.0",
     "express": "^5.2.1",
     "file-type": "^22.0.1",
     "https-proxy-agent": "^7.0.6",
@@ -37,10 +37,10 @@
     "puppeteer": "*",
     "redis": "^4.7.1",
     "sequelize": "^6.37.8",
-    "sqlite3": "^6.0.1",
+    "sqlite3": "npm:@karinjs/sqlite3@^0.4.3",
     "strip-ansi": "^7.2.0",
     "ulid": "^3.0.2",
-    "ws": "^8.20.1",
+    "ws": "^8.21.0",
     "yaml": "^2.9.0"
   },
   "devDependencies": {
