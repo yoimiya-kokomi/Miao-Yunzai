@@ -20,7 +20,7 @@
     "chalk": "^5.6.2",
     "chokidar": "^5.0.0",
     "compression": "^1.8.1",
-    "es-toolkit": "^1.47.0",
+    "es-toolkit": "^1.47.1",
     "express": "^5.2.1",
     "file-type": "^22.0.1",
     "https-proxy-agent": "^7.0.6",
@@ -44,7 +44,7 @@
     "yaml": "^2.9.0"
   },
   "devDependencies": {
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.4"
   },
   "imports": {
     "#miao": "./plugins/miao-plugin/components/index.js",

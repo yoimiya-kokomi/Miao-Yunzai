@@ -99,7 +99,7 @@ export class update extends plugin {
   async runUpdate(plugin = "") {
     let cm = "git pull"
     let type = "更新"
-    if (!plugin) cm = `git checkout package.json && ${cm}`
+    if (!plugin) cm = `git checkout package.json pnpm-workspace.yaml && ${cm}`
 
     if (this.e.msg.includes("强制")) {
       type = "强制更新"
