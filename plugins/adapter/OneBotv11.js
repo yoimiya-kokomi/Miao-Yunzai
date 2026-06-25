@@ -594,6 +594,28 @@ Bot.adapter.push(
       })
     }
 
+    async sendGroupNotice(data, content, opts = {}) {
+      Bot.makeLog(
+        "info",
+        [`发送群公告：${content}`, opts],
+        `${data.self_id} => ${data.group_id}`,
+        true,
+      )
+      if (opts.image) opts.image = await this.makeFile(opts.image)
+      return data.bot.sendApi("_send_group_notice", {
+        group_id: data.group_id,
+        content,
+        ...opts,
+      })
+    }
+
+    getGroupNotice(data) {
+      Bot.makeLog("info", "获取群公告", `${data.self_id} => ${data.group_id}`, true)
+      return data.bot.sendApi("_get_group_notice", {
+        group_id: data.group_id,
+      })
+    }
+
     downloadFile(data, url, thread_count, headers) {
       return data.bot.sendApi("download_file", {
         url,
@@ -869,6 +891,11 @@ Bot.adapter.push(
         muteAll: this.setGroupWholeKick.bind(this, i),
         kickMember: this.setGroupKick.bind(this, i),
         quit: this.setGroupLeave.bind(this, i),
+        get announce() {
+          return this.sendNotice
+        },
+        sendNotice: this.sendGroupNotice.bind(this, i),
+        getNotice: this.getGroupNotice.bind(this, i),
         fs: this.getGroupFs(i),
         get is_owner() {
           return data.bot.gml.get(group_id)?.get(data.self_id)?.role === "owner"
