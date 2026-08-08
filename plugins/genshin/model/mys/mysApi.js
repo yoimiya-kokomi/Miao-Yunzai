@@ -146,6 +146,11 @@ export default class MysApi {
 
     if (!response.ok) {
       logger.error(`[米游社接口][${type}][${this.uid}] ${response.status} ${response.statusText}`)
+      if (response.headers.get("x-tengine-error")?.includes("region_block")) {
+        logger.error(
+          `[米游社接口][${type}][${this.uid}] 当前出口IP被米游社地域封锁，国际服查询需在 config/config/bot.yaml 配置可用的 proxyAddress`,
+        )
+      }
       return false
     }
     if (this.option.log) {
