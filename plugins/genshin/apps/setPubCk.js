@@ -4,6 +4,8 @@ import lodash from "lodash"
 import fetch from "node-fetch"
 import YAML from "yaml"
 import MysInfo from "../model/mys/mysInfo.js"
+import MysUser from "../model/mys/MysUser.js"
+import MysUtil from "../model/mys/MysUtil.js"
 import common from "../../../lib/common/common.js"
 
 export class setPubCk extends plugin {
@@ -42,7 +44,10 @@ export class setPubCk extends plugin {
     let msg = this.e.msg
 
     if (
-      !(/(ltoken|ltoken_v2)/.test(this.e.msg) && /(ltuid|ltmid_v2|account_mid_v2)/.test(this.e.msg))
+      !(
+        /(ltoken|ltoken_v2)/.test(this.e.msg) &&
+        /(ltuid|ltmid_v2|account_mid_v2|account_id_v2)/.test(this.e.msg)
+      )
     ) {
       this.e.reply("cookie错误，请发送正确的cookie")
       return true
@@ -72,6 +77,8 @@ export class setPubCk extends plugin {
           "account_mid_v2",
           "ltmid_v2",
           "ltoken_v2",
+          "ltuid_v2",
+          "account_id_v2",
         ].includes(k)
       ) {
         this.ck += `${k}=${v};`
@@ -85,24 +92,24 @@ export class setPubCk extends plugin {
       return
     }
 
-    this.ltuid = param.ltuid
-    // 判断是否是v2版ck
-    if (
-      param.cookie_token_v2 &&
-      (param.account_mid_v2 || param.ltoken_v2) &&
-      !/(\d{4,9})/g.test(this.ltuid)
-    ) {
-      // 获取米游社通行证id
-      let userFullInfo = await this.getUserInfo()
-      if (userFullInfo?.data?.user_info) {
-        let userInfo = userFullInfo?.data?.user_info
-        this.ltuid = userInfo.uid
-        this.ck = `${this.ck}ltuid=${this.ltuid};`
-      } else {
-        logger.mark(`配置公共cookie错误：${userFullInfo.message || "cookie错误"}`)
-        await this.e.reply(`配置公共cookie错误：${userFullInfo.message || "cookie错误"}`)
+    // ltuid必须为数字，v2版ck需换取米游社通行证id
+    this.ltuid = MysUtil.getLtuid(this.ck)
+    if (!this.ltuid) {
+      // 国服/国际服依次尝试
+      let uid, msg
+      for (let serv of ["mys", "hoyolab"]) {
+        let userFullInfo = await this.getUserInfo(serv)
+        uid = userFullInfo?.data?.user_info?.uid
+        if (uid) break
+        msg = userFullInfo?.message || msg
+      }
+      if (!uid) {
+        logger.mark(`配置公共cookie错误：${msg || "cookie错误"}`)
+        await this.e.reply(`配置公共cookie错误：${msg || "cookie错误"}`)
         return
       }
+      this.ltuid = uid
+      this.ck = `${this.ck}ltuid=${this.ltuid};`
     }
 
     let ckArr = GsCfg.getConfig("mys", "pubCk") || []
@@ -138,29 +145,7 @@ export class setPubCk extends plugin {
 
   // 获取米游社通行证id
   async getUserInfo(server = "mys") {
-    try {
-      const that = this
-      let url = {
-        mys: "https://bbs-api.mihoyo.com/user/wapi/getUserFullInfo?gids=2",
-        hoyolab: "",
-      }
-      let res = await fetch(url[server], {
-        method: "get",
-        headers: {
-          Cookie: that.ck,
-          Accept: "application/json, text/plain, */*",
-          Connection: "keep-alive",
-          Host: "bbs-api.mihoyo.com",
-          Origin: "https://m.bbs.mihoyo.com",
-          Referer: " https://m.bbs.mihoyo.com/",
-        },
-      })
-      if (!res.ok) return res
-      res = await res.json()
-      return res
-    } catch (e) {
-      return null
-    }
+    return await MysUser.getUserFullInfoByCk(this.ck, server)
   }
 
   save(data) {

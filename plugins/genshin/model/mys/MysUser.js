@@ -379,27 +379,47 @@ export default class MysUser extends BaseModel {
     return res
   }
 
-  // 获取米游社通行证id
-  async getUserFullInfo(serv = "mys") {
-    let ck = this.ck
-    let url = {
-      mys: "https://bbs-api.mihoyo.com/user/wapi/getUserFullInfo?gids=2",
-      hoyolab: "",
-    }
-    let res = await fetch(url[serv], {
-      method: "get",
-      headers: {
-        Cookie: ck,
-        Accept: "application/json, text/plain, */*",
-        Connection: "keep-alive",
-        Host: "bbs-api.mihoyo.com",
-        Origin: "https://m.bbs.mihoyo.com",
-        Referer: "https://m.bbs.mihoyo.com/",
+  // 获取米游社通行证id，可在MysUser实例建立前直接传ck调用
+  static async getUserFullInfoByCk(ck, serv = "mys") {
+    const hosts = {
+      mys: {
+        url: "https://bbs-api.mihoyo.com/user/wapi/getUserFullInfo?gids=2",
+        host: "bbs-api.mihoyo.com",
+        origin: "https://m.bbs.mihoyo.com",
+        referer: "https://m.bbs.mihoyo.com/",
       },
-    })
-    if (!res.ok) return res
-    res = await res.json()
-    return res
+      hoyolab: {
+        url: "https://bbs-api-os.hoyolab.com/community/painter/wapi/user/full",
+        host: "bbs-api-os.hoyolab.com",
+        origin: "https://www.hoyolab.com",
+        referer: "https://www.hoyolab.com/",
+      },
+    }
+    let cfg = hosts[serv] || hosts.mys
+    try {
+      let res = await fetch(cfg.url, {
+        method: "get",
+        headers: {
+          Cookie: ck,
+          Accept: "application/json, text/plain, */*",
+          Connection: "keep-alive",
+          Host: cfg.host,
+          Origin: cfg.origin,
+          Referer: cfg.referer,
+        },
+      })
+      if (!res.ok) return res
+      return await res.json()
+    } catch (err) {
+      logger.error(`[获取米游社通行证id][${serv}] ${err}`)
+      return null
+    }
+  }
+
+  // 获取米游社通行证id
+  async getUserFullInfo(serv = "") {
+    serv = serv || this.type || "mys"
+    return await MysUser.getUserFullInfoByCk(this.ck, serv)
   }
 
   getCache(game = "gs") {
