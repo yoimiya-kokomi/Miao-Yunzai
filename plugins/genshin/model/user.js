@@ -58,37 +58,79 @@ export default class User extends base {
       param[tmp[0]] = tmp[1]
     })
 
-    if (!param.cookie_token && !param.cookie_token_v2) {
+    // 国际服HoYoLAB的cookie往往只有ltoken_v2，没有cookie_token，不能一律拒绝
+    let hasToken = param.cookie_token || param.cookie_token_v2 || param.ltoken_v2 || param.ltoken
+    let hasUid =
+      param.ltuid ||
+      param.login_uid ||
+      param.ltuid_v2 ||
+      param.account_id_v2 ||
+      param.ltmid_v2 ||
+      param.account_mid_v2
+    if (!hasToken || !hasUid) {
       await this.e.reply("发送Cookie不完整\n请退出米游社【重新登录】，刷新完整Cookie")
       return
     }
 
-    // TODO：独立的mys数据，不走缓存ltuid
-    let mys = await MysUser.create(
-      param.ltuid || param.ltuid_v2 || param.account_id_v2 || param.ltmid_v2,
-    )
-    if (!mys) {
-      await this.e.reply("发送Cookie不完整或数据错误")
-      return
-    }
     let data = {}
-    data.ck = `ltoken=${param.ltoken};ltuid=${param.ltuid || param.login_uid};cookie_token=${param.cookie_token || param.cookie_token_v2}; account_id=${param.ltuid || param.login_uid};`
     let flagV2 = false
-
-    if (param.cookie_token_v2 && (param.account_mid_v2 || param.ltmid_v2)) {
-      //
-      // account_mid_v2 为版本必须带的字段，不带的话会一直提示绑定cookie失败 请重新登录
+    // 国际服/新版米游社为v2版ck，仅有_v2字段，只要出现任一v2字段就按v2拼接
+    if (
+      param.cookie_token_v2 ||
+      param.ltoken_v2 ||
+      param.ltmid_v2 ||
+      param.account_mid_v2 ||
+      param.ltuid_v2 ||
+      param.account_id_v2
+    ) {
       flagV2 = true
-      data.ck = `ltuid=${param.ltuid || param.login_uid || param.ltuid_v2};account_mid_v2=${param.account_mid_v2};cookie_token_v2=${param.cookie_token_v2};ltoken_v2=${param.ltoken_v2};ltmid_v2=${param.ltmid_v2};`
+      let ltuidV2 = param.ltuid || param.login_uid || param.ltuid_v2 || param.account_id_v2
+      let ck = []
+      // ltuid 供getLtuid取数字id，ltuid_v2 供国际服接口校验，两者都带上
+      if (ltuidV2) ck.push(`ltuid=${ltuidV2}`, `ltuid_v2=${ltuidV2}`)
+      if (param.account_id_v2) ck.push(`account_id_v2=${param.account_id_v2}`)
+      if (param.account_mid_v2) ck.push(`account_mid_v2=${param.account_mid_v2}`)
+      if (param.cookie_token_v2) ck.push(`cookie_token_v2=${param.cookie_token_v2}`)
+      if (param.ltoken_v2) ck.push(`ltoken_v2=${param.ltoken_v2}`)
+      if (param.ltmid_v2) ck.push(`ltmid_v2=${param.ltmid_v2}`)
+      data.ck = ck.join(";") + ";"
+    } else {
+      let ltuid = param.ltuid || param.login_uid
+      data.ck = `ltoken=${param.ltoken};ltuid=${ltuid};cookie_token=${param.cookie_token};account_id=${ltuid};`
     }
     if (param.mi18nLang) {
       data.ck += ` mi18nLang=${param.mi18nLang};`
     }
-    /** 拼接ck */
-    data.ltuid = param.ltuid || param.ltuid_v2 || param.account_id_v2 || param.ltmid_v2
 
     /** 米游币签到字段 */
     data.login_ticket = param.login_ticket ?? ""
+
+    // ltuid必须为数字（MysUserDB主键为INTEGER）
+    data.ltuid = param.ltuid || param.login_uid || param.ltuid_v2 || param.account_id_v2
+    if (flagV2 && !/^\d{4,}$/.test(data.ltuid || "")) {
+      // 仅有ltmid_v2/account_mid_v2时，先换取米游社通行证id
+      // 国服/国际服依次尝试，与 reqMysUid 保持一致
+      let uid, msg
+      for (let serv of ["mys", "hoyolab"]) {
+        let userFullInfo = await MysUser.getUserFullInfoByCk(data.ck, serv)
+        uid = userFullInfo?.data?.user_info?.uid
+        if (uid) break
+        msg = userFullInfo?.message || msg
+      }
+      if (!uid) {
+        logger.mark(`绑定Cookie错误：${msg || "Cookie错误"}`)
+        return await this.e.reply(`绑定Cookie失败：${msg || "Cookie不完整或数据错误"}`)
+      }
+      data.ltuid = uid
+      data.ck = `ltuid=${uid};${data.ck}`
+    }
+
+    // TODO：独立的mys数据，不走缓存ltuid
+    let mys = await MysUser.create(data.ltuid)
+    if (!mys) {
+      await this.e.reply("发送Cookie不完整或数据错误")
+      return
+    }
 
     mys.setCkData(data)
 
@@ -99,20 +141,6 @@ export default class User extends base {
       // 清除mys数据
       mys._delCache()
       return await this.e.reply(`绑定Cookie失败：${this.checkMsg || "Cookie错误"}`)
-    }
-
-    // 判断data.ltuid是否是数字
-    if (flagV2 && isNaN(data.ltuid)) {
-      // 获取米游社通行证id
-      let userFullInfo = await mys.getUserFullInfo()
-      if (userFullInfo?.data?.user_info) {
-        let userInfo = userFullInfo?.data?.user_info
-        this.ltuid = userInfo.uid || this.ltuid
-        this.ck = `${this.ck}ltuid=${this.ltuid};`
-      } else {
-        logger.mark(`绑定Cookie错误2：${userFullInfo.message || "Cookie错误"}`)
-        return await this.e.reply(`绑定Cookie失败：${userFullInfo.message || "Cookie错误"}`)
-      }
     }
 
     logger.mark(`${this.e.logFnc} 检查Cookie正常 [ltuid:${mys.ltuid}]`)
