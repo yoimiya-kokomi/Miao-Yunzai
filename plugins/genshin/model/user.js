@@ -161,6 +161,7 @@ export default class User extends base {
       msg.push(
         "星穹铁道支持：",
         "【*uid】当前绑定ck uid列表",
+        "【*我的ck】查看当前绑定ck",
         "【*删除ck】删除当前绑定ck",
         "【*体力】查询当前开拓力",
         "【*星琼】查看星琼月历",
@@ -171,22 +172,39 @@ export default class User extends base {
       button.push(
         [
           { text: "*uid", callback: "*uid" },
+          { text: "*我的ck", callback: "*我的ck" },
           { text: "*删除ck", callback: "*删除ck" },
-          { text: "*体力", callback: "*体力" },
         ],
         [
+          { text: "*体力", callback: "*体力" },
           { text: "*星琼", callback: "*星琼" },
           { text: "*星琼统计", callback: "*星琼统计" },
-          { text: "*练度统计", callback: "*练度统计" },
         ],
         [
+          { text: "*练度统计", callback: "*练度统计" },
           { text: "*面板", callback: "*面板" },
           { text: "*更新面板", callback: "*更新面板" },
         ],
       )
     }
     if (mys.hasGame("zzz")) {
-      msg.push("绝区零支持：", "无")
+      msg.push(
+        "绝区零支持：",
+        "【%uid】当前绑定ck uid列表",
+        "【%我的ck】查看当前绑定ck",
+        "【%删除ck】删除当前绑定ck",
+        "【%体力】查询当前电量",
+      )
+      button.push(
+        [
+          { text: "%uid", callback: "%uid" },
+          { text: "%我的ck", callback: "%我的ck" },
+          { text: "%删除ck", callback: "%删除ck" },
+        ], 
+        [
+          { text: "%体力", callback: "%体力" },
+        ]
+      )
     }
     msg = await common.makeForwardMsg(
       this.e,
@@ -259,12 +277,12 @@ export default class User extends base {
     let user = await this.user()
     let msg = []
     let typeMap = { ck: "CK Uid", reg: "绑定 Uid" }
-    lodash.forEach({ gs: "原神 (#uid)", sr: "星穹铁道 (*uid)" }, (gameName, game) => {
+    lodash.forEach({ gs: "原神 (#uid)", sr: "星穹铁道 (*uid)", zzz: "绝区零 (%uid)" }, (gameName, game) => {
       let uidList = user.getUidList(game)
       let currUid = user.getUid(game)
       msg.push(`【${gameName}】`)
       if (uidList.length === 0) {
-        msg.push(`暂无，通过${game === "gs" ? "#" : "*"}绑定123456789来绑定UID`)
+        msg.push(`暂无，通过${game === "gs" ? "#" : game === "sr" ? "*" : "%"}绑定123456789来绑定UID`)
         return true
       }
       lodash.forEach(uidList, (ds, idx) => {
