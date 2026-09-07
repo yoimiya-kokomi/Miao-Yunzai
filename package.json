@@ -16,8 +16,9 @@
     "lint": "git ls-files '*.js'|xargs prettier --write --list-different"
   },
   "dependencies": {
-    "@shotkit/shotium": "^0.3.4",
+    "@shotkit/shotium": "^0.4.0",
     "art-template": "4.13.2",
+    "body-parser": "^2.3.0",
     "chalk": "^6.0.0",
     "chokidar": "^5.0.0",
     "compression": "^1.8.1",
