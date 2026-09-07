@@ -2,7 +2,7 @@ packages:
   - 'plugins/**'
 
 patchedDependencies:
-  body-parser: lib/modules/body-parser.patch
+  body-parser@2: lib/modules/body-parser.patch
   compression: lib/modules/compression.patch
   log4js: lib/modules/log4js.patch
   streamroller: lib/modules/streamroller.patch
