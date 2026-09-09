@@ -140,7 +140,7 @@ export default class RoleIndex extends base {
     return {
       saveId: this.e.uid,
       uid: this.e.uid,
-      name: this.e.sender.card.replace(this.e.uid, "").trim(),
+      name: (this.e.sender.card || this.e.sender.nickname || "").replace(this.e.uid, "").trim(),
       user_id: this.e.user_id,
       line,
       avatars,
