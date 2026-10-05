@@ -46,6 +46,8 @@ export class update extends plugin {
       msg: "#全部静更新",
       reply: msg => Bot.sendMasterMsg(msg),
     }
+    if (cfg.bot.update_time || cfg.bot.update_cron)
+      this.addCleanup(this.stopAutoUpdate, this.restoreAutoUpdate)
     if (cfg.bot.update_time) this.autoUpdate()
 
     this.task = []
@@ -56,15 +58,48 @@ export class update extends plugin {
         this.task.push({
           name: "定时更新",
           cron: i,
-          fnc: this.updateAll.bind(this),
+          fnc: this.runAutoUpdate.bind(this),
         })
   }
 
-  autoUpdate() {
-    setTimeout(
-      () => this.updateAll().finally(this.autoUpdate.bind(this)),
-      cfg.bot.update_time * 60000,
-    )
+  runAutoUpdate(reschedule = false) {
+    if (this.updateStopped) return Promise.resolve(false)
+    const pending = (this.updateOperations ??= new Set())
+    const operation = Promise.resolve()
+      .then(() => (this.updateStopped ? false : this.updateAll()))
+      .finally(() => {
+        pending.delete(operation)
+        if (reschedule) this.autoUpdate()
+      })
+    pending.add(operation)
+    return operation
+  }
+
+  autoUpdate(delay = cfg.bot.update_time * 60000) {
+    if (this.updateStopped) return
+    this.updateDelay = delay
+    this.updateDeadline = Date.now() + delay
+    const timer = setTimeout(() => {
+      if (this.updateTimer !== timer || this.updateStopped) return
+      this.updateTimer = null
+      return this.runAutoUpdate(true)
+    }, delay)
+    this.updateTimer = timer
+  }
+
+  stopAutoUpdate() {
+    this.updateStopped = true
+    this.updateRemaining = this.updateTimer
+      ? Math.max(0, this.updateDeadline - Date.now())
+      : (this.updateDelay ?? null)
+    clearTimeout(this.updateTimer)
+    this.updateTimer = null
+    return Promise.allSettled(this.updateOperations ?? [])
+  }
+
+  restoreAutoUpdate() {
+    this.updateStopped = false
+    if (this.updateRemaining !== null) this.autoUpdate(this.updateRemaining)
   }
 
   async update() {

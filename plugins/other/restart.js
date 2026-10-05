@@ -58,12 +58,18 @@ export class Restart extends plugin {
   key = "Yz:restart"
 
   init() {
-    Bot.once("online", this.restartMsg.bind(this))
+    this.addCleanup(this.stopInitialization, this.restoreInitialization)
+    this.restartOnlinePending = true
+    this.restartOnlineHandler = (...args) => {
+      this.restartOnlinePending = false
+      return this.restartMsg(...args)
+    }
+    Bot.once("online", this.restartOnlineHandler)
     this.e = {
       reply: msg => Bot.sendMasterMsg(msg),
       isMaster: true,
     }
-    if (cfg.bot.restart_time) setTimeout(this.restart.bind(this), cfg.bot.restart_time * 60000)
+    if (cfg.bot.restart_time) this.scheduleRestart(cfg.bot.restart_time * 60000)
 
     this.task = []
     if (cfg.bot.restart_cron)
@@ -73,7 +79,7 @@ export class Restart extends plugin {
         this.task.push({
           name: "定时重启",
           cron: i,
-          fnc: this.restart.bind(this),
+          fnc: this.runAutoRestart.bind(this),
         })
     if (cfg.bot.stop_cron)
       for (const i of Array.isArray(cfg.bot.stop_cron) ? cfg.bot.stop_cron : [cfg.bot.stop_cron])
@@ -89,6 +95,48 @@ export class Restart extends plugin {
           cron: i,
           fnc: () => new Start(this.e).start(),
         })
+  }
+
+  runAutoRestart() {
+    if (this.restartStopped) return Promise.resolve(false)
+    const pending = (this.restartOperations ??= new Set())
+    const operation = Promise.resolve()
+      .then(() => (this.restartStopped ? false : this.restart()))
+      .finally(() => pending.delete(operation))
+    pending.add(operation)
+    return operation
+  }
+
+  scheduleRestart(delay) {
+    this.restartDeadline = Date.now() + delay
+    const timer = setTimeout(() => {
+      if (this.restartTimer !== timer) return
+      this.restartTimer = null
+      return this.runAutoRestart()
+    }, delay)
+    this.restartTimer = timer
+  }
+
+  stopInitialization() {
+    this.restartStopped = true
+    this.restartRemaining = this.restartTimer
+      ? Math.max(0, this.restartDeadline - Date.now())
+      : null
+    clearTimeout(this.restartTimer)
+    this.restartTimer = null
+    this.restartOnlineRestore = this.restartOnlinePending
+    this.restartOnlinePending = false
+    Bot.off("online", this.restartOnlineHandler)
+    return Promise.allSettled(this.restartOperations ?? [])
+  }
+
+  restoreInitialization() {
+    this.restartStopped = false
+    if (this.restartOnlineRestore) {
+      this.restartOnlinePending = true
+      Bot.once("online", this.restartOnlineHandler)
+    }
+    if (this.restartRemaining !== null) this.scheduleRestart(this.restartRemaining)
   }
 
   async restartMsg() {
