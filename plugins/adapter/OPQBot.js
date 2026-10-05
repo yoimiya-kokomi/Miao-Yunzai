@@ -89,7 +89,7 @@ Bot.adapter.push(
             await Bot.sendForwardMsg(msg => this.sendMsg(send, upload, msg), i.data)
             continue
           case "raw":
-            for (const i in i.data) message[i] = i.data[i]
+            for (const key in i.data) message[key] = i.data[key]
             continue
           default:
             message.Content += Bot.String(i)
@@ -207,7 +207,7 @@ Bot.adapter.push(
       return {
         ...i,
         sendMsg: this.sendGroupMsg.bind(this, i),
-        pickMember: this.pickMember(this, id, group_id),
+        pickMember: this.pickMember.bind(this, id, group_id),
         getAvatarUrl() {
           return `https://p.qlogo.cn/gh/${group_id}/${group_id}/0`
         },
