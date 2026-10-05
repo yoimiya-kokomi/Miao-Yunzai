@@ -155,7 +155,7 @@ export default class Puppeteer extends Renderer {
    * @param name
    * @param data 模板参数
    * @param data.tplFile 模板路径，必传
-   * @param data.saveId  生成html名称，为空name代替
+   * @param data.saveId  生成html名称，未指定时使用name的最后一段
    * @param data.imgType  screenshot参数，生成图片类型：jpeg，png
    * @param data.quality  screenshot参数，图片质量 0-100，jpeg是可传，默认90
    * @param data.omitBackground  screenshot参数，隐藏默认的白色背景，背景透明。默认不透明
