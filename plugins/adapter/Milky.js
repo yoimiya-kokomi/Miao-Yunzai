@@ -44,7 +44,8 @@ Bot.adapter.push(
           : `${wsProtocol}://${cleanHost}:${port}${prefix}/event${cfg.milky.access_token ? `?access_token=${cfg.milky.access_token}` : ""}`
         setTimeout(() => this.connectWs(apiBaseUrl, wsUrl), 12000)
       } else if (connection === "webhook") {
-        setTimeout(() => this.setupWebhook(apiBaseUrl), 12000)
+        this.setupWebhook(apiBaseUrl)
+        setTimeout(() => this.onConnect(null, apiBaseUrl), 12000)
       }
     }
 
@@ -108,7 +109,6 @@ Bot.adapter.push(
       })
 
       Bot.makeLog("mark", `Webhook 已设置在路径: ${path}`, "Milky")
-      this.onConnect(null, apiBaseUrl)
     }
 
     async onConnect(ws, apiBaseUrl) {
