@@ -429,6 +429,13 @@ Bot.adapter.push(
       )
     }
 
+    /** 获取频道 ID 列表，复用频道列表接口 */
+    async getGuildChannelList(data) {
+      const array = []
+      for (const { channel_id } of await this.getGuildChannelArray(data)) array.push(channel_id)
+      return array
+    }
+
     async getGuildChannelMap(data) {
       const map = new Map()
       for (const i of await this.getGuildChannelArray(data)) map.set(i.channel_id, i)
@@ -841,6 +848,7 @@ Bot.adapter.push(
         const guild_id = group_id.split("-")
         const i = {
           ...data,
+          group_id,
           guild_id: guild_id[0],
           channel_id: guild_id[1],
           user_id,
@@ -887,6 +895,7 @@ Bot.adapter.push(
         const i = {
           ...data.bot.gl.get(group_id),
           ...data,
+          group_id,
           guild_id: guild_id[0],
           channel_id: guild_id[1],
         }
@@ -903,7 +912,7 @@ Bot.adapter.push(
           getMemberArray: this.getGuildMemberArray.bind(this, i),
           getMemberList: this.getGuildMemberList.bind(this, i),
           getMemberMap: this.getGuildMemberMap.bind(this, i),
-          pickMember: this.pickMember.bind(this, i),
+          pickMember: this.pickMember.bind(this, i, group_id),
         }
       }
 
