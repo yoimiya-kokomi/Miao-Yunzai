@@ -575,9 +575,6 @@ Bot.adapter.push(
       }
 
       Bot.makeLog("info", `Satori WebSocket: ${this.wsEndpoint}`, "Satori")
-      if (this.token) {
-        Bot.makeLog("info", `Satori token: ${this.token}`, "Satori")
-      }
 
       const ws = new WebSocket(this.wsEndpoint)
       this.ws = ws
