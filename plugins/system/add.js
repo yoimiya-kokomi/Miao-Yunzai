@@ -60,6 +60,7 @@ export class add extends plugin {
     if (!this.keyWord) return this.reply("添加错误：没有关键词")
 
     this.e.keyWord = this.keyWord
+    this.e.addGroupId = this.group_id
     this.e.message = []
     this.setContext("addContext")
 
@@ -130,7 +131,13 @@ export class add extends plugin {
   async addContext() {
     const context = this.getContext("addContext")
     this.isGlobal = context.isGlobal
-    await this.getGroupId()
+    this.group_id = context.addGroupId
+    if (!this.group_id) {
+      this.finish("addContext")
+      return this.reply("添加已失效，请重新添加")
+    }
+    if (!this.isGlobal && this.e.isGroup && String(this.e.group_id) !== String(this.group_id))
+      return "continue"
     /** 关键词 */
     this.keyWord = context.keyWord
 
