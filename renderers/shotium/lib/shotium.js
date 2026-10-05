@@ -167,6 +167,11 @@ export default class Shotium extends Renderer {
    * @return img 不做 segment 包裹；multiPage 时返回数组；失败返回 false
    */
   async screenshot(name, data = {}) {
+    return Renderer.withTpl(name, data, () => this.captureScreenshot(name, data))
+  }
+
+  /** 执行已取得模板路径锁的截图 */
+  async captureScreenshot(name, data) {
     const savePath = this.dealTpl(name, data)
     if (!savePath) return false
 
