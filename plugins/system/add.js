@@ -54,7 +54,7 @@ export class add extends plugin {
 
     await this.initMessageMap()
 
-    if (!this.checkAuth()) return false
+    if (!this.checkAuth(await this.getAuthMember())) return false
     /** 获取关键词 */
     this.getKeyWord()
     if (!this.keyWord) return this.reply("添加错误：没有关键词")
@@ -83,7 +83,39 @@ export class add extends plugin {
     return (this.group_id = await redis.get(this.grpKey))
   }
 
-  checkAuth() {
+  /** 私聊管理员操作只信任目标群查询返回的权限，不修改原消息成员对象 */
+  async getAuthMember() {
+    if (this.e.isMaster || this.isGlobal || this.e.isGroup) return this.e.member
+    const groupCfg = cfg.getGroup(this.e.self_id, this.group_id)
+    if (groupCfg.addLimit != 1 || groupCfg.addPrivate != 1) return this.e.member
+    try {
+      let groupId = this.group_id
+      const groups = this.e.bot.gl
+      if (groups && !groups.has(groupId))
+        for (const id of groups.keys())
+          if (String(id) === String(groupId)) {
+            groupId = id
+            break
+          }
+      const member = this.e.bot.pickGroup(groupId).pickMember(this.e.user_id)
+      if (typeof member.getInfo !== "function") return null
+      const info = await member.getInfo(true)
+      if (!info || typeof info !== "object") return null
+      if (!("role" in info || "is_admin" in info || "is_owner" in info)) return null
+      return {
+        is_admin:
+          info.role === "admin" ||
+          info.role === "owner" ||
+          info.is_admin === true ||
+          info.is_owner === true,
+      }
+    } catch (err) {
+      logger.warn(`获取词条目标群成员权限失败：${this.group_id}`, err)
+      return null
+    }
+  }
+
+  checkAuth(member = this.e.member) {
     if (this.e.isMaster) return true
     if (this.isGlobal) {
       this.reply("暂无权限，只有主人才能操作")
@@ -95,16 +127,20 @@ export class add extends plugin {
       this.reply("暂无权限，只有主人才能操作")
       return false
     }
-    if (groupCfg.addLimit == 1) {
-      if (!this.e.member.is_admin) {
-        this.reply("暂无权限，只有管理员才能操作")
-        return false
-      }
-    }
-
     if (groupCfg.addPrivate != 1 && !this.e.isGroup) {
       this.reply("禁止私聊添加")
       return false
+    }
+
+    if (groupCfg.addLimit == 1) {
+      if (member === null) {
+        this.reply("无法确认管理员权限，请在群内操作")
+        return false
+      }
+      if (!member?.is_admin) {
+        this.reply("暂无权限，只有管理员才能操作")
+        return false
+      }
     }
 
     return true
@@ -113,7 +149,19 @@ export class add extends plugin {
   /** 获取添加关键词 */
   getKeyWord() {
     this.e.isGlobal = Boolean(this.e.msg.match(/^#全局/))
-    this.keyWord = this.trimAlias(this.e.raw_message.replace(/#(全局)?(添加|删除)/, "").trim())
+    const prefix = cfg.bot["/→#"]
+      ? /(?:#|[＃井/]\s*)(全局)?(添加|删除)/
+      : /(?:#|[＃井]\s*)(全局)?(添加|删除)/
+    const pattern = new RegExp(`\\[[^\\]]*\\]|<[^>]*>|(${prefix.source})`, "g")
+    let removed = false
+    const raw = this.e.raw_message.replace(pattern, (text, command) => {
+      if (!removed && command) {
+        removed = true
+        return ""
+      }
+      return text
+    })
+    this.keyWord = this.trimAlias(raw.trim())
   }
 
   /** 过滤别名 */
@@ -282,7 +330,7 @@ export class add extends plugin {
   async del() {
     this.isGlobal = this.e.msg.includes("全局")
     await this.getGroupId()
-    if (!(this.group_id && this.checkAuth())) return false
+    if (!this.group_id || !this.checkAuth(await this.getAuthMember())) return false
 
     await this.initMessageMap()
 
