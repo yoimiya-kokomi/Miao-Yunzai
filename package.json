@@ -16,21 +16,20 @@
     "lint": "git ls-files '*.js'|xargs prettier --write --list-different"
   },
   "dependencies": {
-    "@shotkit/shotium": "^0.4.0",
     "art-template": "4.13.2",
-    "chalk": "^6.0.0",
+    "chalk": "^6.0.1",
     "chokidar": "^5.0.0",
-    "compression": "^1.8.1",
+    "compression": "^1.8.2",
     "es-toolkit": "^1.52.0",
     "express": "^5.2.1",
-    "file-type": "^22.0.2",
+    "file-type": "^22.1.1",
     "https-proxy-agent": "^7.0.6",
-    "image-size": "^2.0.2",
+    "image-size": "^2.0.4",
     "level": "^10.0.0",
     "lodash": "link:lib/modules/lodash",
     "log4js": "^6.9.1",
     "md5": "link:lib/modules/md5",
-    "moment": "^2.30.1",
+    "moment": "^2.31.0",
     "node-fetch": "link:lib/modules/node-fetch",
     "node-schedule": "^2.1.1",
     "oicq": "link:lib/modules/oicq",
@@ -38,14 +37,15 @@
     "puppeteer": "*",
     "redis": "^4.7.1",
     "sequelize": "^6.37.8",
+    "shotium": "npm:@pixel.js/shotium@^0.12.1",
     "sqlite3": "npm:@karinjs/sqlite3@^0.4.3",
     "strip-ansi": "^7.2.0",
     "ulid": "^3.0.2",
-    "ws": "^8.21.3",
-    "yaml": "^2.9.0"
+    "ws": "^8.22.0",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "prettier": "^3.9.6"
+    "prettier": "^3.9.9"
   },
   "imports": {
     "#miao": "./plugins/miao-plugin/components/index.js",

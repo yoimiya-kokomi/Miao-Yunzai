@@ -2,8 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 import Renderer from "../../../lib/renderer/Renderer.js"
-import shotium from "@shotkit/shotium"
-import imageSize from "image-size"
+import shotium from "shotium"
 
 const _path = process.cwd()
 
@@ -11,6 +10,14 @@ const _path = process.cwd()
  * 模板里没有 #container 时退回到 body，与 puppeteer 渲染器的 `page.$("#container") || page.$("body")` 一致
  */
 const SELECTORS = ["#container", "body"]
+
+/**
+ * 一片最多能有多高（css 像素）
+ *
+ * Blink 从一个滚动位置最多画这么多行，引擎也按这个值校验 `tile.height`，
+ * 超过会连请求一起拒掉，所以在这边夹住。
+ */
+const MAX_TILE_HEIGHT = 32000
 
 export default class Shotium extends Renderer {
   constructor(config = {}) {
@@ -100,35 +107,37 @@ export default class Shotium extends Renderer {
   }
 
   /**
-   * 交给引擎截一张
-   * @param options shotium 的 ScreenshotOptions
+   * 交给引擎截一次
+   * @param method 引擎方法名：screenshot 整张 / screenshotTiles 分片
+   * @param options shotium 的 ScreenshotOptions / ScreenshotTilesOptions
    */
-  async shot(options) {
+  async shot(method, options) {
     if (this.config.mode === "daemon") {
       const client = await this.connectDaemon()
       try {
-        return await client.screenshot(options)
+        return await client[method](options)
       } catch (err) {
         /** 连接还在，说明是渲染本身的错误（选择器没匹配、超时等），原样抛出 */
         if (!client.closed) throw err
         /** 连接断了才重连一次再试 */
         this.client = null
-        return await (await this.connectDaemon()).screenshot(options)
+        return await (await this.connectDaemon())[method](options)
       }
     }
     this.startInprocess()
-    return shotium.screenshot(options)
+    return shotium[method](options)
   }
 
   /**
    * 截容器：优先 #container，没有再退回 body
-   * @param options 不含 selector 的 ScreenshotOptions
+   * @param method 引擎方法名
+   * @param options 不含 selector 的引擎参数
    */
-  async shotContainer(options) {
+  async shotContainer(method, options) {
     let lastErr
     for (const selector of SELECTORS) {
       try {
-        return await this.shot({ ...options, selector })
+        return await this.shot(method, { ...options, selector })
       } catch (err) {
         lastErr = err
         if (!/no element matches the selector/.test(String(err?.message || err))) throw err
@@ -156,7 +165,7 @@ export default class Shotium extends Renderer {
    * @param name 模板名（plugin/path）
    * @param data 模板参数
    * @param data.tplFile 模板路径，必传
-   * @param data.saveId  生成 html 名称，未指定时使用 name 的最后一段
+   * @param data.saveId  生成 html 名称，为空 name 代替
    * @param data.imgType  生成图片类型：jpeg，png，webp
    * @param data.quality  图片质量 0-100，jpeg / webp 可传，默认 90
    * @param data.omitBackground  隐藏默认的白色背景，背景透明。jpeg 无 alpha 通道会忽略
@@ -167,11 +176,6 @@ export default class Shotium extends Renderer {
    * @return img 不做 segment 包裹；multiPage 时返回数组；失败返回 false
    */
   async screenshot(name, data = {}) {
-    return Renderer.withTpl(name, data, () => this.captureScreenshot(name, data))
-  }
-
-  /** 执行已取得模板路径锁的截图 */
-  async captureScreenshot(name, data) {
     const savePath = this.dealTpl(name, data)
     if (!savePath) return false
 
@@ -195,7 +199,7 @@ export default class Shotium extends Renderer {
     let ret = []
     try {
       if (!data.multiPage) {
-        const result = await this.shotContainer(options)
+        const result = await this.shotContainer("screenshot", options)
         ret.push(result.image)
         this.renderNum++
         logger.mark(
@@ -233,42 +237,28 @@ export default class Shotium extends Renderer {
   /**
    * 分片截图
    *
-   * puppeteer 那边是「改视窗高度、滚动、重截几次」；这里先把容器整张截下来量高度，
-   * 超过一页时再用 clip 按文档坐标逐片截取，每片都是同一次布局的结果，不会出现分片之间对不上的情况。
+   * puppeteer 那边是「改视窗高度、滚动、重截几次」，一次 multiPage 要重新布局 N 遍；
+   * 这里交给引擎的 screenshotTiles()：文档只加载、布局、光栅化一次，
+   * 引擎在光栅化的过程中按行切开、逐片编码，同一时刻只存在一片的位图。
+   * 每一片都是同一次布局的结果，不会出现分片之间对不上的情况。
+   *
+   * 片数是 ceil(高度 / 单片高度)，最后一片是余数；
+   * puppeteer 那边用的是 round，最后一片不足半页时会并进上一页，这里不并。
    *
    * @param name 模板名
    * @param options 引擎参数
    * @param pageHeight 单张高度（css 像素）
    */
   async screenshotPages(name, options, pageHeight) {
-    const first = await this.shotContainer(options)
-    const size = imageSize(first.image)
-    const scale = options.scale || 1
-    const height = size ? size.height / scale : 0
-    const width = size ? size.width / scale : 0
-    const num = Math.round(height / pageHeight) || 1
+    const height = Math.min(MAX_TILE_HEIGHT, Math.max(1, Math.round(pageHeight)))
+    const result = await this.shotContainer("screenshotTiles", { ...options, tile: { height } })
+    const ret = result.tiles.map(tile => tile.image).filter(Boolean)
 
-    if (num === 1 || !size) {
+    ret.forEach((image, i) => {
       this.renderNum++
-      logger.mark(`[图片生成][${name}][1/1] ${this.kb(first.image)}${this.stats(first)}`)
-      return [first.image]
-    }
-
-    const ret = []
-    for (let i = 0; i < num; i++) {
-      const y = i * pageHeight
-      const h = i === num - 1 ? Math.ceil(height - y) : pageHeight
-      const result = await this.shot({
-        ...options,
-        clip: { x: 0, y, width: Math.ceil(width), height: h },
-      })
-      this.renderNum++
-      logger.mark(
-        `[图片生成][${name}][${i + 1}/${num}] ${this.kb(result.image)}${this.stats(result)}`,
-      )
-      ret.push(result.image)
-    }
-    logger.mark(`[图片生成][${name}] 处理完成`)
+      logger.mark(`[图片生成][${name}][${i + 1}/${ret.length}] ${this.kb(image)}`)
+    })
+    logger.mark(`[图片生成][${name}] 处理完成${this.stats(result)}`)
     return ret
   }
 

@@ -2,6 +2,7 @@ import Shotium from "./lib/shotium.js"
 
 /**
  * shotium 渲染后端
+ * https://github.com/sj817/yunzai-renderer-shotium
  *
  * @param config 本地 config.yaml 的配置内容
  * @returns renderer 渲染器对象

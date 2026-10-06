@@ -35,7 +35,8 @@ imgType: jpeg
 # jpeg / webp 的压缩质量 1-100。调用方传了 quality 时优先
 quality: 90
 
-# 分片截图（multiPage）时单张高度（css 像素）。调用方传了 multiPageHeight 时优先
+# 分片截图（multiPage）时单张高度（css 像素），上限 32000。调用方传了 multiPageHeight 时优先
+# 这是每一片的硬上限：引擎一次布局切成若干横条，片数按 ceil(高度 / 这个值) 算，最后一片是余数
 multiPageHeight: 4000
 
 # 每渲染多少张后把引擎能重建的内存（Blink 堆、Skia 缓存）还给系统，0 表示不做
