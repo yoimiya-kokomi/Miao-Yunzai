@@ -1,3 +1,6 @@
 [submodule "genshin"]
     path = plugins/genshin
     url = https://github.com/kissnavel/genshin.git
+[submodule "plugins/genshin"]
+	path = plugins/genshin
+	url = https://github.com/kissnavel/genshin.git
