@@ -1,3 +1,3 @@
 [submodule "plugins/genshin"]
 	path = plugins/genshin
-	url = https://github.com/kissnavel/genshin.git
+	url = https://ghproxy.114514616.xyz/https://github.com/kissnavel/genshin.git
