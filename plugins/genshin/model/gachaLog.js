@@ -2,9 +2,14 @@ import base from "./base.js"
 import fetch from "node-fetch"
 import lodash from "lodash"
 import fs from "node:fs"
+import path from "node:path"
 import common from "../../../lib/common/common.js"
 import gsCfg from "./gsCfg.js"
 import { Character, Weapon } from "#miao.models"
+import { pathToFileURL } from "node:url"
+
+const poolFile = path.join(process.cwd(), "plugins", "miao-plugin", "resources", "meta-gs", "info", "pool.js")
+const poolDetail = fs.existsSync(poolFile) ? (await import(pathToFileURL(poolFile).href)).poolDetail : []
 
 export default class GachaLog extends base {
   constructor(e) {
@@ -461,6 +466,10 @@ export default class GachaLog extends base {
         fiveMaxNum = data.fiveLog.length
       }
       data.max = i === "武器" || i === "光锥" ? 80 : 90
+      data.luckPercent = data.luckPercent || 0
+      data.luckRating = data.luckPercent >= 85 ? "极欧" : data.luckPercent >= 70 ? "很欧" : data.luckPercent >= 55 ? "偏欧" : data.luckPercent >= 40 ? "普通" : "偏非"
+      data.luckTitle = `超过 ${data.luckPercent}% 旅行者`
+      data.luckImage = `html/gacha/imgs/luck/${data.luckPercent >= 92 ? 3 : data.luckPercent >= 80 ? 1 : data.luckPercent >= 68 ? 7 : data.luckPercent >= 55 ? 5 : data.luckPercent >= 42 ? 14 : data.luckPercent >= 30 ? 12 : data.luckPercent >= 18 ? 13 : 8}.jpg`
       logData.push(data)
     }
     if (logData.length === 0) {
@@ -475,9 +484,66 @@ export default class GachaLog extends base {
         i.fiveLog = i.fiveLog.concat(new Array(diffNum).fill({ isUp: false, isNull: true }))
       }
     }
+    const totalNum = logData.reduce((sum, pool) => sum + (Number(pool.allNum) || 0), 0)
+    // Cross-pool values are explicitly weighted estimates, never the first pool's values.
+    const fiveWeight = logData.reduce((sum, pool) => sum + (Number(pool.fiveNum) || 0), 0)
+    const validWeight = logData.reduce((sum, pool) => {
+      const fiveNum = Number(pool.fiveNum) || 0
+      const wai = Number(pool.wai) || 0
+      return sum + Math.max(fiveNum - wai, 0)
+    }, 0)
+    const noWaiWeight = logData.reduce((sum, pool) => {
+      const fiveNum = Number(pool.fiveNum) || 0
+      const wai = Number(pool.wai) || 0
+      const big = Number(pool.bigNum) || 0
+      return sum + Math.max(fiveNum - big, 0)
+    }, 0)
+    const combinedFiveAvg = fiveWeight
+      ? Math.round(logData.reduce((sum, pool) => sum + (Number(pool.fiveAvg) || 0) * (Number(pool.fiveNum) || 0), 0) / fiveWeight)
+      : 0
+    const combinedIsvalidNum = validWeight
+      ? Math.round(logData.reduce((sum, pool) => sum + (Number(pool.isvalidNum) || 0) * Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0), 0) / validWeight)
+      : 0
+    const combinedNoWaiRate = noWaiWeight
+      ? (logData.reduce((sum, pool) => sum + (Number(pool.noWaiRate) || 0) * Math.max((Number(pool.fiveNum) || 0) - (Number(pool.bigNum) || 0), 0), 0) / noWaiWeight).toFixed(1)
+      : "0.0"
+    const combinedUsed = logData.reduce((sum, pool) => {
+      const up = pool.luckPercentSource === "up"
+      const num = up ? Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0) : (Number(pool.fiveNum) || 0)
+      const avg = up ? (Number(pool.isvalidNum) || 0) : (Number(pool.fiveAvg) || 0)
+      return sum + avg * num
+    }, 0)
+    const combinedNum = logData.reduce((sum, pool) => sum + (pool.luckPercentSource === "up"
+      ? Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0)
+      : (Number(pool.fiveNum) || 0)), 0)
+    const combinedLuckPercent = combinedNum > 0 ? Math.round(this.luckPercentOf(this.luckDist(this.luckModel(301), true), combinedNum, combinedUsed)) : 0
+    const combinedLuckRating = combinedLuckPercent >= 85 ? "极欧" : combinedLuckPercent >= 70 ? "很欧" : combinedLuckPercent >= 55 ? "偏欧" : combinedLuckPercent >= 40 ? "普通" : "偏非"
+    const combinedLuckTitle = `超过 ${combinedLuckPercent}% 旅行者`
+    const combinedLuckImage = `html/gacha/imgs/luck/${combinedLuckPercent >= 92 ? 3 : combinedLuckPercent >= 80 ? 1 : combinedLuckPercent >= 68 ? 7 : combinedLuckPercent >= 55 ? 5 : combinedLuckPercent >= 42 ? 14 : combinedLuckPercent >= 30 ? 12 : combinedLuckPercent >= 18 ? 13 : 8}.jpg`
+    const splashRoot = path.join(process.cwd(), 'plugins', 'miao-plugin', 'resources', 'meta-gs', 'character')
+    const splashNames = fs.existsSync(splashRoot)
+      ? fs.readdirSync(splashRoot).filter((name) => fs.existsSync(path.join(splashRoot, name, 'imgs', 'splash.webp')))
+      : []
+    const splashPath = splashNames.length
+      ? `meta-gs/character/${splashNames[Math.floor(Math.random() * splashNames.length)]}/imgs/splash.webp`
+      : ''
     const data = {
       ...logData[0],
       data: logData,
+      poolNum: logData.length,
+      totalNum,
+      combinedFiveAvg,
+      combinedIsvalidNum,
+      combinedNoWaiRate,
+      combinedLuckPercent,
+      combinedLuckRating,
+      combinedLuckTitle,
+      combinedLuckImage,
+      splashPath,
+      luckPercent: combinedLuckPercent,
+      luckRating: combinedLuckRating,
+      luckTitle: combinedLuckTitle,
+      luckImage: combinedLuckImage,
     }
     this.e.msg = originalMsg
     return data
@@ -493,7 +559,37 @@ export default class GachaLog extends base {
     data.type = type
     data.typeName = typeName
     /** 渲染数据 */
+    const analysed = data
+    const fiveAvg = Number(analysed.fiveAvg) || 0
+    const noWaiRate = Math.max(0, Math.min(100, Number(analysed.noWaiRate) || 0))
     data = this.randData(data)
+    const model = this.luckModel(type)
+    const upNum = Math.max((Number(analysed.fiveNum) || 0) - (Number(analysed.wai) || 0), 0)
+    const useUp = model.upRate > 0 && upNum > 0
+    const luckRaw = useUp
+      ? this.luckPercentOf(this.luckDist(model, true), upNum, (Number(analysed.isvalidNum) || 0) * upNum)
+      : this.luckPercentOf(this.luckDist(model, false), Number(analysed.fiveNum) || 0, fiveAvg * (Number(analysed.fiveNum) || 0))
+    const luckPercent = luckRaw === false ? 0 : Math.round(luckRaw)
+    data.luckPercentSource = useUp ? "up" : "five"
+    data.luckPercent = luckPercent
+    data.luckRating = luckPercent >= 85 ? "极欧" : luckPercent >= 70 ? "很欧" : luckPercent >= 55 ? "偏欧" : luckPercent >= 40 ? "普通" : "偏非"
+    data.luckTitle = `超过 ${luckPercent}% 旅行者`
+    data.luckImage = `html/gacha/imgs/luck/${luckPercent >= 92 ? 3 : luckPercent >= 80 ? 1 : luckPercent >= 68 ? 7 : luckPercent >= 55 ? 5 : luckPercent >= 42 ? 14 : luckPercent >= 30 ? 12 : luckPercent >= 18 ? 13 : 8}.jpg`
+    data.type = type
+    data.typeName = typeName
+    data.allNum = Number(data.allNum) || 0
+    data.fiveAvg = fiveAvg
+    data.noWaiRate = noWaiRate.toFixed(1)
+    data.fiveNum = Number(analysed.fiveNum) || 0
+    data.isvalidNum = Number(analysed.isvalidNum) || 0
+    data.wai = Number(analysed.wai) || 0
+    data.bigNum = Number(analysed.bigNum) || 0
+    data.luckPercent = luckPercent
+    data.luckRating = data.luckRating || '普通'
+    data.luckTitle = data.luckTitle || `超过 ${luckPercent}% 旅行者`
+    data.luckImage = data.luckImage || `html/gacha/imgs/luck/${luckPercent >= 92 ? 3 : luckPercent >= 80 ? 1 : luckPercent >= 68 ? 7 : luckPercent >= 55 ? 5 : luckPercent >= 42 ? 14 : luckPercent >= 30 ? 12 : luckPercent >= 18 ? 13 : 8}.jpg`
+    data.firstTime = data.firstTime || "暂无"
+    data.lastTime = data.lastTime || "暂无"
     return data
   }
 
@@ -602,6 +698,63 @@ export default class GachaLog extends base {
     return uidArr[0].uid
   }
 
+  // 与 miao GachaLuck 相同：官方基础概率 + 软保底，算花费抽数多于你的玩家占比
+  luckModel(type) {
+    const models = {
+      301: { base: 0.006, soft: 74, step: 0.06, hard: 90, upRate: 0.55 },
+      302: { base: 0.007, soft: 63, step: 0.07, hard: 80, upRate: 0.75 },
+      200: { base: 0.006, soft: 74, step: 0.06, hard: 90 },
+      500: { base: 0.006, soft: 74, step: 0.06, hard: 90 },
+      11: { base: 0.006, soft: 74, step: 0.06, hard: 90, upRate: 0.5 },
+      12: { base: 0.008, soft: 66, step: 0.07, hard: 80, upRate: 0.75 },
+      1: { base: 0.006, soft: 74, step: 0.06, hard: 90 },
+    }
+    return models[type] || models[301]
+  }
+
+  luckConv(a, b, limit) {
+    const ret = new Array(Math.min(a.length + b.length - 1, limit + 1)).fill(0)
+    for (let i = 0; i < a.length && i <= limit; i++) {
+      if (!a[i]) continue
+      for (let j = 0; j < b.length && i + j <= limit; j++) {
+        ret[i + j] += a[i] * b[j]
+      }
+    }
+    return ret
+  }
+
+  luckDist(model, up) {
+    const five = [0]
+    let survive = 1
+    for (let i = 1; i <= model.hard; i++) {
+      const p = i >= model.hard ? 1 : Math.min(1, model.base + Math.max(0, i - model.soft + 1) * model.step)
+      five[i] = survive * p
+      survive *= 1 - p
+    }
+    if (!up || !model.upRate) return five
+    const twice = this.luckConv(five, five, model.hard * 2)
+    return twice.map((v, i) => (five[i] || 0) * model.upRate + v * (1 - model.upRate))
+  }
+
+  luckPercentOf(dist, num, used) {
+    if (!(num > 0) || !(used > 0)) return false
+    const mean = dist.reduce((sum, p, i) => sum + p * i, 0)
+    const variance = dist.reduce((sum, p, i) => sum + p * (i - mean) * (i - mean), 0)
+    if (num > 50) {
+      const z = (used - num * mean) / Math.sqrt(num * variance)
+      const t = 1 / (1 + 0.2316419 * Math.abs(z))
+      const d = 0.3989422804014327 * Math.exp(-z * z / 2)
+      const tail = d * t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
+      const cdf = z > 0 ? 1 - tail : tail
+      return Math.min(100, Math.max(0, (1 - cdf) * 100))
+    }
+    let total = [1]
+    for (let i = 0; i < num; i++) total = this.luckConv(total, dist, used)
+    let below = 0
+    for (let i = 0; i < used && i < total.length; i++) below += total[i]
+    return Math.min(100, Math.max(0, (1 - below - (total[used] || 0) / 2) * 100))
+  }
+
   /** 统计计算记录 */
   analyse() {
     if (lodash.isEmpty(this.all)) {
@@ -621,6 +774,8 @@ export default class GachaLog extends base {
     let allNum = this.all.length
     let bigNum = 0
     let game = this.e?.game
+    let weaponYear = 0
+    let weaponPrev = ""
 
     for (let val of this.all) {
       this.role = val
@@ -650,6 +805,24 @@ export default class GachaLog extends base {
         }
         fiveLogNum = 0
         let isUp = false
+        if (val.item_type == "武器" || val.item_type == "光锥") {
+          isUp = Boolean(val.isUp ?? val.is_up ?? val.is_up_item)
+          if (!isUp && val.item_type == "武器" && val.time) {
+            let rawYear = Number(String(val.time).slice(0, 4))
+            let monthDay = String(val.time).slice(5, 10)
+            if (rawYear >= 2020) {
+              weaponYear = rawYear
+            } else if (!weaponYear) {
+              weaponYear = new Date().getFullYear()
+            } else if (weaponPrev && monthDay > weaponPrev) {
+              weaponYear--
+            }
+            weaponPrev = monthDay
+            let when = `${weaponYear}-${String(val.time).slice(5)}`
+            let banner = poolDetail.find((pool) => when >= pool.from && when <= pool.to)
+            isUp = Boolean(banner?.weapon5?.includes(val.name))
+          }
+        }
         // 歪了多少个
         if (val.item_type == "角色") {
           if (this.checkIsUp()) {
@@ -754,6 +927,7 @@ export default class GachaLog extends base {
       noFourNum,
       fiveNum,
       fourNum,
+      bigNum,
       fiveAvg,
       fourAvg,
       wai,
@@ -1036,6 +1210,16 @@ export default class GachaLog extends base {
       firstTime: data.firstTime,
       lastTime: data.lastTime,
       fiveLog: data.fiveLog,
+      fiveNum: data.fiveNum,
+      fiveAvg: data.fiveAvg,
+      isvalidNum: data.isvalidNum,
+      noWaiRate: data.noWaiRate,
+      wai: data.wai,
+      bigNum: data.bigNum,
+      luckPercent: data.luckPercent,
+      luckRating: data.luckRating,
+      luckTitle: data.luckTitle,
+      luckImage: data.luckImage,
       line,
       hasMore,
       max,
