@@ -88,7 +88,7 @@ export class gcLog extends plugin {
     let file = ["./data/gachaJson", "./data/srJson", "./temp/html/StarRail", "./temp/uigf"]
     for (let i of file) {
       if (!fs.existsSync(i)) {
-        fs.mkdirSync(i)
+        fs.mkdirSync(i, { recursive: true })
       }
     }
   }

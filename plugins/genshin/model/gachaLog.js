@@ -8,8 +8,18 @@ import gsCfg from "./gsCfg.js"
 import { Character, Weapon } from "#miao.models"
 import { pathToFileURL } from "node:url"
 
-const poolFile = path.join(process.cwd(), "plugins", "miao-plugin", "resources", "meta-gs", "info", "pool.js")
-const poolDetail = fs.existsSync(poolFile) ? (await import(pathToFileURL(poolFile).href)).poolDetail : []
+const poolFile = path.join(
+  process.cwd(),
+  "plugins",
+  "miao-plugin",
+  "resources",
+  "meta-gs",
+  "info",
+  "pool.js",
+)
+const poolDetail = fs.existsSync(poolFile)
+  ? (await import(pathToFileURL(poolFile).href)).poolDetail
+  : []
 
 export default class GachaLog extends base {
   constructor(e) {
@@ -467,7 +477,16 @@ export default class GachaLog extends base {
       }
       data.max = i === "武器" || i === "光锥" ? 80 : 90
       data.luckPercent = data.luckPercent || 0
-      data.luckRating = data.luckPercent >= 85 ? "极欧" : data.luckPercent >= 70 ? "很欧" : data.luckPercent >= 55 ? "偏欧" : data.luckPercent >= 40 ? "普通" : "偏非"
+      data.luckRating =
+        data.luckPercent >= 85
+          ? "极欧"
+          : data.luckPercent >= 70
+            ? "很欧"
+            : data.luckPercent >= 55
+              ? "偏欧"
+              : data.luckPercent >= 40
+                ? "普通"
+                : "偏非"
       data.luckTitle = `超过 ${data.luckPercent}% 旅行者`
       data.luckImage = `html/gacha/imgs/luck/${data.luckPercent >= 92 ? 3 : data.luckPercent >= 80 ? 1 : data.luckPercent >= 68 ? 7 : data.luckPercent >= 55 ? 5 : data.luckPercent >= 42 ? 14 : data.luckPercent >= 30 ? 12 : data.luckPercent >= 18 ? 13 : 8}.jpg`
       logData.push(data)
@@ -499,34 +518,85 @@ export default class GachaLog extends base {
       return sum + Math.max(fiveNum - big, 0)
     }, 0)
     const combinedFiveAvg = fiveWeight
-      ? Math.round(logData.reduce((sum, pool) => sum + (Number(pool.fiveAvg) || 0) * (Number(pool.fiveNum) || 0), 0) / fiveWeight)
+      ? Math.round(
+          logData.reduce(
+            (sum, pool) => sum + (Number(pool.fiveAvg) || 0) * (Number(pool.fiveNum) || 0),
+            0,
+          ) / fiveWeight,
+        )
       : 0
     const combinedIsvalidNum = validWeight
-      ? Math.round(logData.reduce((sum, pool) => sum + (Number(pool.isvalidNum) || 0) * Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0), 0) / validWeight)
+      ? Math.round(
+          logData.reduce(
+            (sum, pool) =>
+              sum +
+              (Number(pool.isvalidNum) || 0) *
+                Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0),
+            0,
+          ) / validWeight,
+        )
       : 0
     const combinedNoWaiRate = noWaiWeight
-      ? (logData.reduce((sum, pool) => sum + (Number(pool.noWaiRate) || 0) * Math.max((Number(pool.fiveNum) || 0) - (Number(pool.bigNum) || 0), 0), 0) / noWaiWeight).toFixed(1)
+      ? (
+          logData.reduce(
+            (sum, pool) =>
+              sum +
+              (Number(pool.noWaiRate) || 0) *
+                Math.max((Number(pool.fiveNum) || 0) - (Number(pool.bigNum) || 0), 0),
+            0,
+          ) / noWaiWeight
+        ).toFixed(1)
       : "0.0"
     const combinedUsed = logData.reduce((sum, pool) => {
       const up = pool.luckPercentSource === "up"
-      const num = up ? Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0) : (Number(pool.fiveNum) || 0)
-      const avg = up ? (Number(pool.isvalidNum) || 0) : (Number(pool.fiveAvg) || 0)
+      const num = up
+        ? Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0)
+        : Number(pool.fiveNum) || 0
+      const avg = up ? Number(pool.isvalidNum) || 0 : Number(pool.fiveAvg) || 0
       return sum + avg * num
     }, 0)
-    const combinedNum = logData.reduce((sum, pool) => sum + (pool.luckPercentSource === "up"
-      ? Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0)
-      : (Number(pool.fiveNum) || 0)), 0)
-    const combinedLuckPercent = combinedNum > 0 ? Math.round(this.luckPercentOf(this.luckDist(this.luckModel(301), true), combinedNum, combinedUsed)) : 0
-    const combinedLuckRating = combinedLuckPercent >= 85 ? "极欧" : combinedLuckPercent >= 70 ? "很欧" : combinedLuckPercent >= 55 ? "偏欧" : combinedLuckPercent >= 40 ? "普通" : "偏非"
+    const combinedNum = logData.reduce(
+      (sum, pool) =>
+        sum +
+        (pool.luckPercentSource === "up"
+          ? Math.max((Number(pool.fiveNum) || 0) - (Number(pool.wai) || 0), 0)
+          : Number(pool.fiveNum) || 0),
+      0,
+    )
+    const combinedLuckPercent =
+      combinedNum > 0
+        ? Math.round(
+            this.luckPercentOf(this.luckDist(this.luckModel(301), true), combinedNum, combinedUsed),
+          )
+        : 0
+    const combinedLuckRating =
+      combinedLuckPercent >= 85
+        ? "极欧"
+        : combinedLuckPercent >= 70
+          ? "很欧"
+          : combinedLuckPercent >= 55
+            ? "偏欧"
+            : combinedLuckPercent >= 40
+              ? "普通"
+              : "偏非"
     const combinedLuckTitle = `超过 ${combinedLuckPercent}% 旅行者`
     const combinedLuckImage = `html/gacha/imgs/luck/${combinedLuckPercent >= 92 ? 3 : combinedLuckPercent >= 80 ? 1 : combinedLuckPercent >= 68 ? 7 : combinedLuckPercent >= 55 ? 5 : combinedLuckPercent >= 42 ? 14 : combinedLuckPercent >= 30 ? 12 : combinedLuckPercent >= 18 ? 13 : 8}.jpg`
-    const splashRoot = path.join(process.cwd(), 'plugins', 'miao-plugin', 'resources', 'meta-gs', 'character')
+    const splashRoot = path.join(
+      process.cwd(),
+      "plugins",
+      "miao-plugin",
+      "resources",
+      "meta-gs",
+      "character",
+    )
     const splashNames = fs.existsSync(splashRoot)
-      ? fs.readdirSync(splashRoot).filter((name) => fs.existsSync(path.join(splashRoot, name, 'imgs', 'splash.webp')))
+      ? fs
+          .readdirSync(splashRoot)
+          .filter(name => fs.existsSync(path.join(splashRoot, name, "imgs", "splash.webp")))
       : []
     const splashPath = splashNames.length
       ? `meta-gs/character/${splashNames[Math.floor(Math.random() * splashNames.length)]}/imgs/splash.webp`
-      : ''
+      : ""
     const data = {
       ...logData[0],
       data: logData,
@@ -567,12 +637,29 @@ export default class GachaLog extends base {
     const upNum = Math.max((Number(analysed.fiveNum) || 0) - (Number(analysed.wai) || 0), 0)
     const useUp = model.upRate > 0 && upNum > 0
     const luckRaw = useUp
-      ? this.luckPercentOf(this.luckDist(model, true), upNum, (Number(analysed.isvalidNum) || 0) * upNum)
-      : this.luckPercentOf(this.luckDist(model, false), Number(analysed.fiveNum) || 0, fiveAvg * (Number(analysed.fiveNum) || 0))
+      ? this.luckPercentOf(
+          this.luckDist(model, true),
+          upNum,
+          (Number(analysed.isvalidNum) || 0) * upNum,
+        )
+      : this.luckPercentOf(
+          this.luckDist(model, false),
+          Number(analysed.fiveNum) || 0,
+          fiveAvg * (Number(analysed.fiveNum) || 0),
+        )
     const luckPercent = luckRaw === false ? 0 : Math.round(luckRaw)
     data.luckPercentSource = useUp ? "up" : "five"
     data.luckPercent = luckPercent
-    data.luckRating = luckPercent >= 85 ? "极欧" : luckPercent >= 70 ? "很欧" : luckPercent >= 55 ? "偏欧" : luckPercent >= 40 ? "普通" : "偏非"
+    data.luckRating =
+      luckPercent >= 85
+        ? "极欧"
+        : luckPercent >= 70
+          ? "很欧"
+          : luckPercent >= 55
+            ? "偏欧"
+            : luckPercent >= 40
+              ? "普通"
+              : "偏非"
     data.luckTitle = `超过 ${luckPercent}% 旅行者`
     data.luckImage = `html/gacha/imgs/luck/${luckPercent >= 92 ? 3 : luckPercent >= 80 ? 1 : luckPercent >= 68 ? 7 : luckPercent >= 55 ? 5 : luckPercent >= 42 ? 14 : luckPercent >= 30 ? 12 : luckPercent >= 18 ? 13 : 8}.jpg`
     data.type = type
@@ -585,9 +672,11 @@ export default class GachaLog extends base {
     data.wai = Number(analysed.wai) || 0
     data.bigNum = Number(analysed.bigNum) || 0
     data.luckPercent = luckPercent
-    data.luckRating = data.luckRating || '普通'
+    data.luckRating = data.luckRating || "普通"
     data.luckTitle = data.luckTitle || `超过 ${luckPercent}% 旅行者`
-    data.luckImage = data.luckImage || `html/gacha/imgs/luck/${luckPercent >= 92 ? 3 : luckPercent >= 80 ? 1 : luckPercent >= 68 ? 7 : luckPercent >= 55 ? 5 : luckPercent >= 42 ? 14 : luckPercent >= 30 ? 12 : luckPercent >= 18 ? 13 : 8}.jpg`
+    data.luckImage =
+      data.luckImage ||
+      `html/gacha/imgs/luck/${luckPercent >= 92 ? 3 : luckPercent >= 80 ? 1 : luckPercent >= 68 ? 7 : luckPercent >= 55 ? 5 : luckPercent >= 42 ? 14 : luckPercent >= 30 ? 12 : luckPercent >= 18 ? 13 : 8}.jpg`
     data.firstTime = data.firstTime || "暂无"
     data.lastTime = data.lastTime || "暂无"
     return data
@@ -727,7 +816,8 @@ export default class GachaLog extends base {
     const five = [0]
     let survive = 1
     for (let i = 1; i <= model.hard; i++) {
-      const p = i >= model.hard ? 1 : Math.min(1, model.base + Math.max(0, i - model.soft + 1) * model.step)
+      const p =
+        i >= model.hard ? 1 : Math.min(1, model.base + Math.max(0, i - model.soft + 1) * model.step)
       five[i] = survive * p
       survive *= 1 - p
     }
@@ -743,8 +833,11 @@ export default class GachaLog extends base {
     if (num > 50) {
       const z = (used - num * mean) / Math.sqrt(num * variance)
       const t = 1 / (1 + 0.2316419 * Math.abs(z))
-      const d = 0.3989422804014327 * Math.exp(-z * z / 2)
-      const tail = d * t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
+      const d = 0.3989422804014327 * Math.exp((-z * z) / 2)
+      const tail =
+        d *
+        t *
+        (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))))
       const cdf = z > 0 ? 1 - tail : tail
       return Math.min(100, Math.max(0, (1 - cdf) * 100))
     }
@@ -819,7 +912,7 @@ export default class GachaLog extends base {
             }
             weaponPrev = monthDay
             let when = `${weaponYear}-${String(val.time).slice(5)}`
-            let banner = poolDetail.find((pool) => when >= pool.from && when <= pool.to)
+            let banner = poolDetail.find(pool => when >= pool.from && when <= pool.to)
             isUp = Boolean(banner?.weapon5?.includes(val.name))
           }
         }
