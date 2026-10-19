@@ -409,17 +409,19 @@ export class add extends plugin {
 
     keyWord = this.trimAlias(keyWord)
 
-    let num = 0
+    /** 检查用户是否指定了关键词回复的序号，未指定时为 undefined */
+    let num
     if (isNaN(keyWord)) {
-      num = keyWord.trim().match(/[0-9]+$/)?.[0]
+      let numStr = keyWord.match(/[0-9]+$/)?.[0]
 
+      /** 优先匹配完整关键词，不存在时才解析序号 */
       if (
-        !isNaN(num) &&
+        numStr !== undefined &&
         !textArr[this.group_id].has(keyWord) &&
         !textArr[this.e.bot.uin].has(keyWord)
       ) {
-        keyWord = lodash.trimEnd(keyWord, num).trim()
-        num--
+        keyWord = keyWord.slice(0, -numStr.length).trim()
+        num = Number(numStr)
       }
     }
 
@@ -428,14 +430,20 @@ export class add extends plugin {
     if (lodash.isEmpty(msg) && lodash.isEmpty(globalMsg)) return false
 
     msg = [...msg, ...globalMsg]
-    /** 如果只有一个则不随机 */
-    if (num >= 0 && msg.length === 1) {
-      msg = msg[num]
+    let index
+    if (num !== undefined) {
+      /** 序号无效 */
+      if (!Number.isSafeInteger(num) || num < 1 || num > msg.length) {
+        await this.e.reply(`序号无效，请输入 1～${msg.length} 之间的序号`)
+        return true
+      }
+      /** 序号有效，使用指定序号的回复 */
+      index = num - 1
     } else {
-      /** 随机获取一个 */
-      num = lodash.random(0, msg.length - 1)
-      msg = msg[num]
+      /** 未指定序号，随机选择回复 */
+      index = msg.length === 1 ? 0 : lodash.random(0, msg.length - 1)
     }
+    msg = msg[index]
 
     if (msg[0] && msg[0].local) {
       if (fs.existsSync(msg[0].local)) {
@@ -460,7 +468,7 @@ export class add extends plugin {
     logger.mark(`[发送表情]${this.e.logText} ${keyWord}`)
     let ret = await this.e.reply(msg)
     if (!ret) {
-      this.expiredMsg(keyWord, num)
+      this.expiredMsg(keyWord, index)
     }
 
     return true
