@@ -10,9 +10,7 @@
 {{block 'main'}}
 <div class="info_box">
   <div class="head_box">
-    <div class="id_text">
-      ID: {{uid}}
-    </div>
+    <div class="id_text">ID: {{uid}}</div>
     <h2 class="day_text">
       {{allNum}}抽
       <span class="label label_{{type}}">{{typeName}}池</span>
@@ -24,7 +22,14 @@
     {{/if}}
   </div>
   <div class="data_box">
-    <div class="tab_lable">数据总览</div>
+    <div class="luck_summary">
+      <span class="luck_label">欧皇度</span>
+      <strong>{{luckRating || '普通'}}</strong>
+      <span>（{{luckPercent || 0}}%）</span>
+      <span class="luck_title">· {{luckTitle || '超过 0% 旅行者'}}</span>
+    </div>
+    <img class="luck_badge" src="{{_res_path}}{{luckImage || 'html/gacha/imgs/luck/1.jpg'}}" alt="{{luckRating || '普通'}}"/>
+
     {{each line val}}
     <div class="data_line">
       {{each val item}}
@@ -43,17 +48,16 @@
     </div>
     <div class="card_list">
       {{each fiveLog val}}
-      <div class="item star5 {{val.num<=10?'gold': (val.num<max*0.5 ? 'good' : (val.num<max*0.83) ? 'normal': 'bad')}}">
-        {{ if val.isUp && typeName == '角色' }}
+      <div class="item star5 {{val.num<=10?'gold': (val.num<max*0.5 ? 'good' : (val.num<max*0.83 ? 'normal' : 'bad'))}}">
+        {{if val.isUp}}
         <span class="minimum">UP</span>
         {{/if}}
         <span class="role_img" style="background-image:url({{_miao_path}}{{val.icon}})"></span>
-        <!-- <div class="num">{{val.num}}</div>-->
-        <div class="num_name {{val.num<=10?'gold': (val.num<max*0.5 ? 'good' : (val.num<max*0.83) ? 'normal': 'bad')}}">{{val.num}}</div>
+        <div class="num_name {{val.num<=10?'gold': (val.num<max*0.5 ? 'good' : (val.num<max*0.83 ? 'normal' : 'bad'))}}">{{val.num}}</div>
       </div>
       {{/each}}
     </div>
-    {{if hasMore }}
+    {{if hasMore}}
     <div class="hasMore">*完整数据请私聊查看</div>
     {{/if}}
   </div>
