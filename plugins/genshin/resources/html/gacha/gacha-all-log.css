@@ -1,42 +1,26 @@
-body {
-  position: absolute;
-}
-.container {
-  width: 1500px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  padding: 20px 15px 10px 15px;
-  background-color: #f5f6fb;
-  height: 100%;
-  /* 设置容器高度，这里假设容器的父元素有固定高度或是占满整个视口 */
-}
-.info_box {
-  width: 465px;
-  margin-right: 15px;
-  margin-left: 15px;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-}
-.logo {
-  width: 100%;
-}
-body,
-.container {
-  width: inherit;
-}
-.card_list .item {
-  margin: 0px 10px 10px 10px;
-  background: none;
-}
-.card_list .item.isNull {
-  margin: 0px 10px 10px 10px;
-  border-radius: 7px;
-  height: 90px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: none !important;
-  background: none !important;
-}
-/*# sourceMappingURL=gacha-all-log.css.map */
+body { position: absolute; background: #f5f2f6; }
+.container { width: 1500px; padding: 26px 30px 34px; background: linear-gradient(145deg,#f8f4f1,#eeeaf5); }
+.all_log_page { color:#343044; font-family:PingFangSC-Medium,"Microsoft YaHei",sans-serif; }
+.hero_summary { position:relative; overflow:hidden; min-height:248px; margin:0 0 28px; padding:30px 46px; border-radius:30px; color:#fff; background:#2a2340; box-shadow:0 12px 28px rgba(42,35,64,.28); }
+.hero_splash { position:absolute; right:0; top:0; height:100%; width:48%; object-fit:cover; object-position:center top; pointer-events:none; }
+.hero_summary:after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#2a2340 0%,rgba(42,35,64,.78) 46%,rgba(42,35,64,.12) 100%); pointer-events:none; }
+.hero_sparkles { position:absolute; right:26px; top:20px; color:#ffe79d; font-size:25px; letter-spacing:8px; }
+.hero_copy { position:relative; z-index:2; } .hero_kicker { font-size:18px; opacity:.8; letter-spacing:2px; }
+.hero_copy h1 { margin:12px 0 3px; font-size:62px; line-height:1; letter-spacing:7px; text-shadow:0 3px 0 rgba(54,37,73,.28); }
+.hero_uid { font-size:20px; letter-spacing:2px; opacity:.9; } .hero_hint { margin-top:20px; color:#ffe8b1; font-size:17px; }
+.hero_luck { display:flex; align-items:center; gap:14px; margin-top:18px; }
+.hero_face { width:86px; height:86px; object-fit:cover; object-position:center top; border-radius:16px; border:2px solid #ffe7a4; box-shadow:0 0 18px rgba(255,219,134,.45); }
+.hero_luck strong { display:block; color:#ffe7a4; font-size:28px; }
+.hero_luck span { display:block; margin-top:4px; color:#fff4d2; font-size:16px; }
+.hero_metrics { position:absolute; z-index:3; right:42px; bottom:28px; display:flex; gap:14px; } .hero_metrics div { min-width:145px; padding:12px 16px; border:1px solid rgba(255,255,255,.26); border-radius:14px; background:rgba(45,31,69,.22); text-align:center; }
+.hero_metrics strong { display:block; color:#ffe8a1; font:30px tttgbnumber,sans-serif; } .hero_metrics small { font-size:13px; opacity:.86; }
+.pool_grid { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; } .info_box { flex:1 1 460px; max-width:710px; min-width:560px; }
+.info_box .head_box,.info_box .data_box { border:1px solid #e6ddec; box-shadow:0 7px 18px rgba(82,57,96,.12); } .info_box .head_box { background:linear-gradient(120deg,#fff,#faf7ff); } .info_box .tab_lable { background:linear-gradient(120deg,#9a6fc0,#d49b8b); }
+.card_list .item { margin: 0 10px 10px; background: none; box-shadow: none; } .line_box .line { background:#dfd5e5; }
+
+/* Let every pool render its complete five-star history without clipping. */
+.pool_grid { align-items: flex-start; }
+.pool_luck { display:flex; align-items:center; gap:12px; margin:12px 16px; padding:10px 12px; border-radius:12px; background:#fff6df; border-left:5px solid #e2b34a; }
+.pool_luck img { width:64px; height:64px; object-fit:cover; object-position:center top; border-radius:10px; flex:0 0 auto; }
+.pool_luck strong { display:block; color:#8a5a12; font-size:18px; }
+.pool_luck span { display:block; margin-top:4px; color:#6d6252; font-size:14px; }
