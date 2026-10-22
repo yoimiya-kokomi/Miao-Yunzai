@@ -53,16 +53,21 @@ export class Restart extends plugin {
       time = (new Date().getTime() - time) / 1000
 
       let msg = `重启成功：耗时${time.toFixed(2)}秒`
-      try {
-        if (restart.isGroup) {
-          Bot[uin].pickGroup(restart.id).sendMsg(msg)
-        } else {
-          Bot[uin].pickUser(restart.id).sendMsg(msg)
+
+      // NapCat / OneBot 适配器建立 WebSocket 连接需要时间，延迟 3 秒后发送
+      setTimeout(async () => {
+        try {
+          if (restart.isGroup) {
+            await Bot[uin].pickGroup(restart.id).sendMsg(msg)
+          } else {
+            await Bot[uin].pickUser(restart.id).sendMsg(msg)
+          }
+        } catch (error) {
+          /** 不发了，发不出去... */
+          logger.debug(error)
         }
-      } catch (error) {
-        /** 不发了，发不出去... */
-        logger.debug(error)
-      }
+      }, 3000)
+
       redis.del(this.key)
     }
   }
@@ -107,8 +112,8 @@ export class Restart extends plugin {
 
         exec(cm, { windowsHide: true }, (error, stdout, stderr) => {
           if (error) {
-            // 如果是 pm2 重启收到了 SIGINT 信号，属于正常的中断重启，直接忽略不报错
-            if (error.signal === "SIGINT" && cm.includes("run restart")) {
+            // 如果是 pm2 触发的 run restart 重启，一律视为正常重启退出，不删除 Redis 标记
+            if (cm.includes("run restart")) {
               return
             }
 
