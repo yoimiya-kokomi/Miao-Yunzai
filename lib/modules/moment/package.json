@@ -1,0 +1,5 @@
+{
+  "name": "moment",
+  "type": "module",
+  "main": "index.js"
+}
