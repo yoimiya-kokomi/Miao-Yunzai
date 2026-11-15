@@ -3,69 +3,69 @@
 {{block 'css'}}
 <link rel="stylesheet" type="text/css" href="{{_res_path}}html/gacha/gacha-log.css"/>
 <link rel="stylesheet" type="text/css" href="{{_res_path}}html/gacha/gacha-all-log.css"/>
-<style>
-  .container {
-    width: 1200px;
-  }
-</style>
 {{/block}}
 
 {{block 'main'}}
-{{each data log}}
-<div class="info_box">
-  <div class="head_box">
-    <div class="id_text">
-      ID: {{log.uid}}
+<div class="all_log_page">
+  <section class="hero_summary">
+    <img class="hero_splash" src="{{_miao_path}}{{splashPath}}" alt=""/>
+    <div class="hero_copy">
+      <div class="hero_kicker">祈愿履历 · 全部记录</div>
+      <h1>抽卡总览</h1>
+      <div class="hero_uid">UID {{uid}}</div>
+      <div class="hero_luck">
+        <img class="hero_face" src="{{_res_path}}{{combinedLuckImage || luckImage || 'html/gacha/imgs/luck/14.jpg'}}" alt="{{combinedLuckRating || luckRating || '普通'}}"/>
+        <div>
+          <strong>{{combinedLuckRating || luckRating || '普通'}} · {{combinedLuckPercent || luckPercent || 0}}%</strong>
+          <span>{{combinedLuckTitle || luckTitle || '超过 0% 旅行者'}}</span>
+        </div>
+      </div>
     </div>
-    <h2 class="day_text">
-      {{log.allNum}}抽
-      <span class="label label_{{type}}">{{log.typeName}}池</span>
-    </h2>
-    {{if game === 'gs'}}
-    <img class="genshin_logo" src="{{pluResPath}}img/other/原神.png"/>
-    {{else}}
-    <img class="starrail_logo" src="{{pluResPath}}/StarRail/img/other/logo.png"/>
-    {{/if}}
-  </div>
-  <div class="data_box">
-    <div class="tab_lable">数据总览</div>
-    {{each log.line val}}
-    <div class="data_line">
-      {{each val item}}
-      <div class="data_line_item">
-        <div class="num">{{item.num}}<span class="unit">{{item.unit}}</span></div>
-        <div class="lable">{{item.lable}}</div>
+    <div class="hero_metrics">
+      <div><strong>{{totalNum || 0}}</strong><small>抽卡总数</small></div>
+      <div><strong>{{poolNum || 0}}</strong><small>记录卡池</small></div>
+      <div><strong>{{combinedFiveAvg || 0}}</strong><small>综合五星平均</small></div>
+      <div><strong>{{combinedIsvalidNum || 0}}</strong><small>综合UP平均</small></div>
+      <div><strong>{{combinedNoWaiRate || '0.0'}}%</strong><small>综合不歪率</small></div>
+    </div>
+  </section>
+  <div class="pool_grid">
+  {{each data log}}
+  <section class="info_box">
+    <div class="head_box">
+      <div class="id_text">ID: {{log.uid}}</div>
+      <h2 class="day_text">{{log.allNum || 0}}抽<span class="label label_{{log.type}}">{{log.typeName || '未知'}}池</span></h2>
+    </div>
+    <div class="data_box">
+      <div class="pool_luck">
+        <img src="{{_res_path}}{{log.luckImage || 'html/gacha/imgs/luck/14.jpg'}}" alt="{{log.luckRating || '普通'}}"/>
+        <div>
+          <strong>{{log.luckRating || '普通'}} · 超过 {{log.luckPercent || 0}}% 旅行者</strong>
+          <span>五星平均 {{log.fiveAvg || 0}} 抽 · UP平均 {{log.isvalidNum || 0}} 抽 · 不歪率 {{log.noWaiRate || '0.0'}}%</span>
+        </div>
+      </div>
+      {{each log.line val}}
+      <div class="data_line">
+        {{each val item}}
+        <div class="data_line_item"><div class="num">{{item.num}}<span class="unit">{{item.unit}}</span></div><div class="lable">{{item.lable}}</div></div>
+        {{/each}}
       </div>
       {{/each}}
-    </div>
-    {{/each}}
-    <div class="line_box">
-      <span class="line"></span>
-      <span class="text">五星历史 {{firstTime}} ~ {{lastTime}}</span>
-      <span class="line"></span>
-    </div>
-    <div class="card_list">
-      {{each log.fiveLog val}}
-      <div
-        class="item {{val.isNull?'isNull':''}} star5 {{val.num<=10?'gold': (val.num<log.max*0.5 ? 'good' : (val.num<log.max*0.83) ? 'normal': 'bad')}}">
-        {{ if val.isUp && typeName == '角色' }}
-        <span class="minimum">UP</span>
-        {{/if}}
-        {{ if val.isNull }}
-        <div class="role"></div>
-        <div class="num_name">{{val.num}}</div>
-        {{/if}}
-        {{ if !val.isNull }}
-        <span class="role_img" style="background-image:url({{_miao_path}}{{val.icon}})"></span>
-        <!-- <div class="num">{{val.num}}</div>-->
-        <div class="num_name {{val.num<=10?'gold': (val.num<log.max*0.5 ? 'good' : (val.num<log.max*0.83) ? 'normal': 'bad')}}">
-          {{val.num}}
+      <div class="line_box"><span class="line"></span><span class="text">五星历史 {{log.firstTime || '暂无'}} ~ {{log.lastTime || '暂无'}}</span><span class="line"></span></div>
+      <div class="card_list">
+        {{each log.fiveLog val}}
+        {{if !val.isNull}}
+        <div class="item star5 {{val.num<=10?'gold': (val.num<log.max*0.5 ? 'good' : (val.num<log.max*0.83) ? 'normal': 'bad')}}">
+          {{if val.isUp}}<span class="minimum">UP</span>{{/if}}
+          <span class="role_img" style="background-image:url({{_miao_path}}{{val.icon}})"></span>
+          <div class="num_name {{val.num<=10?'gold': (val.num<log.max*0.5 ? 'good' : (val.num<log.max*0.83) ? 'normal': 'bad')}}">{{val.num}}</div>
         </div>
         {{/if}}
+        {{/each}}
       </div>
-      {{/each}}
     </div>
+  </section>
+  {{/each}}
   </div>
 </div>
-{{/each}}
 {{/block}}

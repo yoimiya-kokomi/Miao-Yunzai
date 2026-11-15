@@ -4,6 +4,7 @@ import lodash from "lodash"
 import moment from "moment"
 import fetch from "node-fetch"
 import { Character, Weapon } from "#miao.models"
+import { syncPool } from "./poolSync.js"
 
 export default class GachaData extends base {
   /**
@@ -36,7 +37,9 @@ export default class GachaData extends base {
     gacha.getTpye()
     /** 用户抽卡数据 */
     await gacha.userData()
-    /** 卡池 */
+    /** 卡池：优先同步主仓库数据，网络失败时继续使用本地缓存 */
+    await syncPool()
+    delete gsCfg.defSet["gacha.pool"]
     await gacha.getPool()
 
     return gacha
